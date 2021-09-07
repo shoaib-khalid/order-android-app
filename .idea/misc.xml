@@ -3,8 +3,15 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_login.xml" value="0.14375" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/drawable/ic_baseline_email_24.xml" value="0.290625" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout-land/activity_login.xml" value="0.4244791666666667" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout-land/activity_order_details.xml" value="0.47477477477477475" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout-sw600dp/activity_login.xml" value="0.205859375" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout-sw600dp/activity_order_details.xml" value="0.205859375" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_login.xml" value="0.264" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_order_details.xml" value="0.264" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/order_item.xml" value="0.27447916666666666" />
       </map>
     </option>
   </component>
@@ -13,5 +20,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.4" />
+      </ProjectState>
+    </option>
   </component>
 </project>

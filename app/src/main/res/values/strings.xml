@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">SYMplified Merchants</string>
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="login_text">Login</string>
+    <string name="tv_date">Date: \u0020</string>
+    <string name="tv_date_value">Day, Month, Year</string>
+    <string name="tv_invoice_number">Invoice #: \u0020</string>
+    <string name="tv_invoice_number_value">XXXXXXXXXXXXXX</string>
+    <string name = "btn_process">Process</string>
+    <string name = "tv_shipment_address">Shipment Address: \u0020</string>
+    <string name = "tv_shipment_address_value"> 24, Jalan 1/2, Taman Puchong Prima</string>
+    <string name = "tv_shipment_city">City: \u0020</string>
+    <string name = "tv_shipment_city_value">Puchong</string>
+    <string name = "tv_shipment_state">State: \u0020</string>
+    <string name = "tv_shipment_state_value">Selangor</string>
+    <string name = "tv_shipment_postcode">Postcode: \u0020</string>
+    <string name = "tv_shipment_postcode_value">47150</string>
+    <string name = "tv_shipment_name">Customer Name: \u0020</string>
+    <string name = "tv_shipment_name_value">Albert</string>
+    <string name = "tv_shipment_note">Customer Note: \u0020</string>
+    <string name = "tv_shipment_note_value">Please Ring the bell</string>
+    <string name = "header_item">Item</string>
+    <string name = "header_special_instruction">Special Instructions</string>
+    <string name = "header_qty">Qty</string>
+    <string name = "header_price">Price</string>
+    <string name = "sub_total">Sub-Total</string>
+    <string name = "sub_total_value">57.00</string>
+    <string name = "service_charges">Service Charges</string>
+    <string name = "service_charges_value">5.70</string>
+    <string name = "delivery_charges">Delivery Charges</string>
+    <string name = "delivery_charges_value">67.70</string>
+    <string name = "btn_print">Print</string>
+    <string name = "is_pickup">Pickup \u0020</string>
 </resources>
