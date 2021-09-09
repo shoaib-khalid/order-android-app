@@ -16,17 +16,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
+            android:name=".ChooseStore"
+            android:exported="true"/>
+        <activity
+            android:name=".Orders"
+            android:exported="true"
+            android:label="@string/title_activity_orders"
+            android:theme="@style/Theme.SymplifiedOrderUpdate.NoActionBar"/>
+        <activity
             android:name=".OrderDetails"
+            android:exported="true" />
+        <activity
+            android:name=".Login"
             android:exported="true">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
-        <activity
-            android:name=".Login"
-            android:exported="true"/>
 
         <service
             android:name=".services.OrderNotificationService"
@@ -54,7 +64,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:exported="true"/>
+            android:exported="true" />
     </application>
 
 </manifest>
