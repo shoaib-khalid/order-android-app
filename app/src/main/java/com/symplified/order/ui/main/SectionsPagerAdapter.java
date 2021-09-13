@@ -8,6 +8,7 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.symplified.order.R;
 
@@ -32,6 +33,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         // Return a PlaceholderFragment (defined as a static inner class below).
         Fragment fragment = PlaceholderFragment.newInstance("new");
         switch (position){
+            case 0:{
+                fragment = PlaceholderFragment.newInstance("new");
+                Toast.makeText(mContext, "onNew", Toast.LENGTH_SHORT).show();
+                break;
+            }
             case 1: {
                 fragment = PlaceholderFragment.newInstance("processed");
                 Toast.makeText(mContext, "onProcessed", Toast.LENGTH_SHORT).show();
@@ -42,11 +48,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
                 Toast.makeText(mContext, "onSent", Toast.LENGTH_SHORT).show();
                 break;
             }
-            case 0:{
-                fragment = PlaceholderFragment.newInstance("new");
-                Toast.makeText(mContext, "onNew", Toast.LENGTH_SHORT).show();
-                break;
-            }
+
         }
 
         return fragment;
