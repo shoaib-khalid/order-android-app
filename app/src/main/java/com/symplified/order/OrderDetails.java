@@ -71,7 +71,7 @@ public class OrderDetails extends AppCompatActivity {
             pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
 
 
-        dateValue.setText(gson.toJson(order.created).toString());
+        dateValue.setText(order.created);
         addressValue.setText(order.orderShipmentDetail.address);
         invoiceValue.setText(order.invoiceId);
         cityValue.setText(order.orderShipmentDetail.city);
