@@ -1,8 +1,10 @@
 package com.symplified.order.apis;
 
 import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.OrderResponse;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -24,5 +26,9 @@ public interface OrderApi {
 
     @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_DELIVERED&pageSize=10&")
     Call<ResponseBody> getSentOrders (@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
+
+
+    @GET("orders/{orderId}/items")
+    Call<ItemResponse> getItemsForOrder(@HeaderMap Map<String,String> headers , @Path("orderId") String storeId);
 
 }

@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,7 +32,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView name,phone, qty, amount,invoice;
+        private final TextView name,phone, amount,invoice;
+        private final ImageView pickup;
+        private final Button process;
 
         public ViewHolder(View view) {
             super(view);
@@ -38,9 +42,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             name = (TextView) view.findViewById(R.id.order_row_name_value);
             phone = (TextView) view.findViewById(R.id.order_row_phone_value);
-            qty = (TextView) view.findViewById(R.id.order_quantity_value);
+//            qty = (TextView) view.findViewById(R.id.order_quantity_value);
             amount = (TextView) view.findViewById(R.id.order_amount_value);
             invoice = (TextView) view.findViewById(R.id.card_invoice_value);
+            pickup = view.findViewById(R.id.order_pickup_icon);
+            process = view.findViewById(R.id.card_btn_process);
         }
 
 
@@ -74,13 +80,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.name.setText(orders.get(position).orderShipmentDetail.receiverName);
         holder.phone.setText(orders.get(position).orderShipmentDetail.phoneNumber);
-        holder.qty.setText("3");
+//        holder.qty.setText("3");
         holder.amount.setText(Double.toString(orders.get(position).total));
         holder.invoice.setText(orders.get(position).invoiceId);
 
+        if(!orders.get(position).orderShipmentDetail.storePickup)
+            holder.pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
+        else
+            holder.pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
 
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+
+        holder.process.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent (holder.itemView.getContext(), OrderDetails.class);
@@ -88,6 +99,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 view.getContext().startActivity(intent);
             }
         });
+
+//        holder.itemView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent (holder.itemView.getContext(), OrderDetails.class);
+//                intent.putExtra("selectedOrder",orders.get(position));
+//                view.getContext().startActivity(intent);
+//            }
+//        });
 
     }
 

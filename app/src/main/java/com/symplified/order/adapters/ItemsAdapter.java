@@ -1,7 +1,6 @@
 package com.symplified.order.adapters;
 
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,18 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
-import com.symplified.order.models.Item;
+import com.symplified.order.models.item.Item;
 
 import java.util.List;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
     public List<Item> items;
 
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+
+    public ItemsAdapter (){}
     public ItemsAdapter(List<Item> items){
         this.items = items;
     }
@@ -62,10 +66,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        holder.item.setText(items.get(position).item);
+        holder.item.setText(items.get(position).productName);
         holder.instructions.setText(items.get(position).specialInstruction);
-        holder.qty.setText(items.get(position).qty);
-        holder.price.setText(items.get(position).price);
+        holder.qty.setText(Integer.toString(items.get(position).quantity));
+        holder.price.setText(Double.toString(items.get(position).price));
 
     }
 

@@ -66,7 +66,7 @@ public class ChooseStore extends AppCompatActivity {
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
 
-        storeResponse.enqueue(new Callback<StoreResponse>() {
+        storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
                 if(response.isSuccessful())

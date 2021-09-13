@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -144,9 +145,15 @@ public class PlaceholderFragment extends Fragment {
         binding = NewOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+
         RecyclerView recyclerView = root.findViewById(R.id.order_recycler);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(mDividerItemDecoration);
+
 
 
 //        retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
