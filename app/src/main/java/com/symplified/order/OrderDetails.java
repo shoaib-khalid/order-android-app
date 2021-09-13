@@ -2,6 +2,7 @@ package com.symplified.order;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,17 +16,20 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.adapters.ItemsAdapter;
 import com.symplified.order.apis.OrderApi;
+import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.services.DateParser;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -84,6 +88,8 @@ public class OrderDetails extends AppCompatActivity {
         deliveryChargesValue.setText(Double.toString(order.deliveryCharges));
         billingTotal.setText(Double.toString(order.total));
 
+        process = findViewById(R.id.btn_process);
+
         recyclerView = findViewById(R.id.order_items);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -117,6 +123,40 @@ public class OrderDetails extends AppCompatActivity {
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Failed to retrieve items", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        Call<ResponseBody> processOrder = storeApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_PREPARED), order.id);
+
+        process.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
+                processOrder.clone().enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if(response.isSuccessful()){
+
+                            Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().toString(), Order.UpdatedOrder.class);
+                            Log.e("TAG", "onResponse: "+response.body().toString(), new Error() );
+                            process.setText("Being Prepared");
+                        }
+                        else {
+                            try {
+                                Log.e("TAG", "onResponse: "+response.errorBody().string(), new Error() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 

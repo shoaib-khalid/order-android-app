@@ -2,6 +2,9 @@ package com.symplified.order.models.order;
 
 import androidx.annotation.NonNull;
 
+import com.symplified.order.enums.Status;
+import com.symplified.order.models.HttpResponse;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -64,6 +67,22 @@ public class Order implements Serializable {
 
     public static class OrderList implements Serializable{
         public List<Order> content;
+    }
+
+    public static class OrderUpdate{
+        public String orderId;
+        public Status status;
+
+        public OrderUpdate(String orderId, Status status){
+            this.orderId = orderId;
+            this.status = status;
+        }
+    }
+
+    public static class UpdatedOrder extends HttpResponse implements Serializable{
+
+        public Order order;
+
     }
 
 }
