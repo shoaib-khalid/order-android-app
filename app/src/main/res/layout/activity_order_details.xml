@@ -346,7 +346,7 @@
             android:layout_below="@id/subdivider"
             android:layout_marginEnd="100dp"
             android:layout_marginBottom="5dp"
-            android:text="@string/delivery_charges"
+            android:text="@string/total"
             android:textSize="16sp" />
 
         <TextView
@@ -354,9 +354,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/subdivider"
-            android:layout_marginBottom="5dp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="15dp"
+            android:layout_marginBottom="5dp"
             android:text="@string/delivery_charges_value"
             android:textSize="16sp" />
 

@@ -1,9 +1,5 @@
 package com.symplified.order;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -11,12 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.adapters.ItemsAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.models.item.Item;
-import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.services.DateParser;
@@ -27,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,7 +35,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class OrderDetails extends AppCompatActivity {
     private RecyclerView recyclerView;
 
-    private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue;
+    private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal;
     private Button process, print;
     private ImageView pickup;
 
@@ -60,8 +58,8 @@ public class OrderDetails extends AppCompatActivity {
         subtotalValue = findViewById(R.id.billing_subtotal_value);
         serviceChargesValue = findViewById(R.id.billing_service_charges_value);
         deliveryChargesValue = findViewById(R.id.billing_delivery_charges_value);
+        billingTotal = findViewById(R.id.billing_total_value);
         pickup = findViewById(R.id.address_is_pickup);
-
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
 
@@ -84,7 +82,7 @@ public class OrderDetails extends AppCompatActivity {
         subtotalValue.setText(Double.toString(order.subTotal));
         serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
         deliveryChargesValue.setText(Double.toString(order.deliveryCharges));
-
+        billingTotal.setText(Double.toString(order.total));
 
         recyclerView = findViewById(R.id.order_items);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
