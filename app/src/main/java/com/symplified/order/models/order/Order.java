@@ -3,7 +3,6 @@ package com.symplified.order.models.order;
 import androidx.annotation.NonNull;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 public class Order implements Serializable {
@@ -18,8 +17,8 @@ public class Order implements Serializable {
     public String privateAdminNotes;
     public String cartId;
     public String customerId;
-    public transient Date created;
-    public transient Date updated;
+    public String created;
+    public String updated;
     public String invoiceId;
     public double klCommission;
     public double storeServiceCharges;
