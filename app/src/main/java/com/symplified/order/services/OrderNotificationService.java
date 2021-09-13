@@ -7,12 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,8 +17,7 @@ import androidx.core.app.TaskStackBuilder;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.symplified.order.App;
-import com.symplified.order.Login;
-import com.symplified.order.MainActivity;
+import com.symplified.order.Orders;
 import com.symplified.order.R;
 
 import java.util.Random;
@@ -39,7 +33,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
-        Intent test = new Intent(this, MainActivity.class);
+        Intent test = new Intent(this, Orders.class);
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
         taskStackBuilder.addNextIntentWithParentStack(test);
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
