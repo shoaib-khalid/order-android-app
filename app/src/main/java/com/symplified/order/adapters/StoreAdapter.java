@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.symplified.order.App;
 import com.symplified.order.Orders;
 import com.symplified.order.R;
+import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.models.Store.Store;
 
 import java.util.List;
@@ -65,6 +66,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             public void onClick(View view) {
                 SharedPreferences sharedPreferences = holder.itemView.getContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
                 sharedPreferences.edit().putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
+                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id,view.getContext());
                 Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
                 Log.e("TAG", "preferences: "+sharedPreferences.getAll(),new Error() );
                 Toast.makeText(view.getContext(), "Store id : "+ (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
