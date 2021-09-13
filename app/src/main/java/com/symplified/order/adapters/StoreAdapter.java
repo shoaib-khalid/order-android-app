@@ -1,25 +1,30 @@
 package com.symplified.order.adapters;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.symplified.order.OrderDetails;
+import com.symplified.order.App;
 import com.symplified.order.Orders;
 import com.symplified.order.R;
-import com.symplified.order.models.OrderDetailsModel;
+import com.symplified.order.models.Store.Store;
 
 import java.util.List;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
-    public List<String> items;
+    public List<Store> items;
 
-    public StoreAdapter(List<String> items){
+    public StoreAdapter(List<Store> items){
         this.items = items;
     }
 
@@ -43,19 +48,30 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View listItem= layoutInflater.inflate(R.layout.store_list_item, parent, false);
 //        Log.e("TAG", "onCreateViewHolder: size = "+getItemCount(),new Error() );
-        listItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent (parent.getContext(), Orders.class);
-                parent.getContext().startActivity(intent);
-            }
-        });
+//        listItem.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
         return new StoreAdapter.ViewHolder(listItem);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.name.setText(items.get(position));
+        holder.name.setText(items.get(position).name);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences sharedPreferences = holder.itemView.getContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+                sharedPreferences.edit().putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
+                Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
+                Log.e("TAG", "preferences: "+sharedPreferences.getAll(),new Error() );
+                Toast.makeText(view.getContext(), "Store id : "+ (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
+                view.getContext().startActivity(intent);
+                ((Activity) holder.itemView.getContext()).finish();
+            }
+        });
     }
 
 
@@ -63,4 +79,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public int getItemCount() {
         return items.size();
     }
+
+    public boolean isEmpty(){return items.isEmpty();}
 }

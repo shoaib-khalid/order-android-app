@@ -54,6 +54,7 @@
         <com.google.android.material.button.MaterialButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/btn_process"
             android:layout_alignParentEnd="true"
             android:paddingHorizontal="20dp"
             android:paddingVertical="5dp"
@@ -366,6 +367,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintWidth_percent=".5"
+        android:id="@+id/btn_print"
         app:cornerRadius="25dp"
         android:paddingVertical="10dp"
         android:text="@string/btn_print"

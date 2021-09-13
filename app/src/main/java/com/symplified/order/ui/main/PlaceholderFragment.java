@@ -1,10 +1,16 @@
 package com.symplified.order.ui.main;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -14,28 +20,58 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
+import com.symplified.order.apis.OrderApi;
+import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.models.OrderDetailsModel;
+import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.order.Order;
+import com.symplified.order.models.order.OrderResponse;
+import com.symplified.order.services.DateParser;
 
+import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * A placeholder fragment containing a simple view.
  */
 public class PlaceholderFragment extends Fragment {
 
-    private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String ARG_SECTION = "section";
 
     private PageViewModel pageViewModel;
     private NewOrdersBinding binding;
+    private OrderAdapter orderAdapter;
 
-    public static PlaceholderFragment newInstance(int index) {
+    private Retrofit retrofit;
+    private List<OrderDetailsModel> orders;
+
+    private Map<String, String> headers;
+    private OrderApi orderApiService;
+    private Call<ResponseBody> orderResponse;
+
+    public static PlaceholderFragment newInstance(String type) {
         PlaceholderFragment fragment = new PlaceholderFragment();
         Bundle bundle = new Bundle();
-        bundle.putInt(ARG_SECTION_NUMBER, index);
+        bundle.putString(ARG_SECTION, type);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -44,11 +80,60 @@ public class PlaceholderFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
-        int index = 1;
-        if (getArguments() != null) {
-            index = getArguments().getInt(ARG_SECTION_NUMBER);
+        retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create()).build();
+
+        orders = new ArrayList<>();
+
+        headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        orderApiService = retrofit.create(OrderApi.class);
+
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        String storeId = sharedPreferences.getString("storeId", null);
+
+//        String storeId = "McD";
+        Log.e("TAG", "onCreate: "+"storeId : "+storeId, new Error() );
+
+
+
+        if(null == storeId)
+        {
+            Toast.makeText(this.getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
         }
-        pageViewModel.setIndex(index);
+
+//        orderResponse = orderApiService.getNewOrders(headers, storeId);
+
+
+        String section = null;
+        if (getArguments() != null) {
+            section = getArguments().getString(ARG_SECTION);
+        }
+
+        if(section == null)
+            Toast.makeText(getContext(), "Section is null", Toast.LENGTH_SHORT).show();
+
+        pageViewModel.setIndex(0);
+
+        switch (section){
+            case "processed":
+            {
+                pageViewModel.setIndex(1);
+                orderResponse = orderApiService.getProcessedOrders(headers, storeId);
+                break;
+            }
+            case "sent":{
+                pageViewModel.setIndex(2);
+                orderResponse = orderApiService.getSentOrders(headers, storeId);
+                break;
+            }
+            case "new" :{
+                pageViewModel.setIndex(0);
+                orderResponse = orderApiService.getNewOrders(headers, storeId);
+                break;
+            }
+        }
     }
 
     @Override
@@ -60,14 +145,78 @@ public class PlaceholderFragment extends Fragment {
         View root = binding.getRoot();
 
         RecyclerView recyclerView = root.findViewById(R.id.order_recycler);
-        List<OrderDetailsModel> items = new ArrayList<>();
-        for(int i=0; i<15; i++)
-            items.add(new OrderDetailsModel(getString(R.string.card_name_value), getString(R.string.card_phone_value), getString(R.string.order_quantity_value),
-                    getString(R.string.order_amount_value), getString(R.string.tv_invoice_number_value)));
 
-        OrderAdapter orderAdapter = new OrderAdapter(items);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(orderAdapter);
+
+
+//        retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create()).build();
+
+//        OrderApi orderApiService = retrofit.create(OrderApi.class);
+//        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+//        String storeId = sharedPreferences.getString("ownerId", null);
+//
+//        if(null == storeId)
+//        {
+//            Toast.makeText(this.getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
+//        }
+
+//        List<OrderDetailsModel> orders = new ArrayList<>();
+//
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+
+//        Call<ResponseBody> orderResponse = orderApiService.getNewOrders(headers, storeId);
+
+
+        Log.e("TAG", "URL : "+orderResponse.request().url(), new Error() );
+
+        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+
+
+                if(response.isSuccessful())
+                {
+                    try {
+                        OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
+                        orderAdapter = new OrderAdapter(orderResponse.data.content);
+//                        for (Order e : orderResponse.data.content)
+//                           {
+//                               orders.add(OrderDetailsModel.fromOrder(e));
+//
+//                               orderAdapter.notifyDataSetChanged();
+//                           }
+
+                        recyclerView.setAdapter(orderAdapter);
+                        orderAdapter.notifyDataSetChanged();
+                        Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getActivity(), "Failed to fetch orders, ", Toast.LENGTH_SHORT).show();
+                Log.e("TAG", "onFailure: ",t.getCause() );
+            }
+        });
+
+
+
+
+//        RecyclerView recyclerView = root.findViewById(R.id.order_recycler);
+//
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        recyclerView.setAdapter(orderAdapter);
 
 //        final TextView textView = binding.sectionLabel;
 //        pageViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {

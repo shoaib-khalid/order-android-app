@@ -48,4 +48,5 @@
     <string name="ready_for_pickup">Ready For Pickup</string>
     <string name="symplified">Symplified</string>
     <string name="choose_a_store">Choose a Store</string>
+    <string name="no_store_msg">No Stores Added Yet !</string>
 </resources>

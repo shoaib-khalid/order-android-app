@@ -1,6 +1,7 @@
 package com.symplified.order.ui.main;
 
 import android.content.Context;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -29,7 +30,26 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        return PlaceholderFragment.newInstance(position + 1);
+        Fragment fragment = PlaceholderFragment.newInstance("new");
+        switch (position){
+            case 1: {
+                fragment = PlaceholderFragment.newInstance("processed");
+                Toast.makeText(mContext, "onProcessed", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case 2: {
+                fragment = PlaceholderFragment.newInstance("sent");
+                Toast.makeText(mContext, "onSent", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case 0:{
+                fragment = PlaceholderFragment.newInstance("new");
+                Toast.makeText(mContext, "onNew", Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+
+        return fragment;
     }
 
     @Nullable
