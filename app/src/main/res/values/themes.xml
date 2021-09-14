@@ -3,7 +3,7 @@
     <style name="Theme.SymplifiedOrderUpdate" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/sf_300</item>
-        <item name="colorPrimaryVariant">@color/sf_500</item>
+        <item name="colorPrimaryVariant">@color/sf_300</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/sf_b_700</item>

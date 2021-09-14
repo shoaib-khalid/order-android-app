@@ -68,6 +68,9 @@ public class PlaceholderFragment extends Fragment {
     private Map<String, String> headers;
     private OrderApi orderApiService;
     private Call<ResponseBody> orderResponse;
+    private String storeId;
+    private RecyclerView recyclerView;
+    private String section;
 
     public static PlaceholderFragment newInstance(String type) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -92,7 +95,7 @@ public class PlaceholderFragment extends Fragment {
         orderApiService = retrofit.create(OrderApi.class);
 
         SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        String storeId = sharedPreferences.getString("storeId", null);
+        storeId = sharedPreferences.getString("storeId", null);
 
 //        String storeId = "McD";
         Log.e("TAG", "onCreate: "+"storeId : "+storeId, new Error() );
@@ -101,13 +104,13 @@ public class PlaceholderFragment extends Fragment {
 
         if(null == storeId)
         {
-            Toast.makeText(this.getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getActivity(), "storeId id is null", Toast.LENGTH_SHORT).show();
         }
 
 //        orderResponse = orderApiService.getNewOrders(headers, storeId);
 
 
-        String section = null;
+        section = null;
         if (getArguments() != null) {
             section = getArguments().getString(ARG_SECTION);
         }
@@ -146,7 +149,7 @@ public class PlaceholderFragment extends Fragment {
         View root = binding.getRoot();
 
 
-        RecyclerView recyclerView = root.findViewById(R.id.order_recycler);
+        recyclerView = root.findViewById(R.id.order_recycler);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -189,14 +192,7 @@ public class PlaceholderFragment extends Fragment {
                 {
                     try {
                         OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
-                        orderAdapter = new OrderAdapter(orderResponse.data.content);
-//                        for (Order e : orderResponse.data.content)
-//                           {
-//                               orders.add(OrderDetailsModel.fromOrder(e));
-//
-//                               orderAdapter.notifyDataSetChanged();
-//                           }
-
+                        orderAdapter = new OrderAdapter(orderResponse.data.content, section);
                         recyclerView.setAdapter(orderAdapter);
                         orderAdapter.notifyDataSetChanged();
                         Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
@@ -233,6 +229,54 @@ public class PlaceholderFragment extends Fragment {
 //            }
 //        });
         return root;
+    }
+
+    public void refreshOrders(){
+        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                if(response.isSuccessful())
+                {
+                    try {
+//                        Toast.makeText(getActivity(), "onResumeCalled", Toast.LENGTH_SHORT).show();
+                        OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
+                        orderAdapter = new OrderAdapter(orderResponse.data.content, section);
+                        recyclerView.setAdapter(orderAdapter);
+                        orderAdapter.notifyDataSetChanged();
+                        Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
     }
 
     @Override

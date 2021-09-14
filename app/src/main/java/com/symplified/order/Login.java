@@ -44,6 +44,7 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
+//        getSupportActionBar().hide();
 
         Log.d("TAG", "onCreate: "+sharedPreferences.getAll().toString());
 

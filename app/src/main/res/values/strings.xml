@@ -5,7 +5,7 @@
     <string name="login_text">Login</string>
     <string name="tv_date">Date: \u0020</string>
     <string name="tv_date_value">Day, Month, Year</string>
-    <string name="tv_invoice_number">Invoice #: \u0020</string>
+    <string name="tv_invoice_number">Invoice :\u0020</string>
     <string name="tv_invoice_number_value">XXXXXXXXXXXXXX</string>
     <string name="btn_process">Process</string>
     <string name="tv_shipment_address">Shipment Address: \u0020</string>

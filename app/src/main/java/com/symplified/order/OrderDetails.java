@@ -1,5 +1,10 @@
 package com.symplified.order;
 
+import android.app.Instrumentation;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -7,6 +12,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -16,13 +24,18 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.adapters.ItemsAdapter;
 import com.symplified.order.apis.OrderApi;
+import com.symplified.order.apis.StoreApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.services.DateParser;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -42,14 +55,19 @@ public class OrderDetails extends AppCompatActivity {
     private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal;
     private Button process, print;
     private ImageView pickup;
+    private String section;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_details);
+
         Bundle data = getIntent().getExtras();
         Order order = (Order) data.getSerializable("selectedOrder");
+        section = null;
 
+        section = getIntent().getStringExtra("section");
 
         dateValue = findViewById(R.id.invoice_tv_date_value);
         addressValue = findViewById(R.id.address_shipment_value);
@@ -67,7 +85,67 @@ public class OrderDetails extends AppCompatActivity {
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
 
-        Gson gson = new GsonBuilder().registerTypeAdapter(Date.class, new DateParser()).create();
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+
+        ImageView home = toolbar.findViewById(R.id.app_bar_home);
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setResult(4, new Intent().putExtra("finish", 1));
+                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), Login.class);
+                sharedPreferences.edit().clear().apply();
+                startActivity(intent);
+                finish();
+            }
+        });
+
+        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
+        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+
+        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()){
+                    try {
+                        JSONObject responseBody = new Gson().fromJson(response.body().string(), JSONObject.class);
+
+                        URL url = new URL(responseBody.getJSONObject("data").get("logoUrl").toString());
+                        Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+                        storeLogo.setImageBitmap(bmp);
+
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+            }
+        });
+
 
         if(order.orderShipmentDetail.storePickup)
             pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
@@ -90,18 +168,17 @@ public class OrderDetails extends AppCompatActivity {
 
         process = findViewById(R.id.btn_process);
 
+
         recyclerView = findViewById(R.id.order_items);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
-        OrderApi storeApiService = retrofit.create(OrderApi.class);
+        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Call<ItemResponse> itemResponseCall = storeApiService.getItemsForOrder(headers, order.id);
+        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
         ItemsAdapter itemsAdapter = new ItemsAdapter();
         List<Item> items = new ArrayList<>();
@@ -126,9 +203,12 @@ public class OrderDetails extends AppCompatActivity {
             }
         });
 
-        Call<ResponseBody> processOrder = storeApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_PREPARED), order.id);
+//        Call<ResponseBody> processOrder = storeApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_PREPARED), order.id);
 
-        process.setOnClickListener(new View.OnClickListener() {
+
+        if(section.equals("new")) {
+            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_PREPARED), order.id);
+            process.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -138,9 +218,18 @@ public class OrderDetails extends AppCompatActivity {
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if(response.isSuccessful()){
 
-                            Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().toString(), Order.UpdatedOrder.class);
-                            Log.e("TAG", "onResponse: "+response.body().toString(), new Error() );
-                            process.setText("Being Prepared");
+                            try {
+//                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
+                                Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
+                                if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
+                                    process.setText("Being Prepared");
+                                else
+                                    process.setText("Failed");
+
+//                                Log.e("TAG", "response code: "+response.code(), new Error() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
                         else {
                             try {
@@ -159,6 +248,97 @@ public class OrderDetails extends AppCompatActivity {
                 });
             }
         });
+        }
+        else if (section.equals("processed")) {
+            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
+            process.setText("Awaiting Pickup");
+            process.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
+                processOrder.clone().enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if(response.isSuccessful()){
+
+                            try {
+//                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
+                                Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
+                                Log.e("TAG", "onResponse: "+currentOrder.data.completionStatus.toString(),new Error() );
+                                if(currentOrder.data.completionStatus.toString().equals(Status.AWAITING_PICKUP.toString()))
+                                    process.setText("Awaiting Pickup");
+                                else
+                                    process.setText("Failed");
+
+//                                Log.e("TAG", "response code: "+response.code(), new Error() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        else {
+                            try {
+                                Log.e("TAG", "onResponse: "+response.errorBody().string(), new Error() );
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        }
+        else if(section.equals("sent"))
+            process.setVisibility(View.INVISIBLE);
+
+
+        Log.e("TAG", "onCreate: Seciton : "+section, new Error() );
+
+//        process.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
+//                processOrder.clone().enqueue(new Callback<ResponseBody>() {
+//                    @Override
+//                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                        if(response.isSuccessful()){
+//
+//                            try {
+////                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
+//                                Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
+//                                if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
+//                                    process.setText("Being Prepared");
+//
+////                                Log.e("TAG", "response code: "+response.code(), new Error() );
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                        else {
+//                            try {
+//                                Log.e("TAG", "onResponse: "+response.errorBody().string(), new Error() );
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
+//                            }
+//                        }
+//
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                        Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//            }
+//        });
 
 
 

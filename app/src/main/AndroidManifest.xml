@@ -28,6 +28,7 @@
             android:exported="true" />
         <activity
             android:name=".Login"
+            android:noHistory="true"
             android:exported="true">
 
             <intent-filter>

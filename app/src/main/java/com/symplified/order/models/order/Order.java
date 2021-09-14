@@ -81,7 +81,7 @@ public class Order implements Serializable {
 
     public static class UpdatedOrder extends HttpResponse implements Serializable{
 
-        public Order order;
+        public Order data;
 
     }
 

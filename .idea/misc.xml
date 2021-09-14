@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/drawable/ic_baseline_email_24.xml" value="0.290625" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/drawable/ic_home_black_24dp.xml" value="0.290625" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/drawable/ic_logout_black_24dp.xml" value="0.290625" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/drawable/ic_store_black_24dp.xml" value="0.290625" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout-land/activity_login.xml" value="0.4244791666666667" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout-land/activity_order_details.xml" value="0.47477477477477475" />
@@ -14,10 +16,12 @@
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_order_details.xml" value="0.264" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/activity_orders.xml" value="0.205859375" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/custom_action_bar.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/new_orders.xml" value="0.21484375" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/order_item.xml" value="0.27447916666666666" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/order_row.xml" value="0.4" />
         <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/layout/store_list_item.xml" value="0.27447916666666666" />
+        <entry key="..\:/Users/Nadeem/AndroidStudioProjects/SymplifiedOrderUpdate/app/src/main/res/menu/menu_top.xml" value="0.27447916666666666" />
       </map>
     </option>
   </component>

@@ -6,6 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".OrderDetails">
 
+    <include android:id="@+id/toolbar"
+        layout="@layout/custom_action_bar"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
     <RelativeLayout
         android:id="@+id/rl_invoice"
         android:layout_width="match_parent"
@@ -14,7 +20,7 @@
         android:paddingVertical="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <TextView
             android:id="@+id/invoice_tv_date"
@@ -52,9 +58,9 @@
             android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_process"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/btn_process"
             android:layout_alignParentEnd="true"
             android:paddingHorizontal="20dp"
             android:paddingVertical="5dp"

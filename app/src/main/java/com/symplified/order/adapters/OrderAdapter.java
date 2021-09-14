@@ -1,6 +1,7 @@
 package com.symplified.order.adapters;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,11 +25,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 //    public List<OrderDetailsModel> items;
 
     public List<Order> orders;
+    public String section;
 
-    public OrderAdapter(List<Order> orders){
+    public OrderAdapter(List<Order> orders, String section){
 //        List<OrderDetailsModel> items,
 //        this.items = items;
         this.orders = orders;
+        this.section = section;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -89,14 +92,24 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         else
             holder.pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
 
+//        if(section.equals("processed"))
+//            holder.process.setText("Being Prepared");
+//        else if(section.equals("sent"))
+//        {
+//            holder.process.setText("Being Delivered");
+////            holder.process.setEnabled(false);
+//        }
 
+        holder.process.setText("Order Details");
 
         holder.process.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent (holder.itemView.getContext(), OrderDetails.class);
                 intent.putExtra("selectedOrder",orders.get(position));
-                view.getContext().startActivity(intent);
+                intent.putExtra("section", section);
+                ((Activity)view.getContext()).startActivityForResult(intent, 4);
+                ((Activity)view.getContext()).finish();
             }
         });
 
