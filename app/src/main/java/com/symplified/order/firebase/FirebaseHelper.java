@@ -5,32 +5,33 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.services.AlertService;
 
 public class FirebaseHelper {
+    /**
+     * Initializes firebase messaging instance.
+     * Also subscribes to storeId topic
+     * Starts AlertService if not already running
+     * @param storeId storeId
+     * @param context application context
+     * @return returns false if any error, otherwise returns true
+     */
     static public boolean initializeFirebase(String storeId, Context context){
         boolean result =true;
         try{
 
-            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                @Override
-                public void onComplete(@NonNull Task<String> task) {
-                    if (!task.isSuccessful()) {
-                        Log.w("TAG", "Fetching FCM registration token failed", task.getException());
-                        return;
-                    }
-
-                    // Get new FCM registration token
-                    String token = task.getResult();
-
-                    // Log and toast
-                    Log.d("TAG", "token : "+ token);
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task -> {
+                if (!task.isSuccessful()) {
+                    Log.w("TAG", "Fetching FCM registration token failed", task.getException());
+                    return;
                 }
+
+                // Get new FCM registration token
+                String token = task.getResult();
+
+                // Log and toast
+                Log.d("TAG", "token : "+ token);
             });
 
             FirebaseMessaging.getInstance().subscribeToTopic(storeId);
@@ -40,13 +41,18 @@ public class FirebaseHelper {
                 Log.e("TAG", "onCreate: Service not running ", new Error());
                 context.startService(new Intent(context, AlertService.class).putExtra("first", 1));
             }
-
         }catch(Exception ex){
             Log.e("FirebaseHelper",ex.toString());
             result =false;
         }
         return result;
     }
+
+    /**
+     * Checks if Alert service is running
+     * @param context application context
+     * @return true if service is running, otherwise returns false
+     */
     private static boolean isServiceRunning(Context context){
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -55,5 +61,16 @@ public class FirebaseHelper {
             }
         }
         return false;
+    }
+
+    /**
+     * Use this method when a new store is selected from "store selection activity"
+     * @param oldStoreId old store Id for which FCM topic was subscribed to
+     * @param newStoreId new store id for which FCM topic needs to be subscribed to
+     */
+    public static void overrideSubscribedTopic(String oldStoreId, String newStoreId){
+
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(oldStoreId);
+        FirebaseMessaging.getInstance().subscribeToTopic(newStoreId);
     }
 }
