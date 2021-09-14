@@ -109,7 +109,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 ((Activity)view.getContext()).startActivityForResult(intent, 4);
-                ((Activity)view.getContext()).finish();
+//                ((Activity)view.getContext()).finish();
             }
         });
 

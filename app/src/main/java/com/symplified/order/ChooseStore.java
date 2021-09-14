@@ -68,12 +68,12 @@ public class ChooseStore extends AppCompatActivity {
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(4, new Intent().putExtra("finish", 1));
-                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+//                setResult(4, new Intent().putExtra("finish", 1));
+//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(intent);
+//                finish();
             }
         });
 

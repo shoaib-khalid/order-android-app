@@ -66,6 +66,7 @@ public class Orders extends AppCompatActivity {
             public void onClick(View view) {
                 setResult(4, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+                sharedPreferences.edit().remove("storeId").apply();
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -124,6 +125,7 @@ public class Orders extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "onActivityResult Called", Toast.LENGTH_SHORT).show();
             if(data != null && data.getIntExtra("finish",0) == 1){
                 this.finishActivity(4);
+//                this.finish();
             }
     }
 }

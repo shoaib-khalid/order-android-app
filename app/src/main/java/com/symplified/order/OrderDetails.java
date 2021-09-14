@@ -96,10 +96,11 @@ public class OrderDetails extends AppCompatActivity {
             public void onClick(View view) {
                 setResult(4, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                sharedPreferences.edit().remove("storeId").apply();
+//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-                finish();
+//                finish();
             }
         });
 
@@ -110,7 +111,7 @@ public class OrderDetails extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), Login.class);
                 sharedPreferences.edit().clear().apply();
                 startActivity(intent);
-                finish();
+//                finish();
             }
         });
 
