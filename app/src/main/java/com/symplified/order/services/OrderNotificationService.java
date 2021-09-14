@@ -40,7 +40,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
                 .setContentIntent(pendingIntent)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(remoteMessage.getData().get("title"))
                 .setContentText(remoteMessage.getData().get("body"))
                 .setAutoCancel(false)
