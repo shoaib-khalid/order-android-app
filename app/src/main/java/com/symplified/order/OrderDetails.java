@@ -26,10 +26,12 @@ import com.symplified.order.adapters.ItemsAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.enums.Status;
+import com.symplified.order.models.asset.Asset;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.services.DateParser;
+import com.symplified.order.services.DownloadImageTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,13 +131,10 @@ public class OrderDetails extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.isSuccessful()){
                     try {
-                        JSONObject responseBody = new Gson().fromJson(response.body().string(), JSONObject.class);
+                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
 
-                        URL url = new URL(responseBody.getJSONObject("data").get("logoUrl").toString());
-                        Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                        storeLogo.setImageBitmap(bmp);
-
-                    } catch (IOException | JSONException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }

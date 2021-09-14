@@ -29,6 +29,8 @@ import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.asset.Asset;
+import com.symplified.order.services.DownloadImageTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -103,13 +105,10 @@ public class ChooseStore extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.isSuccessful()){
                     try {
-                        JSONObject responseBody = new Gson().fromJson(response.body().string(), JSONObject.class);
+                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
 
-                        URL url = new URL(responseBody.getJSONObject("data").get("logoUrl").toString());
-                        Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                        storeLogo.setImageBitmap(bmp);
-
-                    } catch (IOException | JSONException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }

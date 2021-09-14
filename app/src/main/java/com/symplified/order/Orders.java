@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -18,7 +19,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.ActivityOrdersBinding;
+import com.symplified.order.models.asset.Asset;
 import com.symplified.order.services.AlertService;
+import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.ui.main.SectionsPagerAdapter;
 
 import org.json.JSONException;
@@ -99,13 +102,9 @@ public class Orders extends AppCompatActivity {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if(response.isSuccessful()){
                     try {
-                        JSONObject responseBody = new Gson().fromJson(response.body().string(), JSONObject.class);
-
-                        URL url = new URL(responseBody.getJSONObject("data").get("logoUrl").toString());
-                        Bitmap bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
-                        storeLogo.setImageBitmap(bmp);
-
-                    } catch (IOException | JSONException e) {
+                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -128,4 +127,5 @@ public class Orders extends AppCompatActivity {
 //                this.finish();
             }
     }
+
 }
