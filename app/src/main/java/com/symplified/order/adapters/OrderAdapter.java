@@ -26,6 +26,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     public List<Order> orders;
     public String section;
+    public boolean isPickup;
 
     public OrderAdapter(List<Order> orders, String section){
 //        List<OrderDetailsModel> items,
@@ -87,10 +88,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.amount.setText(Double.toString(orders.get(position).total));
         holder.invoice.setText(orders.get(position).invoiceId);
 
-        if(!orders.get(position).orderShipmentDetail.storePickup)
+        if(!orders.get(position).orderShipmentDetail.storePickup) {
             holder.pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
-        else
+            isPickup = false;
+        }
+        else {
             holder.pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
+            isPickup = true;
+        }
 
 //        if(section.equals("processed"))
 //            holder.process.setText("Being Prepared");
@@ -108,6 +113,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 Intent intent = new Intent (holder.itemView.getContext(), OrderDetails.class);
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
+                intent.putExtra("pickup", isPickup);
                 ((Activity)view.getContext()).startActivityForResult(intent, 4);
 //                ((Activity)view.getContext()).finish();
             }

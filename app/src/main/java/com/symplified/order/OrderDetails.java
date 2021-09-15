@@ -180,6 +180,7 @@ public class OrderDetails extends AppCompatActivity {
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
+        boolean isPickup = getIntent().getBooleanExtra("pickup",false);
         ItemsAdapter itemsAdapter = new ItemsAdapter();
         List<Item> items = new ArrayList<>();
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
@@ -219,14 +220,11 @@ public class OrderDetails extends AppCompatActivity {
                         if(response.isSuccessful()){
 
                             try {
-//                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
                                 if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
                                     process.setText("Being Prepared");
                                 else
                                     process.setText("Failed");
-
-//                                Log.e("TAG", "response code: "+response.code(), new Error() );
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -250,13 +248,24 @@ public class OrderDetails extends AppCompatActivity {
         });
         }
         else if (section.equals("processed")) {
-            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
-            process.setText("Awaiting Pickup");
+            Call<ResponseBody> processOrder ;
+//                    = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
+
+            if(!isPickup)
+                processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_DELIVERED), order.id);
+            else
+                processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.DELIVERED_TO_CUSTOMER), order.id);
+
+
+            Log.e("PICKUPMSG", "onCreate: isPickup :"+isPickup, new Error() );
+
+            process.setText("Being Perpared");
+
             process.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "being delivered clicked", Toast.LENGTH_SHORT).show();
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -265,9 +274,13 @@ public class OrderDetails extends AppCompatActivity {
                             try {
 //                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
-                                Log.e("TAG", "onResponse: "+currentOrder.data.completionStatus.toString(),new Error() );
-                                if(currentOrder.data.completionStatus.toString().equals(Status.AWAITING_PICKUP.toString()))
-                                    process.setText("Awaiting Pickup");
+                                Log.e("PICKUPMSG", "onResponse: "+currentOrder.data.completionStatus.toString(),new Error() );
+                                if(currentOrder.data.completionStatus.toString().equals(Status.DELIVERED_TO_CUSTOMER.toString()))
+                                    process.setText("Delivered");
+
+                                else if(currentOrder.data.completionStatus.toString().equals(Status.BEING_DELIVERED.toString())){
+                                    process.setText("Being Delivered");
+                                }
                                 else
                                     process.setText("Failed");
 
@@ -278,7 +291,7 @@ public class OrderDetails extends AppCompatActivity {
                         }
                         else {
                             try {
-                                Log.e("TAG", "onResponse: "+response.errorBody().string(), new Error() );
+                                Log.e("TAG", "isPickup : "+isPickup+response.errorBody().string(), new Error() );
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
