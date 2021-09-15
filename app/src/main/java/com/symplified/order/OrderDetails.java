@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.adapters.ItemsAdapter;
@@ -98,6 +99,7 @@ public class OrderDetails extends AppCompatActivity {
             public void onClick(View view) {
                 setResult(4, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 sharedPreferences.edit().remove("storeId").apply();
 //                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);

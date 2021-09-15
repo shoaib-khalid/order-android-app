@@ -16,6 +16,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.ActivityOrdersBinding;
@@ -69,6 +70,7 @@ public class Orders extends AppCompatActivity {
             public void onClick(View view) {
                 setResult(4, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 sharedPreferences.edit().remove("storeId").apply();
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

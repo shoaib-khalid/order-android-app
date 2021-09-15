@@ -62,15 +62,4 @@ public class FirebaseHelper {
         }
         return false;
     }
-
-    /**
-     * Use this method when a new store is selected from "store selection activity"
-     * @param oldStoreId old store Id for which FCM topic was subscribed to
-     * @param newStoreId new store id for which FCM topic needs to be subscribed to
-     */
-    public static void overrideSubscribedTopic(String oldStoreId, String newStoreId){
-
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(oldStoreId);
-        FirebaseMessaging.getInstance().subscribeToTopic(newStoreId);
-    }
 }

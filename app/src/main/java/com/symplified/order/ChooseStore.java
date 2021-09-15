@@ -99,27 +99,6 @@ public class ChooseStore extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
         storeLogo.setBackgroundResource(R.drawable.header);
 
-//        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-//
-//        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                if(response.isSuccessful()){
-//                    try {
-//                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-//                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
-//
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//
-//            }
-//        });
 
 
 
