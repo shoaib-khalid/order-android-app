@@ -26,7 +26,11 @@ public class Order implements Serializable {
     public double klCommission;
     public double storeServiceCharges;
     public double storeShare;
-    public Object paymentType;
+    public String paymentType;
+    public double appliedDiscount;
+    public double deliveryDiscount;
+    public String appliedDiscountDescription;
+    public String deliveryDiscountDescription;
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
 
@@ -47,12 +51,12 @@ public class Order implements Serializable {
         public int deliveryProviderId;
         public String state;
         public String country;
-        public Object trackingUrl;
+        public String trackingUrl;
         public String orderId;
         public boolean storePickup;
-        public Object merchantTrackingUrl;
-        public Object customerTrackingUrl;
-        public Object trackingNumber;
+        public String merchantTrackingUrl;
+        public String customerTrackingUrl;
+        public String trackingNumber;
     }
 
     public static class OrderPaymentDetail implements Serializable{

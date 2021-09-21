@@ -294,12 +294,34 @@
             android:layout_marginEnd="15dp"
             android:text="@string/sub_total_value"
             android:textSize="16sp" />
+        <TextView
+            android:id="@+id/billing_discount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/billing_subtotal"
+            android:layout_marginEnd="100dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/discount"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/billing_discount_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_below="@+id/billing_subtotal_value"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"
+            android:text="@string/discount_value"
+            android:textSize="16sp" />
+
+
 
         <TextView
             android:id="@+id/billing_service_charges"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/billing_subtotal"
+            android:layout_below="@id/billing_discount"
             android:layout_marginEnd="100dp"
             android:layout_marginBottom="5dp"
             android:text="@string/service_charges"
@@ -309,7 +331,7 @@
             android:id="@+id/billing_service_charges_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/billing_subtotal"
+            android:layout_below="@id/billing_discount"
             android:layout_marginBottom="5dp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="15dp"
@@ -337,12 +359,33 @@
             android:text="@string/delivery_charges_value"
             android:textSize="16sp" />
 
+        <TextView
+            android:id="@+id/billing_delivery_charges_discount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/billing_delivery_charges"
+            android:layout_marginEnd="100dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/delivery_charges_discount"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/billing_delivery_charges_discount_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/billing_delivery_charges"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="15dp"
+            android:layout_marginBottom="5dp"
+            android:text="@string/delivery_charges_discount_value"
+            android:textSize="16sp" />
+
         <View
             android:id="@+id/subdivider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/light_grey"
-            android:layout_below="@id/billing_delivery_charges"
+            android:layout_below="@id/billing_delivery_charges_discount"
             />
 
         <TextView
@@ -373,6 +416,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintWidth_percent=".5"
+        android:visibility="invisible"
         android:id="@+id/btn_print"
         app:cornerRadius="25dp"
         android:paddingVertical="10dp"

@@ -4,13 +4,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
@@ -24,11 +27,14 @@ import com.symplified.order.models.asset.Asset;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.ui.main.SectionsPagerAdapter;
+import com.symplified.order.utils.ImageUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +51,7 @@ public class Orders extends AppCompatActivity {
     private ActivityOrdersBinding binding;
     private Toolbar toolbar;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,32 +98,43 @@ public class Orders extends AppCompatActivity {
         });
 
         ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+//        String logourl = sharedPreferences.getString("logoUrl", null);
+//        Log.e("TAG", "onCreate: logourl is : "+logourl, new Error() );
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+//        Bitmap s = (Bitmap) getIntent().getParcelableExtra("logo");
+//        Log.e("TAG", "logoBitmap: " + s, new Error() );
+        Log.e("TAG", "has logo: " +sharedPreferences.getString("logoImage", null), new Error());
+        String encodedImage = sharedPreferences.getString("logoImage", null);
+        if(getIntent().hasExtra("logo") || encodedImage != null){
+            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+        }
 
-        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-
-        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()){
-                    try {
-                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
+//        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+//
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+//
+//        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                if(response.isSuccessful()){
+//                    try {
+//                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+//                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//
+//            }
+//        });
 
     }
 

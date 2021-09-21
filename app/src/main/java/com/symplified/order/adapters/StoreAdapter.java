@@ -1,9 +1,14 @@
 package com.symplified.order.adapters;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,19 +19,46 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.Orders;
 import com.symplified.order.R;
+import com.symplified.order.apis.StoreApi;
 import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.models.Store.Store;
+import com.symplified.order.models.asset.Asset;
+import com.symplified.order.services.DownloadImageTask;
+import com.symplified.order.utils.ImageUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
     public List<Store> items;
+    public Context context;
+    private Dialog progressDialog;
 
-    public StoreAdapter(List<Store> items){
+    public StoreAdapter(List<Store> items, Context context, Dialog progressDialog){
         this.items = items;
+        this.context = context;
+        this.progressDialog = progressDialog;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -60,18 +92,95 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
+
+
         holder.name.setText(items.get(position).name);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SharedPreferences sharedPreferences = holder.itemView.getContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-                sharedPreferences.edit().putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
-                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id,view.getContext());
+
+                progressDialog.show();
+                SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+                final SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
+
+                Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+                StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+
+                Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer Bearer accessToken");
+
+                Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
                 Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
-                Log.e("TAG", "preferences: "+sharedPreferences.getAll(),new Error() );
-                Toast.makeText(view.getContext(), "Store id : "+ (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
-                view.getContext().startActivity(intent);
-                ((Activity) holder.itemView.getContext()).finish();
+
+                responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        try {
+                            Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+//                            editor.putString("logoUrl", "https://blog.hubspot.com/hubfs/image8-2.jpg");
+
+                            try {
+                                Bitmap bitmap  = new DownloadImageTask().execute("https://blog.hubspot.com/hubfs/image8-2.jpg").get();
+                                if(bitmap != null)
+                                    Log.e("TAG", "bitmapLogo: " + bitmap,  new Error());
+//                                String bitmap64 = ImageUtil.encodeTobase64(bitmap);
+//                                Log.e("TAG", "bitmap: "+ bitmap64, new Error() );
+                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+//                                intent.putExtra("logo", byteArrayOutputStream.toByteArray());
+                                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+                                editor.putString("logoImage", encodedImage);
+                                editor.apply();
+                                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id,view.getContext());
+                                Log.e("TAG", "preferences: "+sharedPreferences.getAll(),new Error() );
+                                Toast.makeText(view.getContext(), "Store id : "+ (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
+                                progressDialog.hide();
+                                view.getContext().startActivity(intent);
+                                ((Activity) holder.itemView.getContext()).finish();
+
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        progressDialog.hide();
+
+                    }
+                });
+
+                editor.apply();
+//                sharedPreferences.edit().putString("logoUrl", logoUrl);
+                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id,view.getContext());
+//                String logoUrl = sharedPreferences.getString("logoUrl", null);
+//                Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
+//                if(logoUrl != null){
+//                    try {
+//                        Bitmap bitmap  = new DownloadImageTask().execute(sharedPreferences.getString("logoUrl", null)).get();
+//                        String bitmap64 = ImageUtil.encodeTobase64(bitmap);
+//                        Log.e("TAG", "bitmap: "+ bitmap64 );
+//                        intent.putExtra("logo", bitmap64);
+//                    } catch (ExecutionException e) {
+//                        e.printStackTrace();
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+
+//                Log.e("TAG", "preferences: "+sharedPreferences.getAll(),new Error() );
+//                Toast.makeText(view.getContext(), "Store id : "+ (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
+//                view.getContext().startActivity(intent);
+//                ((Activity) holder.itemView.getContext()).finish();
             }
         });
     }
@@ -83,4 +192,53 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     public boolean isEmpty(){return items.isEmpty();}
+
+
+//    public String setLogoUrl (View view) throws IOException {
+//
+//        SharedPreferences sharedPreferences = view.getContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+//        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+//
+//        Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());
+//        Map<String, String> headers = new HashMap<>();
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+//
+//        Asset.AssetResponse response = new Gson().fromJson(responseLogo.execute().body().string(), Asset.AssetResponse.class);
+//
+//        return response.data.logoUrl;
+//
+////        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+////            @Override
+////            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+////                if(response.isSuccessful()){
+////                    try {
+////                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+//////                        sharedPreferences.edit().putString("logoUrl", responseBody.data.logoUrl).apply();
+////                        logoUrl = logoUrl + responseBody.data.logoUrl;
+////                        Log.e("TAG", "logoUrl: "+ responseBody.data, new Error() );
+////
+////                    } catch (IOException e) {
+////                        e.printStackTrace();
+////                    }
+////                }
+////                else{
+////                    Log.e("TAG", "onFailure: "+ sharedPreferences.getAll(), new Error());
+////                }
+////            }
+////
+////            @Override
+////            public void onFailure(Call<ResponseBody> call, Throwable t) {
+////
+////            }
+////        });
+//
+////        Log.e("TAG", "onFinishLogoUrl: "+ sharedPreferences.getAll(), new Error());
+//
+////        return logoUrl;
+//    }
+
+
 }

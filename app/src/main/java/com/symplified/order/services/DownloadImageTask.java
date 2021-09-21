@@ -1,9 +1,12 @@
 package com.symplified.order.services;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
+
+import com.symplified.order.utils.ImageUtil;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -14,6 +17,7 @@ public class DownloadImageTask extends AsyncTask<String,Void, Bitmap> {
     public DownloadImageTask(ImageView imageView){
         this.imageView = imageView;
     }
+    public DownloadImageTask() {  }
 
     /*
         doInBackground(Params... params)
@@ -39,7 +43,12 @@ public class DownloadImageTask extends AsyncTask<String,Void, Bitmap> {
         onPostExecute(Result result)
             Runs on the UI thread after doInBackground(Params...).
      */
-    protected void onPostExecute(Bitmap result){
-        imageView.setImageBitmap(result);
-    }
+//    protected void onPostExecute(Bitmap result){
+//        imageView.setImageBitmap(result);
+//    }
+
+//    protected String onPostExecute(Bitmap result, boolean flag){
+//        logoUrl = ImageUtil.encodeTobase64(result);
+//        return logoUrl;
+//    }
 }

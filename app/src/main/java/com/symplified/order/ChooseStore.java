@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ActionBar;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -23,6 +24,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.gson.Gson;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
@@ -52,6 +54,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ChooseStore extends AppCompatActivity {
 
     private Toolbar toolbar;
+    private Dialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +63,11 @@ public class ChooseStore extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.store_recycler);
         TextView chooseStore = findViewById(R.id.choose_store);
         TextView noStore = findViewById(R.id.no_store);
+
+        progressDialog = new Dialog(this);
+        progressDialog.setContentView(R.layout.progress_dialog);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -119,7 +127,7 @@ public class ChooseStore extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-
+        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
@@ -133,16 +141,18 @@ public class ChooseStore extends AppCompatActivity {
                         noStore.setVisibility(View.VISIBLE);
                     }
                     else{
-                            StoreAdapter storeAdapter = new StoreAdapter(response.body().data.content);
+                            StoreAdapter storeAdapter = new StoreAdapter(response.body().data.content, getApplicationContext(), progressDialog);
                             recyclerView.setLayoutManager(new LinearLayoutManager(ChooseStore.this));
                             recyclerView.setAdapter(storeAdapter);
                     }
                 }
+                progressDialog.hide();
             }
 
             @Override
             public void onFailure(Call<StoreResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
+                progressDialog.hide();
             }
         });
 

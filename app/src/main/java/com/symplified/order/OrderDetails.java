@@ -1,5 +1,7 @@
 package com.symplified.order;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -20,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,6 +36,7 @@ import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.services.DateParser;
 import com.symplified.order.services.DownloadImageTask;
+import com.symplified.order.utils.ImageUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,16 +59,23 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class OrderDetails extends AppCompatActivity {
     private RecyclerView recyclerView;
 
-    private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal;
+    private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
     private Button process, print;
     private ImageView pickup;
     private String section;
     private Toolbar toolbar;
+    private Dialog progressDialog;
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_details);
+        progressDialog = new Dialog(this);
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
 
         Bundle data = getIntent().getExtras();
         Order order = (Order) data.getSerializable("selectedOrder");
@@ -81,12 +92,15 @@ public class OrderDetails extends AppCompatActivity {
         nameValue = findViewById(R.id.address_name_value);
         noteValue = findViewById(R.id.address_note_value);
         subtotalValue = findViewById(R.id.billing_subtotal_value);
+        discount = findViewById(R.id.billing_discount_value);
         serviceChargesValue = findViewById(R.id.billing_service_charges_value);
         deliveryChargesValue = findViewById(R.id.billing_delivery_charges_value);
+        deliveryDiscount = findViewById(R.id.billing_delivery_charges_discount_value);
         billingTotal = findViewById(R.id.billing_total_value);
         pickup = findViewById(R.id.address_is_pickup);
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
+        print.setVisibility(View.GONE);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -119,34 +133,42 @@ public class OrderDetails extends AppCompatActivity {
             }
         });
 
-        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
+        String encodedImage = sharedPreferences.getString("logoImage", null);
+        if(getIntent().hasExtra("logo") || encodedImage != null){
+            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+        }
 
-        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()){
-                    try {
-                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
-            }
-        });
+//        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+//
+//        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+//            @Override
+//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                if(response.isSuccessful()){
+//                    try {
+//                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+//                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
+//
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<ResponseBody> call, Throwable t) {
+//
+//            }
+//        });
 
 
         if(order.orderShipmentDetail.storePickup)
@@ -164,8 +186,10 @@ public class OrderDetails extends AppCompatActivity {
         nameValue.setText(order.orderShipmentDetail.receiverName);
         noteValue.setText(order.customerNotes);
         subtotalValue.setText(Double.toString(order.subTotal));
+        discount.setText(Double.toString(order.appliedDiscount));
         serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
         deliveryChargesValue.setText(Double.toString(order.deliveryCharges));
+        deliveryDiscount.setText(Double.toString(order.deliveryDiscount));
         billingTotal.setText(Double.toString(order.total));
 
         process = findViewById(R.id.btn_process);
@@ -185,6 +209,7 @@ public class OrderDetails extends AppCompatActivity {
         boolean isPickup = getIntent().getBooleanExtra("pickup",false);
         ItemsAdapter itemsAdapter = new ItemsAdapter();
         List<Item> items = new ArrayList<>();
+        progressDialog.show();
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
@@ -193,8 +218,9 @@ public class OrderDetails extends AppCompatActivity {
                 {
                     Log.e("TAG", "onResponse: "+order.id, new Error() );
                     itemsAdapter.setItems(response.body().data.content);
-                    itemsAdapter.notifyDataSetChanged();
                     recyclerView.setAdapter(itemsAdapter);
+                    itemsAdapter.notifyDataSetChanged();
+                    progressDialog.hide();
                 }
 
 
@@ -203,6 +229,7 @@ public class OrderDetails extends AppCompatActivity {
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Failed to retrieve items", Toast.LENGTH_SHORT).show();
+                progressDialog.hide();
             }
         });
 
@@ -216,6 +243,7 @@ public class OrderDetails extends AppCompatActivity {
             public void onClick(View view) {
 
                 Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
+                progressDialog.show();
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -238,12 +266,13 @@ public class OrderDetails extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-
+                                progressDialog.hide();
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
+                        progressDialog.hide();
                     }
                 });
             }
@@ -268,6 +297,7 @@ public class OrderDetails extends AppCompatActivity {
             public void onClick(View view) {
 
                 Toast.makeText(getApplicationContext(), "being delivered clicked", Toast.LENGTH_SHORT).show();
+                progressDialog.show();
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -298,12 +328,13 @@ public class OrderDetails extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         }
-
+                        progressDialog.hide();
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
+                        progressDialog.hide();
                     }
                 });
             }

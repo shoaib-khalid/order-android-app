@@ -1,6 +1,7 @@
 package com.symplified.order.ui.main;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.App;
@@ -71,6 +73,7 @@ public class PlaceholderFragment extends Fragment {
     private String storeId;
     private RecyclerView recyclerView;
     private String section;
+    private Dialog progressDialog;
 
     public static PlaceholderFragment newInstance(String type) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -84,6 +87,13 @@ public class PlaceholderFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+
+        progressDialog = new Dialog(getContext());
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
+
         retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
@@ -181,6 +191,7 @@ public class PlaceholderFragment extends Fragment {
 
         Log.e("TAG", "URL : "+orderResponse.request().url(), new Error() );
 
+        progressDialog.show();
         orderResponse.clone().enqueue(new Callback<ResponseBody>() {
             @SuppressLint("NotifyDataSetChanged")
             @Override
@@ -195,6 +206,7 @@ public class PlaceholderFragment extends Fragment {
                         orderAdapter = new OrderAdapter(orderResponse.data.content, section);
                         recyclerView.setAdapter(orderAdapter);
                         orderAdapter.notifyDataSetChanged();
+                        progressDialog.hide();
                         Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
 
                     } catch (IOException e) {
@@ -210,6 +222,7 @@ public class PlaceholderFragment extends Fragment {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(getActivity(), "Failed to fetch orders, ", Toast.LENGTH_SHORT).show();
                 Log.e("TAG", "onFailure: ",t.getCause() );
+                progressDialog.hide();
             }
         });
 
@@ -249,6 +262,7 @@ public class PlaceholderFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        progressDialog.show();
         orderResponse.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -261,6 +275,7 @@ public class PlaceholderFragment extends Fragment {
                         orderAdapter = new OrderAdapter(orderResponse.data.content, section);
                         recyclerView.setAdapter(orderAdapter);
                         orderAdapter.notifyDataSetChanged();
+                        progressDialog.hide();
                         Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
 
                     } catch (IOException e) {
@@ -274,7 +289,7 @@ public class PlaceholderFragment extends Fragment {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                progressDialog.hide();
             }
         });
     }

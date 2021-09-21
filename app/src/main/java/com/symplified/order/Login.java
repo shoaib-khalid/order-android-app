@@ -2,6 +2,8 @@ package com.symplified.order;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.symplified.order.apis.LoginApi;
@@ -37,6 +40,7 @@ public class Login extends AppCompatActivity {
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
+    private Dialog progressDialog;
 
 
     @Override
@@ -45,6 +49,11 @@ public class Login extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
 //        getSupportActionBar().hide();
+        progressDialog = new Dialog(this);
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
 
         Log.d("TAG", "onCreate: "+sharedPreferences.getAll().toString());
 
@@ -64,7 +73,9 @@ public class Login extends AppCompatActivity {
                 Call<LoginResponse> loginResponse = loginApiService.login("application/json",
                         new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
 
-                loginResponse.enqueue(new Callback<LoginResponse>() {
+                progressDialog.show();
+
+                loginResponse.clone().enqueue(new Callback<LoginResponse>() {
 
                     @Override
                     public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
@@ -86,11 +97,13 @@ public class Login extends AppCompatActivity {
                                 editor.apply();
                             }
                             Toast.makeText(getApplicationContext(), "ownerID : "+sharedPreferences.getString("ownerId", null), Toast.LENGTH_SHORT).show();
+                            progressDialog.hide();
                             Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
                             startActivity(intent);
                         }
                         else {
                             Log.d("TAG", "Login response : Not successful");
+                            progressDialog.hide();
                             Toast.makeText(getApplicationContext(), "Unsuccessful, Please try again", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -99,6 +112,7 @@ public class Login extends AppCompatActivity {
                     public void onFailure(Call<LoginResponse> call, Throwable t) {
                         Log.e("TAG", "onFailure: ", t.getCause());
                         Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                        progressDialog.hide();
                     }
                 });
             }
