@@ -242,7 +242,7 @@ public class OrderDetails extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
                 progressDialog.show();
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
@@ -296,7 +296,7 @@ public class OrderDetails extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Toast.makeText(getApplicationContext(), "being delivered clicked", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), "being delivered clicked", Toast.LENGTH_SHORT).show();
                 progressDialog.show();
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override

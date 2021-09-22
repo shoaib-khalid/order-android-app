@@ -120,7 +120,8 @@ public class ChooseStore extends AppCompatActivity {
 
         if(null == clientId)
         {
-            Toast.makeText(this, "Client id is null", Toast.LENGTH_SHORT).show();
+            Log.d("Client-ID", "onCreate: client id is null");
+//            Toast.makeText(this, "Client id is null", Toast.LENGTH_SHORT).show();
         }
 
 //        Map<String, String> headers = new HashMap<>();

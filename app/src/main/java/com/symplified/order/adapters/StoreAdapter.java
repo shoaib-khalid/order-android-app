@@ -138,7 +138,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                                 }
                             FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, view.getContext());
                             Log.e("TAG", "preferences: " + sharedPreferences.getAll(), new Error());
-                            Toast.makeText(view.getContext(), "Store id : " + (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(view.getContext(), "Store id : " + (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
                             progressDialog.hide();
                             view.getContext().startActivity(intent);
                             ((Activity) holder.itemView.getContext()).finish();

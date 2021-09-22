@@ -114,7 +114,8 @@ public class PlaceholderFragment extends Fragment {
 
         if(null == storeId)
         {
-            Toast.makeText(this.getActivity(), "storeId id is null", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this.getActivity(), "storeId id is null", Toast.LENGTH_SHORT).show();
+            Log.d("Store-id", "onCreate: store id is null");
         }
 
 //        orderResponse = orderApiService.getNewOrders(headers, storeId);
@@ -126,7 +127,7 @@ public class PlaceholderFragment extends Fragment {
         }
 
         if(section == null)
-            Toast.makeText(getContext(), "Section is null", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getContext(), "Section is null", Toast.LENGTH_SHORT).show();
 
         pageViewModel.setIndex(0);
 

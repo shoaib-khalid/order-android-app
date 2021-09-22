@@ -97,7 +97,7 @@ public class Login extends AppCompatActivity {
                                 editor.putInt("isLoggedIn", 1);
                                 editor.apply();
                             }
-                            Toast.makeText(getApplicationContext(), "ownerID : "+sharedPreferences.getString("ownerId", null), Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getApplicationContext(), "ownerID : "+sharedPreferences.getString("ownerId", null), Toast.LENGTH_SHORT).show();
                             progressDialog.hide();
                             Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
                             startActivity(intent);

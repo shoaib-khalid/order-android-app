@@ -141,7 +141,7 @@ public class Orders extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Toast.makeText(getApplicationContext(), "onActivityResult Called", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getApplicationContext(), "onActivityResult Called", Toast.LENGTH_SHORT).show();
             if(data != null && data.getIntExtra("finish",0) == 1){
                 this.finishActivity(4);
 //                this.finish();

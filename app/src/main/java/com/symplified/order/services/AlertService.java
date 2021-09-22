@@ -36,7 +36,7 @@ public class AlertService extends Service{
                     .setContentTitle("Symplified").setContentText("Waiting for orders").setPriority(Notification.PRIORITY_LOW).build();
             startForeground(1 , notification);
         }
-        Toast.makeText(this, "service is created.", Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "service is created.", Toast.LENGTH_LONG).show();
     }
 
     @Nullable
@@ -60,7 +60,7 @@ public class AlertService extends Service{
         mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
-        Toast.makeText(this, "service is running.", Toast.LENGTH_LONG).show();
+//        Toast.makeText(this, "service is running.", Toast.LENGTH_LONG).show();
         return START_STICKY;
     }
 
