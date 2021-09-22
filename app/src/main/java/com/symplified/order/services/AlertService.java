@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.symplified.order.App;
+import com.symplified.order.R;
 
 
 public class AlertService extends Service{
@@ -48,7 +49,8 @@ public class AlertService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
+//        Settings.System.DEFAULT_ALARM_ALERT_URI
+        mediaPlayer = MediaPlayer.create(this, R.raw.ring);
         mediaPlayer.setLooping(true);
         if(intent.getIntExtra("first",0) == 1)
             return START_STICKY;

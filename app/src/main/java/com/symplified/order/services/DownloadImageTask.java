@@ -25,6 +25,8 @@ public class DownloadImageTask extends AsyncTask<String,Void, Bitmap> {
      */
     protected Bitmap doInBackground(String...urls){
         String urlOfImage = urls[0];
+        if(urlOfImage == null)
+            return null;
         Bitmap logo = null;
         try{
             InputStream is = new URL(urlOfImage).openStream();
