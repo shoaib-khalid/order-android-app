@@ -25,9 +25,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
+import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
@@ -89,11 +91,12 @@ public class ChooseStore extends AppCompatActivity {
         });
 
         ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
-        SharedPreferences finalSharedPreferences = sharedPreferences;
+        final SharedPreferences finalSharedPreferences = sharedPreferences;
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), Login.class);
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(finalSharedPreferences.getString("storeId", null));
                 finalSharedPreferences.edit().clear().apply();
                 startActivity(intent);
                 finish();
