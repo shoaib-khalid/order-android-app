@@ -73,6 +73,7 @@ public class ChooseStore extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        sharedPreferences.edit().remove("logoImage").apply();
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setOnClickListener(new View.OnClickListener() {
