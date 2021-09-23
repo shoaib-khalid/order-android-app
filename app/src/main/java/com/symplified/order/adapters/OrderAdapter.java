@@ -2,6 +2,7 @@ package com.symplified.order.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -27,12 +28,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public List<Order> orders;
     public String section;
     public boolean isPickup;
+    public Context context;
 
-    public OrderAdapter(List<Order> orders, String section){
+    public OrderAdapter(List<Order> orders, String section, Context context){
 //        List<OrderDetailsModel> items,
 //        this.items = items;
         this.orders = orders;
         this.section = section;
+        this.context = context;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -114,8 +117,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 intent.putExtra("pickup", isPickup);
-                ((Activity)view.getContext()).startActivityForResult(intent, 4);
-                ((Activity)view.getContext()).finish();
+                ((Activity) context).startActivityForResult(intent, 4);
+//                ((Activity)view.getContext()).finish();
             }
         });
 

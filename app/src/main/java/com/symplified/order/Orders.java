@@ -93,6 +93,7 @@ public class Orders extends AppCompatActivity {
                 Intent intent = new Intent(getApplicationContext(), Login.class);
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 sharedPreferences.edit().clear().apply();
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
             }
@@ -143,9 +144,11 @@ public class Orders extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 //        Toast.makeText(getApplicationContext(), "onActivityResult Called", Toast.LENGTH_SHORT).show();
-            if(data != null && data.getIntExtra("finish",0) == 1){
+//        this.finish();
+        Log.e("TAG", "onActivityResult: "+ requestCode + " "+resultCode+" "+data.getIntExtra("finish",0), new Error());
+            if(resultCode == RESULT_OK){
                 this.finishActivity(4);
-//                this.finish();
+                this.finish();
             }
     }
 

@@ -71,6 +71,7 @@ public class OrderDetails extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_order_details);
+        setResult(RESULT_CANCELED, new Intent().putExtra("finish", 0));
         progressDialog = new Dialog(this);
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
@@ -111,14 +112,14 @@ public class OrderDetails extends AppCompatActivity {
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(4, new Intent().putExtra("finish", 1));
+                setResult(RESULT_OK, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 sharedPreferences.edit().remove("storeId").apply();
 //                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
-//                finish();
+                finish();
             }
         });
 
@@ -126,6 +127,7 @@ public class OrderDetails extends AppCompatActivity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                setResult(RESULT_OK, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), Login.class);
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 sharedPreferences.edit().clear().apply();

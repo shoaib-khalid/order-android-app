@@ -204,7 +204,7 @@ public class PlaceholderFragment extends Fragment {
                 {
                     try {
                         OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
-                        orderAdapter = new OrderAdapter(orderResponse.data.content, section);
+                        orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
                         recyclerView.setAdapter(orderAdapter);
                         orderAdapter.notifyDataSetChanged();
                         progressDialog.hide();
@@ -245,20 +245,6 @@ public class PlaceholderFragment extends Fragment {
         return root;
     }
 
-    public void refreshOrders(){
-        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-
-            }
-        });
-    }
-
 
     @Override
     public void onResume() {
@@ -273,7 +259,7 @@ public class PlaceholderFragment extends Fragment {
                     try {
 //                        Toast.makeText(getActivity(), "onResumeCalled", Toast.LENGTH_SHORT).show();
                         OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
-                        orderAdapter = new OrderAdapter(orderResponse.data.content, section);
+                        orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
                         recyclerView.setAdapter(orderAdapter);
                         orderAdapter.notifyDataSetChanged();
                         progressDialog.hide();

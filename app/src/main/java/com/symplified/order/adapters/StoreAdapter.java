@@ -122,8 +122,8 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         try {
                             Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-//                            editor.putString("logoUrl", "https://blog.hubspot.com/hubfs/image8-2.jpg");
 
+                            if(responseBody.data !=null){
                                 Bitmap bitmap  = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
                                 if(bitmap != null) {
                                     Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
@@ -136,6 +136,8 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                                     editor.putString("logoImage", encodedImage);
                                     editor.apply();
                                 }
+                            }
+
                             FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, view.getContext());
                             Log.e("TAG", "preferences: " + sharedPreferences.getAll(), new Error());
 //                            Toast.makeText(view.getContext(), "Store id : " + (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();

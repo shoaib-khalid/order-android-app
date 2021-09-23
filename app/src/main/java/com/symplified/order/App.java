@@ -11,10 +11,10 @@ import android.os.Build;
 
 public class App extends Application {
 
-    public static final String BASE_URL = "https://api.symplified.it/";
+    public static final String BASE_URL = "https://api.symplified.biz/";
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
-    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.it/product-service/v1/";
-    public static final String ORDER_SERVICE_URL = "https://api.symplified.it/order-service/v1/";
+    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.biz/product-service/v1/";
+    public static final String ORDER_SERVICE_URL = "https://api.symplified.biz/order-service/v1/";
     public static final String SESSION_DETAILS_TITLE = "session";
     public static final String CHANNEL_ID = "CHANNEL_ID";
     public static final String ORDERS = "ORDERS";
