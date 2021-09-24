@@ -286,7 +286,7 @@ public class OrderDetails extends AppCompatActivity {
 //                    = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
 
             if(!isPickup)
-                processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_DELIVERED), order.id);
+                processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
             else
                 processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.DELIVERED_TO_CUSTOMER), order.id);
 
@@ -313,8 +313,8 @@ public class OrderDetails extends AppCompatActivity {
                                 if(currentOrder.data.completionStatus.toString().equals(Status.DELIVERED_TO_CUSTOMER.toString()))
                                     process.setText("Delivered");
 
-                                else if(currentOrder.data.completionStatus.toString().equals(Status.BEING_DELIVERED.toString())){
-                                    process.setText("Being Delivered");
+                                else if(currentOrder.data.completionStatus.toString().equals(Status.AWAITING_PICKUP.toString())){
+                                    process.setText("Awaiting Pickup");
                                 }
                                 else
                                     process.setText("Failed");
