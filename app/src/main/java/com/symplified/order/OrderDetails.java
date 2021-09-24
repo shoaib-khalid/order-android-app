@@ -259,7 +259,7 @@ public class OrderDetails extends AppCompatActivity {
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
                                 Log.i(TAG, "response body : "+ currentOrder.data.toString());
                                 if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
-                                    process.setText("Being Prepared");
+                                    process.setText("Pickup");
                                 else
                                     process.setText("Failed");
                             } catch (IOException e) {
@@ -299,7 +299,7 @@ public class OrderDetails extends AppCompatActivity {
 
             Log.e("PICKUPMSG", "onCreate: isPickup :"+isPickup, new Error() );
 
-            process.setText("Being Perpared");
+            process.setText("Pickup");
 
             process.setOnClickListener(new View.OnClickListener() {
             @Override
