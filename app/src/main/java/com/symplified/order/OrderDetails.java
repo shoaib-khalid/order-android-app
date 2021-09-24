@@ -65,6 +65,7 @@ public class OrderDetails extends AppCompatActivity {
     private String section;
     private Toolbar toolbar;
     private Dialog progressDialog;
+    public static String TAG = "ProcessOrder";
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -209,7 +210,8 @@ public class OrderDetails extends AppCompatActivity {
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
-        boolean isPickup = getIntent().getBooleanExtra("pickup",false);
+//        boolean isPickup = getIntent().getBooleanExtra("pickup",false);
+        boolean isPickup = order.orderShipmentDetail.storePickup;
         ItemsAdapter itemsAdapter = new ItemsAdapter();
         List<Item> items = new ArrayList<>();
         progressDialog.show();
@@ -251,9 +253,11 @@ public class OrderDetails extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if(response.isSuccessful()){
-
                             try {
+                                Log.i(TAG, "request body : "+ call.request().body());
+
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
+                                Log.i(TAG, "response body : "+ currentOrder.data.toString());
                                 if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
                                     process.setText("Being Prepared");
                                 else
@@ -261,6 +265,8 @@ public class OrderDetails extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                            process.setClickable(false);
+                            process.setEnabled(false);
                         }
                         else {
                             try {
@@ -308,7 +314,9 @@ public class OrderDetails extends AppCompatActivity {
 
                             try {
 //                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
+                                Log.i(TAG, "request body : "+ call.request().body());
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
+                                Log.i(TAG, "response body : "+ currentOrder.data.toString());
                                 Log.e("PICKUPMSG", "onResponse: "+currentOrder.data.completionStatus.toString(),new Error() );
                                 if(currentOrder.data.completionStatus.toString().equals(Status.DELIVERED_TO_CUSTOMER.toString()))
                                     process.setText("Delivered");
@@ -323,6 +331,8 @@ public class OrderDetails extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                            process.setClickable(false);
+                            process.setEnabled(false);
                         }
                         else {
                             try {

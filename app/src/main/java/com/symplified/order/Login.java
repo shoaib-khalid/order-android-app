@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -41,6 +42,7 @@ public class Login extends AppCompatActivity {
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
+    private ImageView header;
     private Dialog progressDialog;
 
 
@@ -61,6 +63,18 @@ public class Login extends AppCompatActivity {
         login = findViewById(R.id.btn_login);
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
+        header = findViewById(R.id.iv_header);
+
+        header.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(App.BASE_URL.contains("symplified.it")
+                        && App.ORDER_SERVICE_URL.contains("symplified.it")
+                        && App.PRODUCT_SERVICE_URL.contains("symplified.it")){
+                    Toast.makeText(Login.this, "Staging Version", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
 
         login.setOnClickListener(new View.OnClickListener() {

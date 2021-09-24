@@ -12,6 +12,37 @@ public class Order implements Serializable {
     public String id;
     public String storeId;
     public double subTotal;
+
+    @Override
+    public String toString() {
+        return "Order{" +
+                "id='" + id + '\'' +
+                ", storeId='" + storeId + '\'' +
+                ", subTotal=" + subTotal +
+                ", deliveryCharges=" + deliveryCharges +
+                ", total=" + total +
+                ", completionStatus='" + completionStatus + '\'' +
+                ", paymentStatus='" + paymentStatus + '\'' +
+                ", customerNotes='" + customerNotes + '\'' +
+                ", privateAdminNotes='" + privateAdminNotes + '\'' +
+                ", cartId='" + cartId + '\'' +
+                ", customerId='" + customerId + '\'' +
+                ", created='" + created + '\'' +
+                ", updated='" + updated + '\'' +
+                ", invoiceId='" + invoiceId + '\'' +
+                ", klCommission=" + klCommission +
+                ", storeServiceCharges=" + storeServiceCharges +
+                ", storeShare=" + storeShare +
+                ", paymentType='" + paymentType + '\'' +
+                ", appliedDiscount=" + appliedDiscount +
+                ", deliveryDiscount=" + deliveryDiscount +
+                ", appliedDiscountDescription='" + appliedDiscountDescription + '\'' +
+                ", deliveryDiscountDescription='" + deliveryDiscountDescription + '\'' +
+                ", orderShipmentDetail=" + orderShipmentDetail +
+                ", orderPaymentDetail=" + orderPaymentDetail +
+                '}';
+    }
+
     public double deliveryCharges;
     public double total;
     public String completionStatus;
@@ -34,12 +65,6 @@ public class Order implements Serializable {
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
 
-
-    @NonNull
-    @Override
-    public String toString() {
-        return super.toString();
-    }
 
     public static class OrderShipmentDetail implements Serializable{
         public String receiverName;
