@@ -45,14 +45,17 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -192,22 +195,27 @@ public class OrderDetails extends AppCompatActivity {
             pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
 
 
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZone = sharedPreferences.getString("timezone", null);
-        if(timeZone != null)
-            dtf.setTimeZone(TimeZone.getTimeZone(timeZone));
+//        if(timeZone != null)
+//            dtf.setTimeZone(TimeZone.getTimeZone(timeZone));
         Log.e("timeZoneCheck", "TimeZone:  "+timeZone, new Error() );
         Log.e("timeZoneCheck", "Received date:  "+order.created, new Error() );
-        String date = null;
+        TimeZone timezone = TimeZone.getTimeZone(timeZone);
+        Calendar calendar = new GregorianCalendar();
+//        String date = null;
         try {
-            date = dtf.format(dtf.parse(order.created));
+//            date = dtf.format(dtf.parse(order.created));
+            calendar.setTime(dtf.parse(order.created));
+            calendar.add(Calendar.HOUR_OF_DAY, (timezone.getRawOffset()/3600000));
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e("timeZoneCheck", "date:  "+date, new Error() );
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
-//        LocalDate newDate = LocalDate.parse(date, formatter);
-        dateValue.setText(date);
+
+
+        Log.e("timeZoneCheck", "date:  "+(timezone.getOffset(new Date().getTime())/3600000), new Error() );
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
+        dateValue.setText(formatter.format(calendar.getTime()));
         addressValue.setText(order.orderShipmentDetail.address);
         invoiceValue.setText(order.invoiceId);
         cityValue.setText(order.orderShipmentDetail.city);
