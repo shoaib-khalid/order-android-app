@@ -105,6 +105,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 progressDialog.show();
                 SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
                 final SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("timezone", items.get(holder.getAdapterPosition()).regionCountry.timezone).apply();
                 editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
 //                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, context);
                 Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();

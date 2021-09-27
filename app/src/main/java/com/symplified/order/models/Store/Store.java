@@ -27,7 +27,7 @@ public class Store implements Serializable {
     public RegionCountry regionCountry;
     public List<StoreTiming> storeTiming;
 
-    static class RegionCountry{
+    public static class RegionCountry{
         public String id;
         public String name;
         public String region;

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -16,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,11 +45,18 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -67,6 +76,7 @@ public class OrderDetails extends AppCompatActivity {
     private Dialog progressDialog;
     public static String TAG = "ProcessOrder";
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,7 +191,22 @@ public class OrderDetails extends AppCompatActivity {
             pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
 
 
-        dateValue.setText(order.created);
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String timeZone = sharedPreferences.getString("timezone", null);
+        if(timeZone != null)
+            dtf.setTimeZone(TimeZone.getTimeZone(timeZone));
+        Log.e("timeZoneCheck", "TimeZone:  "+timeZone, new Error() );
+        Log.e("timeZoneCheck", "Received date:  "+order.created, new Error() );
+        String date = null;
+        try {
+            date = dtf.format(dtf.parse(order.created));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.e("timeZoneCheck", "date:  "+date, new Error() );
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss");
+//        LocalDate newDate = LocalDate.parse(date, formatter);
+        dateValue.setText(date);
         addressValue.setText(order.orderShipmentDetail.address);
         invoiceValue.setText(order.invoiceId);
         cityValue.setText(order.orderShipmentDetail.city);
