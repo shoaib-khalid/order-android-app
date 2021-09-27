@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -104,7 +105,7 @@ public class ChooseStore extends AppCompatActivity {
         });
 
         ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
         Map<String, String> headers = new HashMap<>();
@@ -115,7 +116,7 @@ public class ChooseStore extends AppCompatActivity {
 
 
 
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.PRODUCT_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         StoreApi storeApiService = retrofit.create(StoreApi.class);

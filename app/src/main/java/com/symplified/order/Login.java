@@ -30,6 +30,7 @@ import com.symplified.order.services.AlertService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,7 +81,7 @@ public class Login extends AppCompatActivity {
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Retrofit retrofit = new Retrofit.Builder().baseUrl(App.BASE_URL+App.USER_SERVICE_URL)
+                Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).client(new OkHttpClient()).baseUrl(App.BASE_URL+App.USER_SERVICE_URL)
                         .addConverterFactory(GsonConverterFactory.create()).build();
 
                 LoginApi loginApiService = retrofit.create(LoginApi.class);

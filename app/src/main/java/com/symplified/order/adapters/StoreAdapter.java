@@ -43,6 +43,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -108,7 +109,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 editor.putString("timezone", items.get(holder.getAdapterPosition()).regionCountry.timezone).apply();
                 editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
 //                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, context);
-                Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+                Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
                 StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
                 Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());

@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -228,7 +229,7 @@ public class OrderDetails extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);

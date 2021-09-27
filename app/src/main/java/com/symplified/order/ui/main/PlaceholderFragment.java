@@ -47,6 +47,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -94,7 +95,7 @@ public class PlaceholderFragment extends Fragment {
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
 
-        retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
+        retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         orders = new ArrayList<>();
