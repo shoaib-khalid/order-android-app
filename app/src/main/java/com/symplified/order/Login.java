@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.gson.Gson;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.models.HttpResponse;
@@ -45,11 +47,20 @@ public class Login extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
     private ImageView header;
     private Dialog progressDialog;
-
+    private FirebaseRemoteConfig mRemoteConfig;
+    private String BASE_URL,USER_SERVICE_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(3600).build();
+        mRemoteConfig.setConfigSettingsAsync(configSettings);
+        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
+
+        BASE_URL = mRemoteConfig.getString("base_url");
+        USER_SERVICE_URL = mRemoteConfig.getString("user_service_url");
+
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
 //        getSupportActionBar().hide();

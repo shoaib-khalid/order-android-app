@@ -9,18 +9,25 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 public class App extends Application {
 
-    public static final String BASE_URL = "https://api.symplified.biz/";
+    public static final String BASE_URL = "https://api.symplified.it/";
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
-    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.biz/product-service/v1/";
-    public static final String ORDER_SERVICE_URL = "https://api.symplified.biz/order-service/v1/";
+    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.it/product-service/v1/";
+    public static final String ORDER_SERVICE_URL = "https://api.symplified.it/order-service/v1/";
     public static final String SESSION_DETAILS_TITLE = "session";
     public static final String CHANNEL_ID = "CHANNEL_ID";
     public static final String ORDERS = "ORDERS";
     public static final Uri SOUND = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
     public static Ringtone ringtone;
-
+//    private FirebaseRemoteConfig mRemoteConfig;
     public static Ringtone play(Context context){
         ringtone = RingtoneManager.getRingtone(context, SOUND);
         return ringtone;
@@ -29,6 +36,7 @@ public class App extends Application {
     @Override
     public void onCreate(){
         super.onCreate();
+
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ){
             NotificationChannel channel = new NotificationChannel(

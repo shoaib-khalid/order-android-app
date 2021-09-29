@@ -1,5 +1,7 @@
 package com.symplified.order;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -111,6 +113,10 @@ public class Orders extends AppCompatActivity {
             ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
         }
 
+        if(isServiceRunning()){
+            stopService(new Intent(this, AlertService.class));
+        }
+
 //        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 //        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 //
@@ -150,6 +156,16 @@ public class Orders extends AppCompatActivity {
                 this.finishActivity(4);
                 this.finish();
             }
+    }
+
+    public boolean isServiceRunning(){
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (AlertService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

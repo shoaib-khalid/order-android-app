@@ -2,6 +2,7 @@ package com.symplified.order.ui.main;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -147,6 +148,8 @@ public class PlaceholderFragment extends Fragment {
             case "new" :{
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.getNewOrders(headers, storeId);
+                NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.cancelAll();
                 break;
             }
         }
