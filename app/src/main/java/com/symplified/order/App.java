@@ -22,6 +22,14 @@ public class App extends Application {
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
     public static final String PRODUCT_SERVICE_URL = "https://api.symplified.it/product-service/v1/";
     public static final String ORDER_SERVICE_URL = "https://api.symplified.it/order-service/v1/";
+
+
+//    public static final String BASE_URL;
+//    public static final  String USER_SERVICE_URL;
+//    public static final String PRODUCT_SERVICE_URL;
+//    public static final  String ORDER_SERVICE_URL;
+
+
     public static final String SESSION_DETAILS_TITLE = "session";
     public static final String CHANNEL_ID = "CHANNEL_ID";
     public static final String ORDERS = "ORDERS";
@@ -32,6 +40,18 @@ public class App extends Application {
         ringtone = RingtoneManager.getRingtone(context, SOUND);
         return ringtone;
     }
+
+//    static {
+//        FirebaseRemoteConfig mRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(3600).build();
+//        mRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
+//
+//        BASE_URL = mRemoteConfig.getString("base_url");
+//        USER_SERVICE_URL = mRemoteConfig.getString("user_service_url");
+//        PRODUCT_SERVICE_URL = mRemoteConfig.getString("product_service_url");
+//        ORDER_SERVICE_URL = mRemoteConfig.getString("order_service_url");
+//    }
 
     @Override
     public void onCreate(){
