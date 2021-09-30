@@ -19,8 +19,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.Orders;
@@ -55,11 +58,21 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public List<Store> items;
     public Context context;
     private Dialog progressDialog;
+//    private String BASE_URL;
+//    private FirebaseRemoteConfig mRemoteConfig;
+
+    FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
 
     public StoreAdapter(List<Store> items, Context context, Dialog progressDialog){
         this.items = items;
         this.context = context;
         this.progressDialog = progressDialog;
+//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        mRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
+//
+//        mRemoteConfig.fetch(0);
+//        mRemoteConfig.activate();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -96,6 +109,8 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
+//        BASE_URL = mRemoteConfig.getString("base_url");
+
 
 
         holder.name.setText(items.get(position).name);
@@ -109,7 +124,8 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 editor.putString("timezone", items.get(holder.getAdapterPosition()).regionCountry.timezone).apply();
                 editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
 //                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, context);
-                Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+                String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+                Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
                 StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
                 Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());

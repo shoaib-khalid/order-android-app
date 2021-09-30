@@ -2,18 +2,6 @@
 <defaultsMap>
     <entry>
         <key>base_url</key>
-        <value>https://api.symplified.it/</value>
-    </entry>
-    <entry>
-        <key>user_service_url</key>
-        <value>user-service/v1/clients/</value>
-    </entry>
-    <entry>
-        <key>product_service_url</key>
-        <value>https://api.symplified.it/product-service/v1/</value>
-    </entry>
-    <entry>
-        <key>order_service_url</key>
-        <value>https://api.symplified.it/order-service/v1/</value>
+        <value>https://api.symplified.biz/</value>
     </entry>
 </defaultsMap>

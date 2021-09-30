@@ -4,8 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +25,11 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.App;
@@ -36,6 +42,7 @@ import com.symplified.order.models.OrderDetailsModel;
 import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderResponse;
+import com.symplified.order.services.AlertService;
 import com.symplified.order.services.DateParser;
 
 import java.io.IOException;
@@ -76,6 +83,8 @@ public class PlaceholderFragment extends Fragment {
     private RecyclerView recyclerView;
     private String section;
     private Dialog progressDialog;
+//    private FirebaseRemoteConfig mRemoteConfig;
+    String BASE_URL;
 
     public static PlaceholderFragment newInstance(String type) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -88,15 +97,27 @@ public class PlaceholderFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().build();
+//        mRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
+//
+//        mRemoteConfig.fetchAndActivate();
+//        BASE_URL = mRemoteConfig.getString("base_url");
+//        Log.e("TAG", "BASE_URL: "+BASE_URL, new Error() );
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
-
         progressDialog = new Dialog(getContext());
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
 
-        retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.ORDER_SERVICE_URL)
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        storeId = sharedPreferences.getString("storeId", null);
+
+        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+
+        retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         orders = new ArrayList<>();
@@ -106,8 +127,7 @@ public class PlaceholderFragment extends Fragment {
 
         orderApiService = retrofit.create(OrderApi.class);
 
-        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        storeId = sharedPreferences.getString("storeId", null);
+
 
 //        String storeId = "McD";
         Log.e("TAG", "onCreate: "+"storeId : "+storeId, new Error() );
@@ -133,6 +153,7 @@ public class PlaceholderFragment extends Fragment {
 
         pageViewModel.setIndex(0);
 
+
         switch (section){
             case "processed":
             {
@@ -148,6 +169,9 @@ public class PlaceholderFragment extends Fragment {
             case "new" :{
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.getNewOrders(headers, storeId);
+                if(AlertService.isPlaying()){
+                    getActivity().stopService(new Intent(getContext(), AlertService.class));
+                }
                 NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancelAll();
                 break;
@@ -171,8 +195,6 @@ public class PlaceholderFragment extends Fragment {
         DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(mDividerItemDecoration);
-
-
 
 //        retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
 //                .addConverterFactory(GsonConverterFactory.create()).build();
@@ -249,7 +271,6 @@ public class PlaceholderFragment extends Fragment {
         return root;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -283,7 +304,15 @@ public class PlaceholderFragment extends Fragment {
                 progressDialog.hide();
             }
         });
+
+        if(AlertService.isPlaying()){
+            getActivity().stopService(new Intent(getContext(), AlertService.class));
+        }
+        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancelAll();
+
     }
+
 
     @Override
     public void onDestroyView() {

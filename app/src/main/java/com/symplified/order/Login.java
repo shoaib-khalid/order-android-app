@@ -17,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -48,18 +50,24 @@ public class Login extends AppCompatActivity {
     private ImageView header;
     private Dialog progressDialog;
     private FirebaseRemoteConfig mRemoteConfig;
-    private String BASE_URL,USER_SERVICE_URL;
+    private String testUser,testPass;
+    private String BASE_URL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTheme(R.style.Theme_SymplifiedOrderUpdate);
         mRemoteConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(3600).build();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
         mRemoteConfig.setConfigSettingsAsync(configSettings);
         mRemoteConfig.setDefaultsAsync(R.xml.defaults);
 
+        mRemoteConfig.fetch(0);
+        mRemoteConfig.activate();
         BASE_URL = mRemoteConfig.getString("base_url");
-        USER_SERVICE_URL = mRemoteConfig.getString("user_service_url");
+
+        testUser = mRemoteConfig.getString("test_user");
+        testPass = mRemoteConfig.getString("test_pass");
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
@@ -70,6 +78,8 @@ public class Login extends AppCompatActivity {
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
 
+//        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+
         Log.d("TAG", "onCreate: "+sharedPreferences.getAll().toString());
 
         login = findViewById(R.id.btn_login);
@@ -77,22 +87,30 @@ public class Login extends AppCompatActivity {
         password = findViewById(R.id.tv_password);
         header = findViewById(R.id.iv_header);
 
-        header.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(App.BASE_URL.contains("symplified.it")
-                        && App.ORDER_SERVICE_URL.contains("symplified.it")
-                        && App.PRODUCT_SERVICE_URL.contains("symplified.it")){
-                    Toast.makeText(Login.this, "Staging Version", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+//        header.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(App.BASE_URL.contains("symplified.it")
+//                        && App.ORDER_SERVICE_URL.contains("symplified.it")
+//                        && App.PRODUCT_SERVICE_URL.contains("symplified.it")){
+//                    Toast.makeText(Login.this, "Staging Version", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
 
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).client(new OkHttpClient()).baseUrl(App.BASE_URL+App.USER_SERVICE_URL)
+
+                if(email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass))
+                {
+                    BASE_URL = "https://api.symplified.it/";
+                    sharedPreferences.edit().putBoolean("isStaging", true).apply();
+                    Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
+                }
+
+                Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).client(new OkHttpClient()).baseUrl(BASE_URL+App.USER_SERVICE_URL)
                         .addConverterFactory(GsonConverterFactory.create()).build();
 
                 LoginApi loginApiService = retrofit.create(LoginApi.class);
@@ -122,6 +140,7 @@ public class Login extends AppCompatActivity {
                                 editor.putString("expiry", res.session.expiry.toGMTString());
                                 editor.putInt("isLoggedIn", 1);
                                 editor.apply();
+                                sharedPreferences.edit().putString("base_url", BASE_URL).apply();
                             }
 //                            Toast.makeText(getApplicationContext(), "ownerID : "+sharedPreferences.getString("ownerId", null), Toast.LENGTH_SHORT).show();
                             progressDialog.hide();

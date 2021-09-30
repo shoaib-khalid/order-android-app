@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
@@ -26,6 +27,7 @@ import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.models.asset.Asset;
+import com.symplified.order.models.order.Order;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.ui.main.SectionsPagerAdapter;
@@ -67,11 +69,15 @@ public class Orders extends AppCompatActivity {
         viewPager.setOffscreenPageLimit(2);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
+
         stopService(new Intent(this, AlertService.class));
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+
+        if(sharedPreferences.getBoolean("isStaging", false))
+            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setOnClickListener(new View.OnClickListener() {
@@ -113,9 +119,9 @@ public class Orders extends AppCompatActivity {
             ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
         }
 
-        if(isServiceRunning()){
-            stopService(new Intent(this, AlertService.class));
-        }
+//        if(AlertService.isPlaying()){
+//            stopService(new Intent(this, AlertService.class));
+//        }
 
 //        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 //        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
@@ -156,16 +162,6 @@ public class Orders extends AppCompatActivity {
                 this.finishActivity(4);
                 this.finish();
             }
-    }
-
-    public boolean isServiceRunning(){
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (AlertService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

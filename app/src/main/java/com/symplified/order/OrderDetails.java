@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 
@@ -24,8 +26,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.symplified.order.adapters.ItemsAdapter;
@@ -79,14 +86,31 @@ public class OrderDetails extends AppCompatActivity {
     private Toolbar toolbar;
     private Dialog progressDialog;
     public static String TAG = "ProcessOrder";
+//    private FirebaseRemoteConfig mRemoteConfig;
+    private String BASE_URL;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+
+        Log.e("getAllValues", "onCreate: "+ sharedPreferences.getAll(), new Error() );
+        if(sharedPreferences.getBoolean("isStaging", false))
+            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
         setContentView(R.layout.activity_order_details);
         setResult(RESULT_CANCELED, new Intent().putExtra("finish", 0));
+
+//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().build();
+//        mRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
+//        mRemoteConfig.fetchAndActivate();
+//        BASE_URL = mRemoteConfig.getString("base_url");
+
+
         progressDialog = new Dialog(this);
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
@@ -121,7 +145,8 @@ public class OrderDetails extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+
+        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setOnClickListener(new View.OnClickListener() {
@@ -237,7 +262,7 @@ public class OrderDetails extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);

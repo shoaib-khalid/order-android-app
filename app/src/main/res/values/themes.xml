@@ -23,4 +23,20 @@
     <style name="Theme.SymplifiedOrderUpdate.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.SymplifiedOrderUpdate.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.SymplifiedOrderUpdate.Test" parent="Theme.MaterialComponents.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/sf_b_700</item>
+        <item name="colorPrimaryVariant">@color/sf_b_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:textColor">@color/sf_b_800</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/sf_b_700</item>
+        <item name="colorSecondaryVariant">@color/sf_b_800</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/sf_300</item>
+
+
+
+    </style>
 </resources>

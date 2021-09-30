@@ -18,16 +18,16 @@ import java.util.Map;
 
 public class App extends Application {
 
-    public static final String BASE_URL = "https://api.symplified.it/";
+    public static String BASE_URL = "https://api.symplified.biz/";
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
-    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.it/product-service/v1/";
-    public static final String ORDER_SERVICE_URL = "https://api.symplified.it/order-service/v1/";
+    public static final String PRODUCT_SERVICE_URL = "product-service/v1/";
+    public static final String ORDER_SERVICE_URL = "order-service/v1/";
 
-
-//    public static final String BASE_URL;
-//    public static final  String USER_SERVICE_URL;
-//    public static final String PRODUCT_SERVICE_URL;
-//    public static final  String ORDER_SERVICE_URL;
+// public static final String BASE_URL = "https://api.symplified.biz/";
+//    public static final String USER_SERVICE_URL = "user-service/v1/clients/";
+//    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.biz/product-service/v1/";
+//    public static final String ORDER_SERVICE_URL = "https://api.symplified.biz/order-service/v1/";
+//
 
 
     public static final String SESSION_DETAILS_TITLE = "session";

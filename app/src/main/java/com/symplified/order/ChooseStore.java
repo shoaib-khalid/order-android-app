@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -24,8 +25,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.gson.Gson;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
@@ -56,8 +61,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ChooseStore extends AppCompatActivity {
 
+    private  String BASE_URL ;
     private Toolbar toolbar;
     private Dialog progressDialog;
+//    private FirebaseRemoteConfig mRemoteConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +73,13 @@ public class ChooseStore extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.store_recycler);
         TextView chooseStore = findViewById(R.id.choose_store);
         TextView noStore = findViewById(R.id.no_store);
+
+//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
+//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().build();
+//        mRemoteConfig.setConfigSettingsAsync(configSettings);
+//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
+//        mRemoteConfig.fetchAndActivate();
+//        BASE_URL = mRemoteConfig.getString("base_url");
 
         progressDialog = new Dialog(this);
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -77,7 +91,9 @@ public class ChooseStore extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         sharedPreferences.edit().remove("logoImage").apply();
-
+        if(sharedPreferences.getBoolean("isStaging", false))
+            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
+        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,7 +121,7 @@ public class ChooseStore extends AppCompatActivity {
         });
 
         ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
         Map<String, String> headers = new HashMap<>();
@@ -116,7 +132,7 @@ public class ChooseStore extends AppCompatActivity {
 
 
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(App.PRODUCT_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         StoreApi storeApiService = retrofit.create(StoreApi.class);
