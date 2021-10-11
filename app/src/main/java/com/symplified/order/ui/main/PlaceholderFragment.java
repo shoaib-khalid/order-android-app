@@ -97,14 +97,7 @@ public class PlaceholderFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().build();
-//        mRemoteConfig.setConfigSettingsAsync(configSettings);
-//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
-//
-//        mRemoteConfig.fetchAndActivate();
-//        BASE_URL = mRemoteConfig.getString("base_url");
-//        Log.e("TAG", "BASE_URL: "+BASE_URL, new Error() );
+
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
         progressDialog = new Dialog(getContext());
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -133,22 +126,12 @@ public class PlaceholderFragment extends Fragment {
         Log.e("TAG", "onCreate: "+"storeId : "+storeId, new Error() );
 
 
-
-        if(null == storeId)
-        {
-//            Toast.makeText(this.getActivity(), "storeId id is null", Toast.LENGTH_SHORT).show();
-            Log.d("Store-id", "onCreate: store id is null");
-        }
-
-//        orderResponse = orderApiService.getNewOrders(headers, storeId);
-
-
         section = null;
         if (getArguments() != null) {
             section = getArguments().getString(ARG_SECTION);
         }
 
-        if(section == null)
+//        if(section == null)
 //            Toast.makeText(getContext(), "Section is null", Toast.LENGTH_SHORT).show();
 
         pageViewModel.setIndex(0);

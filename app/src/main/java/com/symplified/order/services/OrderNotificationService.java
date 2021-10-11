@@ -44,7 +44,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 .setContentTitle(remoteMessage.getData().get("title"))
                 .setContentText(remoteMessage.getData().get("body"))
                 .setAutoCancel(false)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setCategory(NotificationCompat.CATEGORY_ALARM)
                 .setColor(Color.CYAN)
                 .build();

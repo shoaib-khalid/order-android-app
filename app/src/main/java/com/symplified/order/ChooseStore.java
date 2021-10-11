@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -16,6 +18,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -44,12 +47,14 @@ import com.symplified.order.services.DownloadImageTask;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -163,9 +168,15 @@ public class ChooseStore extends AppCompatActivity {
                         noStore.setVisibility(View.VISIBLE);
                     }
                     else{
+                        if(response.body().data.content.size() == 1){
+                            progressDialog.hide();
+                            setStoreData(getApplicationContext(), response.body().data.content);
+                        }
+                        else{
                             StoreAdapter storeAdapter = new StoreAdapter(response.body().data.content, getApplicationContext(), progressDialog);
                             recyclerView.setLayoutManager(new LinearLayoutManager(ChooseStore.this));
                             recyclerView.setAdapter(storeAdapter);
+                        }
                     }
                 }
                 progressDialog.hide();
@@ -182,5 +193,66 @@ public class ChooseStore extends AppCompatActivity {
 //        StoreAdapter storeAdapter = new StoreAdapter(storeList.stores);
 //        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 //        recyclerView.setAdapter(storeAdapter);
+    }
+
+    public void setStoreData(Context context, List<Store> stores){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("timezone", stores.get(0).regionCountry.timezone).apply();
+        editor.putString("storeId", stores.get(0).id).apply();
+
+        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+
+        Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+        Intent intent = new Intent (context, Orders.class);
+
+        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+
+                    if(responseBody.data !=null){
+                        Bitmap bitmap  = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
+                        if(bitmap != null) {
+                            Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
+//                                String bitmap64 = ImageUtil.encodeTobase64(bitmap);
+//                                Log.e("TAG", "bitmap: "+ bitmap64, new Error() );
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+//                                intent.putExtra("logo", byteArrayOutputStream.toByteArray());
+                            String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+                            editor.putString("logoImage", encodedImage);
+                            editor.apply();
+                        }
+                    }
+
+                    FirebaseHelper.initializeFirebase(stores.get(0).id, context);
+                    Log.e("TAG", "preferences: " + sharedPreferences.getAll(), new Error());
+//                            Toast.makeText(view.getContext(), "Store id : " + (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
+                    progressDialog.hide();
+                    startActivity(intent);
+                    finish();
+
+
+                } catch (IOException | ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                progressDialog.hide();
+
+            }
+        });
+
+
     }
 }

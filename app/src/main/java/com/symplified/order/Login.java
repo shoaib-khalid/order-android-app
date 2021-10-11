@@ -69,6 +69,7 @@ public class Login extends AppCompatActivity {
         testUser = mRemoteConfig.getString("test_user");
         testPass = mRemoteConfig.getString("test_pass");
 
+
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
 //        getSupportActionBar().hide();
@@ -107,6 +108,7 @@ public class Login extends AppCompatActivity {
                 {
                     BASE_URL = "https://api.symplified.it/";
                     sharedPreferences.edit().putBoolean("isStaging", true).apply();
+                    sharedPreferences.edit().putString("base_url", BASE_URL).apply();
                     Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
                 }
 
