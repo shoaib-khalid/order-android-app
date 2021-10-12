@@ -1,5 +1,6 @@
 package com.symplified.order;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Dialog;
@@ -17,6 +18,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -33,6 +35,9 @@ import com.symplified.order.services.AlertService;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -59,16 +64,37 @@ public class Login extends AppCompatActivity {
         setTheme(R.style.Theme_SymplifiedOrderUpdate);
         mRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
+
         mRemoteConfig.setConfigSettingsAsync(configSettings);
+
+
+//        Map<String, Object> defaults = new HashMap<>();
+//        defaults.put("base_url", App.BASE_URL);
+//        defaults.put("test_user", "qa_user");
+//        defaults.put("test_pass", "qa@kalsym");
+
         mRemoteConfig.setDefaultsAsync(R.xml.defaults);
 
         mRemoteConfig.fetch(0);
         mRemoteConfig.activate();
         BASE_URL = mRemoteConfig.getString("base_url");
 
+        if(BASE_URL.equals("")){
+            BASE_URL = App.BASE_URL;
+        }
+
+        Log.e("TAG", "BASE_URL : "+ BASE_URL.length(), new Error() );
+
         testUser = mRemoteConfig.getString("test_user");
         testPass = mRemoteConfig.getString("test_pass");
 
+        if(testUser.equals("") || testPass.equals(""))
+        {
+            testUser = "qa_user";
+            testPass = "qa@kalsym";
+        }
+
+        Log.e("TAG", "test credentials  : user : "+ testUser+" : password : "+testPass, new Error() );
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
@@ -109,6 +135,7 @@ public class Login extends AppCompatActivity {
                     BASE_URL = "https://api.symplified.it/";
                     sharedPreferences.edit().putBoolean("isStaging", true).apply();
                     sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+                    Log.e("TAG", "BASE_URL : "+ BASE_URL, new Error() );
                     Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
                 }
 
