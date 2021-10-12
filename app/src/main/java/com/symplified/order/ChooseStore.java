@@ -133,6 +133,7 @@ public class ChooseStore extends AppCompatActivity {
             public void onFailure(Call<StoreResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
                 progressDialog.hide();
+
             }
         });
     }
