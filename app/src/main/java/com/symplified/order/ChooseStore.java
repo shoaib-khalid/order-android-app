@@ -104,7 +104,8 @@ public class ChooseStore extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-        progressDialog.show();
+//        progressDialog.show();
+        /*
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
@@ -134,7 +135,7 @@ public class ChooseStore extends AppCompatActivity {
                 Log.e("TAG", "onFailure: ", t.getCause());
                 progressDialog.hide();
             }
-        });
+        }); */
     }
 
     public void setStoreData(Context context, List<Store> stores) {

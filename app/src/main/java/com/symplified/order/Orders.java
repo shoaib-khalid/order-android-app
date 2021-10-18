@@ -9,6 +9,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -41,6 +44,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -74,23 +78,31 @@ public class Orders extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         if(sharedPreferences.getBoolean("isStaging", false))
             setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
+        home.setImageDrawable(getDrawable(R.drawable.ic_home_black_24dp));
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(4, new Intent().putExtra("finish", 1));
-                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-                sharedPreferences.edit().remove("storeId").apply();
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+//                setResult(4, new Intent().putExtra("finish", 1));
+//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+//                sharedPreferences.edit().remove("storeId").apply();
+//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(intent);
+//                finish();
+                getSupportFragmentManager().getFragments().get(0).onResume();
+//                List<Fragment> fragments = getSupportFragmentManager().getFragments();
+//                for(Fragment fragment : fragments){
+//                    getSupportFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
+//                    fragment.onStart();
+//                }
             }
         });
 
@@ -99,7 +111,19 @@ public class Orders extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), Login.class);
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+                String storeIdList = sharedPreferences.getString("storeIdList", null);
+                if(storeIdList != null )
+                {
+                    for(String storeId : storeIdList.split(" ")){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+                            }
+                        }).start();
+                    }
+                }
                 sharedPreferences.edit().clear().apply();
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
@@ -113,11 +137,11 @@ public class Orders extends AppCompatActivity {
 
 //        Bitmap s = (Bitmap) getIntent().getParcelableExtra("logo");
 //        Log.e("TAG", "logoBitmap: " + s, new Error() );
-        Log.e("TAG", "has logo: " +sharedPreferences.getString("logoImage", null), new Error());
-        String encodedImage = sharedPreferences.getString("logoImage", null);
-        if(getIntent().hasExtra("logo") || encodedImage != null){
-            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
-        }
+//        Log.e("TAG", "has logo: " +sharedPreferences.getString("logoImage", null), new Error());
+//        String encodedImage = sharedPreferences.getString("logoImage", null);
+//        if(getIntent().hasExtra("logo") || encodedImage != null){
+//            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+//        }
 
 //        if(AlertService.isPlaying()){
 //            stopService(new Intent(this, AlertService.class));

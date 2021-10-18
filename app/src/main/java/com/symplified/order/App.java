@@ -15,6 +15,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class App extends Application {
 
@@ -22,7 +24,7 @@ public class App extends Application {
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
     public static final String PRODUCT_SERVICE_URL = "product-service/v1/";
     public static final String ORDER_SERVICE_URL = "order-service/v1/";
-
+    public static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 // public static final String BASE_URL = "https://api.symplified.biz/";
 //    public static final String USER_SERVICE_URL = "user-service/v1/clients/";
 //    public static final String PRODUCT_SERVICE_URL = "https://api.symplified.biz/product-service/v1/";

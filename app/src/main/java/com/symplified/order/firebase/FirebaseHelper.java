@@ -35,11 +35,12 @@ public class FirebaseHelper {
             });
 
             FirebaseMessaging.getInstance().subscribeToTopic(storeId);
+            Log.i("SUBS", "initializeFirebase: subscribed to topic "+ storeId);
 
             if(!isServiceRunning(context))
             {
                 Log.e("TAG", "onCreate: Service not running ", new Error());
-                context.startService(new Intent(context, AlertService.class).putExtra("first", 1));
+//                context.startService(new Intent(context, AlertService.class).putExtra("first", 1));
             }
         }catch(Exception ex){
             Log.e("FirebaseHelper",ex.toString());

@@ -60,6 +60,7 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -81,7 +82,7 @@ public class OrderDetails extends AppCompatActivity {
 
     private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
     private Button process, print;
-    private ImageView pickup;
+    private ImageView pickup, storeLogo;
     private String section;
     private Toolbar toolbar;
     private Dialog progressDialog;
@@ -140,6 +141,7 @@ public class OrderDetails extends AppCompatActivity {
         pickup = findViewById(R.id.address_is_pickup);
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
+        storeLogo = findViewById(R.id.storeLogoDetails);
         print.setVisibility(View.GONE);
 
         toolbar = findViewById(R.id.toolbar);
@@ -148,17 +150,22 @@ public class OrderDetails extends AppCompatActivity {
 
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
+        String encodedImage = sharedPreferences.getString("logoImage-"+order.storeId, null);
+
+        if(encodedImage != null)
+            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-                sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+//                setResult(RESULT_OK, new Intent().putExtra("finish", 1));
+//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+//                sharedPreferences.edit().remove("storeId").apply();
+////                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+//                startActivity(intent);
                 finish();
             }
         });
@@ -169,7 +176,19 @@ public class OrderDetails extends AppCompatActivity {
             public void onClick(View view) {
                 setResult(RESULT_OK, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), Login.class);
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+                String storeIdList = sharedPreferences.getString("storeIdList", null);
+                if(storeIdList != null )
+                {
+                    for(String storeId : storeIdList.split(" ")){
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+                            }
+                        }).start();
+                    }
+                }
                 sharedPreferences.edit().clear().apply();
                 startActivity(intent);
                 finish();
@@ -181,10 +200,10 @@ public class OrderDetails extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-        String encodedImage = sharedPreferences.getString("logoImage", null);
-        if(getIntent().hasExtra("logo") || encodedImage != null){
-            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
-        }
+//        String encodedImage = sharedPreferences.getString("logoImage", null);
+//        if(getIntent().hasExtra("logo") || encodedImage != null){
+//            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+//        }
 
 
 
@@ -219,14 +238,17 @@ public class OrderDetails extends AppCompatActivity {
         else
             pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
 
+        Log.d("GETALLVALUES", "onCreate: "+sharedPreferences.getAll().toString());
+
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZone = sharedPreferences.getString("timezone", null);
+        String currentTimezone = Arrays.asList(timeZone.split(" ")).get(0);
 //        if(timeZone != null)
 //            dtf.setTimeZone(TimeZone.getTimeZone(timeZone));
         Log.e("timeZoneCheck", "TimeZone:  "+timeZone, new Error() );
         Log.e("timeZoneCheck", "Received date:  "+order.created, new Error() );
-        TimeZone timezone = TimeZone.getTimeZone(timeZone);
+        TimeZone timezone = TimeZone.getTimeZone(currentTimezone);
         Calendar calendar = new GregorianCalendar();
 //        String date = null;
         try {

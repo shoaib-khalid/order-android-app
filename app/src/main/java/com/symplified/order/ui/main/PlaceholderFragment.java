@@ -108,6 +108,13 @@ public class PlaceholderFragment extends Fragment {
         SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         storeId = sharedPreferences.getString("storeId", null);
 
+        String clientId = sharedPreferences.getString("ownerId", null);
+
+        if(clientId == null)
+            Toast.makeText(getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
+
+        Log.e("CHECKCLIENTID", "onCreate: clientId = " + clientId, new Error() );
+
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
         retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
@@ -141,17 +148,17 @@ public class PlaceholderFragment extends Fragment {
             case "processed":
             {
                 pageViewModel.setIndex(1);
-                orderResponse = orderApiService.getProcessedOrders(headers, storeId);
+                orderResponse = orderApiService.getProcessedOrdersByClientId(headers, clientId);
                 break;
             }
             case "sent":{
                 pageViewModel.setIndex(2);
-                orderResponse = orderApiService.getSentOrders(headers, storeId);
+                orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId);
                 break;
             }
             case "new" :{
                 pageViewModel.setIndex(0);
-                orderResponse = orderApiService.getNewOrders(headers, storeId);
+                orderResponse = orderApiService.getNewOrdersByClientId(headers, clientId);
                 if(AlertService.isPlaying()){
                     getActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
@@ -258,6 +265,7 @@ public class PlaceholderFragment extends Fragment {
     public void onResume() {
         super.onResume();
         progressDialog.show();
+        getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
         orderResponse.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
