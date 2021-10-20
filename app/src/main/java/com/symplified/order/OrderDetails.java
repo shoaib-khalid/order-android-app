@@ -80,7 +80,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class OrderDetails extends AppCompatActivity {
     private RecyclerView recyclerView;
 
-    private TextView dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
+    private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
     private Button process, print;
     private ImageView pickup, storeLogo;
     private String section;
@@ -120,6 +120,8 @@ public class OrderDetails extends AppCompatActivity {
 
         Bundle data = getIntent().getExtras();
         Order order = (Order) data.getSerializable("selectedOrder");
+
+        Log.e(TAG, "onCreate: "+order.toString(), new Error());
         section = null;
 
         section = getIntent().getStringExtra("section");
@@ -144,6 +146,8 @@ public class OrderDetails extends AppCompatActivity {
         storeLogo = findViewById(R.id.storeLogoDetails);
         print.setVisibility(View.GONE);
 
+        storeLogoText = findViewById(R.id.storeLogoDetailsText);
+
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -152,8 +156,22 @@ public class OrderDetails extends AppCompatActivity {
 
         String encodedImage = sharedPreferences.getString("logoImage-"+order.storeId, null);
 
-        if(encodedImage != null)
-            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+        String storeIdList = sharedPreferences.getString("storeIdList", null);
+
+       if(storeIdList.split(" ").length-1 > 1)
+       {
+           if(encodedImage != null)
+               ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
+           else{
+               storeLogo.setVisibility(View.GONE);
+               storeLogoText.setVisibility(View.VISIBLE);
+               storeLogoText.setText(sharedPreferences.getString(order.storeId+"-name", null));
+           }
+       }
+       else{
+           storeLogo.setVisibility(View.GONE);
+           storeLogoText.setVisibility(View.GONE);
+       }
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setOnClickListener(new View.OnClickListener() {
@@ -242,11 +260,13 @@ public class OrderDetails extends AppCompatActivity {
 
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String timeZone = sharedPreferences.getString("timezone", null);
-        String currentTimezone = Arrays.asList(timeZone.split(" ")).get(0);
+        String timeZones = sharedPreferences.getString("timezone", null);
+//        String storeIdList = sharedPreferences.getString("storeIdList", null);
+        int  indexOfStore = Arrays.asList(storeIdList.split(" ")).indexOf(order.storeId);
+        String currentTimezone = Arrays.asList(timeZones.split(" ")).get(indexOfStore);
 //        if(timeZone != null)
 //            dtf.setTimeZone(TimeZone.getTimeZone(timeZone));
-        Log.e("timeZoneCheck", "TimeZone:  "+timeZone, new Error() );
+        Log.e("timeZoneCheck", "TimeZone:  "+timeZones, new Error() );
         Log.e("timeZoneCheck", "Received date:  "+order.created, new Error() );
         TimeZone timezone = TimeZone.getTimeZone(currentTimezone);
         Calendar calendar = new GregorianCalendar();
@@ -333,6 +353,7 @@ public class OrderDetails extends AppCompatActivity {
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        Log.e(TAG, "request body : "+ call.request().toString(), new Error());
                         if(response.isSuccessful()){
                             try {
                                 Log.i(TAG, "request body : "+ call.request().body());
@@ -340,7 +361,9 @@ public class OrderDetails extends AppCompatActivity {
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
                                 Log.i(TAG, "response body : "+ currentOrder.data.toString());
                                 if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
+                                {
                                     process.setText("Pickup");
+                                }
                                 else
                                     process.setText("Failed");
                             } catch (IOException e) {
@@ -391,6 +414,8 @@ public class OrderDetails extends AppCompatActivity {
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                        Log.i(TAG, "request body : "+ call.request().body());
                         if(response.isSuccessful()){
 
                             try {

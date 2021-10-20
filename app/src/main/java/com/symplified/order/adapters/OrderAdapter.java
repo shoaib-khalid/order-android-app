@@ -8,12 +8,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,6 +53,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final ImageView pickup;
         private final Button process;
         private final ImageView storeLogo;
+        private final TextView storeLogoText;
 
         public ViewHolder(View view) {
             super(view);
@@ -64,6 +67,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             storeLogo = (ImageView) view.findViewById(R.id.storeLogoOrder);
             pickup = view.findViewById(R.id.order_pickup_icon);
             process = view.findViewById(R.id.card_btn_process);
+            storeLogoText = (TextView) view.findViewById(R.id.storeLogoOrderText);
         }
 
 
@@ -134,9 +138,27 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 //        }
 //        else{
             String encodedStoreLogo = sharedPreferences.getString("logoImage-"+orders.get(holder.getAdapterPosition()).storeId, null);
-            if(encodedStoreLogo != null)
-                ImageUtil.decodeAndSetImage(holder.storeLogo, encodedStoreLogo);
+
+            if(storeIdList.split(" ").length-1 > 1)
+            {
+
+                if(sharedPreferences.contains("logoImage-"+orders.get(holder.getAdapterPosition()).storeId)
+                        && encodedStoreLogo != null)
+                {
+                    ImageUtil.decodeAndSetImage(holder.storeLogo, encodedStoreLogo);
+                }
+                else{
+                    holder.storeLogo.setVisibility(View.GONE);
+                    holder.storeLogoText.setVisibility(View.VISIBLE);
+                    String storeName = sharedPreferences.getString(orders.get(holder.getAdapterPosition()).storeId+"-name", null);
+                    holder.storeLogoText.setText(storeName);
+                }
+
+            }
+
 //        }
+
+        Log.e("TAG", "onBindViewHolder: "+ sharedPreferences.getString(orders.get(holder.getAdapterPosition()).storeId+"-name", null), new Error());
 
 
         holder.name.setText(orders.get(position).orderShipmentDetail.receiverName);
@@ -163,7 +185,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 ////            holder.process.setEnabled(false);
 //        }
 
-        holder.process.setText("Order Details");
+        holder.process.setText("Details");
 
         holder.process.setOnClickListener(new View.OnClickListener() {
             @Override

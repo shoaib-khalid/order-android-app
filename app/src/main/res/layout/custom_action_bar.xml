@@ -34,10 +34,9 @@
                     android:id="@+id/app_bar_logo"
                     android:layout_width="100dp"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="5dp"
-                    android:src="@drawable/header"
                     android:layout_centerInParent="true"
-                    />
+                    android:paddingVertical="5dp"
+                    android:src="@drawable/sym_white_cloud" />
 
                 <ImageView
                     android:id="@+id/app_bar_logout"

@@ -201,7 +201,7 @@ public class Login extends AppCompatActivity{
                                 editor.putInt("isLoggedIn", 1);
                                 editor.apply();
                                 sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-                                getStoresAndRegister();
+                                getStoresAndRegister(sharedPreferences);
                                 Log.e("getAllStore", "onResponse: " + stores, new Error() );
 //                                Toast.makeText(getApplicationContext(), ""+stores.size(), Toast.LENGTH_SHORT).show();
 
@@ -252,9 +252,9 @@ public class Login extends AppCompatActivity{
     }
 
 
-    private void setStoreData(Context context, List<Store> items) {
+    private void setStoreData(Context context, List<Store> items, SharedPreferences sharedPreferences) {
 
-            SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+//            SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
             StringBuilder timeZoneList = new StringBuilder();
             StringBuilder storeIdList = new StringBuilder();
@@ -262,6 +262,7 @@ public class Login extends AppCompatActivity{
             {
                 timeZoneList.append(store.regionCountry.timezone).append(" ");
                 storeIdList.append(store.id).append(" ");
+                sharedPreferences.edit().putString(store.id+"-name", store.name).apply();
             }
             editor.putString("storeId", storeIdList.toString().split(" ")[0]).apply();
             editor.putString("timezone", timeZoneList.toString()).apply();
@@ -304,7 +305,7 @@ public class Login extends AppCompatActivity{
 
     }
 
-    private void getStoresAndRegister() {
+    private void getStoresAndRegister(SharedPreferences sharedPreferences) {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
@@ -313,7 +314,7 @@ public class Login extends AppCompatActivity{
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         StoreApi storeApiService = retrofit.create(StoreApi.class);
-        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+//        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", null);
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
@@ -327,7 +328,7 @@ public class Login extends AppCompatActivity{
 //                    Toast.makeText(getApplicationContext(), "List items : "+ response.body().data.content.size(), Toast.LENGTH_SHORT).show();
                     stores = response.body().data.content;
                     subscribeStores(stores, getApplicationContext());
-                    setStoreData(getApplicationContext(),stores);
+                    setStoreData(getApplicationContext(),stores, sharedPreferences);
                     downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(),clientId);
                     Log.e("getMYSTORES", "onResponse: " + stores, new Error());
                 }
