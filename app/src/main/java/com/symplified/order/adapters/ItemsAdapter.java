@@ -59,7 +59,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View listItem= layoutInflater.inflate(R.layout.order_item, parent, false);
-//        Log.e("TAG", "onCreateViewHolder: size = "+getItemCount(),new Error() );
         return new ViewHolder(listItem);
     }
 

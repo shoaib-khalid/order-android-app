@@ -40,17 +40,4 @@ public class DownloadImageTask extends AsyncTask<String,Void, Bitmap> {
         }
         return logo;
     }
-
-    /*
-        onPostExecute(Result result)
-            Runs on the UI thread after doInBackground(Params...).
-     */
-//    protected void onPostExecute(Bitmap result){
-//        imageView.setImageBitmap(result);
-//    }
-
-//    protected String onPostExecute(Bitmap result, boolean flag){
-//        logoUrl = ImageUtil.encodeTobase64(result);
-//        return logoUrl;
-//    }
 }

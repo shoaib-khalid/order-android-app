@@ -26,7 +26,6 @@ public class FirebaseHelper {
                     Log.w("TAG", "Fetching FCM registration token failed", task.getException());
                     return;
                 }
-
                 // Get new FCM registration token
                 String token = task.getResult();
 

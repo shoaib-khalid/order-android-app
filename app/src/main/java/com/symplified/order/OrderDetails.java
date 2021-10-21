@@ -87,7 +87,6 @@ public class OrderDetails extends AppCompatActivity {
     private Toolbar toolbar;
     private Dialog progressDialog;
     public static String TAG = "ProcessOrder";
-//    private FirebaseRemoteConfig mRemoteConfig;
     private String BASE_URL;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -104,14 +103,6 @@ public class OrderDetails extends AppCompatActivity {
         setContentView(R.layout.activity_order_details);
         setResult(RESULT_CANCELED, new Intent().putExtra("finish", 0));
 
-//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().build();
-//        mRemoteConfig.setConfigSettingsAsync(configSettings);
-//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
-//        mRemoteConfig.fetchAndActivate();
-//        BASE_URL = mRemoteConfig.getString("base_url");
-
-
         progressDialog = new Dialog(this);
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
@@ -121,7 +112,7 @@ public class OrderDetails extends AppCompatActivity {
         Bundle data = getIntent().getExtras();
         Order order = (Order) data.getSerializable("selectedOrder");
 
-        Log.e(TAG, "onCreate: "+order.toString(), new Error());
+        Log.i(TAG, "onCreate: "+order.toString());
         section = null;
 
         section = getIntent().getStringExtra("section");
@@ -150,7 +141,6 @@ public class OrderDetails extends AppCompatActivity {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
 
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
@@ -194,7 +184,6 @@ public class OrderDetails extends AppCompatActivity {
             public void onClick(View view) {
                 setResult(RESULT_OK, new Intent().putExtra("finish", 1));
                 Intent intent = new Intent(getApplicationContext(), Login.class);
-//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 String storeIdList = sharedPreferences.getString("storeIdList", null);
                 if(storeIdList != null )
                 {
@@ -218,38 +207,6 @@ public class OrderDetails extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-//        String encodedImage = sharedPreferences.getString("logoImage", null);
-//        if(getIntent().hasExtra("logo") || encodedImage != null){
-//            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
-//        }
-
-
-
-//        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
-
-//        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-//
-//        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                if(response.isSuccessful()){
-//                    try {
-//                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-//                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
-//
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//
-//            }
-//        });
-
 
         if(order.orderShipmentDetail.storePickup)
             pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
@@ -261,26 +218,17 @@ public class OrderDetails extends AppCompatActivity {
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZones = sharedPreferences.getString("timezone", null);
-//        String storeIdList = sharedPreferences.getString("storeIdList", null);
         int  indexOfStore = Arrays.asList(storeIdList.split(" ")).indexOf(order.storeId);
         String currentTimezone = Arrays.asList(timeZones.split(" ")).get(indexOfStore);
-//        if(timeZone != null)
-//            dtf.setTimeZone(TimeZone.getTimeZone(timeZone));
-        Log.e("timeZoneCheck", "TimeZone:  "+timeZones, new Error() );
-        Log.e("timeZoneCheck", "Received date:  "+order.created, new Error() );
         TimeZone timezone = TimeZone.getTimeZone(currentTimezone);
         Calendar calendar = new GregorianCalendar();
-//        String date = null;
         try {
-//            date = dtf.format(dtf.parse(order.created));
             calendar.setTime(dtf.parse(order.created));
             calendar.add(Calendar.HOUR_OF_DAY, (timezone.getRawOffset()/3600000));
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-
-        Log.e("timeZoneCheck", "date:  "+(timezone.getOffset(new Date().getTime())/3600000), new Error() );
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss a");
         dateValue.setText(formatter.format(calendar.getTime()));
         addressValue.setText(order.orderShipmentDetail.address);
@@ -311,7 +259,6 @@ public class OrderDetails extends AppCompatActivity {
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
-//        boolean isPickup = getIntent().getBooleanExtra("pickup",false);
         boolean isPickup = order.orderShipmentDetail.storePickup;
         ItemsAdapter itemsAdapter = new ItemsAdapter();
         List<Item> items = new ArrayList<>();
@@ -339,25 +286,20 @@ public class OrderDetails extends AppCompatActivity {
             }
         });
 
-//        Call<ResponseBody> processOrder = storeApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_PREPARED), order.id);
-
 
         if(section.equals("new")) {
             Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.BEING_PREPARED), order.id);
             process.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-//                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
                 progressDialog.show();
                 processOrder.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        Log.e(TAG, "request body : "+ call.request().toString(), new Error());
+                        Log.i(TAG, "request body : "+ call.request().toString());
                         if(response.isSuccessful()){
                             try {
                                 Log.i(TAG, "request body : "+ call.request().body());
-
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
                                 Log.i(TAG, "response body : "+ currentOrder.data.toString());
                                 if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
@@ -393,15 +335,13 @@ public class OrderDetails extends AppCompatActivity {
         }
         else if (section.equals("processed")) {
             Call<ResponseBody> processOrder ;
-//                    = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
-
             if(!isPickup)
                 processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
             else
                 processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.DELIVERED_TO_CUSTOMER), order.id);
 
 
-            Log.e("PICKUPMSG", "onCreate: isPickup :"+isPickup, new Error() );
+//            Log.i("PICKUPMSG", "onCreate: isPickup :"+isPickup, new Error() );
 
             process.setText("Pickup");
 
@@ -423,7 +363,7 @@ public class OrderDetails extends AppCompatActivity {
                                 Log.i(TAG, "request body : "+ call.request().body());
                                 Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
                                 Log.i(TAG, "response body : "+ currentOrder.data.toString());
-                                Log.e("PICKUPMSG", "onResponse: "+currentOrder.data.completionStatus.toString(),new Error() );
+                                Log.i("PICKUPMSG", "onResponse: "+currentOrder.data.completionStatus.toString());
                                 if(currentOrder.data.completionStatus.toString().equals(Status.DELIVERED_TO_CUSTOMER.toString()))
                                     process.setText("Delivered");
 
@@ -432,8 +372,6 @@ public class OrderDetails extends AppCompatActivity {
                                 }
                                 else
                                     process.setText("Failed");
-
-//                                Log.e("TAG", "response code: "+response.code(), new Error() );
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -442,7 +380,7 @@ public class OrderDetails extends AppCompatActivity {
                         }
                         else {
                             try {
-                                Log.e("TAG", "isPickup : "+isPickup+response.errorBody().string(), new Error() );
+                                Log.e("TAG", "isPickup : "+isPickup+" response error body : "+response.errorBody().string(), new Error() );
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -462,58 +400,5 @@ public class OrderDetails extends AppCompatActivity {
         }
         else if(section.equals("sent"))
             process.setVisibility(View.INVISIBLE);
-
-
-        Log.e("TAG", "onCreate: Seciton : "+section, new Error() );
-
-//        process.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//                Toast.makeText(getApplicationContext(), "process clicked", Toast.LENGTH_SHORT).show();
-//                processOrder.clone().enqueue(new Callback<ResponseBody>() {
-//                    @Override
-//                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                        if(response.isSuccessful()){
-//
-//                            try {
-////                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
-//                                Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
-//                                if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
-//                                    process.setText("Being Prepared");
-//
-////                                Log.e("TAG", "response code: "+response.code(), new Error() );
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        else {
-//                            try {
-//                                Log.e("TAG", "onResponse: "+response.errorBody().string(), new Error() );
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                        Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-//            }
-//        });
-
-
-
-
-
-//        recyclerView = findViewById(R.id.order_items);
-////        ItemsAdapter itemsAdapter = new ItemsAdapter(items);
-////        itemsAdapter.notifyDataSetChanged();
-//        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-//        recyclerView.setAdapter(itemsAdapter);
-
     }
 }

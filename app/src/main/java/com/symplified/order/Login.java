@@ -80,8 +80,6 @@ public class Login extends AppCompatActivity{
     private FirebaseRemoteConfig mRemoteConfig;
     private String testUser,testPass;
     private String BASE_URL;
-    public static boolean isLogoImportComplete = false;
-
     private List<Store> stores;
 
     @Override
@@ -95,12 +93,6 @@ public class Login extends AppCompatActivity{
 
         stores = new ArrayList<>();
 
-
-//        Map<String, Object> defaults = new HashMap<>();
-//        defaults.put("base_url", App.BASE_URL);
-//        defaults.put("test_user", "qa_user");
-//        defaults.put("test_pass", "qa@kalsym");
-
         mRemoteConfig.setDefaultsAsync(R.xml.defaults);
 
         mRemoteConfig.fetch(0);
@@ -111,7 +103,7 @@ public class Login extends AppCompatActivity{
             BASE_URL = App.BASE_URL;
         }
 
-        Log.e("TAG", "BASE_URL : "+ BASE_URL.length(), new Error() );
+        Log.i("TAG", "BASE_URL : "+ BASE_URL.length());
 
         testUser = mRemoteConfig.getString("test_user");
         testPass = mRemoteConfig.getString("test_pass");
@@ -122,36 +114,20 @@ public class Login extends AppCompatActivity{
             testPass = "qa@kalsym";
         }
 
-        Log.e("TAG", "test credentials  : user : "+ testUser+" : password : "+testPass, new Error() );
+        Log.i("TAG", "test credentials  : user : "+ testUser+" : password : "+testPass );
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
-//        getSupportActionBar().hide();
         progressDialog = new Dialog(this);
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
 
-//        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-
-
         login = findViewById(R.id.btn_login);
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
         header = findViewById(R.id.iv_header);
-
-//        header.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if(App.BASE_URL.contains("symplified.it")
-//                        && App.ORDER_SERVICE_URL.contains("symplified.it")
-//                        && App.PRODUCT_SERVICE_URL.contains("symplified.it")){
-//                    Toast.makeText(Login.this, "Staging Version", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-
 
         login.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,9 +164,7 @@ public class Login extends AppCompatActivity{
                             LoginData res = response.body().data;
                             Log.d("TAG", "Login Response : "+ response.body().data.toString());
                             loginMessage = "Logged In Successfully !";
-//                            Toast.makeText(getApplicationContext(), "Logged In Successfully !", Toast.LENGTH_SHORT).show();
                             SharedPreferences.Editor editor = sharedPreferences.edit();
-                            Log.e("ALLVALUES", "onResponse: "+ sharedPreferences.getAll(), new Error() );
                             if(!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0)
                             {
                                 editor.putString("email", res.session.username);
@@ -202,12 +176,9 @@ public class Login extends AppCompatActivity{
                                 editor.apply();
                                 sharedPreferences.edit().putString("base_url", BASE_URL).apply();
                                 getStoresAndRegister(sharedPreferences);
-                                Log.e("getAllStore", "onResponse: " + stores, new Error() );
-//                                Toast.makeText(getApplicationContext(), ""+stores.size(), Toast.LENGTH_SHORT).show();
-
+                                Log.i("getAllStore", "onResponse: " + stores );
 
                             }
-//                            Toast.makeText(getApplicationContext(), "ownerID : "+sharedPreferences.getString("ownerId", null), Toast.LENGTH_SHORT).show();
 
                             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                                 @Override
@@ -218,16 +189,11 @@ public class Login extends AppCompatActivity{
                                     startActivity(intent);
                                 }
                             }, 5000);
-
-//                            progressDialog.hide();
-//                            Intent intent = new Intent(getApplicationContext(), Orders.class);
-//                            startActivity(intent);
                         }
                         else {
                             Log.d("TAG", "Login response : Not successful");
                             progressDialog.hide();
                             loginMessage = "Unsuccessful, Please try again";
-//                            Toast.makeText(getApplicationContext(), "Unsuccessful, Please try again", Toast.LENGTH_SHORT).show();
                             email.getEditText().setText("");
                             password.getEditText().setText("");
                             email.getEditText().requestFocus();
@@ -254,7 +220,6 @@ public class Login extends AppCompatActivity{
 
     private void setStoreData(Context context, List<Store> items, SharedPreferences sharedPreferences) {
 
-//            SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
             final SharedPreferences.Editor editor = sharedPreferences.edit();
             StringBuilder timeZoneList = new StringBuilder();
             StringBuilder storeIdList = new StringBuilder();
@@ -269,18 +234,11 @@ public class Login extends AppCompatActivity{
             editor.putString("storeIdList", storeIdList.toString()).apply();
             editor.putInt("hasLogos", 0).apply();
 
-        Log.e("TIMEZONELIST", "setStoreData: "+ timeZoneList, new Error() );
-//                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, context);
-            String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
-            Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-            StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
-
-            Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());
-
+        Log.i("TIMEZONELIST", "setStoreData: "+ timeZoneList);
     }
 
     private void subscribeStores(List<Store> stores, Context context) {
-        Log.e("TAG", "subscribeStores: "+ stores, new Error() );
+        Log.i("TAG", "subscribeStores: "+ stores);
 
         for(Store store : stores)
         {
@@ -296,13 +254,10 @@ public class Login extends AppCompatActivity{
 
 
     public void downloadAndSaveLogos(String[] stores, Context context, String clientId){
-        ImageView iv = new ImageView(context);
-
         LogoHandler logoHandler = new LogoHandler(stores, context, new Handler(), clientId);
         Thread thread = new Thread(logoHandler);
             thread.setName("Logo Fetcher Thread");
             thread.start();
-
     }
 
     private void getStoresAndRegister(SharedPreferences sharedPreferences) {
@@ -314,7 +269,6 @@ public class Login extends AppCompatActivity{
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         StoreApi storeApiService = retrofit.create(StoreApi.class);
-//        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", null);
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
@@ -324,13 +278,11 @@ public class Login extends AppCompatActivity{
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
                 if (response.isSuccessful()) {
-//                    Log.e("getMYSTORES", "onResponse: " + response.body().data.content, new Error());
-//                    Toast.makeText(getApplicationContext(), "List items : "+ response.body().data.content.size(), Toast.LENGTH_SHORT).show();
                     stores = response.body().data.content;
                     subscribeStores(stores, getApplicationContext());
                     setStoreData(getApplicationContext(),stores, sharedPreferences);
                     downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(),clientId);
-                    Log.e("getMYSTORES", "onResponse: " + stores, new Error());
+                    Log.i("getMYSTORES", "onResponse: " + stores);
                 }
             }
 
@@ -368,10 +320,4 @@ public class Login extends AppCompatActivity{
         else
             super.onBackPressed();
     }
-//
-//    @Override
-//    public void onLogoDownloadCompleteListener() {
-//        Intent intent = new Intent(getApplicationContext(), Orders.class);
-//        startActivity(intent);
-//    }
 }

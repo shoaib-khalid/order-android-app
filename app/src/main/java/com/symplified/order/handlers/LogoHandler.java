@@ -39,13 +39,11 @@ public class LogoHandler implements Runnable{
     String[] stores;
     Context context;
     Handler handler;
-//    ImageView imageView;
     String clientId;
     public LogoHandler(String[] storeIdList, Context context, Handler handler, String clientId){
         this.stores = storeIdList;
         this.context = context;
         this.handler = handler;
-//        this.imageView = imageView;
         this.clientId = clientId;
     }
 
@@ -80,20 +78,12 @@ public class LogoHandler implements Runnable{
                                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                     bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
                                     String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-//                                    handler.post(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            imageView.setImageBitmap(bitmap);
-//                                        }
-//                                    });
                                     editor.putString("logoImage-"+asset.storeId, encodedImage);
                                     editor.apply();
                                 }
 
                             }
                         }
-
-
 
                     } catch (IOException | InterruptedException | ExecutionException e) {
                         e.printStackTrace();
@@ -107,62 +97,7 @@ public class LogoHandler implements Runnable{
 
             }
         });
-
-//        for(String store : stores) {
-//
-//            Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, store);
-//
-//            responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-//                @Override
-//                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                    if(response.isSuccessful()){
-//
-//                        try{
-//                            Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-//
-//                            if (responseBody.data != null) {
-//                                Bitmap bitmap = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
-//                                if (bitmap != null) {
-//                                    Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
-//                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                                    bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                                    String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-////                                    handler.post(new Runnable() {
-////                                        @Override
-////                                        public void run() {
-////                                            imageView.setImageBitmap(bitmap);
-////                                        }
-////                                    });
-//                                    editor.putString("logoImage-"+store, encodedImage);
-//                                    editor.apply();
-//                                }
-//                            }
-//                        }catch (Exception e){
-//                            Log.e("LogoFetch", "onResponse: ",e );
-//                        }
-//
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                    Log.e("LogoFetch", "onResponse: ",t.getCause() );
-//                }
-//            });
-//
-//        }
-
         sharedPreferences.edit().putInt("hasLogos", 1).apply();
-
-
-        Log.e("LogoHandlerTAG", "run: Image Download Complete. Stopping the thread", new Error());
-//        callback.onLogoDownloadCompleteListener();
-
-//        ((Activity) context).finish();
-//        ((Activity) context).overridePendingTransition(0, 0);
-//        context.startActivity(((Activity) context).getIntent());
-//        ((Activity) context).overridePendingTransition(0, 0);
-
     }
 
 }

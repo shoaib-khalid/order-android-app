@@ -37,17 +37,14 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         switch (position){
             case 0:{
                 fragment = PlaceholderFragment.newInstance("new");
-//                Toast.makeText(mContext, "onNew", Toast.LENGTH_SHORT).show();
                 break;
             }
             case 1: {
                 fragment = PlaceholderFragment.newInstance("processed");
-//                Toast.makeText(mContext, "onProcessed", Toast.LENGTH_SHORT).show();
                 break;
             }
             case 2: {
                 fragment = PlaceholderFragment.newInstance("sent");
-//                Toast.makeText(mContext, "onSent", Toast.LENGTH_SHORT).show();
                 break;
             }
 

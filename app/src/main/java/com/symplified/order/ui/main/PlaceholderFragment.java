@@ -83,7 +83,6 @@ public class PlaceholderFragment extends Fragment {
     private RecyclerView recyclerView;
     private String section;
     private Dialog progressDialog;
-//    private FirebaseRemoteConfig mRemoteConfig;
     String BASE_URL;
 
     public static PlaceholderFragment newInstance(String type) {
@@ -113,7 +112,7 @@ public class PlaceholderFragment extends Fragment {
         if(clientId == null)
             Toast.makeText(getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
 
-        Log.e("CHECKCLIENTID", "onCreate: clientId = " + clientId, new Error() );
+        Log.i("CHECKCLIENTID", "onCreate: clientId = " + clientId );
 
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
@@ -128,18 +127,10 @@ public class PlaceholderFragment extends Fragment {
         orderApiService = retrofit.create(OrderApi.class);
 
 
-
-//        String storeId = "McD";
-        Log.e("TAG", "onCreate: "+"storeId : "+storeId, new Error() );
-
-
         section = null;
         if (getArguments() != null) {
             section = getArguments().getString(ARG_SECTION);
         }
-
-//        if(section == null)
-//            Toast.makeText(getContext(), "Section is null", Toast.LENGTH_SHORT).show();
 
         pageViewModel.setIndex(0);
 
@@ -186,26 +177,6 @@ public class PlaceholderFragment extends Fragment {
                 DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(mDividerItemDecoration);
 
-//        retrofit = new Retrofit.Builder().baseUrl(App.ORDER_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create()).build();
-
-//        OrderApi orderApiService = retrofit.create(OrderApi.class);
-//        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-//        String storeId = sharedPreferences.getString("ownerId", null);
-//
-//        if(null == storeId)
-//        {
-//            Toast.makeText(this.getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
-//        }
-
-//        List<OrderDetailsModel> orders = new ArrayList<>();
-//
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-
-//        Call<ResponseBody> orderResponse = orderApiService.getNewOrders(headers, storeId);
-
-
         Log.e("TAG", "URL : "+orderResponse.request().url(), new Error() );
 
         progressDialog.show();
@@ -242,22 +213,6 @@ public class PlaceholderFragment extends Fragment {
                 progressDialog.hide();
             }
         });
-
-
-
-
-//        RecyclerView recyclerView = root.findViewById(R.id.order_recycler);
-//
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        recyclerView.setAdapter(orderAdapter);
-
-//        final TextView textView = binding.sectionLabel;
-//        pageViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-//            @Override
-//            public void onChanged(@Nullable String s) {
-//                textView.setText(s);
-//            }
-//        });
         return root;
     }
 
@@ -273,7 +228,6 @@ public class PlaceholderFragment extends Fragment {
                 if(response.isSuccessful())
                 {
                     try {
-//                        Toast.makeText(getActivity(), "onResumeCalled", Toast.LENGTH_SHORT).show();
                         OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
                         orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
                         recyclerView.setAdapter(orderAdapter);

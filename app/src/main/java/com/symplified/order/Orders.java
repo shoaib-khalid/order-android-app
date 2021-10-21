@@ -66,7 +66,6 @@ public class Orders extends AppCompatActivity {
 
         binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
@@ -98,11 +97,6 @@ public class Orders extends AppCompatActivity {
 //                startActivity(intent);
 //                finish();
                 getSupportFragmentManager().getFragments().get(0).onResume();
-//                List<Fragment> fragments = getSupportFragmentManager().getFragments();
-//                for(Fragment fragment : fragments){
-//                    getSupportFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
-//                    fragment.onStart();
-//                }
             }
         });
 
@@ -111,7 +105,6 @@ public class Orders extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), Login.class);
-//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
                 String storeIdList = sharedPreferences.getString("storeIdList", null);
                 if(storeIdList != null )
                 {
@@ -131,7 +124,7 @@ public class Orders extends AppCompatActivity {
             }
         });
 
-        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
+//        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
 //        String logourl = sharedPreferences.getString("logoUrl", null);
 //        Log.e("TAG", "onCreate: logourl is : "+logourl, new Error() );
 
@@ -142,46 +135,11 @@ public class Orders extends AppCompatActivity {
 //        if(getIntent().hasExtra("logo") || encodedImage != null){
 //            ImageUtil.decodeAndSetImage(storeLogo, encodedImage);
 //        }
-
-//        if(AlertService.isPlaying()){
-//            stopService(new Intent(this, AlertService.class));
-//        }
-
-//        Retrofit retrofitLogo = new Retrofit.Builder().baseUrl(App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
-//
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//
-//        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-//
-//        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                if(response.isSuccessful()){
-//                    try {
-//                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-//                        new DownloadImageTask(storeLogo).execute(responseBody.data.logoUrl);
-//                    } catch (IOException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//
-//            }
-//        });
-
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        Toast.makeText(getApplicationContext(), "onActivityResult Called", Toast.LENGTH_SHORT).show();
-//        this.finish();
-        Log.e("TAG", "onActivityResult: "+ requestCode + " "+resultCode+" "+data.getIntExtra("finish",0), new Error());
             if(resultCode == RESULT_OK){
                 this.finishActivity(4);
                 this.finish();

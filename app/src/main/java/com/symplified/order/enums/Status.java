@@ -1,7 +1,6 @@
 package com.symplified.order.enums;
 
 public enum Status {
-
     BEING_DELIVERED,
     BEING_PREPARED,
     CANCELED_BY_CUSTOMER,
@@ -14,5 +13,4 @@ public enum Status {
     REQUESTING_DELIVERY_FAILED,
     AWAITING_PICKUP,
     FAILED;
-
 }

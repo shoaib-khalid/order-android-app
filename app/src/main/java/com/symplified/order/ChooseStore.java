@@ -99,43 +99,10 @@ public class ChooseStore extends AppCompatActivity {
 
         if (null == clientId) {
             Log.d("Client-ID", "onCreate: client id is null");
-//            Toast.makeText(this, "Client id is null", Toast.LENGTH_SHORT).show();
         }
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-//        progressDialog.show();
-        /*
-        storeResponse.clone().enqueue(new Callback<StoreResponse>() {
-            @Override
-            public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
-                if (response.isSuccessful()) {
-                    Log.e("TAG", "onResponse: " + response.body().data.content, new Error());
-                    if (response.body().data.content.isEmpty()) {
-                        chooseStore.setVisibility(View.GONE);
-                        recyclerView.setVisibility(View.GONE);
-                        noStore.setVisibility(View.VISIBLE);
-                    } else {
-                        if (response.body().data.content.size() == 1) {
-//                            progressDialog.hide();
-                            setStoreData(getApplicationContext(), response.body().data.content);
-                        } else {
-                            StoreAdapter storeAdapter = new StoreAdapter(response.body().data.content, getApplicationContext(), progressDialog);
-                            recyclerView.setLayoutManager(new LinearLayoutManager(ChooseStore.this));
-                            recyclerView.setAdapter(storeAdapter);
-                            progressDialog.hide();
-                        }
-                    }
-                }
-//                progressDialog.hide();
-            }
-
-            @Override
-            public void onFailure(Call<StoreResponse> call, Throwable t) {
-                Log.e("TAG", "onFailure: ", t.getCause());
-                progressDialog.hide();
-            }
-        }); */
     }
 
     public void setStoreData(Context context, List<Store> stores) {
@@ -164,12 +131,8 @@ public class ChooseStore extends AppCompatActivity {
                     if (responseBody.data != null) {
                         Bitmap bitmap = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
                         if (bitmap != null) {
-                            Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
-//                                String bitmap64 = ImageUtil.encodeTobase64(bitmap);
-//                                Log.e("TAG", "bitmap: "+ bitmap64, new Error() );
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                                intent.putExtra("logo", byteArrayOutputStream.toByteArray());
                             String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
                             editor.putString("logoImage", encodedImage);
                             editor.apply();
@@ -178,8 +141,6 @@ public class ChooseStore extends AppCompatActivity {
 
                     FirebaseHelper.initializeFirebase(stores.get(0).id, context);
                     Log.e("TAG", "preferences: " + sharedPreferences.getAll(), new Error());
-//                            Toast.makeText(view.getContext(), "Store id : " + (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
-//                    progressDialog.hide();
                     startActivity(intent);
                     finish();
 

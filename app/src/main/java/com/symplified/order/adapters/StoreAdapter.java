@@ -55,11 +55,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
+    private static final String TAG = "StoreAdapter";
     public List<Store> items;
     public Context context;
     private Dialog progressDialog;
-//    private String BASE_URL;
-//    private FirebaseRemoteConfig mRemoteConfig;
 
     FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
 
@@ -67,12 +66,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         this.items = items;
         this.context = context;
         this.progressDialog = progressDialog;
-//        mRemoteConfig = FirebaseRemoteConfig.getInstance();
-//        mRemoteConfig.setConfigSettingsAsync(configSettings);
-//        mRemoteConfig.setDefaultsAsync(R.xml.defaults);
-//
-//        mRemoteConfig.fetch(0);
-//        mRemoteConfig.activate();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -94,13 +87,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public StoreAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
         View listItem= layoutInflater.inflate(R.layout.store_list_item, parent, false);
-//        Log.e("TAG", "onCreateViewHolder: size = "+getItemCount(),new Error() );
-//        listItem.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
         return new StoreAdapter.ViewHolder(listItem);
     }
 
@@ -109,8 +95,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
-//        BASE_URL = mRemoteConfig.getString("base_url");
-
 
 
         holder.name.setText(items.get(position).name);
@@ -123,12 +107,11 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 final SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("timezone", items.get(holder.getAdapterPosition()).regionCountry.timezone).apply();
                 editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
-//                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, context);
+
                 String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+
                 Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
                 StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
-
-                Log.e("TAG", "onEnterLogoUrl: "+ sharedPreferences.getAll(), new Error());
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Authorization", "Bearer Bearer accessToken");
 
@@ -144,26 +127,17 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                             if(responseBody.data !=null){
                                 Bitmap bitmap  = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
                                 if(bitmap != null) {
-                                    Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
-//                                String bitmap64 = ImageUtil.encodeTobase64(bitmap);
-//                                Log.e("TAG", "bitmap: "+ bitmap64, new Error() );
                                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                     bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                                intent.putExtra("logo", byteArrayOutputStream.toByteArray());
                                     String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
                                     editor.putString("logoImage", encodedImage);
                                     editor.apply();
                                 }
                             }
-
                             FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, view.getContext());
-                            Log.e("TAG", "preferences: " + sharedPreferences.getAll(), new Error());
-//                            Toast.makeText(view.getContext(), "Store id : " + (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
                             progressDialog.hide();
                             view.getContext().startActivity(intent);
                             ((Activity) holder.itemView.getContext()).finish();
-
-
                         } catch (IOException | ExecutionException | InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -175,29 +149,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
                     }
                 });
-
-//                editor.apply();
-//                sharedPreferences.edit().putString("logoUrl", logoUrl);
-//                FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id,view.getContext());
-//                String logoUrl = sharedPreferences.getString("logoUrl", null);
-//                Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
-//                if(logoUrl != null){
-//                    try {
-//                        Bitmap bitmap  = new DownloadImageTask().execute(sharedPreferences.getString("logoUrl", null)).get();
-//                        String bitmap64 = ImageUtil.encodeTobase64(bitmap);
-//                        Log.e("TAG", "bitmap: "+ bitmap64 );
-//                        intent.putExtra("logo", bitmap64);
-//                    } catch (ExecutionException e) {
-//                        e.printStackTrace();
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-
-//                Log.e("TAG", "preferences: "+sharedPreferences.getAll(),new Error() );
-//                Toast.makeText(view.getContext(), "Store id : "+ (items.get(holder.getAdapterPosition()).id), Toast.LENGTH_SHORT).show();
-//                view.getContext().startActivity(intent);
-//                ((Activity) holder.itemView.getContext()).finish();
             }
         });
     }

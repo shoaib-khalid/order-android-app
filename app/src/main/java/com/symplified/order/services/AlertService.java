@@ -49,7 +49,6 @@ public class AlertService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-//        Settings.System.DEFAULT_ALARM_ALERT_URI
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
         mediaPlayer.setLooping(true);
         if(intent.getIntExtra("first",0) == 1)
@@ -60,7 +59,6 @@ public class AlertService extends Service{
         mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
-//        Toast.makeText(this, "service is running.", Toast.LENGTH_LONG).show();
         return START_STICKY;
     }
 
