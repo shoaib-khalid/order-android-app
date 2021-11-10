@@ -21,7 +21,7 @@ import com.symplified.order.services.AlertService;
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @StringRes
-    private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.processed_orders, R.string.sent_orders};
+    private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.processed_orders, R.string.pickup_orders, R.string.sent_orders};
     private final Context mContext;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
@@ -44,6 +44,10 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
                 break;
             }
             case 2: {
+                fragment = PlaceholderFragment.newInstance("pickup");
+                break;
+            }
+            case 3:{
                 fragment = PlaceholderFragment.newInstance("sent");
                 break;
             }
@@ -61,6 +65,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount(){
-        return 3;
+        return 4;
     }
 }

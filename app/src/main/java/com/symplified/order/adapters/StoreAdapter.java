@@ -1,66 +1,29 @@
 package com.symplified.order.adapters;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.util.Base64;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.google.gson.Gson;
-import com.symplified.order.App;
-import com.symplified.order.Orders;
 import com.symplified.order.R;
-import com.symplified.order.apis.StoreApi;
-import com.symplified.order.firebase.FirebaseHelper;
+import com.symplified.order.dialogs.SettingsBottomSheet;
 import com.symplified.order.models.Store.Store;
-import com.symplified.order.models.asset.Asset;
-import com.symplified.order.services.DownloadImageTask;
-import com.symplified.order.utils.ImageUtil;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
     private static final String TAG = "StoreAdapter";
     public List<Store> items;
     public Context context;
     private Dialog progressDialog;
-
-    FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
 
     public StoreAdapter(List<Store> items, Context context, Dialog progressDialog){
         this.items = items;
@@ -101,7 +64,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                /*
                 progressDialog.show();
                 SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
                 final SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -149,6 +112,9 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
                     }
                 });
+                */
+                BottomSheetDialogFragment bottomSheetDialogFragment = new SettingsBottomSheet();
+                bottomSheetDialogFragment.show(((FragmentActivity) context).getSupportFragmentManager(),"bottomSheetDialog");
             }
         });
     }

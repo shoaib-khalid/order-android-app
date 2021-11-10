@@ -66,6 +66,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         holder.item.setText(items.get(position).productName);
+//        if(items.get(position).specialInstruction.equals("")){
+//            holder.instructions.setVisibility(View.GONE);
+//        }else {
+//            holder.instructions.setText(items.get(position).specialInstruction);
+//        }
         holder.instructions.setText(items.get(position).specialInstruction);
         holder.qty.setText(Integer.toString(items.get(position).quantity));
         holder.price.setText(Double.toString(items.get(position).price));

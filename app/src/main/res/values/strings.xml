@@ -5,7 +5,7 @@
     <string name="login_text">Login</string>
     <string name="tv_date">Date: \u0020</string>
     <string name="tv_date_value">Day, Month, Year</string>
-    <string name="tv_invoice_number">Invoice :\u0020</string>
+    <string name="tv_invoice_number">Invoice:\u0020</string>
     <string name="tv_invoice_number_value">XXXXXXXXXXXXXX</string>
     <string name="btn_process">Process</string>
     <string name="tv_shipment_address">Shipment Address: \u0020</string>
@@ -39,6 +39,7 @@
     <string name="title_activity_orders">Orders</string>
     <string name="new_orders">New</string>
     <string name="processed_orders">Processed</string>
+    <string name="pickup_orders">PickUp</string>
     <string name="sent_orders">Sent</string>
 
     <string name="card_name">Name:\u0020</string>
@@ -54,4 +55,16 @@
     <string name="choose_a_store">Choose a Store</string>
     <string name="no_store_msg">No Stores Added Yet !</string>
     <string name="total">Total</string>
+    <string name="set_store_status">Set Store Status</string>
+    <string name="normal">Normal</string>
+    <string name="paused">Paused Until</string>
+    <string name="_30_min">30 min</string>
+    <string name="_15_min">15 min</string>
+    <string name="_45_min">45 min</string>
+    <string name="_1_hour">1 hour</string>
+    <string name="_24_hours">1 day</string>
+    <string name="confirm">Confirm</string>
+    <string name="setting_title">Store Settings</string>
+    <string name="store_status">Store Status</string>
+    <string name="click_here"><u>Click Here</u></string>
 </resources>

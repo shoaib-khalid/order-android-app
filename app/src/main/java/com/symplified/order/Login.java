@@ -5,23 +5,36 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -29,6 +42,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -46,6 +61,8 @@ import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.DownloadImageTask;
+import com.symplified.order.services.StoreBroadcastReceiver;
+import com.symplified.order.services.StoreManagerService;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,6 +70,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +136,9 @@ public class Login extends AppCompatActivity{
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
+        initScheduler();
         progressDialog = new Dialog(this);
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
@@ -215,6 +235,88 @@ public class Login extends AppCompatActivity{
             }
         });
 
+    }
+
+    private void initScheduler() {
+
+//        ComponentName componentName = new ComponentName(this, StoreManagerService.class);
+////        PersistableBundle bundle = new PersistableBundle();
+////        bundle.putString("storeId", "Testing Store Closure");
+//        JobInfo.Builder builder = new JobInfo.Builder(1423, componentName)
+//                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+//                .setPersisted(true)
+//                .setPeriodic(60 * 1000);
+//        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
+//        int resultCode = scheduler.schedule(builder.build());
+//        if(resultCode == JobScheduler.RESULT_SUCCESS){
+//            Log.d("LoginActivity", "initScheduler: Job Scheduled");
+//        }else
+//            Log.d("LoginActivity", "initScheduler: Job could not Scheduled");
+
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.MINUTE, 1);
+
+        Intent job = new Intent(getApplicationContext(), StoreBroadcastReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, job, 0);
+//        alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+
+
+        Dialog dialog = new Dialog(this);
+        dialog.setCancelable(false);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.store_status_dialog);
+
+        RadioGroup radioGroup = dialog.findViewById(R.id.store_status_options);
+        TimePicker timePicker = dialog.findViewById(R.id.status_timePicker);
+        MaterialTimePicker materialTimePicker = new MaterialTimePicker.Builder()
+                .setTimeFormat(TimeFormat.CLOCK_12H)
+                .setHour(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
+                .setMinute(Calendar.getInstance().get(Calendar.MINUTE))
+                .setTitleText("Paused Until")
+                .build();
+//        RadioGroup pausedGroup = dialog.findViewById(R.id.paused_status);
+        radioGroup.setOnCheckedChangeListener((radioGroup1, i) -> {
+            switch (i){
+                case R.id.store_status_paused:{
+//                    pausedGroup.setVisibility(View.VISIBLE);
+//                    timePicker.setVisibility(View.VISIBLE);
+                    materialTimePicker.show(getSupportFragmentManager(), "materialTimePicker");
+                    break;
+                }
+                default:{
+//                    pausedGroup.setVisibility(View.GONE);
+                    timePicker.setVisibility(View.GONE);
+                    break;
+                }
+            }
+        });
+
+//        RadioButton radio_30_min = dialog.findViewById(R.id.paused_30m);
+//        RadioButton radio_1_hr = dialog.findViewById(R.id.paused_1h);
+//        RadioButton radio_24hr = dialog.findViewById(R.id.paused_24h);
+//
+//        radio_30_min.setOnClickListener(view -> {
+//            radio_1_hr.setTextColor(Color.BLACK);
+//            radio_24hr.setTextColor(Color.BLACK);
+//            radio_30_min.setTextColor(Color.WHITE);
+//        });
+//
+//        radio_1_hr.setOnClickListener(view -> {
+//            radio_1_hr.setTextColor(Color.WHITE);
+//            radio_24hr.setTextColor(Color.BLACK);
+//            radio_30_min.setTextColor(Color.BLACK);
+//        });
+//
+//        radio_24hr.setOnClickListener(view -> {
+//            radio_1_hr.setTextColor(Color.BLACK);
+//            radio_24hr.setTextColor(Color.WHITE);
+//            radio_30_min.setTextColor(Color.BLACK);
+//        });
+
+        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        dialog.show();
     }
 
 

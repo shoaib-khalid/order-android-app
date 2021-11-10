@@ -1,0 +1,51 @@
+package com.symplified.order.models.order;
+
+import com.symplified.order.models.HttpResponse;
+
+import java.io.Serializable;
+
+public class OrderDeliveryDetailsResponse extends HttpResponse implements Serializable {
+
+    public OrderDeliveryDetailsData data;
+
+    public static class OrderDeliveryDetailsData implements Serializable{
+        public String name;
+        public String phoneNumber;
+        public String plateNumber;
+        public String trackingUrl;
+        public String orderNumber;
+        public Provider provider;
+
+        public OrderDeliveryDetailsData(){}
+
+        public OrderDeliveryDetailsData(String name, String phoneNumber, String plateNumber, String trackingUrl, String orderNumber, Provider provider) {
+            this.name = name;
+            this.phoneNumber = phoneNumber;
+            this.plateNumber = plateNumber;
+            this.trackingUrl = trackingUrl;
+            this.orderNumber = orderNumber;
+            this.provider = provider;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "OrderDeliveryDetailsResponse{" +
+                "data=" + data +
+                '}';
+    }
+
+    public static  class Provider implements Serializable{
+        public int id;
+        public String name;
+        public String providerImage;
+
+        public Provider(){}
+
+        public Provider(int id, String name, String providerImage) {
+            this.id = id;
+            this.name = name;
+            this.providerImage = providerImage;
+        }
+    }
+}

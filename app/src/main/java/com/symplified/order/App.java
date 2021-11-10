@@ -24,6 +24,7 @@ public class App extends Application {
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
     public static final String PRODUCT_SERVICE_URL = "product-service/v1/";
     public static final String ORDER_SERVICE_URL = "order-service/v1/";
+    public static final String DELIVERY_SERVICE_URL = "delivery-service/v1/";
     public static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static final String SESSION_DETAILS_TITLE = "session";

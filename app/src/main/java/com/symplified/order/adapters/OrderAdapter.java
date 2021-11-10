@@ -2,12 +2,12 @@ package com.symplified.order.adapters;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,22 +15,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
-import com.symplified.order.Login;
 import com.symplified.order.OrderDetails;
 import com.symplified.order.R;
-import com.symplified.order.handlers.LogoHandler;
-import com.symplified.order.models.OrderDetailsModel;
+import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.utils.ImageUtil;
+import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
+import com.symplified.order.utils.Utility;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
 //    public List<OrderDetailsModel> items;
@@ -39,6 +47,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public String section;
     public boolean isPickup;
     public Context context;
+    private final String TAG = OrderAdapter.class.getName();
+    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
+    private Dialog progressDialog;
 
     public OrderAdapter(List<Order> orders, String section, Context context){
 //        List<OrderDetailsModel> items,
@@ -46,6 +57,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.orders = orders;
         this.section = section;
         this.context = context;
+
+        progressDialog = new Dialog((Activity) context);
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -54,6 +72,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final Button process;
         private final ImageView storeLogo;
         private final TextView storeLogoText;
+        private final ConstraintLayout driverDetails;
+        private final View driverDetailsDivider;
+        private final TextView driverName;
+        private final TextView driverPhoneNumber;
 
         public ViewHolder(View view) {
             super(view);
@@ -67,6 +89,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             pickup = view.findViewById(R.id.order_pickup_icon);
             process = view.findViewById(R.id.card_btn_process);
             storeLogoText = (TextView) view.findViewById(R.id.storeLogoOrderText);
+            driverDetails = view.findViewById(R.id.driver_info_card);
+            driverDetailsDivider = view.findViewById(R.id.divider_card2);
+            driverName = view.findViewById(R.id.driver_value_card);
+            driverPhoneNumber = view.findViewById(R.id.driver_contact_value_card);
         }
 
 
@@ -100,6 +126,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
+//        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
 
             String encodedStoreLogo = sharedPreferences.getString("logoImage-"+orders.get(holder.getAdapterPosition()).storeId, null);
 
@@ -109,7 +136,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 if(sharedPreferences.contains("logoImage-"+orders.get(holder.getAdapterPosition()).storeId)
                         && encodedStoreLogo != null)
                 {
-                    ImageUtil.decodeAndSetImage(holder.storeLogo, encodedStoreLogo);
+                    Utility.decodeAndSetImage(holder.storeLogo, encodedStoreLogo);
                 }
                 else{
                     holder.storeLogo.setVisibility(View.GONE);
@@ -120,13 +147,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             }
 
-        Log.e("TAG", "onBindViewHolder: "+ sharedPreferences.getString(orders.get(holder.getAdapterPosition()).storeId+"-name", null), new Error());
+//        Log.e("TAG", "onBindViewHolder: "+ sharedPreferences.getString(orders.get(holder.getAdapterPosition()).storeId+"-name", null), new Error());
 
 
         holder.name.setText(orders.get(position).orderShipmentDetail.receiverName);
         holder.phone.setText(orders.get(position).orderShipmentDetail.phoneNumber);
         holder.amount.setText(Double.toString(orders.get(position).total));
         holder.invoice.setText(orders.get(position).invoiceId);
+        if(section.equals("sent")){
+            holder.driverDetails.setVisibility(View.VISIBLE);
+            holder.driverDetailsDivider.setVisibility(View.VISIBLE);
+            setDriverDeliveryDetails(orders.get(position), sharedPreferences, holder);
+        }
 
 
         if(!orders.get(position).orderShipmentDetail.storePickup) {
@@ -147,10 +179,66 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 intent.putExtra("pickup", isPickup);
+                intent.putExtra("deliveryDetails", deliveryDetails);
                 ((Activity) context).startActivityForResult(intent, 4);
 //                ((Activity)view.getContext()).finish();
             }
         });
+
+    }
+
+    private void setDriverDeliveryDetails(Order order, SharedPreferences sharedPreferences, ViewHolder holder) {
+
+        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                .baseUrl(BASE_URL+App.DELIVERY_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        DeliveryApi deliveryApiService = retrofit.create(DeliveryApi.class);
+
+        //12dc5195-5f03-42fd-94f0-f147dc4ced55
+        Call<OrderDeliveryDetailsResponse> deliveryDetailsResponseCall = deliveryApiService.getOrderDeliveryDetailsById(headers, "12dc5195-5f03-42fd-94f0-f147dc4ced55");
+
+        progressDialog.show();
+
+        deliveryDetailsResponseCall.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
+            @Override
+            public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
+                if(response.isSuccessful()){
+                    Log.i(TAG, "onResponse: "+response.body().toString());
+                    if(holder.driverDetails.getVisibility() == View.VISIBLE){
+                        holder.driverName.setText(response.body().data.name);
+                        holder.driverPhoneNumber.setText(response.body().data.phoneNumber);
+
+                        OrderDeliveryDetailsResponse.Provider provider = new OrderDeliveryDetailsResponse.Provider(response.body().data.provider.id,
+                                response.body().data.provider.name, response.body().data.provider.providerImage);
+
+                        deliveryDetails = new OrderDeliveryDetailsResponse
+                                .OrderDeliveryDetailsData(response.body().data.name,
+                                response.body().data.phoneNumber, response.body().data.plateNumber,
+                                response.body().data.trackingUrl, response.body().data.orderNumber,
+                                provider);
+                    }
+                    else {
+                        Log.e(TAG, "Response Unsuccessful" + "onResponse: "+response.body());
+                    }
+
+                }
+                progressDialog.hide();
+            }
+
+            @Override
+            public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: ",t );
+                progressDialog.hide();
+            }
+        });
+
 
     }
 

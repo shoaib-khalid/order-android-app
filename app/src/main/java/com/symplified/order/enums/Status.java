@@ -1,5 +1,7 @@
 package com.symplified.order.enums;
 
+import com.symplified.order.utils.Utility;
+
 public enum Status {
     BEING_DELIVERED,
     BEING_PREPARED,
@@ -13,4 +15,8 @@ public enum Status {
     REQUESTING_DELIVERY_FAILED,
     AWAITING_PICKUP,
     FAILED;
+
+    public static Status fromString(String name) {
+        return Utility.getEnumFromString(Status.class, name);
+    }
 }

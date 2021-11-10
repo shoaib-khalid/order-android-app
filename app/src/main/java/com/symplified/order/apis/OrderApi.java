@@ -3,6 +3,7 @@ package com.symplified.order.apis;
 import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderResponse;
 
 import java.util.HashMap;
@@ -26,6 +27,11 @@ public interface OrderApi {
 
     @GET("orders?receiverName=&phoneNumber=&completionStatus=PAYMENT_CONFIRMED&pageSize=10&")
     Call<ResponseBody> getNewOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
+
+
+
+    @GET("orders?receiverName=&phoneNumber=&completionStatus=AWAITING_PICKUP&pageSize=10&")
+    Call<ResponseBody> getPickupOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
 //
 //    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_PREPARED&pageSize=10&")
 //    Call<ResponseBody> getProcessedOrders (@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
@@ -47,5 +53,8 @@ public interface OrderApi {
 
     @PUT("orders/{orderId}/completion-status-updates")
     Call<ResponseBody> updateOrderStatus(@HeaderMap Map<String, String> headers, @Body Order.OrderUpdate body, @Path("orderId") String orderId);
+
+    @GET("orders/details/{orderId}")
+    Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
 
 }

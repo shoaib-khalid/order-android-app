@@ -1,12 +1,9 @@
 package com.symplified.order.services;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.widget.ImageView;
-
-import com.symplified.order.utils.ImageUtil;
 
 import java.io.InputStream;
 import java.net.URL;

@@ -13,8 +13,8 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 31
-        versionCode 24
-        versionName "1.0.1"
+        versionCode 25
+        versionName "1.1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,6 +50,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'com.squareup.retrofit2:converter-gson:2.7.0'
     implementation 'com.google.firebase:firebase-config:21.0.1'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
