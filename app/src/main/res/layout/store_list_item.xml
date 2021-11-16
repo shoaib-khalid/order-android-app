@@ -32,6 +32,15 @@
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                 />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/store_status"
+                android:layout_alignParentEnd="true"
+                android:textStyle="bold"
+                android:layout_centerInParent="true"
+                android:layout_marginHorizontal="15dp"/>
+
 
         </RelativeLayout>
 

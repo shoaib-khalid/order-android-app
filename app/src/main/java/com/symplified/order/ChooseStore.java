@@ -43,6 +43,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+//not used anymore
 public class ChooseStore extends AppCompatActivity {
 
     private String BASE_URL;

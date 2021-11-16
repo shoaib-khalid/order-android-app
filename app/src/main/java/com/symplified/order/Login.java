@@ -5,6 +5,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.PendingIntent;
@@ -104,6 +105,52 @@ public class Login extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.Theme_SymplifiedOrderUpdate);
+
+        configureRemoteConfig();
+
+        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        setContentView(R.layout.activity_login);
+
+//        try {
+//            Runtime.getRuntime().exec("pm clear "+getApplicationContext().getPackageName());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        ((ActivityManager)getSystemService(ACTIVITY_SERVICE)).clearApplicationUserData(); // note: it has a return value!
+
+        initViews();
+
+        login.setOnClickListener(view -> {
+
+            onLoginButtonClick();
+
+        });
+
+    }
+
+
+    /**
+     * method to initialize all the views in this activity
+     */
+    private void initViews() {
+        progressDialog = new Dialog(this);
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
+
+        login = findViewById(R.id.btn_login);
+        email = findViewById(R.id.tv_email);
+        password = findViewById(R.id.tv_password);
+        header = findViewById(R.id.iv_header);
+
+    }
+
+    /**
+     * method to configure and setup Firebase Remote Config
+     */
+    private void configureRemoteConfig() {
         mRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
 
@@ -134,192 +181,101 @@ public class Login extends AppCompatActivity{
 
         Log.i("TAG", "test credentials  : user : "+ testUser+" : password : "+testPass );
 
-        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        setContentView(R.layout.activity_login);
-        initScheduler();
-        progressDialog = new Dialog(this);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
+    }
 
-        login = findViewById(R.id.btn_login);
-        email = findViewById(R.id.tv_email);
-        password = findViewById(R.id.tv_password);
-        header = findViewById(R.id.iv_header);
 
-        login.setOnClickListener(new View.OnClickListener() {
+    /**
+     * onClick method for Login Button
+     */
+    private void onLoginButtonClick() {
+        if(email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass))
+        {
+            BASE_URL = App.BASE_URL_STAGING;
+            sharedPreferences.edit().putBoolean("isStaging", true).apply();
+            sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+            Log.e("TAG", "BASE_URL : "+ BASE_URL, new Error() );
+            Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
+        }
+        progressDialog.show();
+
+
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).client(new OkHttpClient()).baseUrl(BASE_URL+App.USER_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create()).build();
+
+        LoginApi loginApiService = retrofit.create(LoginApi.class);
+
+        Call<LoginResponse> loginResponse = loginApiService.login("application/json",
+                new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
+
+        loginResponse.clone().enqueue(new Callback<LoginResponse>() {
+
+            String loginMessage = "";
             @Override
-            public void onClick(View view) {
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
 
-                if(email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass))
+
+                if(response.isSuccessful())
                 {
-                    BASE_URL = "https://api.symplified.it/";
-                    sharedPreferences.edit().putBoolean("isStaging", true).apply();
-                    sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-                    Log.e("TAG", "BASE_URL : "+ BASE_URL, new Error() );
-                    Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
-                }
-                progressDialog.show();
+                    LoginData res = response.body().data;
+                    Log.d("TAG", "Login Response : "+ response.body().data.toString());
+                    loginMessage = "Logged In Successfully !";
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    if(!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0)
+                    {
+                        editor.putString("email", res.session.username);
+                        editor.putString("accessToken", res.session.accessToken);
+                        editor.putString("refreshToken", res.session.refreshToken);
+                        editor.putString("ownerId", res.session.ownerId);
+                        editor.putString("expiry", res.session.expiry.toGMTString());
+                        editor.putInt("isLoggedIn", 1);
+                        editor.putInt("versionCode", BuildConfig.VERSION_CODE);
+                        editor.apply();
+                        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+                        getStoresAndRegister(sharedPreferences);
+                        Log.i("getAllStore", "onResponse: " + stores );
 
+                    }
 
-                Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).client(new OkHttpClient()).baseUrl(BASE_URL+App.USER_SERVICE_URL)
-                        .addConverterFactory(GsonConverterFactory.create()).build();
-
-                LoginApi loginApiService = retrofit.create(LoginApi.class);
-
-                Call<LoginResponse> loginResponse = loginApiService.login("application/json",
-                        new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
-
-                loginResponse.clone().enqueue(new Callback<LoginResponse>() {
-
-                    String loginMessage = "";
-                    @Override
-                    public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-
-
-                        if(response.isSuccessful())
-                        {
-                            LoginData res = response.body().data;
-                            Log.d("TAG", "Login Response : "+ response.body().data.toString());
-                            loginMessage = "Logged In Successfully !";
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            if(!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0)
-                            {
-                                editor.putString("email", res.session.username);
-                                editor.putString("accessToken", res.session.accessToken);
-                                editor.putString("refreshToken", res.session.refreshToken);
-                                editor.putString("ownerId", res.session.ownerId);
-                                editor.putString("expiry", res.session.expiry.toGMTString());
-                                editor.putInt("isLoggedIn", 1);
-                                editor.apply();
-                                sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-                                getStoresAndRegister(sharedPreferences);
-                                Log.i("getAllStore", "onResponse: " + stores );
-
-                            }
-
-                            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    progressDialog.hide();
-                                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                                    Intent intent = new Intent(getApplicationContext(), Orders.class);
-                                    startActivity(intent);
-                                }
-                            }, 5000);
-                        }
-                        else {
-                            Log.d("TAG", "Login response : Not successful");
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
                             progressDialog.hide();
-                            loginMessage = "Unsuccessful, Please try again";
-                            email.getEditText().setText("");
-                            password.getEditText().setText("");
-                            email.getEditText().requestFocus();
-                        }
-
-                        if(!(BASE_URL.contains(".it") && loginMessage.contains("success"))){
                             Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(getApplicationContext(), Orders.class);
+                            startActivity(intent);
                         }
-                    }
-
-                    @Override
-                    public void onFailure(Call<LoginResponse> call, Throwable t) {
-                        Log.e("TAG", "onFailure: ", t.getCause());
-                        Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
-                        progressDialog.hide();
-                    }
-
-                });
-            }
-        });
-
-    }
-
-    private void initScheduler() {
-
-//        ComponentName componentName = new ComponentName(this, StoreManagerService.class);
-////        PersistableBundle bundle = new PersistableBundle();
-////        bundle.putString("storeId", "Testing Store Closure");
-//        JobInfo.Builder builder = new JobInfo.Builder(1423, componentName)
-//                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
-//                .setPersisted(true)
-//                .setPeriodic(60 * 1000);
-//        JobScheduler scheduler = (JobScheduler) getSystemService(JOB_SCHEDULER_SERVICE);
-//        int resultCode = scheduler.schedule(builder.build());
-//        if(resultCode == JobScheduler.RESULT_SUCCESS){
-//            Log.d("LoginActivity", "initScheduler: Job Scheduled");
-//        }else
-//            Log.d("LoginActivity", "initScheduler: Job could not Scheduled");
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.MINUTE, 1);
-
-        Intent job = new Intent(getApplicationContext(), StoreBroadcastReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, job, 0);
-//        alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-
-
-        Dialog dialog = new Dialog(this);
-        dialog.setCancelable(false);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.store_status_dialog);
-
-        RadioGroup radioGroup = dialog.findViewById(R.id.store_status_options);
-        TimePicker timePicker = dialog.findViewById(R.id.status_timePicker);
-        MaterialTimePicker materialTimePicker = new MaterialTimePicker.Builder()
-                .setTimeFormat(TimeFormat.CLOCK_12H)
-                .setHour(Calendar.getInstance().get(Calendar.HOUR_OF_DAY))
-                .setMinute(Calendar.getInstance().get(Calendar.MINUTE))
-                .setTitleText("Paused Until")
-                .build();
-//        RadioGroup pausedGroup = dialog.findViewById(R.id.paused_status);
-        radioGroup.setOnCheckedChangeListener((radioGroup1, i) -> {
-            switch (i){
-                case R.id.store_status_paused:{
-//                    pausedGroup.setVisibility(View.VISIBLE);
-//                    timePicker.setVisibility(View.VISIBLE);
-                    materialTimePicker.show(getSupportFragmentManager(), "materialTimePicker");
-                    break;
+                    }, 5000);
                 }
-                default:{
-//                    pausedGroup.setVisibility(View.GONE);
-                    timePicker.setVisibility(View.GONE);
-                    break;
+                else {
+                    Log.d("TAG", "Login response : Not successful");
+                    progressDialog.hide();
+                    loginMessage = "Unsuccessful, Please try again";
+                    email.getEditText().setText("");
+                    password.getEditText().setText("");
+                    email.getEditText().requestFocus();
+                }
+
+                if(!(BASE_URL.contains(".it") && loginMessage.contains("success"))){
+                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
                 }
             }
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.e("TAG", "onFailure: ", t.getCause());
+                Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                progressDialog.hide();
+            }
+
         });
-
-//        RadioButton radio_30_min = dialog.findViewById(R.id.paused_30m);
-//        RadioButton radio_1_hr = dialog.findViewById(R.id.paused_1h);
-//        RadioButton radio_24hr = dialog.findViewById(R.id.paused_24h);
-//
-//        radio_30_min.setOnClickListener(view -> {
-//            radio_1_hr.setTextColor(Color.BLACK);
-//            radio_24hr.setTextColor(Color.BLACK);
-//            radio_30_min.setTextColor(Color.WHITE);
-//        });
-//
-//        radio_1_hr.setOnClickListener(view -> {
-//            radio_1_hr.setTextColor(Color.WHITE);
-//            radio_24hr.setTextColor(Color.BLACK);
-//            radio_30_min.setTextColor(Color.BLACK);
-//        });
-//
-//        radio_24hr.setOnClickListener(view -> {
-//            radio_1_hr.setTextColor(Color.BLACK);
-//            radio_24hr.setTextColor(Color.WHITE);
-//            radio_30_min.setTextColor(Color.BLACK);
-//        });
-
-        dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        dialog.show();
     }
 
-
+    /**
+     * method to store information to sharedPreferences for user session management
+     * @param context
+     * @param items
+     * @param sharedPreferences
+     */
     private void setStoreData(Context context, List<Store> items, SharedPreferences sharedPreferences) {
 
             final SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -339,22 +295,33 @@ public class Login extends AppCompatActivity{
         Log.i("TIMEZONELIST", "setStoreData: "+ timeZoneList);
     }
 
+    /**
+     * method to subscribe the user to all the stores that belong to user, to receive new order notifications
+     * @param stores
+     * @param context
+     */
     private void subscribeStores(List<Store> stores, Context context) {
         Log.i("TAG", "subscribeStores: "+ stores);
 
         for(Store store : stores)
         {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    FirebaseHelper.initializeFirebase(store.id, context);
-                }
-            }).start();
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    FirebaseHelper.initializeFirebase(store.id, context);
+//                }
+//            }).start();
+            FirebaseHelper.initializeFirebase(store.id, context);
         }
 
     }
 
-
+    /**
+     * method to download and store Store logos Asynchronously to sharedPreferences to avoid frequent downloads.
+     * @param stores
+     * @param context
+     * @param clientId
+     */
     public void downloadAndSaveLogos(String[] stores, Context context, String clientId){
         LogoHandler logoHandler = new LogoHandler(stores, context, new Handler(), clientId);
         Thread thread = new Thread(logoHandler);
@@ -362,6 +329,11 @@ public class Login extends AppCompatActivity{
             thread.start();
     }
 
+
+    /**
+     * method to make the api call to get all the stores of user from backend
+     * @param sharedPreferences
+     */
     private void getStoresAndRegister(SharedPreferences sharedPreferences) {
 
         Map<String, String> headers = new HashMap<>();
@@ -397,22 +369,41 @@ public class Login extends AppCompatActivity{
 
     }
 
+    /**
+     * overridden onStart method to accomplish persistent login
+     */
     @Override
     protected void onStart() {
-        if(sharedPreferences.getInt("isLoggedIn",-1) == 1 && !sharedPreferences.contains("storeId")) {
+        //check if user session already exists, for persistent login
+        if(sharedPreferences.getInt("isLoggedIn",-1) == 1
+                && sharedPreferences.contains("storeIdList")
+                && sharedPreferences.getInt("versionCode", 0) == BuildConfig.VERSION_CODE) {
             Intent intent = new Intent(getApplicationContext(), Orders.class);
             startActivity(intent);
             finish();
         }
-        else if(sharedPreferences.getInt("isLoggedIn",-1) == 1 && sharedPreferences.contains("storeId")){
-            Intent intent = new Intent(getApplicationContext(), Orders.class);
-            startActivity(intent);
-            finish();
+        else{
+            String storeIdList = sharedPreferences.getString("storeIdList", null);
+            if(storeIdList != null )
+            {
+                for(String storeId : storeIdList.split(" ")){
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+                }
+            }
+            sharedPreferences.edit().clear().apply();
         }
+//        else if(sharedPreferences.getInt("isLoggedIn",-1) == 1 && sharedPreferences.contains("storeId")){
+//            Intent intent = new Intent(getApplicationContext(), Orders.class);
+//            startActivity(intent);
+//            finish();
+//        }
 
         super.onStart();
     }
 
+    /**
+     * overridden onBackPressed method to cater persistent login flow
+     */
     @Override
     public void onBackPressed() {
         if(sharedPreferences.getInt("isLoggedIn", -1) == 1)

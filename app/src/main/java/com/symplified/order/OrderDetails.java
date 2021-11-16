@@ -91,7 +91,6 @@ public class OrderDetails extends AppCompatActivity {
         //change theme for staging mode
         if(sharedPreferences.getBoolean("isStaging", false))
             setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
-
         setContentView(R.layout.activity_order_details);
         setResult(RESULT_CANCELED, new Intent().putExtra("finish", 0));
 
@@ -117,19 +116,15 @@ public class OrderDetails extends AppCompatActivity {
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         initAppBar(sharedPreferences, order, storeIdList);
 
+        //get list of items in order
         getOrderItems(order);
 
+        //get current order status details of the order
         getOrderStatusDetails(order);
-
         Log.i(TAG, "onCreate: "+order.toString());
-
-//        Log.d("GETALLVALUES", "onCreate: "+sharedPreferences.getAll().toString());
 
         //display all order details to relevant fields
         displayOrderDetails(sharedPreferences, order, storeIdList, driverDetails);
-
-
-
     }
 
     private void getOrderStatusDetails(Order order) {
@@ -148,7 +143,6 @@ public class OrderDetails extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 try {
-//                    JSONObject responseJson = new Gson().fromJson(response.body().string(),JSONObject.class);
                     JSONObject responseJson = new JSONObject(response.body().string().toString());
                     Log.e(TAG, "onResponse: "+ responseJson, new Error() );
                     new Handler().post(() -> {
@@ -189,7 +183,6 @@ public class OrderDetails extends AppCompatActivity {
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
-//        boolean isPickup = order.orderShipmentDetail.storePickup;
         ItemsAdapter itemsAdapter = new ItemsAdapter();
         progressDialog.show();
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
@@ -227,173 +220,38 @@ public class OrderDetails extends AppCompatActivity {
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
 
-//        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
-//
-////        boolean isPickup = order.orderShipmentDetail.storePickup;
-//        ItemsAdapter itemsAdapter = new ItemsAdapter();
-//        progressDialog.show();
-//        itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
-//            @Override
-//            public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
-//
-//                if(response.isSuccessful())
-//                {
-//                    Log.e("TAG", "onResponse: "+order.id, new Error() );
-//                    itemsAdapter.setItems(response.body().data.content);
-//                    recyclerView.setAdapter(itemsAdapter);
-//                    itemsAdapter.notifyDataSetChanged();
-//                    progressDialog.hide();
-//                }
-//
-//
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ItemResponse> call, Throwable t) {
-//                Toast.makeText(getApplicationContext(), "Failed to retrieve items", Toast.LENGTH_SHORT).show();
-//                progressDialog.hide();
-//            }
-//        });
-
         Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.fromString(nextStatus)), order.id);
 
-
-//        if(section.equals("new")) {
-//            Log.e(TAG, "getOrderItems: nextStatus "+ nextStatus,new Error() );
-//            /*process.setOnClickListener(view -> {
-//                progressDialog.show();
-//                processOrder.clone().enqueue(new Callback<ResponseBody>() {
-//                    @Override
-//                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                        Log.i(TAG, "request body : "+ call.request().toString());
-//                        if(response.isSuccessful()){
-//                            try {
-//                                Log.i(TAG, "request body : "+ call.request().body());
-//                                Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
-//                                Log.i(TAG, "response body : "+ currentOrder.data.toString());
-//                                if(currentOrder.data.completionStatus.toString().equals(Status.BEING_PREPARED.toString()))
-//                                {
-////                                        process.setText("Pickup");
-//                                }
-//                                else {
-////                                        process.setText("Failed");
-//                                }
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                            process.setClickable(false);
-//                            process.setEnabled(false);
-//                        }
-//                        else {
-//                            try {
-//                                Log.e("TAG", "onResponse: "+response.errorBody().string(), new Error() );
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        progressDialog.hide();
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                        Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
-//                        progressDialog.hide();
-//                    }
-//                });
-//            });*/
-//        }
-//        else if (section.equals("processed")) {
-////            Call<ResponseBody> processOrder ;
-////            if(!isPickup)
-////                processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.AWAITING_PICKUP), order.id);
-////            else
-////                processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.DELIVERED_TO_CUSTOMER), order.id);
-////
-//
-////            Log.i("PICKUPMSG", "onCreate: isPickup :"+isPickup, new Error() );
-//
-//            process.setText("Pickup");
-//
-//            process.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//
-////                Toast.makeText(getApplicationContext(), "being delivered clicked", Toast.LENGTH_SHORT).show();
-//                    progressDialog.show();
-//                    processOrder.clone().enqueue(new Callback<ResponseBody>() {
-//                        @Override
-//                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//
-//                            Log.i(TAG, "request body : "+ call.request().body());
-//                            if(response.isSuccessful()){
-//
-//                                try {
-////                                Log.e("TAG", "onResponse: "+response.body().string(), new Error() );
-//                                    Log.i(TAG, "request body : "+ call.request().body());
-//                                    Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
-//                                    Log.i(TAG, "response body : "+ currentOrder.data.toString());
-//                                    Log.i("PICKUPMSG", "onResponse: "+currentOrder.data.completionStatus.toString());
-//                                    if(currentOrder.data.completionStatus.toString().equals(Status.DELIVERED_TO_CUSTOMER.toString()))
-//                                        process.setText("Delivered");
-//
-//                                    else if(currentOrder.data.completionStatus.toString().equals(Status.AWAITING_PICKUP.toString())){
-//                                        process.setText("Awaiting Pickup");
-//                                    }
-//                                    else
-//                                        process.setText("Failed");
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                process.setClickable(false);
-//                                process.setEnabled(false);
-//                            }
-//                            else {
-//                                try {
-//                                    Log.e("TAG", "isPickup : "+isPickup+" response error body : "+response.errorBody().string(), new Error() );
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-//                            progressDialog.hide();
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                            Toast.makeText(getApplicationContext(), "Not Found", Toast.LENGTH_SHORT).show();
-//                            progressDialog.hide();
-//                        }
-//                    });
-//                }
-//            });
-//
-//        }
-//        else if(section.equals("sent"))
-//            process.setVisibility(View.INVISIBLE);
-
         process.setOnClickListener(view -> {
-            processOrder.clone().enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if(response.isSuccessful()){
-                        try {
-                            Log.i(TAG, "onResponse: "+response.raw().toString());
-                            Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
-                            process.setText(Utility.removeUnderscores(currentOrder.data.completionStatus));
-                            process.setEnabled(false);
-                            process.setClickable(false);
-                            Toast.makeText(getApplicationContext(), "Status Updated", Toast.LENGTH_SHORT).show();
-                            finish();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+            onProcessButtonClick(processOrder);
+        });
+
+    }
+
+    private void onProcessButtonClick(Call<ResponseBody> processOrder) {
+
+        processOrder.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if(response.isSuccessful()){
+                    try {
+                        Log.i(TAG, "onResponse: "+response.raw().toString());
+                        Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
+                        process.setText(Utility.removeUnderscores(currentOrder.data.completionStatus));
+                        process.setEnabled(false);
+                        process.setClickable(false);
+                        Toast.makeText(getApplicationContext(), "Status Updated", Toast.LENGTH_SHORT).show();
+                        finish();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+            }
 
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Log.e(TAG, "onFailure: ",t );
-                }
-            });
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e(TAG, "onFailure: ",t );
+            }
         });
 
     }

@@ -202,7 +202,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         DeliveryApi deliveryApiService = retrofit.create(DeliveryApi.class);
 
         //12dc5195-5f03-42fd-94f0-f147dc4ced55
-        Call<OrderDeliveryDetailsResponse> deliveryDetailsResponseCall = deliveryApiService.getOrderDeliveryDetailsById(headers, "12dc5195-5f03-42fd-94f0-f147dc4ced55");
+        Call<OrderDeliveryDetailsResponse> deliveryDetailsResponseCall = deliveryApiService.getOrderDeliveryDetailsById(headers, order.id);
 
         progressDialog.show();
 

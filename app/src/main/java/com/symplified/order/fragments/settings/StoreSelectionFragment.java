@@ -106,7 +106,7 @@ public class StoreSelectionFragment extends Fragment {
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
                 if(response.isSuccessful()){
                     progressDialog.hide();
-                    storeAdapter = new StoreAdapter(response.body().data.content, getActivity(), progressDialog);
+                    storeAdapter = new StoreAdapter(response.body().data.content, getContext(), progressDialog, sharedPreferences);
                     recyclerView.setAdapter(storeAdapter);
                     storeAdapter.notifyDataSetChanged();
                 }
@@ -130,5 +130,17 @@ public class StoreSelectionFragment extends Fragment {
         noStore = view.findViewById(R.id.no_store);
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getStores(sharedPreferences);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getStores(sharedPreferences);
     }
 }
