@@ -194,7 +194,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
     }
 
-    public static void setStoreStatus(JSONObject responseJson, TextView status) {
+    public void setStoreStatus(JSONObject responseJson, TextView status) {
         SimpleDateFormat dtf = new SimpleDateFormat("hh:mm a");
         Calendar calendar = new GregorianCalendar();
         String closedUntil = null;

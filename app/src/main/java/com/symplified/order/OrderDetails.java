@@ -29,6 +29,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -312,6 +313,9 @@ public class OrderDetails extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.order_items);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(mDividerItemDecoration);
 
     }
 
@@ -336,37 +340,31 @@ public class OrderDetails extends AppCompatActivity {
             storeLogo.setVisibility(View.GONE);
             storeLogoText.setVisibility(View.GONE);
         }
-        home.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*
-                setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-                sharedPreferences.edit().remove("storeId").apply();
+        home.setOnClickListener(view -> {
+            /*
+            setResult(RESULT_OK, new Intent().putExtra("finish", 1));
+            Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+            sharedPreferences.edit().remove("storeId").apply();
 //                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                */
-                finish();
-            }
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            */
+            finish();
         });
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-                Intent intent = new Intent(getApplicationContext(), Login.class);
-                String storeIdList = sharedPreferences.getString("storeIdList", null);
-                if(storeIdList != null )
-                {
-                    for(String storeId : storeIdList.split(" ")){
-                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                    }
+        logout.setOnClickListener(view -> {
+            setResult(RESULT_OK, new Intent().putExtra("finish", 1));
+            Intent intent = new Intent(getApplicationContext(), Login.class);
+            String storeIdList1 = sharedPreferences.getString("storeIdList", null);
+            if(storeIdList1 != null )
+            {
+                for(String storeId : storeIdList1.split(" ")){
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
-                sharedPreferences.edit().clear().apply();
-                startActivity(intent);
-                finish();
             }
+            sharedPreferences.edit().clear().apply();
+            startActivity(intent);
+            finish();
         });
 
         ImageView settings = toolbar.findViewById(R.id.app_bar_settings);

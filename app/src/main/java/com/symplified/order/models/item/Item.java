@@ -14,6 +14,7 @@ public class Item{
     public String productName;
     public String specialInstruction;
     public String SKU;
+    public String productVariant;
 
     public static class ItemList {
         public List<Item> content;

@@ -267,7 +267,7 @@
 
         <include
             android:id="@+id/headers"
-            layout="@layout/order_item"
+            layout="@layout/order_item_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"

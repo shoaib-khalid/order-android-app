@@ -94,7 +94,6 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
                 snoozeStore(0, false);
                 Toast.makeText(getContext(), "Store Opened", Toast.LENGTH_SHORT).show();
             }
-            storeAdapter.notifyDataSetChanged();
             dismiss();
         });
 //        RadioGroup pausedGroup = view.findViewById(R.id.paused_status);
@@ -143,7 +142,8 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
                         Log.i(TAG, "onResponse: "+ response.raw());
                         status.setText("Open");
                     }
-//                    Toast.makeText(getContext(), "Closed for "+minutes+" minutes", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(status.getContext(), "Closed for "+minutes+" minutes", Toast.LENGTH_SHORT).show();
+                    storeAdapter.notifyDataSetChanged();
                 }
             }
 

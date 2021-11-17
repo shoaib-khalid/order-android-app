@@ -22,6 +22,7 @@
     <string name="tv_shipment_note_value">Please Ring the bell</string>
     <string name="header_item">Item</string>
     <string name="header_special_instruction">Special Instructions</string>
+    <string name="header_variant">Variation</string>
     <string name="header_qty">Qty</string>
     <string name="header_price">Price</string>
     <string name="sub_total">Sub-Total</string>

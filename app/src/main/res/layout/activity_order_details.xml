@@ -370,13 +370,13 @@
             android:id="@+id/rl_items"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintHeight_percent="0.25"
+            app:layout_constraintHeight_percent="0.4"
             app:layout_constraintTop_toBottomOf="@+id/divide3"
             >
 
             <include
                 android:id="@+id/headers"
-                layout="@layout/order_item"
+                layout="@layout/order_item_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
