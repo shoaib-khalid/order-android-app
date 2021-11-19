@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -92,62 +93,59 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
         holder.name.setText(items.get(position).name);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*
-                progressDialog.show();
-                SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-                final SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString("timezone", items.get(holder.getAdapterPosition()).regionCountry.timezone).apply();
-                editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
+        holder.itemView.setOnClickListener(view -> {
+            /*
+            progressDialog.show();
+            SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+            final SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("timezone", items.get(holder.getAdapterPosition()).regionCountry.timezone).apply();
+            editor.putString("storeId", items.get(holder.getAdapterPosition()).id).apply();
 
-                String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+            String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
-                Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-                StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer Bearer accessToken");
+            Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+            StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer Bearer accessToken");
 
-                Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-                Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
+            Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+            Intent intent = new Intent (holder.itemView.getContext(), Orders.class);
 
-                responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        try {
-                            Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
+            responseLogo.clone().enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    try {
+                        Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
 
-                            if(responseBody.data !=null){
-                                Bitmap bitmap  = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
-                                if(bitmap != null) {
-                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                    bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                                    String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                                    editor.putString("logoImage", encodedImage);
-                                    editor.apply();
-                                }
+                        if(responseBody.data !=null){
+                            Bitmap bitmap  = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
+                            if(bitmap != null) {
+                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+                                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+                                editor.putString("logoImage", encodedImage);
+                                editor.apply();
                             }
-                            FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, view.getContext());
-                            progressDialog.hide();
-                            view.getContext().startActivity(intent);
-                            ((Activity) holder.itemView.getContext()).finish();
-                        } catch (IOException | ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
                         }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        FirebaseHelper.initializeFirebase(items.get(holder.getAdapterPosition()).id, view.getContext());
                         progressDialog.hide();
-
+                        view.getContext().startActivity(intent);
+                        ((Activity) holder.itemView.getContext()).finish();
+                    } catch (IOException | ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
                     }
-                });
-                */
-                BottomSheetDialogFragment bottomSheetDialogFragment = new SettingsBottomSheet(storeId, holder.status, StoreAdapter.this);
-                bottomSheetDialogFragment.show(((FragmentActivity) context).getSupportFragmentManager(),"bottomSheetDialog");
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    progressDialog.hide();
+
+                }
+            });
+            */
+            BottomSheetDialogFragment bottomSheetDialogFragment = new SettingsBottomSheet(storeId, holder.status, StoreAdapter.this);
+            bottomSheetDialogFragment.show(((FragmentActivity) context).getSupportFragmentManager(),"bottomSheetDialog");
 //                notifyDataSetChanged();
-            }
         });
     }
 

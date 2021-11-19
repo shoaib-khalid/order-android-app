@@ -37,6 +37,8 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.symplified.order.adapters.ItemsAdapter;
+import com.symplified.order.adapters.OrderAdapter;
+import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.ItemResponse;
@@ -107,8 +109,8 @@ public class OrderDetails extends AppCompatActivity {
         Order order = (Order) data.getSerializable("selectedOrder");
 
         //get Delivery Driver details from previous activity
-        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData driverDetails;
-        driverDetails = (OrderDeliveryDetailsResponse.OrderDeliveryDetailsData) data.getSerializable("deliveryDetails");
+//        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData driverDetails;
+//        driverDetails = (OrderDeliveryDetailsResponse.OrderDeliveryDetailsData) data.getSerializable("deliveryDetails");
 
         //get base url for api calls
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
@@ -125,7 +127,7 @@ public class OrderDetails extends AppCompatActivity {
         Log.i(TAG, "onCreate: "+order.toString());
 
         //display all order details to relevant fields
-        displayOrderDetails(sharedPreferences, order, storeIdList, driverDetails);
+        displayOrderDetails(sharedPreferences, order, storeIdList);
     }
 
     private void getOrderStatusDetails(Order order) {
@@ -258,8 +260,9 @@ public class OrderDetails extends AppCompatActivity {
     }
 
     private void displayOrderDetails(SharedPreferences sharedPreferences,
-                                     Order order, String storeIdList,
-                                     OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails) {
+                                     Order order, String storeIdList
+//                                     OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails
+    ) {
 
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZones = sharedPreferences.getString("timezone", null);
@@ -290,20 +293,22 @@ public class OrderDetails extends AppCompatActivity {
         deliveryDiscount.setText(Double.toString(order.deliveryDiscount));
         billingTotal.setText(Double.toString(order.total));
 
-        if(section.equals("sent") && deliveryDetails != null){
-            deliveryDetailsView.setVisibility(View.VISIBLE);
-            deliveryDetailsDivider.setVisibility(View.VISIBLE);
-            deliveryProvider.setText(deliveryDetails.provider.name);
-            driverName.setText(deliveryDetails.name);
-            driverContactNumber.setText(deliveryDetails.phoneNumber);
-            String link = "<a color=\"#1DA1F2\" href=\""+deliveryDetails.trackingUrl+"\">Click Here</a>";
-            new SpannableString(link).setSpan(
-                    new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),
-                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-            trackingLink.setText(Html.fromHtml(link), TextView.BufferType.SPANNABLE);
-            trackingLink.setMovementMethod(LinkMovementMethod.getInstance());
-            Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
-            spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
+//        && deliveryDetails != null
+        if(section.equals("sent") ){
+            setDriverDeliveryDetails(order, sharedPreferences);
+//            deliveryDetailsView.setVisibility(View.VISIBLE);
+//            deliveryDetailsDivider.setVisibility(View.VISIBLE);
+//            deliveryProvider.setText(deliveryDetails.provider.name);
+//            driverName.setText(deliveryDetails.name);
+//            driverContactNumber.setText(deliveryDetails.phoneNumber);
+//            String link = "<a color=\"#1DA1F2\" href=\""+deliveryDetails.trackingUrl+"\">Click Here</a>";
+//            new SpannableString(link).setSpan(
+//                    new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),
+//                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+//            trackingLink.setText(Html.fromHtml(link), TextView.BufferType.SPANNABLE);
+//            trackingLink.setMovementMethod(LinkMovementMethod.getInstance());
+//            Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
+//            spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
         }
 
         if(order.orderShipmentDetail.storePickup)
@@ -326,7 +331,7 @@ public class OrderDetails extends AppCompatActivity {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
 
-        if(storeIdList.split(" ").length-1 > 1)
+        if(storeIdList.split(" ").length > 1)
         {
             if(encodedImage != null)
                 Utility.decodeAndSetImage(storeLogo, encodedImage);
@@ -416,4 +421,55 @@ public class OrderDetails extends AppCompatActivity {
         progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
     }
+
+    private void setDriverDeliveryDetails(Order order, SharedPreferences sharedPreferences) {
+
+        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                .baseUrl(BASE_URL+App.DELIVERY_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        DeliveryApi deliveryApiService = retrofit.create(DeliveryApi.class);
+
+        //12dc5195-5f03-42fd-94f0-f147dc4ced55
+        Call<OrderDeliveryDetailsResponse> deliveryDetailsResponseCall = deliveryApiService.getOrderDeliveryDetailsById(headers, order.id);
+
+        progressDialog.show();
+
+        deliveryDetailsResponseCall.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
+            @Override
+            public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
+                if (response.isSuccessful()) {
+                    deliveryDetailsView.setVisibility(View.VISIBLE);
+                    deliveryDetailsDivider.setVisibility(View.VISIBLE);
+                    deliveryProvider.setText(response.body().data.provider.name);
+                    driverName.setText(response.body().data.name);
+                    driverContactNumber.setText(response.body().data.phoneNumber);
+                    String link = "<a color=\"#1DA1F2\" href=\""+response.body().data.trackingUrl+"\">Click Here</a>";
+                    new SpannableString(link).setSpan(
+                            new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),
+                            Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    trackingLink.setText(Html.fromHtml(link), TextView.BufferType.SPANNABLE);
+                    trackingLink.setMovementMethod(LinkMovementMethod.getInstance());
+                    Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
+                    spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
+
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
+                Log.e(TAG, "onFailure: ",t );
+                progressDialog.hide();
+            }
+        });
+
+
+    }
+
 }

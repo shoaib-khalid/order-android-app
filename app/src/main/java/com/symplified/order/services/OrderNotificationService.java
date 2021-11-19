@@ -20,6 +20,7 @@ import com.symplified.order.App;
 import com.symplified.order.Orders;
 import com.symplified.order.R;
 
+import java.util.List;
 import java.util.Random;
 
 public class OrderNotificationService extends FirebaseMessagingService {
@@ -54,6 +55,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(new Random().nextInt(), notification);
 
+        // && !isAppOnForeground(getApplicationContext(), getPackageName())
         if(!AlertService.isPlaying())
         {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -68,6 +70,22 @@ public class OrderNotificationService extends FirebaseMessagingService {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (AlertService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isAppOnForeground(Context context,String appPackageName) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+        final String packageName = appPackageName;
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
+                //                Log.e("app",appPackageName);
                 return true;
             }
         }

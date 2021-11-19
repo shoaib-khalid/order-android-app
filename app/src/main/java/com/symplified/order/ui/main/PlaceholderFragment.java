@@ -147,7 +147,7 @@ public class PlaceholderFragment extends Fragment {
                 break;
             }
             case "sent":{
-                pageViewModel.setIndex(2);
+                pageViewModel.setIndex(3);
                 orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId);
                 break;
             }
@@ -162,7 +162,7 @@ public class PlaceholderFragment extends Fragment {
                 break;
             }
             case "pickup": {
-                pageViewModel.setIndex(3);
+                pageViewModel.setIndex(2);
                 orderResponse = orderApiService.getPickupOrdersByClientId(headers, clientId);
                 break;
             }

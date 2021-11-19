@@ -9,6 +9,8 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
@@ -45,6 +47,8 @@ public class App extends Application {
     public void onCreate(){
         super.onCreate();
 
+        //restrict devices from forcing the dark mode on the app
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         //initialize the notification manager to receive and display notifications.
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ){

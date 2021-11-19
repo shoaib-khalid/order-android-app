@@ -26,6 +26,18 @@ public class OrderDeliveryDetailsResponse extends HttpResponse implements Serial
             this.orderNumber = orderNumber;
             this.provider = provider;
         }
+
+        @Override
+        public String toString() {
+            return "OrderDeliveryDetailsData{" +
+                    "name='" + name + '\'' +
+                    ", phoneNumber='" + phoneNumber + '\'' +
+                    ", plateNumber='" + plateNumber + '\'' +
+                    ", trackingUrl='" + trackingUrl + '\'' +
+                    ", orderNumber='" + orderNumber + '\'' +
+                    ", provider=" + provider +
+                    '}';
+        }
     }
 
     @Override

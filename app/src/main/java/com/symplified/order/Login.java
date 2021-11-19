@@ -1,6 +1,7 @@
 package com.symplified.order;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -15,6 +16,7 @@ import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -40,11 +42,18 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.appupdate.AppUpdateOptions;
+import com.google.android.play.core.install.model.ActivityResult;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -90,6 +99,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Login extends AppCompatActivity{
 
+    private static final int UPDATE_REQUEST_CODE = 112;
+    private static final String TAG = Login.class.getName();
     private Button login;
     private TextInputLayout email;
     private TextInputLayout password;
@@ -105,6 +116,8 @@ public class Login extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.Theme_SymplifiedOrderUpdate);
+
+        callInAppUpdate();
 
         configureRemoteConfig();
 
@@ -412,5 +425,49 @@ public class Login extends AppCompatActivity{
         }
         else
             super.onBackPressed();
+    }
+
+    public void callInAppUpdate(){
+        AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
+
+// Returns an intent object that you use to check for an update.
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+// Checks that the platform will allow the specified type of update.
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                Toast.makeText(this, "Update is available", Toast.LENGTH_SHORT).show();
+                // Request the update.
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            this,
+                            AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE)
+                                    .setAllowAssetPackDeletion(true)
+                                    .build(),
+                            UPDATE_REQUEST_CODE);
+                } catch (IntentSender.SendIntentException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == UPDATE_REQUEST_CODE && resultCode == RESULT_OK) {
+            Toast.makeText(this, "Update Started !", Toast.LENGTH_SHORT).show();
+        } else if(resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
+            Log.d(TAG, "onActivityResult: " + "Update flow failed! Result code: " + resultCode);
+            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        callInAppUpdate();
     }
 }

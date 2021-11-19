@@ -27,6 +27,7 @@ import com.symplified.order.R;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
+import com.symplified.order.services.AlertService;
 import com.symplified.order.utils.Utility;
 
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public boolean isPickup;
     public Context context;
     private final String TAG = OrderAdapter.class.getName();
-    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
+//    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
     private Dialog progressDialog;
 
     public OrderAdapter(List<Order> orders, String section, Context context){
@@ -130,7 +131,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             String encodedStoreLogo = sharedPreferences.getString("logoImage-"+orders.get(holder.getAdapterPosition()).storeId, null);
 
-            if(storeIdList.split(" ").length-1 > 1)
+            if(storeIdList.split(" ").length > 1)
             {
 
                 if(sharedPreferences.contains("logoImage-"+orders.get(holder.getAdapterPosition()).storeId)
@@ -179,7 +180,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 intent.putExtra("pickup", isPickup);
-                intent.putExtra("deliveryDetails", deliveryDetails);
+//                intent.putExtra("deliveryDetails", deliveryDetails);
+                context.stopService(new Intent(context, AlertService.class));
                 ((Activity) context).startActivityForResult(intent, 4);
 //                ((Activity)view.getContext()).finish();
             }
@@ -210,19 +212,24 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
                 if(response.isSuccessful()){
-                    Log.i(TAG, "onResponse: "+response.body().toString());
+                    Log.i(TAG, "onResponse123: "+ response.body().toString());
                     if(holder.driverDetails.getVisibility() == View.VISIBLE){
-                        holder.driverName.setText(response.body().data.name);
+                        Log.i(TAG, "onResponse123: " + order.invoiceId + " id : "+order.id);
+                        String name = response.body().data.name ;
+                        if(name != null && name.split(" ").length > 1){
+                            name = name.trim().split(" ")[0] + " ...";
+                        }
+                        holder.driverName.setText(name);
                         holder.driverPhoneNumber.setText(response.body().data.phoneNumber);
 
-                        OrderDeliveryDetailsResponse.Provider provider = new OrderDeliveryDetailsResponse.Provider(response.body().data.provider.id,
-                                response.body().data.provider.name, response.body().data.provider.providerImage);
-
-                        deliveryDetails = new OrderDeliveryDetailsResponse
-                                .OrderDeliveryDetailsData(response.body().data.name,
-                                response.body().data.phoneNumber, response.body().data.plateNumber,
-                                response.body().data.trackingUrl, response.body().data.orderNumber,
-                                provider);
+//                        OrderDeliveryDetailsResponse.Provider provider = new OrderDeliveryDetailsResponse.Provider(response.body().data.provider.id,
+//                                response.body().data.provider.name, response.body().data.provider.providerImage);
+//
+//                        deliveryDetails = new OrderDeliveryDetailsResponse
+//                                .OrderDeliveryDetailsData(response.body().data.name,
+//                                response.body().data.phoneNumber, response.body().data.plateNumber,
+//                                response.body().data.trackingUrl, response.body().data.orderNumber,
+//                                provider);
                     }
                     else {
                         Log.e(TAG, "Response Unsuccessful" + "onResponse: "+response.body());
