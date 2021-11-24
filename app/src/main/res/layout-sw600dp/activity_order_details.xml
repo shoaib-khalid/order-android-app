@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:keepScreenOn="true"
     android:layout_height="match_parent"
-    tools:context=".OrderDetails">
+    tools:context=".OrderDetailsActivity">
 
     <include android:id="@+id/toolbar"
         layout="@layout/custom_action_bar"

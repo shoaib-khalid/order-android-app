@@ -1,18 +1,14 @@
-package com.symplified.order.ui.main;
+package com.symplified.order.ui.tabs;
 
 import android.content.Context;
-import android.content.Intent;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.symplified.order.R;
-import com.symplified.order.services.AlertService;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to

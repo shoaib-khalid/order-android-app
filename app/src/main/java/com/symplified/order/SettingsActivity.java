@@ -56,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Login.class);
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 String storeIdList = sharedPreferences.getString("storeIdList", null);
                 if(storeIdList != null )
                 {

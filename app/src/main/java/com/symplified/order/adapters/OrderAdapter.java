@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
-import com.symplified.order.OrderDetails;
+import com.symplified.order.OrderDetailsActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.models.order.Order;
@@ -176,7 +176,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.process.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent (holder.itemView.getContext(), OrderDetails.class);
+                Intent intent = new Intent (holder.itemView.getContext(), OrderDetailsActivity.class);
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 intent.putExtra("pickup", isPickup);

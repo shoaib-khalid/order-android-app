@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/choose_store_layout"
-    tools:context=".ChooseStore">
+    tools:context=".ChooseStoreActivity">
 
 <!--    <include android:id="@+id/toolbar"-->
 <!--        layout="@layout/custom_action_bar"-->

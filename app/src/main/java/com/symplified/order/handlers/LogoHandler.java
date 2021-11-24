@@ -1,30 +1,23 @@
 package com.symplified.order.handlers;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
 
 import com.google.gson.Gson;
 import com.symplified.order.App;
-import com.symplified.order.Login;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.asset.Asset;
 import com.symplified.order.services.DownloadImageTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 
 import okhttp3.OkHttpClient;

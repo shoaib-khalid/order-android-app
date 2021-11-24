@@ -16,7 +16,6 @@ import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
-import android.text.util.Linkify;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +36,6 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.symplified.order.adapters.ItemsAdapter;
-import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
@@ -66,7 +64,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class OrderDetails extends AppCompatActivity {
+public class OrderDetailsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
@@ -359,7 +357,7 @@ public class OrderDetails extends AppCompatActivity {
         });
         logout.setOnClickListener(view -> {
             setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-            Intent intent = new Intent(getApplicationContext(), Login.class);
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             String storeIdList1 = sharedPreferences.getString("storeIdList", null);
             if(storeIdList1 != null )
             {

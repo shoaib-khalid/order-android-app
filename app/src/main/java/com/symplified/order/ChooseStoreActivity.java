@@ -8,19 +8,16 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
-import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.models.Store.Store;
@@ -44,7 +41,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 //not used anymore
-public class ChooseStore extends AppCompatActivity {
+public class ChooseStoreActivity extends AppCompatActivity {
 
     private String BASE_URL;
     private Toolbar toolbar;
@@ -76,7 +73,7 @@ public class ChooseStore extends AppCompatActivity {
         ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
         final SharedPreferences finalSharedPreferences = sharedPreferences;
         logout.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), Login.class);
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             FirebaseMessaging.getInstance().unsubscribeFromTopic(finalSharedPreferences.getString("storeId", null));
             finalSharedPreferences.edit().clear().apply();
             startActivity(intent);
@@ -121,7 +118,7 @@ public class ChooseStore extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-        Intent intent = new Intent(context, Orders.class);
+        Intent intent = new Intent(context, OrdersActivity.class);
 
         responseLogo.clone().enqueue(new Callback<ResponseBody>() {
             @Override

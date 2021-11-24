@@ -17,7 +17,7 @@ import androidx.core.app.TaskStackBuilder;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.symplified.order.App;
-import com.symplified.order.Orders;
+import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
-        Intent test = new Intent(this, Orders.class);
+        Intent test = new Intent(this, OrdersActivity.class);
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
         taskStackBuilder.addNextIntentWithParentStack(test);
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);

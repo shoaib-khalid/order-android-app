@@ -17,9 +17,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.services.AlertService;
-import com.symplified.order.ui.main.SectionsPagerAdapter;
+import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 
-public class Orders extends AppCompatActivity {
+public class OrdersActivity extends AppCompatActivity {
 
     private ActivityOrdersBinding binding;
     private Toolbar toolbar;
@@ -74,7 +74,7 @@ public class Orders extends AppCompatActivity {
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), Login.class);
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 String storeIdList = sharedPreferences.getString("storeIdList", null);
                 if(storeIdList != null )
                 {

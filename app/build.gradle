@@ -7,15 +7,15 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 
 android {
-//    signingConfigs {
-//        release {
-//            storeFile file('')
-//            storePassword ''
-//            keyPassword ''
-//            keyAlias ''
-//        }
-//
-//    }
+    signingConfigs {
+        release {
+            storeFile file('C:\\Users\\Nadeem\\AndroidStudioProjects\\SymplifiedOrderUpdate\\keys\\release.jks')
+            storePassword 'kalsym@123'
+            keyPassword 'kalsym@123'
+            keyAlias 'C:\\Users\\Nadeem\\AndroidStudioProjects\\SymplifiedOrderUpdate\\keys\\release.jks'
+        }
+
+    }
 
     compileSdk 31
     defaultConfig {
@@ -29,14 +29,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-//    lintOptions{
-//        checkReleaseBuilds false
-//    }
+    lintOptions{
+        checkReleaseBuilds false
+    }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
@@ -73,10 +74,4 @@ dependencies {
 
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-analytics'
-
-    def nav_version = "2.3.5"
-
-    // Java language implementation
-    implementation "androidx.navigation:navigation-fragment:$nav_version"
-    implementation "androidx.navigation:navigation-ui:$nav_version"
 }

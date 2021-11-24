@@ -1,51 +1,27 @@
 package com.symplified.order;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.AlarmManager;
 import android.app.Dialog;
-import android.app.PendingIntent;
-import android.app.ProgressDialog;
-import android.app.job.JobInfo;
-import android.app.job.JobScheduler;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PersistableBundle;
-import android.util.Base64;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -57,50 +33,32 @@ import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.google.gson.Gson;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.handlers.LogoHandler;
-import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
-import com.symplified.order.models.asset.Asset;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
-import com.symplified.order.services.AlertService;
-import com.symplified.order.services.DownloadImageTask;
-import com.symplified.order.services.StoreBroadcastReceiver;
-import com.symplified.order.services.StoreManagerService;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class Login extends AppCompatActivity{
+public class LoginActivity extends AppCompatActivity{
 
     private static final int UPDATE_REQUEST_CODE = 112;
-    private static final String TAG = Login.class.getName();
+    private static final String TAG = LoginActivity.class.getName();
     private Button login;
     private TextInputLayout email;
     private TextInputLayout password;
@@ -254,7 +212,7 @@ public class Login extends AppCompatActivity{
                         public void run() {
                             progressDialog.hide();
                             Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(getApplicationContext(), Orders.class);
+                            Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
                             startActivity(intent);
                         }
                     }, 5000);
@@ -387,11 +345,12 @@ public class Login extends AppCompatActivity{
      */
     @Override
     protected void onStart() {
+        callInAppUpdate();
         //check if user session already exists, for persistent login
         if(sharedPreferences.getInt("isLoggedIn",-1) == 1
                 && sharedPreferences.contains("storeIdList")
                 && sharedPreferences.getInt("versionCode", 0) == BuildConfig.VERSION_CODE) {
-            Intent intent = new Intent(getApplicationContext(), Orders.class);
+            Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
         }
