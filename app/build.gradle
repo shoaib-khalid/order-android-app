@@ -29,9 +29,9 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    lintOptions{
-        checkReleaseBuilds false
-    }
+//    lintOptions{
+//        checkReleaseBuilds false
+//    }
 
     buildTypes {
         release {
