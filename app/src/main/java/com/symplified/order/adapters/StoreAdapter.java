@@ -160,8 +160,14 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public void getStoreStatus(String storeId, ViewHolder holder){
         String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
-        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
+        Retrofit retrofitLogo = new Retrofit.Builder()
+                .client(new OkHttpClient())
+                .baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
         StoreApi storeApiService = retrofitLogo.create(StoreApi.class);
+
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 

@@ -1,14 +1,19 @@
 package com.symplified.order.ui.tabs;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,12 +37,15 @@ import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.models.OrderDetailsModel;
 import com.symplified.order.models.order.OrderResponse;
 import com.symplified.order.services.AlertService;
+import com.symplified.order.services.StoreBroadcastReceiver;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -67,6 +75,7 @@ public class PlaceholderFragment extends Fragment {
     private RecyclerView recyclerView;
     private String section;
     private Dialog progressDialog;
+    private BroadcastReceiver ordersReceiver;
     String BASE_URL;
 
     public static PlaceholderFragment newInstance(String type) {
@@ -148,6 +157,16 @@ public class PlaceholderFragment extends Fragment {
                 break;
             }
         }
+
+        ordersReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+//                if(section.equals("new")){
+                    Toast.makeText(getContext(), "Updating orders", Toast.LENGTH_SHORT).show();
+                    onResume();
+//                }
+            }
+        };
     }
 
     @Override
@@ -169,76 +188,24 @@ public class PlaceholderFragment extends Fragment {
 
         Log.e("TAG", "URL : "+orderResponse.request().url(), new Error() );
 
-        progressDialog.show();
-        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+        updateOrdersEveryFiveMinutes();
 
-
-
-                if(response.isSuccessful())
-                {
-                    try {
-                        OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
-                        orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
-                        recyclerView.setAdapter(orderAdapter);
-                        orderAdapter.notifyDataSetChanged();
-                        progressDialog.hide();
-                        Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(getActivity(), "Failed to fetch orders, ", Toast.LENGTH_SHORT).show();
-                Log.e("TAG", "onFailure: ",t.getCause() );
-                progressDialog.hide();
-            }
-        });
+//        getOrders();
         return root;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getContext().unregisterReceiver(ordersReceiver);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        progressDialog.show();
         getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
-        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
 
-                if(response.isSuccessful())
-                {
-                    try {
-                        OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
-                        orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
-                        recyclerView.setAdapter(orderAdapter);
-                        orderAdapter.notifyDataSetChanged();
-                        progressDialog.hide();
-                        Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                progressDialog.hide();
-            }
-        });
+        getOrders();
 
         if(AlertService.isPlaying()){
             getActivity().stopService(new Intent(getContext(), AlertService.class));
@@ -248,10 +215,69 @@ public class PlaceholderFragment extends Fragment {
 
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        IntentFilter filter = new IntentFilter("com.symplified.order.GET_ORDERS");
+        getContext().registerReceiver(ordersReceiver, filter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getContext().unregisterReceiver(ordersReceiver);
+    }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
     }
+
+    public void updateOrdersEveryFiveMinutes(){
+        AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+        Intent fetchOrdersIntent = new Intent("com.symplified.order.GET_ORDERS");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+//        getActivity().sendBroadcast(fetchOrdersIntent);
+        alarmManager.setRepeating(
+                AlarmManager.RTC,
+                System.currentTimeMillis(),
+                60 * 1000,
+                pendingIntent
+        );
+    }
+
+    public void getOrders(){
+        progressDialog.show();
+        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                if(response.isSuccessful())
+                {
+                    try {
+                        OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
+                        orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
+                        recyclerView.setAdapter(orderAdapter);
+                        orderAdapter.notifyDataSetChanged();
+                        progressDialog.dismiss();
+                        Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                progressDialog.dismiss();
+            }
+        });
+    }
+
 }

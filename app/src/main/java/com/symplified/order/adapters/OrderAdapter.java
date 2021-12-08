@@ -21,6 +21,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.transition.MaterialContainerTransform;
 import com.symplified.order.App;
 import com.symplified.order.OrderDetailsActivity;
 import com.symplified.order.R;
@@ -33,6 +34,8 @@ import com.symplified.order.utils.Utility;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
@@ -51,6 +54,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private final String TAG = OrderAdapter.class.getName();
 //    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
     private Dialog progressDialog;
+    private boolean hasDeliveryDetails;
 
     public OrderAdapter(List<Order> orders, String section, Context context){
 //        List<OrderDetailsModel> items,
@@ -156,8 +160,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.amount.setText(Double.toString(orders.get(position).total));
         holder.invoice.setText(orders.get(position).invoiceId);
         if(section.equals("sent")){
-            holder.driverDetails.setVisibility(View.VISIBLE);
-            holder.driverDetailsDivider.setVisibility(View.VISIBLE);
             setDriverDeliveryDetails(orders.get(position), sharedPreferences, holder);
         }
 
@@ -180,6 +182,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 intent.putExtra("pickup", isPickup);
+                intent.putExtra("hasDeliveryDetails", hasDeliveryDetails);
 //                intent.putExtra("deliveryDetails", deliveryDetails);
                 context.stopService(new Intent(context, AlertService.class));
                 ((Activity) context).startActivityForResult(intent, 4);
@@ -213,7 +216,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
                 if(response.isSuccessful()){
                     Log.i(TAG, "onResponse123: "+ response.body().toString());
-                    if(holder.driverDetails.getVisibility() == View.VISIBLE){
+                    OrderDeliveryDetailsResponse.OrderDeliveryDetailsData data = response.body().data;
+                    if(data.name != null && data.phoneNumber != null){
+
+                        holder.driverDetails.setVisibility(View.VISIBLE);
+                        holder.driverDetailsDivider.setVisibility(View.VISIBLE);
+
                         Log.i(TAG, "onResponse123: " + order.invoiceId + " id : "+order.id);
                         String name = response.body().data.name ;
                         if(name != null && name.split(" ").length > 1){
@@ -221,6 +229,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         }
                         holder.driverName.setText(name);
                         holder.driverPhoneNumber.setText(response.body().data.phoneNumber);
+                        hasDeliveryDetails = true;
 
 //                        OrderDeliveryDetailsResponse.Provider provider = new OrderDeliveryDetailsResponse.Provider(response.body().data.provider.id,
 //                                response.body().data.provider.name, response.body().data.provider.providerImage);
@@ -233,16 +242,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     }
                     else {
                         Log.e(TAG, "Response Unsuccessful" + "onResponse: "+response.body());
+                        holder.driverDetails.setVisibility(View.GONE);
+                        holder.driverDetailsDivider.setVisibility(View.GONE);
+                        hasDeliveryDetails = false;
                     }
 
                 }
-                progressDialog.hide();
+                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ",t );
-                progressDialog.hide();
+                progressDialog.dismiss();
             }
         });
 

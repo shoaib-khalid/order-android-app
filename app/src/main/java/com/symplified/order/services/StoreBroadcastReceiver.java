@@ -6,6 +6,11 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class StoreBroadcastReceiver extends BroadcastReceiver {
 
     private static final String TAG = StoreBroadcastReceiver.class.getName();
@@ -13,12 +18,8 @@ public class StoreBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-
-                //        ComponentName componentName = new ComponentName(this, StoreManagerService.class);
+        new Thread(() -> {
+            //        ComponentName componentName = new ComponentName(this, StoreManagerService.class);
 ////        PersistableBundle bundle = new PersistableBundle();
 ////        bundle.putString("storeId", "Testing Store Closure");
 //        JobInfo.Builder builder = new JobInfo.Builder(1423, componentName)
@@ -50,7 +51,6 @@ public class StoreBroadcastReceiver extends BroadcastReceiver {
 
 
 
-            }
         }).start();
 
     }

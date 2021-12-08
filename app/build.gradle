@@ -5,7 +5,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
-
 android {
     signingConfigs {
         release {
@@ -22,10 +21,8 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 31
-        //27
-        versionCode 28
-        versionName "1.2.2"
-
+        versionCode 33
+        versionName "1.2.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -48,7 +45,6 @@ android {
         viewBinding true
     }
 }
-
 
 dependencies {
 

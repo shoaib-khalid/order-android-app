@@ -33,7 +33,10 @@ public interface StoreApi {
     Call<ResponseBody> getStoreStatusById(@HeaderMap Map<String,String> headers, @Path("storeId") String storeId);
 
     @PUT("stores/{storeId}/timings/snooze")
-    Call<ResponseBody> updateStoreStatus(@HeaderMap Map<String,String> headers, @Path("storeId") String storeId, @Query("isSnooze") boolean isSnooze, @Query("snoozeDuration") int snoozeDuration);
+    Call<ResponseBody> updateStoreStatus(@HeaderMap Map<String,String> headers,
+                                         @Path("storeId") String storeId,
+                                         @Query("isSnooze") boolean isSnooze,
+                                         @Query("snoozeDuration") int snoozeDuration);
 
     @GET("stores/{storeId}/timings/snooze")
     Call<ResponseBody> getStoreStatus(@HeaderMap Map<String,String> headers, @Path("storeId") String storeId);

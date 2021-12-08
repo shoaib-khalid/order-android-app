@@ -80,6 +80,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private RelativeLayout deliveryDetailsView;
     private View deliveryDetailsDivider;
     private String nextStatus;
+    private boolean hasDeliveryDetails;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
@@ -97,6 +98,10 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         section = null;
         section = getIntent().getStringExtra("section");
+
+        if(getIntent().getExtras().containsKey("hasDeliveryDetails")){
+            hasDeliveryDetails = getIntent().getBooleanExtra("hasDeliveryDetails", false);
+        }
 
         //initialize all views
         initViews();
@@ -196,7 +201,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     itemsAdapter.setItems(response.body().data.content);
                     recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
-                    progressDialog.hide();
+                    progressDialog.dismiss();
                 }
 
 
@@ -205,7 +210,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Failed to retrieve items", Toast.LENGTH_SHORT).show();
-                progressDialog.hide();
+                progressDialog.dismiss();
             }
         });
     }
@@ -230,10 +235,11 @@ public class OrderDetailsActivity extends AppCompatActivity {
     }
 
     private void onProcessButtonClick(Call<ResponseBody> processOrder) {
-
+        progressDialog.show();
         processOrder.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                progressDialog.dismiss();
                 if(response.isSuccessful()){
                     try {
                         Log.i(TAG, "onResponse: "+response.raw().toString());
@@ -292,7 +298,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         billingTotal.setText(Double.toString(order.total));
 
 //        && deliveryDetails != null
-        if(section.equals("sent") ){
+        if(section.equals("sent") && hasDeliveryDetails ){
             setDriverDeliveryDetails(order, sharedPreferences);
 //            deliveryDetailsView.setVisibility(View.VISIBLE);
 //            deliveryDetailsDivider.setVisibility(View.VISIBLE);
@@ -405,9 +411,10 @@ public class OrderDetailsActivity extends AppCompatActivity {
         driverContactNumber = findViewById(R.id.contact_value);
         trackingLink = findViewById(R.id.tracking_value);
         storeLogoText = findViewById(R.id.storeLogoDetailsText);
-        toolbar = findViewById(R.id.toolbar);
         deliveryDetailsView = findViewById(R.id.delivery_details);
         deliveryDetailsDivider = findViewById(R.id.divide3);
+
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
@@ -463,7 +470,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ",t );
-                progressDialog.hide();
+                progressDialog.dismiss();
             }
         });
 

@@ -81,14 +81,6 @@ public class LoginActivity extends AppCompatActivity{
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_login);
-
-//        try {
-//            Runtime.getRuntime().exec("pm clear "+getApplicationContext().getPackageName());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        ((ActivityManager)getSystemService(ACTIVITY_SERVICE)).clearApplicationUserData(); // note: it has a return value!
-
         initViews();
 
         login.setOnClickListener(view -> {
@@ -123,16 +115,17 @@ public class LoginActivity extends AppCompatActivity{
      */
     private void configureRemoteConfig() {
         mRemoteConfig = FirebaseRemoteConfig.getInstance();
-        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder().setMinimumFetchIntervalInSeconds(0).build();
-
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings
+                .Builder()
+                .setMinimumFetchIntervalInSeconds(0)
+                .build();
         mRemoteConfig.setConfigSettingsAsync(configSettings);
-
-        stores = new ArrayList<>();
-
         mRemoteConfig.setDefaultsAsync(R.xml.defaults);
 
         mRemoteConfig.fetch(0);
         mRemoteConfig.activate();
+
+        stores = new ArrayList<>();
         BASE_URL = mRemoteConfig.getString("base_url");
 
         if(BASE_URL.equals("")){
@@ -210,7 +203,7 @@ public class LoginActivity extends AppCompatActivity{
                     new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            progressDialog.hide();
+                            progressDialog.dismiss();
                             Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
                             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
                             startActivity(intent);
@@ -219,7 +212,7 @@ public class LoginActivity extends AppCompatActivity{
                 }
                 else {
                     Log.d("TAG", "Login response : Not successful");
-                    progressDialog.hide();
+                    progressDialog.dismiss();
                     loginMessage = "Unsuccessful, Please try again";
                     email.getEditText().setText("");
                     password.getEditText().setText("");
@@ -235,7 +228,7 @@ public class LoginActivity extends AppCompatActivity{
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
                 Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
-                progressDialog.hide();
+                progressDialog.dismiss();
             }
 
         });
@@ -388,10 +381,8 @@ public class LoginActivity extends AppCompatActivity{
 
     public void callInAppUpdate(){
         AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
-
 // Returns an intent object that you use to check for an update.
         Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
-
 // Checks that the platform will allow the specified type of update.
         appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE

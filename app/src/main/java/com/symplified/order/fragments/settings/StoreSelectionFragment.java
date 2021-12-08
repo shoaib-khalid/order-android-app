@@ -105,7 +105,7 @@ public class StoreSelectionFragment extends Fragment {
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
                 if(response.isSuccessful()){
-                    progressDialog.hide();
+                    progressDialog.dismiss();
                     storeAdapter = new StoreAdapter(response.body().data.content, getContext(), progressDialog, sharedPreferences);
                     recyclerView.setAdapter(storeAdapter);
                     storeAdapter.notifyDataSetChanged();

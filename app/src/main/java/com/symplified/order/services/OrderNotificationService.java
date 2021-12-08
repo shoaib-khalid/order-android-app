@@ -34,9 +34,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
-        Intent test = new Intent(this, OrdersActivity.class);
+        Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-        taskStackBuilder.addNextIntentWithParentStack(test);
+        taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
         PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)

@@ -150,7 +150,7 @@ public class ChooseStoreActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                progressDialog.hide();
+                progressDialog.dismiss();
 
             }
         });

@@ -21,22 +21,20 @@ public class AlertService extends Service{
 
 
     private static MediaPlayer mediaPlayer;
-
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-//
         mediaPlayer.setLooping(true);
-//        mediaPlayer.start();
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Notification notification =  new Notification.Builder(this, App.ORDERS)
-                    .setContentTitle("Symplified").setContentText("Waiting for orders").setPriority(Notification.PRIORITY_LOW).build();
+                    .setContentTitle("Symplified")
+                    .setContentText("Waiting for orders")
+                    .setPriority(Notification.PRIORITY_LOW)
+                    .build();
             startForeground(1 , notification);
         }
-//        Toast.makeText(this, "service is created.", Toast.LENGTH_LONG).show();
     }
 
     @Nullable
@@ -55,8 +53,11 @@ public class AlertService extends Service{
             return START_STICKY;
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), AudioManager.FLAG_PLAY_SOUND);
-        mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                AudioManager.FLAG_PLAY_SOUND);
+        mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
         return START_STICKY;

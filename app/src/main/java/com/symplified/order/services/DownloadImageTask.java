@@ -9,17 +9,12 @@ import java.io.InputStream;
 import java.net.URL;
 
 public class DownloadImageTask extends AsyncTask<String,Void, Bitmap> {
-    ImageView imageView;
+    private ImageView imageView;
 
     public DownloadImageTask(ImageView imageView){
         this.imageView = imageView;
     }
     public DownloadImageTask() {  }
-
-    /*
-        doInBackground(Params... params)
-            Override this method to perform a computation on a background thread.
-     */
     protected Bitmap doInBackground(String...urls){
         String urlOfImage = urls[0];
         if(urlOfImage == null)
