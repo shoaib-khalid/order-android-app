@@ -98,7 +98,7 @@ public class PlaceholderFragment extends Fragment {
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
 
-        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         storeId = sharedPreferences.getString("storeId", null);
 
         String clientId = sharedPreferences.getString("ownerId", null);
@@ -194,11 +194,6 @@ public class PlaceholderFragment extends Fragment {
         return root;
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        getContext().unregisterReceiver(ordersReceiver);
-    }
 
     @Override
     public void onResume() {
@@ -219,13 +214,17 @@ public class PlaceholderFragment extends Fragment {
     public void onStart() {
         super.onStart();
         IntentFilter filter = new IntentFilter("com.symplified.order.GET_ORDERS");
-        getContext().registerReceiver(ordersReceiver, filter);
+        if(getContext() != null){
+            getContext().registerReceiver(ordersReceiver, filter);
+        }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getContext().unregisterReceiver(ordersReceiver);
+    public void onStop() {
+        super.onStop();
+        if(getContext() != null){
+            getContext().unregisterReceiver(ordersReceiver);
+        }
     }
 
     @Override
@@ -243,7 +242,7 @@ public class PlaceholderFragment extends Fragment {
         alarmManager.setRepeating(
                 AlarmManager.RTC,
                 System.currentTimeMillis(),
-                60 * 1000,
+                5 * 60 * 1000,
                 pendingIntent
         );
     }

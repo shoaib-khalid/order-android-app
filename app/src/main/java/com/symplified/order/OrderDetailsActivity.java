@@ -239,8 +239,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
         processOrder.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                progressDialog.dismiss();
                 if(response.isSuccessful()){
+//                    progressDialog.dismiss();
                     try {
                         Log.i(TAG, "onResponse: "+response.raw().toString());
                         Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
@@ -248,8 +248,10 @@ public class OrderDetailsActivity extends AppCompatActivity {
                         process.setEnabled(false);
                         process.setClickable(false);
                         Toast.makeText(getApplicationContext(), "Status Updated", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
                         finish();
                     } catch (IOException e) {
+                        progressDialog.dismiss();
                         e.printStackTrace();
                     }
                 }
@@ -257,6 +259,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(OrderDetailsActivity.this, "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
                 Log.e(TAG, "onFailure: ",t );
             }
         });
@@ -298,7 +302,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         billingTotal.setText(Double.toString(order.total));
 
 //        && deliveryDetails != null
-        if(section.equals("sent") && hasDeliveryDetails ){
+        if((section.equals("sent") || section.equals("pickup")) && hasDeliveryDetails ){
             setDriverDeliveryDetails(order, sharedPreferences);
 //            deliveryDetailsView.setVisibility(View.VISIBLE);
 //            deliveryDetailsDivider.setVisibility(View.VISIBLE);

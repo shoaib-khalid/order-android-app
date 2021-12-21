@@ -23,6 +23,7 @@ public class OrdersActivity extends AppCompatActivity {
 
     private ActivityOrdersBinding binding;
     private Toolbar toolbar;
+    private ViewPager mViewPager;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -48,6 +49,8 @@ public class OrdersActivity extends AppCompatActivity {
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
         tabs.setTabMode(TabLayout.MODE_AUTO);
+
+        mViewPager = viewPager;
 
         stopService(new Intent(this, AlertService.class));
     }
@@ -123,4 +126,12 @@ public class OrdersActivity extends AppCompatActivity {
             }
     }
 
+    @Override
+    public void onBackPressed() {
+        if(mViewPager.getCurrentItem() != 0){
+            mViewPager.setCurrentItem(0);
+        }else{
+            super.onBackPressed();
+        }
+    }
 }

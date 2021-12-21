@@ -31,6 +31,7 @@ import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.utils.Utility;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private final String TAG = OrderAdapter.class.getName();
 //    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
     private Dialog progressDialog;
-    private boolean hasDeliveryDetails;
+//    private boolean hasDeliveryDetails;
+    private Map<String, Boolean> hasDeliveryDetailsMap;
 
     public OrderAdapter(List<Order> orders, String section, Context context){
 //        List<OrderDetailsModel> items,
@@ -63,6 +65,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.section = section;
         this.context = context;
 
+        hasDeliveryDetailsMap = new HashMap<>();
         progressDialog = new Dialog((Activity) context);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -135,7 +138,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             String encodedStoreLogo = sharedPreferences.getString("logoImage-"+orders.get(holder.getAdapterPosition()).storeId, null);
 
-            if(storeIdList.split(" ").length > 1)
+            if(storeIdList != null && storeIdList.split(" ").length > 1)
             {
 
                 if(sharedPreferences.contains("logoImage-"+orders.get(holder.getAdapterPosition()).storeId)
@@ -159,7 +162,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.phone.setText(orders.get(position).orderShipmentDetail.phoneNumber);
         holder.amount.setText(Double.toString(orders.get(position).total));
         holder.invoice.setText(orders.get(position).invoiceId);
-        if(section.equals("sent")){
+        if(section.equals("sent") || section.equals("pickup")){
             setDriverDeliveryDetails(orders.get(position), sharedPreferences, holder);
         }
 
@@ -182,7 +185,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 intent.putExtra("selectedOrder",orders.get(position));
                 intent.putExtra("section", section);
                 intent.putExtra("pickup", isPickup);
-                intent.putExtra("hasDeliveryDetails", hasDeliveryDetails);
+                intent.putExtra("hasDeliveryDetails", hasDeliveryDetailsMap.get(orders.get(position).id));
 //                intent.putExtra("deliveryDetails", deliveryDetails);
                 context.stopService(new Intent(context, AlertService.class));
                 ((Activity) context).startActivityForResult(intent, 4);
@@ -215,6 +218,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
                 if(response.isSuccessful()){
+                    if(section.equals("pickup")){
+                        Log.e(TAG, "onResponse: onPickupTab" );
+                    }
                     Log.i(TAG, "onResponse123: "+ response.body().toString());
                     OrderDeliveryDetailsResponse.OrderDeliveryDetailsData data = response.body().data;
                     if(data.name != null && data.phoneNumber != null){
@@ -229,7 +235,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         }
                         holder.driverName.setText(name);
                         holder.driverPhoneNumber.setText(response.body().data.phoneNumber);
-                        hasDeliveryDetails = true;
+//                        hasDeliveryDetails = true;
+                        hasDeliveryDetailsMap.put(order.id, true);
 
 //                        OrderDeliveryDetailsResponse.Provider provider = new OrderDeliveryDetailsResponse.Provider(response.body().data.provider.id,
 //                                response.body().data.provider.name, response.body().data.provider.providerImage);
@@ -244,7 +251,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         Log.e(TAG, "Response Unsuccessful" + "onResponse: "+response.body());
                         holder.driverDetails.setVisibility(View.GONE);
                         holder.driverDetailsDivider.setVisibility(View.GONE);
-                        hasDeliveryDetails = false;
+//                        hasDeliveryDetails = false;
+                        hasDeliveryDetailsMap.put(order.id, false);
                     }
 
                 }
