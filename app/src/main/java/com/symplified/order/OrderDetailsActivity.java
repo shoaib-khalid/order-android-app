@@ -271,7 +271,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
                                      Order order, String storeIdList
 //                                     OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails
     ) {
-
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZones = sharedPreferences.getString("timezone", null);
         int  indexOfStore = Arrays.asList(storeIdList.split(" ")).indexOf(order.storeId);
