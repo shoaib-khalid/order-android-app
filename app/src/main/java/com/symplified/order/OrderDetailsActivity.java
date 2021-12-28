@@ -2,6 +2,7 @@ package com.symplified.order;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -32,6 +33,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
@@ -69,7 +71,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
     private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
     private TextView deliveryProvider, driverName, driverContactNumber, trackingLink;
-    private Button process, print;
+    private Button process, print, cancelOrder;
     private ImageView pickup, storeLogo;
     private String section;
     private Toolbar toolbar;
@@ -110,6 +112,13 @@ public class OrderDetailsActivity extends AppCompatActivity {
         //get details of selected order from previous activity
         Bundle data = getIntent().getExtras();
         Order order = (Order) data.getSerializable("selectedOrder");
+
+        //set Cancel Order buttton click listener
+        cancelOrder.setOnClickListener(view -> onCancelOrderButtonClick(order));
+
+        if(section != null && section.equals("new")){
+            cancelOrder.setVisibility(View.VISIBLE);
+        }
 
         //get Delivery Driver details from previous activity
 //        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData driverDetails;
@@ -416,6 +425,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         storeLogoText = findViewById(R.id.storeLogoDetailsText);
         deliveryDetailsView = findViewById(R.id.delivery_details);
         deliveryDetailsDivider = findViewById(R.id.divide3);
+        cancelOrder = findViewById(R.id.btn_cancel_order);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -478,6 +488,42 @@ public class OrderDetailsActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    public void onCancelOrderButtonClick(Order order){
+        //add headers required for api calls
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create()).build();
+
+        OrderApi orderApiService = retrofit.create(OrderApi.class);
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Cancel Order")
+                .setMessage("Do you really want to cancel this order ?")
+                .setNegativeButton("No", null)
+                .setPositiveButton("Yes", (dialogInterface, i) -> {
+                    Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
+                    progressDialog.show();
+                    processOrder.clone().enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            progressDialog.dismiss();
+                            if(response.isSuccessful()){
+                                Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "onFailure: ", t);
+                        }
+                    });
+                }).show();
     }
 
 }
