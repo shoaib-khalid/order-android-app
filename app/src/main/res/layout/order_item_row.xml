@@ -6,30 +6,30 @@
         android:layout_height="wrap_content"
         android:id="@+id/order_item"
         android:paddingHorizontal="15dp"
-        android:paddingVertical="10dp">
+        android:paddingVertical="5dp">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/item_row_non_expanded"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="5dp"
+                android:paddingVertical="0dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/header_item"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:text="@string/header_item"
-            android:textColor="@color/sf_b_700"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintWidth_percent=".3" />
+                <TextView
+                    android:id="@+id/header_item"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:text="@string/header_item"
+                    android:textColor="@color/sf_b_700"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintWidth_percent=".3" />
 
         <TextView
             android:id="@+id/header_variant"
@@ -77,13 +77,28 @@
             app:layout_constraintWidth_percent=".23" />
 
 
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/subItems"
+        android:visibility="gone"
+        android:layout_below="@+id/item_row_non_expanded">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/subItemRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@+id/exanded_instructions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/item_row_non_expanded">
+        android:layout_below="@+id/subItems">
 
         <TextView
             android:id="@+id/header_instruction"

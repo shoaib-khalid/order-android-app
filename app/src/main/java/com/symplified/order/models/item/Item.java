@@ -6,6 +6,7 @@ public class Item{
     public String id;
     public String orderId;
     public String productId;
+    public List<SubItem> orderSubItem;
     public double price;
     public double productPrice;
     public Object weight;

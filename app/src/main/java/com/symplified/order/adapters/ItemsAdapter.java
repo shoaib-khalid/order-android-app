@@ -6,14 +6,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
 import com.symplified.order.models.item.Item;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
@@ -36,6 +39,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
         private final TextView qty;
         private final TextView price;
         private final RelativeLayout expandableInstructions;
+        private final RecyclerView subItemsRecyclerView;
+        private final RelativeLayout subItemLayout;
 //        private final ConstraintLayout constraintLayout;
 
         public ViewHolder(View view) {
@@ -50,6 +55,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             expandableInstructions = view.findViewById(R.id.exanded_instructions);
             instructionsValue = view.findViewById(R.id.header_instruction_value);
             variant = view.findViewById(R.id.header_variant);
+            subItemsRecyclerView = (RecyclerView) view.findViewById(R.id.subItemRecyclerView);
+            subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(), RecyclerView.HORIZONTAL, false));
+            subItemLayout = view.findViewById(R.id.subItems);
+
 
             item.setTypeface(Typeface.DEFAULT);
 //            instructions.setTypeface(Typeface.DEFAULT);
@@ -80,6 +89,18 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 //        }else{
 //            holder.variant.setText("XL");
 //        }
+
+        if(items.get(position).orderSubItem != null && items.get(position).orderSubItem.size() > 0){
+            SubItemsAdapter adapter = new SubItemsAdapter();
+            adapter.items = items.get(position).orderSubItem;
+
+            holder.subItemsRecyclerView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+            holder.subItemLayout.setVisibility(View.VISIBLE);
+        }else {
+            holder.subItemLayout.setVisibility(View.GONE);
+        }
+
         if(items.get(position).specialInstruction.equals("") || items.get(position).specialInstruction == null){
             holder.expandableInstructions.setVisibility(View.GONE);
         }else {
@@ -91,6 +112,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
         if(items.get(position).productVariant != null){
             holder.variant.setText(items.get(position).productVariant);
         }
+
+
 
     }
 
