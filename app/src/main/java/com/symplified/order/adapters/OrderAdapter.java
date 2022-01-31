@@ -14,12 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.transition.MaterialContainerTransform;
 import com.symplified.order.App;
@@ -84,6 +87,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final View driverDetailsDivider;
         private final TextView driverName;
         private final TextView driverPhoneNumber;
+        private final MaterialCardView cardLayout;
+        private final TextView driverNameLable, driverPhoneLable, nameLable,phoneLable, invoiceLable, amountLable, pickupLable;
 
         public ViewHolder(View view) {
             super(view);
@@ -101,6 +106,34 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             driverDetailsDivider = view.findViewById(R.id.divider_card2);
             driverName = view.findViewById(R.id.driver_value_card);
             driverPhoneNumber = view.findViewById(R.id.driver_contact_value_card);
+            cardLayout = view.findViewById(R.id.order_card_parent);
+            driverNameLable = view.findViewById(R.id.driver_label_card);
+            driverPhoneLable = view.findViewById(R.id.driver_contact_label_card);
+            nameLable = view.findViewById(R.id.order_row_name);
+            phoneLable = view.findViewById(R.id.order_row_phone);
+            invoiceLable = view.findViewById(R.id.card_invoice);
+            amountLable = view.findViewById(R.id.order_amount);
+            pickupLable = view.findViewById(R.id.order_pickup);
+        }
+
+        public void changeTextColorWhite(){
+
+            name.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            phone.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            amount.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            invoice.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            storeLogoText.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            driverName.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            driverPhoneNumber.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            driverNameLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            driverPhoneLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            nameLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            phoneLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            invoiceLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            amountLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            pickupLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
+            pickup.setImageTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.white));
+
         }
 
 
@@ -138,7 +171,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             String encodedStoreLogo = sharedPreferences.getString("logoImage-"+orders.get(holder.getAdapterPosition()).storeId, null);
 
-            if(storeIdList != null && storeIdList.split(" ").length > 1)
+            if(storeIdList != null && storeIdList.split(" ").length > 0)
             {
 
                 if(sharedPreferences.contains("logoImage-"+orders.get(holder.getAdapterPosition()).storeId)
@@ -178,19 +211,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.process.setText("Details");
 
-        holder.process.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent (holder.itemView.getContext(), OrderDetailsActivity.class);
-                intent.putExtra("selectedOrder",orders.get(position));
-                intent.putExtra("section", section);
-                intent.putExtra("pickup", isPickup);
-                intent.putExtra("hasDeliveryDetails", hasDeliveryDetailsMap.get(orders.get(position).id));
+        holder.process.setOnClickListener(view -> {
+            Intent intent = new Intent (holder.itemView.getContext(), OrderDetailsActivity.class);
+            intent.putExtra("selectedOrder",orders.get(position));
+            intent.putExtra("section", section);
+            intent.putExtra("pickup", isPickup);
+            intent.putExtra("hasDeliveryDetails", hasDeliveryDetailsMap.get(orders.get(position).id));
 //                intent.putExtra("deliveryDetails", deliveryDetails);
-                context.stopService(new Intent(context, AlertService.class));
-                ((Activity) context).startActivityForResult(intent, 4);
+            context.stopService(new Intent(context, AlertService.class));
+            ((Activity) context).startActivityForResult(intent, 4);
 //                ((Activity)view.getContext()).finish();
-            }
         });
 
     }
@@ -220,13 +250,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 if(response.isSuccessful()){
                     if(section.equals("pickup")){
                         Log.e(TAG, "onResponse: onPickupTab" );
+                        Log.e(TAG, "onResponse: order-id = "+order.id );
                     }
                     Log.i(TAG, "onResponse123: "+ response.body().toString());
                     OrderDeliveryDetailsResponse.OrderDeliveryDetailsData data = response.body().data;
-                    if(data.name != null && data.phoneNumber != null){
 
-                        holder.driverDetails.setVisibility(View.VISIBLE);
-                        holder.driverDetailsDivider.setVisibility(View.VISIBLE);
+                    if(data.riderStatus != null && data.riderStatus.equals("CANCELED")){
+                        holder.cardLayout.setCardBackgroundColor(ContextCompat.getColor(context, R.color.red));
+                        holder.changeTextColorWhite();
+                    }
+
+                    holder.driverDetails.setVisibility(View.VISIBLE);
+                    holder.driverDetailsDivider.setVisibility(View.VISIBLE);
+
+                    if(data.name != null && data.phoneNumber != null){
 
                         Log.i(TAG, "onResponse123: " + order.invoiceId + " id : "+order.id);
                         String name = response.body().data.name ;
@@ -248,9 +285,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 //                                provider);
                     }
                     else {
-                        Log.e(TAG, "Response Unsuccessful" + "onResponse: "+response.body());
-                        holder.driverDetails.setVisibility(View.GONE);
-                        holder.driverDetailsDivider.setVisibility(View.GONE);
+                        Log.e(TAG, "Response Unsuccessful" + " onResponse: "+response.body());
+                        if(data.riderStatus != null && data.riderStatus.equals("CANCELED")){
+                            holder.driverPhoneLable.setVisibility(View.GONE);
+                            holder.driverNameLable.setVisibility(View.GONE);
+                            holder.driverName.setText("Status : Problem with delivery. No driver available !");
+                        }
+                        else{
+                            holder.driverDetails.setVisibility(View.GONE);
+                            holder.driverDetailsDivider.setVisibility(View.GONE);
+                        }
 //                        hasDeliveryDetails = false;
                         hasDeliveryDetailsMap.put(order.id, false);
                     }

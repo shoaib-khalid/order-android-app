@@ -9,6 +9,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="light_grey">#efefef</color>
     <color name="twitter_blue">#1DA1F2</color>
+    <color name="red">#ff4569</color>
+    <color name="card_red">#ff6850</color>
 
 
 </resources>

@@ -282,7 +282,12 @@ public class OrderDetailsActivity extends AppCompatActivity {
     ) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZones = sharedPreferences.getString("timezone", null);
+        Log.e(TAG, "displayOrderDetails: storeId = " + order.storeId );
         int  indexOfStore = Arrays.asList(storeIdList.split(" ")).indexOf(order.storeId);
+        Log.e(TAG, "displayOrderDetails: index = " + indexOfStore + " stores = " + Arrays.asList(storeIdList.split(" ")));
+        if(indexOfStore == -1){
+            indexOfStore = 0;
+        }
         String currentTimezone = Arrays.asList(timeZones.split(" ")).get(indexOfStore);
         TimeZone timezone = TimeZone.getTimeZone(currentTimezone);
         Calendar calendar = new GregorianCalendar();
@@ -347,10 +352,12 @@ public class OrderDetailsActivity extends AppCompatActivity {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
 
-        if(storeIdList.split(" ").length > 1)
+        if(storeIdList.split(" ").length > 0)
         {
             if(encodedImage != null)
+            {
                 Utility.decodeAndSetImage(storeLogo, encodedImage);
+            }
             else{
                 storeLogo.setVisibility(View.GONE);
                 storeLogoText.setVisibility(View.VISIBLE);

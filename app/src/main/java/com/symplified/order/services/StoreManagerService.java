@@ -14,6 +14,8 @@ public class StoreManagerService extends JobService {
     public static final String TAG = "StoreManagerService";
     private String BASE_URL;
 
+    public StoreManagerService(){}
+
     public StoreManagerService(String BASE_URL){
         super();
         this.BASE_URL = BASE_URL;

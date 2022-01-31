@@ -163,8 +163,11 @@ public class LoginActivity extends AppCompatActivity{
         progressDialog.show();
 
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).client(new OkHttpClient()).baseUrl(BASE_URL+App.USER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(new OkHttpClient())
+                .baseUrl(BASE_URL+App.USER_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
 
         LoginApi loginApiService = retrofit.create(LoginApi.class);
 
@@ -208,7 +211,7 @@ public class LoginActivity extends AppCompatActivity{
                             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
                             startActivity(intent);
                         }
-                    }, 5000);
+                    }, 0);
                 }
                 else {
                     Log.d("TAG", "Login response : Not successful");
@@ -317,6 +320,7 @@ public class LoginActivity extends AppCompatActivity{
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
                 if (response.isSuccessful()) {
                     stores = response.body().data.content;
+//                    int storeCount = stores.size();
                     subscribeStores(stores, getApplicationContext());
                     setStoreData(getApplicationContext(),stores, sharedPreferences);
                     downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(),clientId);

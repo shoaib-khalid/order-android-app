@@ -62,23 +62,33 @@ public class LogoHandler implements Runnable{
                         Asset.AllAssetResponse assets = new Gson().fromJson(response.body().string(), Asset.AllAssetResponse.class);
 
                         if (assets.data != null) {
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try{
+                                        for(Asset asset : assets.data){
 
-                            for(Asset asset : assets.data){
+                                            Bitmap bitmap = new DownloadImageTask().execute(asset.logoUrl).get();
+                                            if (bitmap != null) {
+                                                Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
+                                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+                                                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+                                                editor.putString("logoImage-"+asset.storeId, encodedImage);
+                                                editor.apply();
+                                            }
 
-                                Bitmap bitmap = new DownloadImageTask().execute(asset.logoUrl).get();
-                                if (bitmap != null) {
-                                    Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
-                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                    bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                                    String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                                    editor.putString("logoImage-"+asset.storeId, encodedImage);
-                                    editor.apply();
+                                        }
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                    }
                                 }
-
-                            }
+                            }).start();
                         }
 
-                    } catch (IOException | InterruptedException | ExecutionException e) {
+                    } catch (IOException e
+//                            | InterruptedException | ExecutionException e
+                    ) {
                         e.printStackTrace();
                     }
 

@@ -15,16 +15,20 @@ public class OrderDeliveryDetailsResponse extends HttpResponse implements Serial
         public String trackingUrl;
         public String orderNumber;
         public Provider provider;
+        public String riderStatus;
+        public String airwayBill;
 
         public OrderDeliveryDetailsData(){}
 
-        public OrderDeliveryDetailsData(String name, String phoneNumber, String plateNumber, String trackingUrl, String orderNumber, Provider provider) {
+        public OrderDeliveryDetailsData(String name, String phoneNumber, String plateNumber, String trackingUrl, String orderNumber, Provider provider, String riderStatus, String airwayBill) {
             this.name = name;
             this.phoneNumber = phoneNumber;
             this.plateNumber = plateNumber;
             this.trackingUrl = trackingUrl;
             this.orderNumber = orderNumber;
             this.provider = provider;
+            this.riderStatus = riderStatus;
+            this.airwayBill = airwayBill;
         }
 
         @Override
@@ -36,6 +40,8 @@ public class OrderDeliveryDetailsResponse extends HttpResponse implements Serial
                     ", trackingUrl='" + trackingUrl + '\'' +
                     ", orderNumber='" + orderNumber + '\'' +
                     ", provider=" + provider +
+                    ", riderStatus='" + riderStatus + '\'' +
+                    ", airwayBill='" + airwayBill + '\'' +
                     '}';
         }
     }

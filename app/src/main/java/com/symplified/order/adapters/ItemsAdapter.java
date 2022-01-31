@@ -101,7 +101,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             holder.subItemLayout.setVisibility(View.GONE);
         }
 
-        if(items.get(position).specialInstruction.equals("") || items.get(position).specialInstruction == null){
+        if(items.get(position).specialInstruction == null || items.get(position).specialInstruction.equals("")){
             holder.expandableInstructions.setVisibility(View.GONE);
         }else {
             holder.expandableInstructions.setVisibility(View.VISIBLE);
