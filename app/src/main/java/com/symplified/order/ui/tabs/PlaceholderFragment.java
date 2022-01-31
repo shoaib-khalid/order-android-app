@@ -261,7 +261,7 @@ public class PlaceholderFragment extends Fragment {
                         recyclerView.setAdapter(orderAdapter);
                         orderAdapter.notifyDataSetChanged();
                         progressDialog.dismiss();
-                        Log.e("TAG", "Size: "+ orderResponse.data.content.size(),  new Error());
+                        Log.e("TAG",  "Size: "+ orderResponse.data.content.size(),  new Error());
 
                     } catch (IOException e) {
                         e.printStackTrace();
