@@ -239,12 +239,37 @@
                     android:text="@string/tv_shipment_note_value"
                     android:textSize="16sp" />
 
+                <!--                <TextView-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:id="@+id/address_contact_label"-->
+                <!--                    android:text="Contact: "-->
+                <!--                    android:layout_below="@+id/address_note"-->
+                <!--                    />-->
+
+                <!--                <TextView-->
+                <!--                    android:id="@+id/address_contact_value"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_below="@+id/address_note"-->
+                <!--                    android:layout_toEndOf="@id/address_contact_label"-->
+                <!--                    android:text="+921234567890"-->
+                <!--                    android:textStyle="bold" />-->
+                <!--                <ImageView-->
+                <!--                    android:layout_width="21dp"-->
+                <!--                    android:layout_height="21dp"-->
+                <!--                    android:src="@drawable/ic_baseline_phone_24"-->
+                <!--                    android:id="@+id/address_icon_phone"-->
+                <!--                    android:layout_marginLeft="5dp"-->
+                <!--                    android:layout_below="@+id/address_note"-->
+                <!--                    android:layout_toEndOf="@+id/address_contact_value"/>-->
+
                 <TextView
                     android:id="@+id/address_pickup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="5dp"
                     android:layout_below="@+id/address_note"
+                    android:layout_marginBottom="5dp"
                     android:text="@string/is_pickup"
                     android:textSize="16sp" />
 
@@ -253,8 +278,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/address_note"
-                    android:layout_toEndOf="@+id/address_pickup"
-                    />
+                    android:layout_toEndOf="@+id/address_pickup" />
 
 
             </RelativeLayout>

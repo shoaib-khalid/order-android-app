@@ -70,7 +70,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
-    private TextView deliveryProvider, driverName, driverContactNumber, trackingLink;
+    private TextView deliveryProvider, driverName, driverContactNumber, trackingLink, driverContact;
     private Button process, print, cancelOrder;
     private ImageView pickup, storeLogo;
     private String section;
