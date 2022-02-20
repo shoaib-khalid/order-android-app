@@ -4,22 +4,49 @@ import androidx.annotation.NonNull;
 
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.HttpResponse;
+import com.symplified.order.models.Store.Store;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 public class Order implements Serializable {
     public String id;
     public String storeId;
-    public double subTotal;
+    public Double deliveryCharges;
+    public Double subTotal;
+    public Double total;
+    public String completionStatus;
+    public String paymentStatus;
+    public String customerNotes;
+    public String privateAdminNotes;
+    public String cartId;
+    public String customerId;
+    public String created;
+    public String updated;
+    public String invoiceId;
+    public Double klCommission;
+    public Double storeServiceCharges;
+    public Double storeShare;
+    public String paymentType;
+    public Double appliedDiscount;
+    public Double deliveryDiscount;
+    public String appliedDiscountDescription;
+    public String deliveryDiscountDescription;
+    public OrderShipmentDetail orderShipmentDetail;
+    public OrderPaymentDetail orderPaymentDetail;
+//    private Store store;
+    public Customer customer;
+    public List<OrderRefund> orderRefund;
+    public boolean isRevised;
 
     @Override
     public String toString() {
         return "Order{" +
                 "id='" + id + '\'' +
                 ", storeId='" + storeId + '\'' +
-                ", subTotal=" + subTotal +
                 ", deliveryCharges=" + deliveryCharges +
+                ", subTotal=" + subTotal +
                 ", total=" + total +
                 ", completionStatus='" + completionStatus + '\'' +
                 ", paymentStatus='" + paymentStatus + '\'' +
@@ -40,31 +67,11 @@ public class Order implements Serializable {
                 ", deliveryDiscountDescription='" + deliveryDiscountDescription + '\'' +
                 ", orderShipmentDetail=" + orderShipmentDetail +
                 ", orderPaymentDetail=" + orderPaymentDetail +
+                ", customer=" + customer +
+                ", orderRefund=" + orderRefund +
+                ", isRevised=" + isRevised +
                 '}';
     }
-
-    public double deliveryCharges;
-    public double total;
-    public String completionStatus;
-    public String paymentStatus;
-    public String customerNotes;
-    public String privateAdminNotes;
-    public String cartId;
-    public String customerId;
-    public String created;
-    public String updated;
-    public String invoiceId;
-    public double klCommission;
-    public double storeServiceCharges;
-    public double storeShare;
-    public String paymentType;
-    public double appliedDiscount;
-    public double deliveryDiscount;
-    public String appliedDiscountDescription;
-    public String deliveryDiscountDescription;
-    public OrderShipmentDetail orderShipmentDetail;
-    public OrderPaymentDetail orderPaymentDetail;
-
 
     public static class OrderShipmentDetail implements Serializable{
         public String receiverName;
@@ -73,7 +80,7 @@ public class Order implements Serializable {
         public String city;
         public String zipcode;
         public String email;
-        public int deliveryProviderId;
+        public Integer deliveryProviderId;
         public String state;
         public String country;
         public String trackingUrl;
@@ -87,11 +94,52 @@ public class Order implements Serializable {
     public static class OrderPaymentDetail implements Serializable{
         public String accountName;
         public String gatewayId;
-        public Object couponId;
-        public Object time;
+        public String couponId;
+        public String time;
         public String orderId;
         public String deliveryQuotationReferenceId;
-        public double deliveryQuotationAmount;
+        public Double deliveryQuotationAmount;
+    }
+
+    public static class Customer implements Serializable{
+        public String id;
+
+        public String name;
+
+        public String email;
+        public String phoneNumber;
+        public String created;
+        public String updated;
+    }
+
+    public static class OrderRefund implements Serializable{
+        private String id;
+
+        public String orderId;
+        public Double refundAmount;
+        public String remarks;
+        public String paymentChannel;
+        public String refundStatus;
+        public String refundType;
+        public String created;
+        public String updated;
+        public String refunded;
+
+        @Override
+        public String toString() {
+            return "OrderRefund{" +
+                    "id='" + id + '\'' +
+                    ", orderId='" + orderId + '\'' +
+                    ", refundAmount=" + refundAmount +
+                    ", remarks='" + remarks + '\'' +
+                    ", paymentChannel='" + paymentChannel + '\'' +
+                    ", refundStatus='" + refundStatus + '\'' +
+                    ", refundType='" + refundType + '\'' +
+                    ", created='" + created + '\'' +
+                    ", updated='" + updated + '\'' +
+                    ", refunded='" + refunded + '\'' +
+                    '}';
+        }
     }
 
     public static class OrderList implements Serializable{
@@ -129,6 +177,10 @@ public class Order implements Serializable {
                     ", nextActionText='" + nextActionText + '\'' +
                     '}';
         }
+    }
+
+    public static class OrderByIdResponse extends HttpResponse implements Serializable{
+        public Order data;
     }
 
 }

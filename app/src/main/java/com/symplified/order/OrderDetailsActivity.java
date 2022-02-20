@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,6 +42,7 @@ import com.symplified.order.adapters.ItemsAdapter;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
+import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
@@ -55,6 +57,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -70,9 +73,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
-    private TextView deliveryProvider, driverName, driverContactNumber, trackingLink, driverContact;
-    private Button process, print, cancelOrder;
-    private ImageView pickup, storeLogo;
+    private TextView deliveryProvider, driverName, driverContactNumber, trackingLink, headerOrginalQty, customerPhoneNumber;
+    private Button process, print, cancelOrder, editOrder;
+    private ImageView pickup, storeLogo, phoneIcon, phoneIconCustomer;
     private String section;
     private Toolbar toolbar;
     private Dialog progressDialog;
@@ -83,6 +86,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private View deliveryDetailsDivider;
     private String nextStatus;
     private boolean hasDeliveryDetails;
+    private boolean isEdited;
+    private ItemsAdapter itemsAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
@@ -107,17 +112,35 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         //initialize all views
         initViews();
+
         nextStatus = "";
 
         //get details of selected order from previous activity
         Bundle data = getIntent().getExtras();
         Order order = (Order) data.getSerializable("selectedOrder");
 
+        itemsAdapter.order = order;
+
+        editOrder.setOnClickListener(view -> {
+            if(!order.isRevised){
+                editOrderItem(order);
+            }else{
+                Toast.makeText(OrderDetailsActivity.this, "Order already revised !", Toast.LENGTH_SHORT).show();
+//                editOrder.setEnabled(false);
+//                editOrder.setVisibility(View.GONE);
+            }
+        });
+
+        Log.e(TAG, "onCreateORDERID: " + order.id);
+
         //set Cancel Order buttton click listener
         cancelOrder.setOnClickListener(view -> onCancelOrderButtonClick(order));
 
         if(section != null && section.equals("new")){
             cancelOrder.setVisibility(View.VISIBLE);
+            if(!order.isRevised){
+                editOrder.setVisibility(View.VISIBLE);
+            }
         }
 
         //get Delivery Driver details from previous activity
@@ -198,7 +221,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
-        ItemsAdapter itemsAdapter = new ItemsAdapter();
+//        ItemsAdapter itemsAdapter = new ItemsAdapter();
+//        itemsAdapter.editable = false;
         progressDialog.show();
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
@@ -207,6 +231,13 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 if(response.isSuccessful())
                 {
                     Log.e("TAG", "onResponse: "+order.id, new Error() );
+                    if(order.isRevised){
+                        headerOrginalQty.setVisibility(View.VISIBLE);
+//                        editOrder.setVisibility(View.VISIBLE);
+//                        editOrder.setEnabled(false);
+//                        editOrder.setClickable(false);
+                    }
+//                    editOrder.setVisibility(View.VISIBLE);
                     itemsAdapter.setItems(response.body().data.content);
                     recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
@@ -219,9 +250,40 @@ public class OrderDetailsActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Failed to retrieve items", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailureItems: ", t);
                 progressDialog.dismiss();
             }
         });
+    }
+
+    private void editOrderItem(Order order) {
+        if(isEdited){
+            if(!order.isRevised){
+                new MaterialAlertDialogBuilder(this)
+                        .setTitle("Update Order")
+                        .setMessage("Confirm to proceed with changes made ?\nOnce confirmed, it cannot be undone.")
+                        .setNegativeButton("No", null)
+                        .setPositiveButton("Yes", (dialogInterface, i) -> {
+                            itemsAdapter.updateOrderItems(order, BASE_URL, progressDialog);
+                            editOrder.setClickable(false);
+                            editOrder.setEnabled(false);
+                        }).show();
+            }
+        }
+        else{
+            new MaterialAlertDialogBuilder(this)
+                    .setTitle("Edit Order")
+                    .setMessage("Have you contacted the buyer to change the order ?\nIn case of any dispute, the amount will be refunded to customer.")
+                    .setNegativeButton("No", null)
+                    .setPositiveButton("Yes", (dialogInterface, i) -> {
+                        isEdited = true;
+//                        Toast.makeText(this, "edit enabled", Toast.LENGTH_SHORT).show();
+                        itemsAdapter.editable = true;
+                        itemsAdapter.notifyDataSetChanged();
+                        headerOrginalQty.setVisibility(View.VISIBLE);
+                        editOrder.setText(R.string.update_order);
+                    }).show();
+        }
     }
 
     private void updateOrderStatus(Order order) {
@@ -306,13 +368,25 @@ public class OrderDetailsActivity extends AppCompatActivity {
         stateValue.setText(order.orderShipmentDetail.state);
         postcodeValue.setText(order.orderShipmentDetail.zipcode);
         nameValue.setText(order.orderShipmentDetail.receiverName);
+        customerPhoneNumber.setText(order.orderShipmentDetail.phoneNumber);
         noteValue.setText(order.customerNotes);
         subtotalValue.setText(Double.toString(order.subTotal));
         discount.setText(Double.toString(order.appliedDiscount));
         serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
-        deliveryChargesValue.setText(Double.toString(order.deliveryCharges));
+
+        if(order.deliveryCharges != null ){
+            deliveryChargesValue.setText(Double.toString(order.deliveryCharges));
+        }else {
+            deliveryChargesValue.setText("0.0");
+        }
         deliveryDiscount.setText(Double.toString(order.deliveryDiscount));
         billingTotal.setText(Double.toString(order.total));
+
+        phoneIconCustomer.setOnClickListener(view -> {
+            Intent callDriver = new Intent(Intent.ACTION_DIAL);
+            callDriver.setData(Uri.parse("tel:" + order.orderShipmentDetail.phoneNumber));
+            startActivity(callDriver);
+        });
 
 //        && deliveryDetails != null
         if((section.equals("sent") || section.equals("pickup")) && hasDeliveryDetails ){
@@ -419,6 +493,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         deliveryDiscount = findViewById(R.id.billing_delivery_charges_discount_value);
         billingTotal = findViewById(R.id.billing_total_value);
         pickup = findViewById(R.id.address_is_pickup);
+        customerPhoneNumber = findViewById(R.id.address_phone_value);
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
         storeLogo = findViewById(R.id.storeLogoDetails);
@@ -428,15 +503,27 @@ public class OrderDetailsActivity extends AppCompatActivity {
         deliveryProvider = findViewById(R.id.delivery_by_value);
         driverName = findViewById(R.id.driver_value);
         driverContactNumber = findViewById(R.id.contact_value);
+        phoneIcon = findViewById(R.id.address_icon_phone);
+        phoneIconCustomer = findViewById(R.id.address_icon_phone_customer);
         trackingLink = findViewById(R.id.tracking_value);
         storeLogoText = findViewById(R.id.storeLogoDetailsText);
         deliveryDetailsView = findViewById(R.id.delivery_details);
         deliveryDetailsDivider = findViewById(R.id.divide3);
         cancelOrder = findViewById(R.id.btn_cancel_order);
+        headerOrginalQty = findViewById(R.id.header_org_qty);
+
+        editOrder = findViewById(R.id.btn_edit_order);
+        editOrder.setVisibility(View.GONE);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        isEdited = false;
+        itemsAdapter = new ItemsAdapter();
+        itemsAdapter.editable = false;
+        itemsAdapter.context = this;
+        itemsAdapter.sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         //setup progress indicator
         progressDialog = new Dialog(this);
@@ -475,6 +562,13 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     deliveryProvider.setText(response.body().data.provider.name);
                     driverName.setText(response.body().data.name);
                     driverContactNumber.setText(response.body().data.phoneNumber);
+
+                    phoneIcon.setOnClickListener(view -> {
+                        Intent callDriver = new Intent(Intent.ACTION_DIAL);
+                        callDriver.setData(Uri.parse("tel:" + response.body().data.phoneNumber));
+                        startActivity(callDriver);
+                    });
+
                     String link = "<a color=\"#1DA1F2\" href=\""+response.body().data.trackingUrl+"\">Click Here</a>";
                     new SpannableString(link).setSpan(
                             new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),

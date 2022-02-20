@@ -46,6 +46,22 @@
         app:layout_constraintWidth_percent=".245" />
 
     <TextView
+        android:id="@+id/header_org_qty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/header_item"
+        android:text="@string/header_org_qty"
+        android:textAlignment="center"
+        android:textColor="@color/sf_b_700"
+        android:visibility="invisible"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/header_variant"
+        app:layout_constraintTop_toTopOf="@+id/header_item"
+        app:layout_constraintWidth_percent=".15" />
+
+    <TextView
         android:id="@+id/header_qty"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -56,9 +72,9 @@
         android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/header_variant"
+        app:layout_constraintStart_toEndOf="@+id/header_org_qty"
         app:layout_constraintTop_toTopOf="@+id/header_item"
-        app:layout_constraintWidth_percent=".23" />
+        app:layout_constraintWidth_percent=".15" />
 
     <TextView
         android:id="@+id/header_price"
@@ -72,9 +88,9 @@
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/header_qty"
         app:layout_constraintTop_toTopOf="@+id/header_item"
-        app:layout_constraintWidth_percent=".23" />
+        app:layout_constraintWidth_percent=".15" />
+<!--    app:layout_constraintStart_toEndOf="@+id/header_qty"-->
 
     <!--    </RelativeLayout>-->
 

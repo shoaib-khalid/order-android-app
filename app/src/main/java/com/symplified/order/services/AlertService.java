@@ -49,7 +49,7 @@ public class AlertService extends Service{
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
         mediaPlayer.setLooping(true);
-        if(intent.getIntExtra("first",0) == 1)
+        if(intent != null && intent.getIntExtra("first",0) == 1)
             return START_STICKY;
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);

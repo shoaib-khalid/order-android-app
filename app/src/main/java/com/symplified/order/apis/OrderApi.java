@@ -2,11 +2,13 @@ package com.symplified.order.apis;
 
 import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.item.ItemResponse;
+import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderResponse;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.ResponseBody;
@@ -56,5 +58,11 @@ public interface OrderApi {
 
     @GET("orders/details/{orderId}")
     Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
+
+    @GET("orders/{orderId}")
+    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
+
+    @PUT("orders/reviseitem/{orderId}")
+    Call<ResponseBody> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
 
 }
