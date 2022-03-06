@@ -79,7 +79,7 @@
 
         <Spinner
             android:id="@+id/header_qty_editor"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/header_item"
             android:text="@string/header_qty"
@@ -90,8 +90,9 @@
             android:spinnerMode="dropdown"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/header_org_qty"
+            app:layout_constraintRight_toLeftOf="@id/header_price"
             app:layout_constraintTop_toTopOf="@+id/header_item"
-            app:layout_constraintWidth_percent=".21" />
+             />
 
         <TextView
             android:id="@+id/header_price"

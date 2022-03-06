@@ -236,8 +236,14 @@ public class PlaceholderFragment extends Fragment {
     public void updateOrdersEveryFiveMinutes(){
         AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
         Intent fetchOrdersIntent = new Intent("com.symplified.order.GET_ORDERS");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
+        PendingIntent pendingIntent;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_IMMUTABLE);
+        }
+        else
+        {
+            pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 //        getActivity().sendBroadcast(fetchOrdersIntent);
         alarmManager.setRepeating(
                 AlarmManager.RTC,

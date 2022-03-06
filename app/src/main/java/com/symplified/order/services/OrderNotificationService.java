@@ -37,7 +37,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
         taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent ;
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
+        }else{
+            pendingIntent= taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
                 .setContentIntent(pendingIntent)

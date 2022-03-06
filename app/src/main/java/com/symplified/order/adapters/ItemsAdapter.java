@@ -280,6 +280,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                progressDialog.dismiss();
                 Toast.makeText(context, "Failed to update Order !", Toast.LENGTH_SHORT).show();
                 Log.e("TAG", "onFailure: ", t);
             }
@@ -357,10 +358,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                    Log.e(TAG, "onResponse: updated order : " +  orderResponse);
                    editable = false;
                    notifyDataSetChanged();
-                   new MaterialAlertDialogBuilder(context)
+                   new MaterialAlertDialogBuilder(context, R.style.MaterialAlertDialog__Center)
                            .setTitle("Order Updated")
                            .setMessage("The refund will be in place.\nRefund Amount : "+ orderResponse.orderRefund.get(0).refundAmount)
-                           .setNeutralButton("OK", ((dialogInterface, i) -> {
+                           .setPositiveButton("OK", ((dialogInterface, i) -> {
                                dialogInterface.dismiss();
                                Toast.makeText(context, "Order Updated !", Toast.LENGTH_SHORT).show();
                                Intent refreshIntent = ((Activity) context).getIntent();
@@ -371,8 +372,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                                ((Activity) context).overridePendingTransition(0, 0);
                                context.startActivity(refreshIntent);
                                ((Activity) context).overridePendingTransition(0, 0);
-                           }))
-                           .show();
+                           })).show();
                }
            }
 

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -259,9 +260,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private void editOrderItem(Order order) {
         if(isEdited){
             if(!order.isRevised){
-                new MaterialAlertDialogBuilder(this)
+                new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                         .setTitle("Update Order")
-                        .setMessage("Confirm to proceed with changes made ?\nOnce confirmed, it cannot be undone.")
+                        .setMessage("You have made changes to a confirmed order.\nThis action cannot be undone.\nDo you want to continue?")
                         .setNegativeButton("No", null)
                         .setPositiveButton("Yes", (dialogInterface, i) -> {
                             itemsAdapter.updateOrderItems(order, BASE_URL, progressDialog);
@@ -271,9 +272,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
             }
         }
         else{
-            new MaterialAlertDialogBuilder(this)
+            new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                     .setTitle("Edit Order")
-                    .setMessage("Have you contacted the buyer to change the order ?\nIn case of any dispute, the amount will be refunded to customer.")
+                    .setMessage("You are about to change a confirmed order.\nYou can only perform this once.\nAny extra money will be refunded to customer.")
                     .setNegativeButton("No", null)
                     .setPositiveButton("Yes", (dialogInterface, i) -> {
                         isEdited = true;
@@ -601,7 +602,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
 
-        new MaterialAlertDialogBuilder(this)
+        Dialog dialog = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                 .setTitle("Cancel Order")
                 .setMessage("Do you really want to cancel this order ?")
                 .setNegativeButton("No", null)
@@ -624,7 +625,16 @@ public class OrderDetailsActivity extends AppCompatActivity {
                             Log.e(TAG, "onFailure: ", t);
                         }
                     });
-                }).show();
+                })
+                .create();
+        TextView title = dialog.findViewById(android.R.id.title);
+        TextView message = dialog.findViewById(android.R.id.message);
+        if(title != null && message != null){
+            title.setTypeface(Typeface.DEFAULT_BOLD);
+            message.setTextSize(14);
+            message.setTypeface(Typeface.DEFAULT_BOLD);
+        }
+        dialog.show();
     }
 
 }
