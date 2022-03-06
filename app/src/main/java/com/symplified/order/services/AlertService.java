@@ -49,8 +49,8 @@ public class AlertService extends Service{
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
         mediaPlayer.setLooping(true);
-        if(intent != null && intent.getExtras().containsKey("first") && intent.getIntExtra("first",0) == 1)
-            return START_STICKY;
+//        if(intent != null && intent.getExtras().containsKey("first") && intent.getIntExtra("first",0) == 1)
+//            return START_STICKY;
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
