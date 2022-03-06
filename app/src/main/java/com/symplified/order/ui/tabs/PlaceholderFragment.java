@@ -251,6 +251,7 @@ public class PlaceholderFragment extends Fragment {
                 5 * 60 * 1000,
                 pendingIntent
         );
+
     }
 
     public void getOrders(){
