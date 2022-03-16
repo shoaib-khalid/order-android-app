@@ -74,7 +74,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
-    private TextView deliveryProvider, driverName, driverContactNumber, trackingLink, headerOrginalQty, customerPhoneNumber;
+    private TextView deliveryProvider, driverName, driverContactNumber, trackingLink, headerOrginalQty, customerPhoneNumber, orderDeliveryDetailLabel, orderDeliveryDetailValue;
     private Button process, print, cancelOrder, editOrder;
     private ImageView pickup, storeLogo, phoneIcon, phoneIconCustomer;
     private String section;
@@ -372,7 +372,18 @@ public class OrderDetailsActivity extends AppCompatActivity {
         customerPhoneNumber.setText(order.orderShipmentDetail.phoneNumber);
         noteValue.setText(order.customerNotes);
         subtotalValue.setText(Double.toString(order.subTotal));
-        discount.setText(Double.toString(order.appliedDiscount));
+
+        if(!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null){
+            orderDeliveryDetailLabel.setVisibility(View.VISIBLE);
+            orderDeliveryDetailValue.setVisibility(View.VISIBLE);
+            orderDeliveryDetailValue.setText(order.orderShipmentDetail.deliveryPeriodDetails.name);
+        }
+
+        if(order.appliedDiscount != null){
+            discount.setText(Double.toString(order.appliedDiscount));
+        }else{
+            discount.setText("0.0");
+        }
         serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
 
         if(order.deliveryCharges != null ){
@@ -512,6 +523,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
         deliveryDetailsDivider = findViewById(R.id.divide3);
         cancelOrder = findViewById(R.id.btn_cancel_order);
         headerOrginalQty = findViewById(R.id.header_org_qty);
+
+        orderDeliveryDetailLabel = findViewById(R.id.delivery_time_label);
+        orderDeliveryDetailValue = findViewById(R.id.delivery_time_value);
 
         editOrder = findViewById(R.id.btn_edit_order);
         editOrder.setVisibility(View.GONE);

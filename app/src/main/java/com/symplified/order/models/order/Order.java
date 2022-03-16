@@ -73,6 +73,23 @@ public class Order implements Serializable {
                 '}';
     }
 
+    public static class DeliveryPeriod implements Serializable {
+        public String id;
+
+        public String name;
+
+        public String description;
+
+        @Override
+        public String toString() {
+            return "DeliveryPeriod{" +
+                    "id='" + id + '\'' +
+                    ", name='" + name + '\'' +
+                    ", description='" + description + '\'' +
+                    '}';
+        }
+    }
+
     public static class OrderShipmentDetail implements Serializable{
         public String receiverName;
         public String phoneNumber;
@@ -89,6 +106,7 @@ public class Order implements Serializable {
         public String merchantTrackingUrl;
         public String customerTrackingUrl;
         public String trackingNumber;
+        public DeliveryPeriod deliveryPeriodDetails;
     }
 
     public static class OrderPaymentDetail implements Serializable{

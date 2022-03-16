@@ -3,6 +3,7 @@ package com.symplified.order.dialogs;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +58,16 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
     private final String TAG = SettingsBottomSheet.class.getName();
     TimePicker timePicker;
     StoreAdapter storeAdapter;
+    public SettingsBottomSheet (){
+        super();
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        return super.onCreateDialog(savedInstanceState);
+    }
+
     public SettingsBottomSheet(String storeId, TextView status, StoreAdapter storeAdapter){
         super();
         this.storeId = storeId;
@@ -142,7 +153,9 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
                         Log.i(TAG, "onResponse: "+ response.raw());
                         status.setText("Open");
                     }
-                    Toast.makeText(status.getContext(), "Closed for "+minutes+" minutes", Toast.LENGTH_SHORT).show();
+                    if(minutes > 0){
+                        Toast.makeText(status.getContext(), "Closed for "+minutes+" minutes", Toast.LENGTH_SHORT).show();
+                    }
                     storeAdapter.notifyDataSetChanged();
                 }
             }

@@ -319,6 +319,24 @@
                     android:layout_toEndOf="@+id/address_pickup" />
                 <!--        android:src="@drawable/ic_highlight_off_black_24dp"-->
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/delivery_time_label"
+                    android:textSize="16sp"
+                    android:visibility="gone"
+                    android:text="@string/delivery_time"
+                    android:layout_below="@id/address_pickup"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/delivery_time_value"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    android:layout_below="@id/address_pickup"
+                    android:layout_toEndOf="@id/delivery_time_label"/>
+
 
             </RelativeLayout>
 
