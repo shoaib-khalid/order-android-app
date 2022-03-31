@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SYMplified Merchant</string>
+    <string name="app_name">EasyDukan</string>
     <string name="hint_email">Email or Username</string>
     <string name="hint_password">Password</string>
     <string name="login_text">Login</string>

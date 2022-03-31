@@ -15,7 +15,7 @@
         app:layout_constraintHeight_percent="0.3"
         app:layout_constraintWidth_percent="0.3"
         android:layout_marginTop="30dp"
-        android:src="@drawable/sym_white_cloud"
+        android:src="@drawable/easy_dukan"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/gl_top" />
