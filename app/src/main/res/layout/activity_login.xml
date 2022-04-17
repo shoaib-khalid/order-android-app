@@ -15,7 +15,7 @@
         android:layout_marginTop="10dp"
         app:layout_constraintWidth_percent=".7"
         app:layout_constraintHeight_percent=".25"
-        android:src="@drawable/easy_dukan"
+        android:src="@drawable/ic_easy_dukan_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/gl_top" />

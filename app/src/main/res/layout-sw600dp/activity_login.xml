@@ -15,7 +15,7 @@
         app:layout_constraintHeight_percent="0.3"
         app:layout_constraintWidth_percent="0.3"
         android:layout_marginTop="30dp"
-        android:src="@drawable/easy_dukan"
+        android:src="@drawable/ic_easy_dukan_logo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/gl_top" />
@@ -49,6 +49,7 @@
         app:layout_constraintWidth_percent=".65"
         android:layout_marginTop="10dp"
         android:hint="Password"
+        app:passwordToggleEnabled="true"
         android:paddingVertical="10dp"
         app:boxBackgroundColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,7 +60,8 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:inputType="textPassword"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
