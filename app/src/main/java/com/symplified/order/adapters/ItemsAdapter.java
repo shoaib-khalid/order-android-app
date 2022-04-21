@@ -258,8 +258,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 Log.i("updatedItemListTAG", "onResponse: " + call.request().toString());
 //                Toast.makeText(context, "response received", Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
                 if(response.isSuccessful()){
-                    progressDialog.dismiss();
 //                    Toast.makeText(context, "updated items", Toast.LENGTH_SHORT).show();
                     try {
                         Log.i("TAG123", "onResponse: " + order.id);
@@ -270,7 +270,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                     getOrderItems(order, BASE_URL, progressDialog);
                 }
                 else {
-                    progressDialog.dismiss();
                     Log.i("TAG", "onResponse: " + response.raw());
                     Log.e(TAG, "onResponse: " + response.message() + " " );
                     Toast.makeText(context, "Failed to update order", Toast.LENGTH_SHORT).show();
@@ -280,9 +279,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                progressDialog.dismiss();
-                Toast.makeText(context, "Failed to update Order !", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 Log.e("TAG", "onFailure: ", t);
+                progressDialog.dismiss();
             }
         });
 
@@ -373,12 +372,15 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                                context.startActivity(refreshIntent);
                                ((Activity) context).overridePendingTransition(0, 0);
                            })).show();
+               }else{
+                   Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
                }
            }
 
            @Override
            public void onFailure(Call<Order.OrderByIdResponse> call, Throwable t) {
                progressDialog.dismiss();
+               Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                Log.e(TAG, "onFailure: ", t);
            }
        });
