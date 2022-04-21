@@ -12,6 +12,7 @@ android {
 //            storeFile file('C:\\Users\\Nadeem\\AndroidStudioProjects\\SymplifiedOrderUpdate\\keys\\release.jks')
 //            storePassword 'kalsym@123'
 //            keyPassword 'kalsym@123'
+//              alias = release_alias
 //            keyAlias 'C:\\Users\\Nadeem\\AndroidStudioProjects\\SymplifiedOrderUpdate\\keys\\release.jks'
 //        }
 
@@ -33,7 +34,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
 //            signingConfig signingConfigs.release
         }
