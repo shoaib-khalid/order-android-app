@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.settings.StoreSettingFragment">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="5dp">
+
+        <TextView
+            android:id="@+id/store_setting_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_title"
+            android:layout_marginBottom="20dp"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline5" />
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/store_setting_title">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/store_setting_status_lable"
+                android:text="@string/store_status"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="20dp"
+                android:textSize="16sp"/>
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/store_setting_status_lable">
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:text="Open"/>
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:text="Closed"/>
+
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:icon="@drawable/ic_settings_black_24dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:minWidth="0dp"
+                android:layout_alignParentEnd="true"
+                />
+        </RelativeLayout>
+
+
+
+    </RelativeLayout>
+
+</FrameLayout>

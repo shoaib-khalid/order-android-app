@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingTop="10dp"
+    android:paddingHorizontal="20dp">
+
+    <TextView
+        android:id="@+id/store_status_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:text="@string/set_store_status"/>
+
+    <RadioGroup
+        android:id="@+id/store_status_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/store_status_title"
+        android:layout_marginHorizontal="5dp"
+        android:layout_marginVertical="10dp">
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/store_status_normal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="2dp"
+            android:text="@string/normal"
+            android:textSize="18sp"
+            android:buttonTint="@color/sf_500"
+            android:textStyle="bold" />
+
+        <com.google.android.material.radiobutton.MaterialRadioButton
+            android:id="@+id/store_status_paused"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="2dp"
+            android:text="@string/paused"
+            android:buttonTint="@color/sf_500"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+    </RadioGroup>
+
+    <TimePicker
+        android:id="@+id/status_timePicker"
+        style="?attr/materialTimePickerStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/store_status_options"
+        android:headerBackground="@color/sf_500"
+        android:numbersSelectorColor="@color/sf_500"
+        android:visibility="gone" />
+
+<!--    <RadioGroup-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/paused_status"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:layout_below="@+id/store_status_options"-->
+<!--        android:layout_margin="5dp"-->
+<!--        android:visibility="gone"-->
+<!--        android:gravity="center">-->
+
+<!--        <com.google.android.material.radiobutton.MaterialRadioButton-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/paused_30m"-->
+<!--            android:text="@string/_30_min"-->
+<!--            android:paddingHorizontal="20dp"-->
+<!--            android:layout_marginHorizontal="10dp"-->
+<!--            android:background="@drawable/radio_selector"-->
+<!--            android:button="@android:color/transparent"-->
+<!--            android:textSize="18sp"/>-->
+<!--        <com.google.android.material.radiobutton.MaterialRadioButton-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:background="@drawable/radio_selector"-->
+<!--            android:paddingHorizontal="20dp"-->
+<!--            android:id="@+id/paused_1h"-->
+<!--            android:text="@string/_1_hour"-->
+<!--            android:layout_marginHorizontal="10dp"-->
+<!--            android:button="@android:color/transparent"-->
+<!--            android:textSize="18sp"/>-->
+
+<!--        <com.google.android.material.radiobutton.MaterialRadioButton-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:id="@+id/paused_24h"-->
+<!--            android:text="@string/_24_hours"-->
+<!--            android:layout_marginHorizontal="10dp"-->
+<!--            android:button="@android:color/transparent"-->
+<!--            android:paddingHorizontal="20dp"-->
+<!--            android:background="@drawable/radio_selector"-->
+<!--            android:textSize="18sp"/>-->
+
+<!--    </RadioGroup>-->
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/confirm_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/confirm"
+        app:cornerRadius="5dp"
+        android:layout_margin="5dp"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_below="@+id/status_timePicker"/>
+</RelativeLayout>

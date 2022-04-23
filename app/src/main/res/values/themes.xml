@@ -1,0 +1,59 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.SymplifiedOrderUpdate" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/sf_300</item>
+        <item name="colorPrimaryVariant">@color/sf_300</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:textColor">@color/sf_b_800</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/sf_b_700</item>
+        <item name="colorSecondaryVariant">@color/sf_b_800</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="MaterialAlertDialog__Center" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="materialAlertDialogTitlePanelStyle">@style/Title.Panel.Center</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/Message.Center</item>
+    </style>
+
+    <style name="Title.Panel.Center" parent="MaterialAlertDialog.MaterialComponents.Title.Panel">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Message.Center" parent="MaterialAlertDialog.MaterialComponents.Body.Text">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+
+    <style name="Theme.SymplifiedOrderUpdate.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.SymplifiedOrderUpdate.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.SymplifiedOrderUpdate.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.SymplifiedOrderUpdate.Test" parent="Theme.MaterialComponents.Light.NoActionBar">
+
+        <item name="colorPrimary">@color/sf_b_700</item>
+        <item name="colorPrimaryVariant">@color/sf_b_800</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="android:textColor">@color/sf_b_800</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/sf_b_700</item>
+        <item name="colorSecondaryVariant">@color/sf_b_800</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">@color/sf_300</item>
+
+
+
+    </style>
+</resources>

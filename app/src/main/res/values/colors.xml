@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="sf_300">#ff9e22</color>
+    <color name="sf_400">#ffaf49</color>
+    <color name="sf_500">#f9aa33</color>
+    <color name="sf_b_800">#232f34</color>
+    <color name="sf_b_700">#344955</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="light_grey">#efefef</color>
+    <color name="twitter_blue">#1DA1F2</color>
+    <color name="red">#ff4569</color>
+    <color name="card_red">#ff6850</color>
+
+
+</resources>

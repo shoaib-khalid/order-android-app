@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>base_url</key>
+        <value>https://api.symplified.biz/</value>
+    </entry>
+    <entry>
+        <key>test_user</key>
+        <value>qa_user</value>
+    </entry>
+    <entry>
+        <key>test_pass</key>
+        <value>qa@kalsym</value>
+    </entry>
+</defaultsMap>
