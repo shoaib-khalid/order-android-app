@@ -58,7 +58,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -384,7 +383,12 @@ public class OrderDetailsActivity extends AppCompatActivity {
         }else{
             discount.setText("0.0");
         }
-        serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
+        if (order.storeServiceCharges == 0.0) {
+            serviceChargesValue.setVisibility(View.GONE);
+            findViewById(R.id.billing_service_charges).setVisibility(View.GONE);
+        } else {
+            serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
+        }
 
         if(order.deliveryCharges != null ){
             deliveryChargesValue.setText(Double.toString(order.deliveryCharges));

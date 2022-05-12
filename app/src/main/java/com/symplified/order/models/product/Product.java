@@ -3,7 +3,7 @@ package com.symplified.order.models.product;
 import java.io.Serializable;
 import java.util.List;
 
-public class Product  implements Serializable {
+public class Product implements Serializable {
 
     public String id;
     public String name;
@@ -35,7 +35,7 @@ public class Product  implements Serializable {
         public String id;
         public String name;
         public List<ProductVariantAvailable> productVariantsAvailable;
-        public String sequenceNumber;
+        public Integer sequenceNumber;
 
         @Override
         public String toString() {
@@ -69,7 +69,7 @@ public class Product  implements Serializable {
 
     public class ProductInventory {
         public String itemCode;
-        public float price;
+        public double price;
         public int quantity;
         public String productId;
         public String status;
@@ -145,7 +145,7 @@ public class Product  implements Serializable {
         }
     }
 
-    public static class ProductList {
+    public static class ProductList implements Serializable{
         public List<Product> content;
     }
 

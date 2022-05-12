@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -23,4 +24,6 @@ public interface LoginApi {
     @POST("authenticate")
     Call<LoginResponse> login(@Header("Content-Type") String contentType, @Body LoginRequest loginRequest);
 
+    @POST("session/refresh")
+    Call<LoginResponse> refreshToken(@Body RequestBody refreshToken);
 }
