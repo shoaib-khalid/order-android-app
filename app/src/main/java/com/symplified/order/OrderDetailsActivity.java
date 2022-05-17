@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -177,33 +178,40 @@ public class OrderDetailsActivity extends AppCompatActivity {
         OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         Call<ResponseBody> orderStatusDetailsResponseCall = orderApiService.getOrderStatusDetails(headers, order.id);
+        progressDialog.show();
         orderStatusDetailsResponseCall.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    JSONObject responseJson = new JSONObject(response.body().string().toString());
-                    Log.e(TAG, "onResponse: "+ responseJson, new Error() );
-                    new Handler().post(() -> {
-                        try {
-                            if(!section.equals("sent")){
-                                process.setVisibility(View.VISIBLE);
-                                process.setText(responseJson.getJSONObject("data").getString("nextActionText"));
-                                nextStatus += responseJson.getJSONObject("data").getString("nextCompletionStatus");
-                                //get order items from API
-                                updateOrderStatus(order);
+                if(response.isSuccessful()){
+                    try {
+                        JSONObject responseJson = new JSONObject(response.body().string().toString());
+                        Log.e(TAG, "onResponse: "+ responseJson, new Error() );
+                        new Handler().post(() -> {
+                            try {
+                                if(!section.equals("sent")){
+                                    process.setVisibility(View.VISIBLE);
+                                    process.setText(responseJson.getJSONObject("data").getString("nextActionText"));
+                                    nextStatus += responseJson.getJSONObject("data").getString("nextCompletionStatus");
+                                    //get order items from API
+                                    updateOrderStatus(order);
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
                             }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+                        });
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
+                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Toast.makeText(OrderDetailsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "onFailure: ", t);
             }
         });
 
@@ -227,7 +235,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
-
                 if(response.isSuccessful())
                 {
                     Log.e("TAG", "onResponse: "+order.id, new Error() );
@@ -241,15 +248,15 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     itemsAdapter.setItems(response.body().data.content);
                     recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
+                }else{
+                    Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
-
-
+                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Failed to retrieve items", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Failed to retrieve items. "+ R.string.no_internet, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onFailureItems: ", t);
                 progressDialog.dismiss();
             }
@@ -319,18 +326,20 @@ public class OrderDetailsActivity extends AppCompatActivity {
                         process.setEnabled(false);
                         process.setClickable(false);
                         Toast.makeText(getApplicationContext(), "Status Updated", Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
                         finish();
                     } catch (IOException e) {
                         progressDialog.dismiss();
                         e.printStackTrace();
                     }
+                }else{
+                    Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
+                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(OrderDetailsActivity.this, "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OrderDetailsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
                 Log.e(TAG, "onFailure: ",t );
             }
@@ -597,12 +606,16 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
                     spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
 
+                }else{
+                    Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
+                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ",t );
+                Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
         });
@@ -634,12 +647,14 @@ public class OrderDetailsActivity extends AppCompatActivity {
                             if(response.isSuccessful()){
                                 Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
                                 finish();
+                            }else{
+                                Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                             }
                         }
 
                         @Override
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "onFailure: ", t);
                         }
                     });

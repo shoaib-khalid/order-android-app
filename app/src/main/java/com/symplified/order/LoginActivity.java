@@ -43,6 +43,7 @@ import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -179,8 +180,8 @@ public class LoginActivity extends AppCompatActivity{
             String loginMessage = "";
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-
-
+                Log.e(TAG, "onResponse: " + call.request().toString() );
+                progressDialog.dismiss();
                 if(response.isSuccessful())
                 {
                     LoginData res = response.body().data;
@@ -203,18 +204,13 @@ public class LoginActivity extends AppCompatActivity{
 
                     }
 
-                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                            startActivity(intent);
-                        }
-                    }, 0);
+//                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+                    startActivity(intent);
+
                 }
                 else {
-                    Log.d("TAG", "Login response : Not successful");
+                    Log.e("TAG", "Login response : Not successful : " + response.raw());
                     progressDialog.dismiss();
                     loginMessage = "Unsuccessful, Please try again";
                     email.getEditText().setText("");
@@ -222,15 +218,16 @@ public class LoginActivity extends AppCompatActivity{
                     email.getEditText().requestFocus();
                 }
 
-                if(!(BASE_URL.contains(".it") && loginMessage.contains("success"))){
+//                if(!(BASE_URL.contains(".it") && loginMessage.contains("success"))){
+//                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
+//                }
                     Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
-                Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
 
