@@ -30,6 +30,9 @@
             android:name=".SettingsActivity"
             android:exported="false" />
         <activity
+            android:name=".ProductsActivity"
+            android:exported="true" />
+        <activity
             android:name=".ChooseStoreActivity"
             android:exported="true" />
         <activity

@@ -21,7 +21,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        if(sharedPreferences.getBoolean("isStaging", false))
+        if (sharedPreferences.getBoolean("isStaging", false))
             setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
         setContentView(R.layout.activity_settings);
 
@@ -58,9 +58,8 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
                 String storeIdList = sharedPreferences.getString("storeIdList", null);
-                if(storeIdList != null )
-                {
-                    for(String storeId : storeIdList.split(" ")){
+                if (storeIdList != null) {
+                    for (String storeId : storeIdList.split(" ")) {
                         FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                     }
                 }
@@ -74,6 +73,12 @@ public class SettingsActivity extends AppCompatActivity {
         ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
         settings.setOnClickListener(view -> {
             Toast.makeText(this, "Select a store !", Toast.LENGTH_SHORT).show();
+        });
+
+        ImageView products = toolbar.findViewById(R.id.app_bar_products);
+        products.setOnClickListener(view -> {
+            Intent intent = new Intent(this, ProductsActivity.class);
+            startActivity(intent);
         });
     }
 }

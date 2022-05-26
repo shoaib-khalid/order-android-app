@@ -104,6 +104,12 @@ public class OrdersActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        ImageView products = toolbar.findViewById(R.id.app_bar_products);
+        products.setOnClickListener(view -> {
+            Intent intent = new Intent(this, ProductsActivity.class);
+            startActivity(intent);
+        });
+
 //        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
 //        String logourl = sharedPreferences.getString("logoUrl", null);
 //        Log.e("TAG", "onCreate: logourl is : "+logourl, new Error() );
