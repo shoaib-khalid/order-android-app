@@ -1,7 +1,9 @@
 package com.symplified.order.adapters;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.util.Base64;
@@ -18,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.symplified.order.App;
+import com.symplified.order.EditProductActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.models.product.Product;
@@ -69,7 +72,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         progressDialog = new Dialog(context);
 
         holder.prodTitle.setText(products.get(position).name);
-        holder.prodPrice.setText(String.format("%.2f", products.get(position).productInventories.get(0).price));
+        holder.prodPrice.setText(Double.toString(products.get(position).productInventories.get(0).price));
 
         try {
             Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
@@ -88,52 +91,55 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             e.printStackTrace();
         }
 
-        holder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer Bearer accessToken");
+        holder.edit.setOnClickListener(view -> {
+            Intent intent = new Intent(context, EditProductActivity.class);
+            intent.putExtra("product", products.get(position));
 
-                Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                        .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-
-                ProductApi api = retrofit.create(ProductApi.class);
-
-                Dialog dialog = new MaterialAlertDialogBuilder(context)
-                        .setTitle("Delete Product")
-                        .setMessage("Do you really want to delete this product ?")
-                        .setNegativeButton("No", null)
-                        .setPositiveButton("Yes", ((dialogInterface, i) -> {
-                            progressDialog.show();
-
-                            Call<ResponseBody> responseBodyCall = api.deleteProduct(headers, storeId, products.get(holder.getAdapterPosition()).id);
-                            progressDialog.show();
-                            responseBodyCall.clone().enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    if (response.isSuccessful()) {
-                                        products.remove(holder.getAdapterPosition());
-                                        notifyDataSetChanged();
-                                        progressDialog.dismiss();
-                                    }
-                                    progressDialog.dismiss();
-                                }
-
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    Log.e(TAG, "onFailure: ",t );
-                                    progressDialog.dismiss();
-                                }
-                            });
-
-                        }))
-                        .create();
-                dialog.show();
-            }
+            context.startActivity(intent);
         });
-        Log.i("Total Products: ", String.valueOf(getItemCount()));
+
+        holder.delete.setOnClickListener(view ->  {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer Bearer accessToken");
+
+            Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                    .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            ProductApi api = retrofit.create(ProductApi.class);
+
+            Dialog dialog = new MaterialAlertDialogBuilder(context)
+                    .setTitle("Delete Product")
+                    .setMessage("Do you really want to delete this product ?")
+                    .setNegativeButton("No", null)
+                    .setPositiveButton("Yes", ((dialogInterface, i) -> {
+                        progressDialog.show();
+
+                        Call<ResponseBody> responseBodyCall = api.deleteProduct(headers, storeId, products.get(holder.getAdapterPosition()).id);
+                        progressDialog.show();
+                        responseBodyCall.clone().enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if (response.isSuccessful()) {
+                                    products.remove(holder.getAdapterPosition());
+                                    notifyDataSetChanged();
+                                    progressDialog.dismiss();
+                                }
+                                progressDialog.dismiss();
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.e(TAG, "onFailure: ",t );
+                                progressDialog.dismiss();
+                            }
+                        });
+
+                    }))
+                    .create();
+            dialog.show();
+        });
     }
 
     @Override

@@ -71,6 +71,11 @@ public class ProductsActivity extends AppCompatActivity {
         setData();
         getProductsList();
 
+        addFloatingActionButton.setOnClickListener(view -> {
+            Intent intent = new Intent(this, EditProductActivity.class);
+            startActivity(intent);
+        });
+
         productsrecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {

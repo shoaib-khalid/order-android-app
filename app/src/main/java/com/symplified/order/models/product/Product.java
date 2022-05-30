@@ -31,7 +31,7 @@ public class Product implements Serializable {
     public List<ProductAsset> productAssets;
     public ProductDeliveryDetail productDeliveryDetail;
 
-    public static class ProductVariant {
+    public static class ProductVariant implements Serializable{
         public String id;
         public String name;
         public List<ProductVariantAvailable> productVariantsAvailable;
@@ -48,7 +48,7 @@ public class Product implements Serializable {
         }
     }
 
-    public static class ProductVariantAvailable {
+    public static class ProductVariantAvailable implements Serializable {
         public String id;
         public String value;
         public String productId;
@@ -67,7 +67,7 @@ public class Product implements Serializable {
         }
     }
 
-    public class ProductInventory {
+    public class ProductInventory implements Serializable {
         public String itemCode;
         public double price;
         public int quantity;
@@ -90,7 +90,7 @@ public class Product implements Serializable {
         }
     }
 
-    public static class ProductInventoryItem {
+    public static class ProductInventoryItem implements Serializable {
         public String itemCode;
         public String productVariantAvailableId;
         public String productId;
@@ -109,7 +109,7 @@ public class Product implements Serializable {
         }
     }
 
-    public static class ProductAsset {
+    public static class ProductAsset implements Serializable {
         public String id;
         public String itemCode;
         public String name;
@@ -130,7 +130,7 @@ public class Product implements Serializable {
         }
     }
 
-    public static class ProductDeliveryDetail {
+    public static class ProductDeliveryDetail implements Serializable {
         public String productId;
         public String type;
         public String itemType;
@@ -145,7 +145,7 @@ public class Product implements Serializable {
         }
     }
 
-    public static class ProductList implements Serializable{
+    public static class ProductList implements Serializable {
         public List<Product> content;
     }
 

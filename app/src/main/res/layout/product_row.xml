@@ -119,7 +119,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/divider_card"
-                android:padding="10dp">
+                android:padding="5dp">
 
                 <TextView
                     android:id="@+id/product_edit"
@@ -128,6 +128,8 @@
                     android:layout_marginStart="50dp"
                     android:text="Edit"
                     android:textSize="14dp"
+                    android:padding="5dp"
+                    android:background="?attr/selectableItemBackground"
                     android:textColor="@color/sf_500"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -138,8 +140,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="50dp"
                     android:text="Delete"
+                    android:padding="5dp"
+                    android:background="?attr/selectableItemBackground"
                     android:textColor="@color/sf_500"
-
                     android:textSize="14dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -155,7 +158,7 @@
         android:layout_height="1dp"
         android:layout_below="@+id/product_card_parent"
         android:layout_marginHorizontal="10dp"
-        android:background="@color/black">
+        android:background="@color/dark_grey">
 
     </androidx.viewpager.widget.ViewPager>
 

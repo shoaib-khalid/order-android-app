@@ -5,13 +5,12 @@
 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.INTERNET" />
-<!--    <uses-permission android:name="android.permission.CALL_PHONE" />-->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- <uses-permission android:name="android.permission.CALL_PHONE" /> -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
+    <uses-permission
+        android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
         tools:ignore="ProtectedPermissions" />
-
 
     <application
         android:name=".App"
@@ -22,13 +21,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
 
-        <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
-
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
 
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
+        <activity android:name=".EditProductActivity"
+            android:exported="true" />
         <activity
             android:name=".ProductsActivity"
             android:exported="true" />
@@ -83,7 +84,6 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>
