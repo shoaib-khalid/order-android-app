@@ -27,7 +27,7 @@ public interface StoreApi {
     Call<ResponseBody> getAllAssets(@HeaderMap Map<String, String> headers, @Path("clientId") String clientId);
 
     @GET("stores/{storeId}")
-    Call<ResponseBody> getStoreById(@HeaderMap Map<String, String> headers, @Path("clientId") String storeId);
+    Call<ResponseBody> getStoreById(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId);
 
     @GET("stores/{storeId}/timings/snooze")
     Call<ResponseBody> getStoreStatusById(@HeaderMap Map<String,String> headers, @Path("storeId") String storeId);

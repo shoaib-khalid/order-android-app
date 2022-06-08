@@ -6,7 +6,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -16,12 +21,32 @@ import androidx.core.app.TaskStackBuilder;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
+import com.symplified.order.apis.StoreApi;
+import com.symplified.order.models.Store.Store;
+import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.asset.Asset;
 
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import okhttp3.OkHttpClient;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
@@ -35,6 +60,17 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+        String storeIdList = sharedPreferences.getString("storeIdList", null);
+        List<String> storeIds = Arrays.asList(storeIdList.split(" "));
+        String storeName = remoteMessage.getData().get("storeName");
+        String currentStoreId = null;
+        for(String storeId: storeIds) {
+            if (sharedPreferences.getString(storeId+"-name", null).equals(storeName)) {
+                currentStoreId = storeId;
+            }
+        }
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
         taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
         PendingIntent pendingIntent ;
@@ -61,12 +97,50 @@ public class OrderNotificationService extends FirebaseMessagingService {
         notificationManager.notify(new Random().nextInt(), notification);
 
         // && !isAppOnForeground(getApplicationContext(), getPackageName())
-        if(!AlertService.isPlaying())
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(new Intent(this, AlertService.class));
-            }else
-                startService(new Intent(this, AlertService.class));
+        if (currentStoreId != null) {
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer Bearer accessToken");
+
+            Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                    .baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
+
+            StoreApi storeApi = retrofit.create(StoreApi.class);
+
+            Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, currentStoreId);
+
+            storeResponse.clone().enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        try {
+                            StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
+                            if (responseBody.data.verticalCode.equals("FnB")) {
+                                if(!AlertService.isPlaying()) {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        startForegroundService(new Intent(getApplicationContext(), AlertService.class));
+                                    }else
+                                        startService(new Intent(getApplicationContext(), AlertService.class));
+                                }
+                            }
+                            else {
+                                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                                Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
+                                ringtone.play();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+
+                }
+            });
         }
 
     }

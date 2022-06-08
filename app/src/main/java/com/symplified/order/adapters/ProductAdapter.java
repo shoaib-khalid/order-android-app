@@ -49,7 +49,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     private String BASE_URL;
     private static final String TAG = "ProductsAdapter";
     private SharedPreferences sharedPreferences;
-    private String storeId;
+    private String storeId, currency;
 
     public ProductAdapter(Context context, List<Product> products) {
         this.context = context;
@@ -69,10 +69,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         storeId = sharedPreferences.getString("storeId", null);
+        currency = sharedPreferences.getString("currency", null);
         progressDialog = new Dialog(context);
 
         holder.prodTitle.setText(products.get(position).name);
         holder.prodPrice.setText(Double.toString(products.get(position).productInventories.get(0).price));
+        holder.currency.setText(" " + currency);
 
         try {
             Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
@@ -148,7 +150,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView prodTitle, prodPrice, edit, delete;
+        TextView prodTitle, prodPrice, edit, delete, currency;
         ImageView prodImage;
         CardView prod_cardView;
 
@@ -160,6 +162,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             this.prod_cardView = itemView.findViewById(R.id.product_card_parent);
             edit = itemView.findViewById(R.id.product_edit);
             delete = itemView.findViewById(R.id.product_delete);
+            currency = itemView.findViewById(R.id.prod_row_price);
         }
     }
 }

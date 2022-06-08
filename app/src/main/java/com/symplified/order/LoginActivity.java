@@ -251,6 +251,7 @@ public class LoginActivity extends AppCompatActivity{
                 storeIdList.append(store.id).append(" ");
                 sharedPreferences.edit().putString(store.id+"-name", store.name).apply();
             }
+            editor.putString("currency", items.get(0).regionCountry.currencySymbol);
             editor.putString("storeId", storeIdList.toString().split(" ")[0]).apply();
             editor.putString("timezone", timeZoneList.toString()).apply();
             editor.putString("storeIdList", storeIdList.toString()).apply();
