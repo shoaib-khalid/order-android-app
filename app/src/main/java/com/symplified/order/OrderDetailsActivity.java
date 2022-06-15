@@ -73,7 +73,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class OrderDetailsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
-    private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue,billingTotal, discount, deliveryDiscount;
+    private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue, billingTotal, discount, deliveryDiscount;
     private TextView deliveryProvider, driverName, driverContactNumber, trackingLink, headerOrginalQty, customerPhoneNumber, orderDeliveryDetailLabel, orderDeliveryDetailValue;
     private Button process, print, cancelOrder, editOrder;
     private ImageView pickup, storeLogo, phoneIcon, phoneIconCustomer;
@@ -99,7 +99,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         //change theme for staging mode
-        if(sharedPreferences.getBoolean("isStaging", false))
+        if (sharedPreferences.getBoolean("isStaging", false))
             setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
         setContentView(R.layout.activity_order_details);
         setResult(RESULT_CANCELED, new Intent().putExtra("finish", 0));
@@ -107,7 +107,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         section = null;
         section = getIntent().getStringExtra("section");
 
-        if(getIntent().getExtras().containsKey("hasDeliveryDetails")){
+        if (getIntent().getExtras().containsKey("hasDeliveryDetails")) {
             hasDeliveryDetails = getIntent().getBooleanExtra("hasDeliveryDetails", false);
         }
 
@@ -123,9 +123,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
         itemsAdapter.order = order;
 
         editOrder.setOnClickListener(view -> {
-            if(!order.isRevised){
+            if (!order.isRevised) {
                 editOrderItem(order);
-            }else{
+            } else {
                 Toast.makeText(OrderDetailsActivity.this, "Order already revised !", Toast.LENGTH_SHORT).show();
 //                editOrder.setEnabled(false);
 //                editOrder.setVisibility(View.GONE);
@@ -137,9 +137,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
         //set Cancel Order buttton click listener
         cancelOrder.setOnClickListener(view -> onCancelOrderButtonClick(order));
 
-        if(section != null && section.equals("new")){
+        if (section != null && section.equals("new")) {
             cancelOrder.setVisibility(View.VISIBLE);
-            if(!order.isRevised){
+            if (!order.isRevised) {
                 editOrder.setVisibility(View.VISIBLE);
             }
         }
@@ -160,7 +160,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         //get current order status details of the order
         getOrderStatusDetails(order);
-        Log.i(TAG, "onCreate: "+order.toString());
+        Log.i(TAG, "onCreate: " + order.toString());
 
         //display all order details to relevant fields
         displayOrderDetails(sharedPreferences, order, storeIdList);
@@ -172,7 +172,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
@@ -182,13 +182,13 @@ public class OrderDetailsActivity extends AppCompatActivity {
         orderStatusDetailsResponseCall.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
                     try {
                         JSONObject responseJson = new JSONObject(response.body().string().toString());
-                        Log.e(TAG, "onResponse: "+ responseJson, new Error() );
+                        Log.e(TAG, "onResponse: " + responseJson, new Error());
                         new Handler().post(() -> {
                             try {
-                                if(!section.equals("sent")){
+                                if (!section.equals("sent")) {
                                     process.setVisibility(View.VISIBLE);
                                     process.setText(responseJson.getJSONObject("data").getString("nextActionText"));
                                     nextStatus += responseJson.getJSONObject("data").getString("nextCompletionStatus");
@@ -202,7 +202,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     } catch (IOException | JSONException e) {
                         e.printStackTrace();
                     }
-                }else{
+                } else {
                     Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
@@ -217,12 +217,12 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
     }
 
-    private void getOrderItems(Order order){
+    private void getOrderItems(Order order) {
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
@@ -235,10 +235,9 @@ public class OrderDetailsActivity extends AppCompatActivity {
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
-                if(response.isSuccessful())
-                {
-                    Log.e("TAG", "onResponse: "+order.id, new Error() );
-                    if(order.isRevised){
+                if (response.isSuccessful()) {
+                    Log.e("TAG", "onResponse: " + order.id, new Error());
+                    if (order.isRevised) {
                         headerOrginalQty.setVisibility(View.VISIBLE);
 //                        editOrder.setVisibility(View.VISIBLE);
 //                        editOrder.setEnabled(false);
@@ -248,7 +247,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                     itemsAdapter.setItems(response.body().data.content);
                     recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
-                }else{
+                } else {
                     Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
@@ -256,7 +255,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Failed to retrieve items. "+ R.string.no_internet, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Failed to retrieve items. " + R.string.no_internet, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onFailureItems: ", t);
                 progressDialog.dismiss();
             }
@@ -264,8 +263,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
     }
 
     private void editOrderItem(Order order) {
-        if(isEdited){
-            if(!order.isRevised){
+        if (isEdited) {
+            if (!order.isRevised) {
                 new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                         .setTitle("Update Order")
                         .setMessage("You have made changes to a confirmed order.\nThis action cannot be undone.\nDo you want to continue?")
@@ -276,8 +275,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                             editOrder.setEnabled(false);
                         }).show();
             }
-        }
-        else{
+        } else {
             new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                     .setTitle("Edit Order")
                     .setMessage("You are about to change a confirmed order.\nYou can only perform this once.\nAny extra money will be refunded to customer.")
@@ -299,7 +297,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
@@ -317,10 +315,10 @@ public class OrderDetailsActivity extends AppCompatActivity {
         processOrder.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
 //                    progressDialog.dismiss();
                     try {
-                        Log.i(TAG, "onResponse: "+response.raw().toString());
+                        Log.i(TAG, "onResponse: " + response.raw().toString());
                         Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
                         process.setText(Utility.removeUnderscores(currentOrder.data.completionStatus));
                         process.setEnabled(false);
@@ -331,7 +329,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                         progressDialog.dismiss();
                         e.printStackTrace();
                     }
-                }else{
+                } else {
                     Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
@@ -341,7 +339,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(OrderDetailsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
-                Log.e(TAG, "onFailure: ",t );
+                Log.e(TAG, "onFailure: ", t);
             }
         });
 
@@ -353,10 +351,10 @@ public class OrderDetailsActivity extends AppCompatActivity {
     ) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String timeZones = sharedPreferences.getString("timezone", null);
-        Log.e(TAG, "displayOrderDetails: storeId = " + order.storeId );
-        int  indexOfStore = Arrays.asList(storeIdList.split(" ")).indexOf(order.storeId);
+        Log.e(TAG, "displayOrderDetails: storeId = " + order.storeId);
+        int indexOfStore = Arrays.asList(storeIdList.split(" ")).indexOf(order.storeId);
         Log.e(TAG, "displayOrderDetails: index = " + indexOfStore + " stores = " + Arrays.asList(storeIdList.split(" ")));
-        if(indexOfStore == -1){
+        if (indexOfStore == -1) {
             indexOfStore = 0;
         }
         String currentTimezone = Arrays.asList(timeZones.split(" ")).get(indexOfStore);
@@ -364,7 +362,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         Calendar calendar = new GregorianCalendar();
         try {
             calendar.setTime(dtf.parse(order.created));
-            calendar.add(Calendar.HOUR_OF_DAY, (timezone.getRawOffset()/3600000));
+            calendar.add(Calendar.HOUR_OF_DAY, (timezone.getRawOffset() / 3600000));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -381,17 +379,13 @@ public class OrderDetailsActivity extends AppCompatActivity {
         noteValue.setText(order.customerNotes);
         subtotalValue.setText(Double.toString(order.subTotal));
 
-        if(!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null){
+        if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null) {
             orderDeliveryDetailLabel.setVisibility(View.VISIBLE);
             orderDeliveryDetailValue.setVisibility(View.VISIBLE);
             orderDeliveryDetailValue.setText(order.orderShipmentDetail.deliveryPeriodDetails.name);
         }
 
-        if(order.appliedDiscount != null){
-            discount.setText(Double.toString(order.appliedDiscount));
-        }else{
-            discount.setText("0.0");
-        }
+        discount.setText(order.appliedDiscount != null ? Double.toString(order.appliedDiscount) : "0.0");
         if (order.storeServiceCharges == 0.0) {
             serviceChargesValue.setVisibility(View.GONE);
             findViewById(R.id.billing_service_charges).setVisibility(View.GONE);
@@ -399,12 +393,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
             serviceChargesValue.setText(Double.toString(order.storeServiceCharges));
         }
 
-        if(order.deliveryCharges != null ){
-            deliveryChargesValue.setText(Double.toString(order.deliveryCharges));
-        }else {
-            deliveryChargesValue.setText("0.0");
-        }
-        deliveryDiscount.setText(Double.toString(order.deliveryDiscount));
+        deliveryChargesValue.setText(order.deliveryCharges != null ? Double.toString(order.deliveryCharges) : "0.0");
+        deliveryDiscount.setText(order.deliveryDiscount != null ? Double.toString(order.deliveryDiscount) : "0.0");
         billingTotal.setText(Double.toString(order.total));
 
         phoneIconCustomer.setOnClickListener(view -> {
@@ -414,7 +404,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         });
 
 //        && deliveryDetails != null
-        if((section.equals("sent") || section.equals("pickup")) && hasDeliveryDetails ){
+        if ((section.equals("sent") || section.equals("pickup")) && hasDeliveryDetails) {
             setDriverDeliveryDetails(order, sharedPreferences);
 //            deliveryDetailsView.setVisibility(View.VISIBLE);
 //            deliveryDetailsDivider.setVisibility(View.VISIBLE);
@@ -431,7 +421,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 //            spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
         }
 
-        if(order.orderShipmentDetail.storePickup)
+        if (order.orderShipmentDetail.storePickup)
             pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
         else
             pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
@@ -446,24 +436,20 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
     private void initAppBar(SharedPreferences sharedPreferences, Order order, String storeIdList) {
 
-        String encodedImage = sharedPreferences.getString("logoImage-"+order.storeId, null);
+        String encodedImage = sharedPreferences.getString("logoImage-" + order.storeId, null);
         ImageView storeLogo = findViewById(R.id.storeLogoDetails);
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
 
-        if(storeIdList.split(" ").length > 0)
-        {
-            if(encodedImage != null)
-            {
+        if (storeIdList.split(" ").length > 0) {
+            if (encodedImage != null) {
                 Utility.decodeAndSetImage(storeLogo, encodedImage);
-            }
-            else{
+            } else {
                 storeLogo.setVisibility(View.GONE);
                 storeLogoText.setVisibility(View.VISIBLE);
-                storeLogoText.setText(sharedPreferences.getString(order.storeId+"-name", null));
+                storeLogoText.setText(sharedPreferences.getString(order.storeId + "-name", null));
             }
-        }
-        else{
+        } else {
             storeLogo.setVisibility(View.GONE);
             storeLogoText.setVisibility(View.GONE);
         }
@@ -483,9 +469,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
             setResult(RESULT_OK, new Intent().putExtra("finish", 1));
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             String storeIdList1 = sharedPreferences.getString("storeIdList", null);
-            if(storeIdList1 != null )
-            {
-                for(String storeId : storeIdList1.split(" ")){
+            if (storeIdList1 != null) {
+                for (String storeId : storeIdList1.split(" ")) {
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
             }
@@ -496,8 +481,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
         settings.setOnClickListener(view -> {
-                Intent intent = new Intent(this, SettingsActivity.class);
-                startActivity(intent);
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         });
 
         ImageView products = toolbar.findViewById(R.id.app_bar_products);
@@ -576,7 +561,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL+App.DELIVERY_SERVICE_URL)
+                .baseUrl(BASE_URL + App.DELIVERY_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -603,16 +588,16 @@ public class OrderDetailsActivity extends AppCompatActivity {
                         startActivity(callDriver);
                     });
 
-                    String link = "<a color=\"#1DA1F2\" href=\""+response.body().data.trackingUrl+"\">Click Here</a>";
+                    String link = "<a color=\"#1DA1F2\" href=\"" + response.body().data.trackingUrl + "\">Click Here</a>";
                     new SpannableString(link).setSpan(
-                            new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),
+                            new BackgroundColorSpan(getColor(R.color.twitter_blue)), 0, link.length(),
                             Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                     trackingLink.setText(Html.fromHtml(link), TextView.BufferType.SPANNABLE);
                     trackingLink.setMovementMethod(LinkMovementMethod.getInstance());
                     Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
-                    spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
+                    spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)), 0, spannableTrackingLink.length(), 0);
 
-                }else{
+                } else {
                     Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();
@@ -620,7 +605,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: ",t );
+                Log.e(TAG, "onFailure: ", t);
                 Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
@@ -629,12 +614,12 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
     }
 
-    public void onCancelOrderButtonClick(Order order){
+    public void onCancelOrderButtonClick(Order order) {
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
@@ -650,10 +635,10 @@ public class OrderDetailsActivity extends AppCompatActivity {
                         @Override
                         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                             progressDialog.dismiss();
-                            if(response.isSuccessful()){
+                            if (response.isSuccessful()) {
                                 Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
                                 finish();
-                            }else{
+                            } else {
                                 Toast.makeText(OrderDetailsActivity.this, R.string.request_failure, Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -668,7 +653,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 .create();
         TextView title = dialog.findViewById(android.R.id.title);
         TextView message = dialog.findViewById(android.R.id.message);
-        if(title != null && message != null){
+        if (title != null && message != null) {
             title.setTypeface(Typeface.DEFAULT_BOLD);
             message.setTextSize(14);
             message.setTypeface(Typeface.DEFAULT_BOLD);
