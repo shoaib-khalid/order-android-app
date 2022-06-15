@@ -406,19 +406,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
 //        && deliveryDetails != null
         if ((section.equals("sent") || section.equals("pickup")) && hasDeliveryDetails) {
             setDriverDeliveryDetails(order, sharedPreferences);
-//            deliveryDetailsView.setVisibility(View.VISIBLE);
-//            deliveryDetailsDivider.setVisibility(View.VISIBLE);
-//            deliveryProvider.setText(deliveryDetails.provider.name);
-//            driverName.setText(deliveryDetails.name);
-//            driverContactNumber.setText(deliveryDetails.phoneNumber);
-//            String link = "<a color=\"#1DA1F2\" href=\""+deliveryDetails.trackingUrl+"\">Click Here</a>";
-//            new SpannableString(link).setSpan(
-//                    new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),
-//                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-//            trackingLink.setText(Html.fromHtml(link), TextView.BufferType.SPANNABLE);
-//            trackingLink.setMovementMethod(LinkMovementMethod.getInstance());
-//            Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
-//            spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
         }
 
         if (order.orderShipmentDetail.storePickup)
@@ -454,15 +441,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
             storeLogoText.setVisibility(View.GONE);
         }
         home.setOnClickListener(view -> {
-            /*
-            setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-            Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-            sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            */
             finish();
         });
         logout.setOnClickListener(view -> {
