@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.symplified.order.apis.CategoryApi;
 import com.symplified.order.apis.ProductApi;
+import com.symplified.order.databinding.ActivityEditProductBinding;
 import com.symplified.order.models.category.Category;
 import com.symplified.order.models.category.CategoryResponse;
 import com.symplified.order.models.product.Product;
@@ -45,7 +47,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class EditProductActivity extends AppCompatActivity {
+public class EditProductActivity extends NavbarActivity {
 
     private Button prodDetailsUpdateBtn, prodDetailsCancelBtn;
     private Toolbar toolbar;
@@ -71,16 +73,25 @@ public class EditProductActivity extends AppCompatActivity {
 
     private static Dialog progressDialog;
 
+    private ActivityEditProductBinding binding;
+
     @SuppressLint("WrongThread")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_edit_product);
+        binding = ActivityEditProductBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         storeId = sharedPreferences.getString("storeId", null);
         progressDialog = new Dialog(this);
+
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        initToolbar();
 
         initViews();
 
@@ -142,8 +153,31 @@ public class EditProductActivity extends AppCompatActivity {
 
     }
 
+    public void initToolbar() {
+
+        TextView title = toolbar.findViewById(R.id.app_bar_title);
+        title.setText("Edit Prdocut");
+        ImageView home = toolbar.findViewById(R.id.app_bar_home);
+
+        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                EditProductActivity.super.onBackPressed();
+//                setResult(4, new Intent().putExtra("finish", 1));
+//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+//                sharedPreferences.edit().remove("storeId").apply();
+//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(intent);
+//                finish();
+                finish();
+            }
+        });
+    }
+
     public void initViews() {
-        toolbar = findViewById(R.id.toolbar);
 
         prodDetailsUpdateBtn = findViewById(R.id.prodDetailsUpdateBtn);
         prodDetailsCancelBtn = findViewById(R.id.prodDetailsCancelBtn);

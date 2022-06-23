@@ -10,7 +10,7 @@
     android:orientation="vertical">
 
     <include
-        android:id="@+id/prodDetials_toolbar"
+        android:id="@+id/toolbar"
         layout="@layout/custom_action_bar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"

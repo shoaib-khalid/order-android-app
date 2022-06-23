@@ -26,6 +26,7 @@ public class Store implements Serializable {
     public int serviceChargesPercentage;
     public RegionCountry regionCountry;
     public List<StoreTiming> storeTiming;
+    public List<StoreAsset> storeAssets;
 
     public static class RegionCountry{
         public String id;
@@ -43,6 +44,14 @@ public class Store implements Serializable {
         public String openTime;
         public String closeTime;
         public boolean isOff;
+    }
+
+    public static class StoreAsset{
+        public String id;
+        public String storeId;
+        public String assetUrl;
+        public String assetDescription;
+        public String assetType;
     }
 
     public static class StoreList{

@@ -76,4 +76,6 @@
     <string name="delivery_time">Delivery Time: \u0020</string>
     <string name="request_failure">Sorry, we are unable to process your request now. Please try again.</string>
     <string name="no_internet">Please check your internet connection and try again!</string>
+    <string name="forgot_password"><u>Forgot Password</u></string>
+    <string name="welcome_message">Welcome to Symplified App for Merchant</string>
 </resources>

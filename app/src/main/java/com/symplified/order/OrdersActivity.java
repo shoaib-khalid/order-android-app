@@ -2,28 +2,34 @@ package com.symplified.order;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 
-public class OrdersActivity extends AppCompatActivity {
+public class OrdersActivity extends NavbarActivity {
 
     private ActivityOrdersBinding binding;
     private Toolbar toolbar;
     private ViewPager mViewPager;
+    private DrawerLayout drawerLayout;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -33,6 +39,8 @@ public class OrdersActivity extends AppCompatActivity {
         binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        drawerLayout = findViewById(R.id.drawer_layout);
+
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -41,6 +49,31 @@ public class OrdersActivity extends AppCompatActivity {
             setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
 
         initToolbar(sharedPreferences);
+
+//        ImageView logout = findViewById(R.id.app_bar_logout);
+//        logout.setOnClickListener(new View.OnClickListener() {
+//            @OverrideE
+//            public void onClick(View view) {
+//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//                String storeIdList = sharedPreferences.getString("storeIdList", null);
+//                if(storeIdList != null )
+//                {
+//                    for(String storeId : storeIdList.split(" ")){
+////                        new Thread(new Runnable() {
+////                            @Override
+////                            public void run() {
+////
+////                            }
+////                        }).start();
+//                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+//                    }
+//                }
+//                sharedPreferences.edit().clear().apply();
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(intent);
+//                finish();
+//            }
+//        });
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
@@ -57,58 +90,66 @@ public class OrdersActivity extends AppCompatActivity {
 
     private void initToolbar(SharedPreferences sharedPreferences) {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        home.setImageDrawable(getDrawable(R.drawable.ic_home_black_24dp));
-        home.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                setResult(4, new Intent().putExtra("finish", 1));
-//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-//                sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        home.setImageDrawable(getDrawable(R.drawable.ic_baseline_menu_24));
+        home.setOnClickListener(view -> {
+            drawerLayout.openDrawer(GravityCompat.START);
+        });
+        TextView title = toolbar.findViewById(R.id.app_bar_title);
+        title.setText("Your Orders");
+        NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
+        navigationView.getMenu().getItem(0).setChecked(true);
+//        home.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                drawerLayout.openDrawer(GravityCompat.START);
+////                setResult(4, new Intent().putExtra("finish", 1));
+////                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
+////                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
+////                sharedPreferences.edit().remove("storeId").apply();
+////                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+////                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+////                startActivity(intent);
+////                finish();
+////                getSupportFragmentManager().getFragments().get(0).onResume();
+//            }
+//        });
+
+//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
+//        logout.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//                String storeIdList = sharedPreferences.getString("storeIdList", null);
+//                if(storeIdList != null )
+//                {
+//                    for(String storeId : storeIdList.split(" ")){
+////                        new Thread(new Runnable() {
+////                            @Override
+////                            public void run() {
+////
+////                            }
+////                        }).start();
+//                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+//                    }
+//                }
+//                sharedPreferences.edit().clear().apply();
 //                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //                startActivity(intent);
 //                finish();
-                getSupportFragmentManager().getFragments().get(0).onResume();
-            }
-        });
-
-        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                String storeIdList = sharedPreferences.getString("storeIdList", null);
-                if(storeIdList != null )
-                {
-                    for(String storeId : storeIdList.split(" ")){
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
+//            }
+//        });
 //
-//                            }
-//                        }).start();
-                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                    }
-                }
-                sharedPreferences.edit().clear().apply();
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
-        settings.setOnClickListener(view -> {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-        });
-
-        ImageView products = toolbar.findViewById(R.id.app_bar_products);
-        products.setOnClickListener(view -> {
-            Intent intent = new Intent(this, ProductsActivity.class);
-            startActivity(intent);
-        });
+//        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
+//        settings.setOnClickListener(view -> {
+//            Intent intent = new Intent(this, SettingsActivity.class);
+//            startActivity(intent);
+//        });
+//
+//        ImageView products = toolbar.findViewById(R.id.app_bar_products);
+//        products.setOnClickListener(view -> {
+//            Intent intent = new Intent(this, ProductsActivity.class);
+//            startActivity(intent);
+//        });
 
 //        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
 //        String logourl = sharedPreferences.getString("logoUrl", null);

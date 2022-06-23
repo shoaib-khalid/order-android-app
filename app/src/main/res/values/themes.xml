@@ -2,8 +2,8 @@
     <!-- Base application theme. -->
     <style name="Theme.SymplifiedOrderUpdate" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/sf_300</item>
-        <item name="colorPrimaryVariant">@color/sf_300</item>
+        <item name="colorPrimary">@color/sf_primary</item>
+        <item name="colorPrimaryVariant">@color/sf_primaryVariant</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="android:textColor">@color/sf_b_800</item>
         <!-- Secondary brand color. -->

@@ -70,22 +70,22 @@ public class ChooseStoreActivity extends AppCompatActivity {
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
 
-        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
+//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
         final SharedPreferences finalSharedPreferences = sharedPreferences;
-        logout.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(finalSharedPreferences.getString("storeId", null));
-            finalSharedPreferences.edit().clear().apply();
-            startActivity(intent);
-            finish();
-        });
+//        logout.setOnClickListener(view -> {
+//            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//            FirebaseMessaging.getInstance().unsubscribeFromTopic(finalSharedPreferences.getString("storeId", null));
+//            finalSharedPreferences.edit().clear().apply();
+//            startActivity(intent);
+//            finish();
+//        });
 
-        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
+//        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
         Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
-        storeLogo.setBackgroundResource(R.drawable.header);
+//        storeLogo.setBackgroundResource(R.drawable.header);
 
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)

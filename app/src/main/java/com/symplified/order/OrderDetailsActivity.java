@@ -42,6 +42,7 @@ import com.google.gson.Gson;
 import com.symplified.order.adapters.ItemsAdapter;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
+import com.symplified.order.databinding.ActivityOrderDetailsBinding;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
@@ -70,7 +71,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class OrderDetailsActivity extends AppCompatActivity {
+public class OrderDetailsActivity extends NavbarActivity {
     private RecyclerView recyclerView;
 
     private TextView storeLogoText, dateValue, invoiceValue, addressValue, cityValue, stateValue, postcodeValue, nameValue, noteValue, subtotalValue, serviceChargesValue, deliveryChargesValue, billingTotal, discount, deliveryDiscount;
@@ -89,6 +90,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private boolean hasDeliveryDetails;
     private boolean isEdited;
     private ItemsAdapter itemsAdapter;
+    private ActivityOrderDetailsBinding binding;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @SuppressLint("SetTextI18n")
@@ -101,7 +103,14 @@ public class OrderDetailsActivity extends AppCompatActivity {
         //change theme for staging mode
         if (sharedPreferences.getBoolean("isStaging", false))
             setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
-        setContentView(R.layout.activity_order_details);
+        binding = ActivityOrderDetailsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        initToolbar();
+
         setResult(RESULT_CANCELED, new Intent().putExtra("finish", 0));
 
         section = null;
@@ -164,6 +173,21 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         //display all order details to relevant fields
         displayOrderDetails(sharedPreferences, order, storeIdList);
+    }
+
+    public void initToolbar() {
+        TextView title = toolbar.findViewById(R.id.app_bar_title);
+        title.setText("Edit Order");
+        ImageView home = toolbar.findViewById(R.id.app_bar_home);
+
+        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                OrderDetailsActivity.super.onBackPressed();
+                finish();
+            }
+        });
     }
 
     private void getOrderStatusDetails(Order order) {
@@ -426,7 +450,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         String encodedImage = sharedPreferences.getString("logoImage-" + order.storeId, null);
         ImageView storeLogo = findViewById(R.id.storeLogoDetails);
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
+//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
 
         if (storeIdList.split(" ").length > 0) {
             if (encodedImage != null) {
@@ -443,31 +467,31 @@ public class OrderDetailsActivity extends AppCompatActivity {
         home.setOnClickListener(view -> {
             finish();
         });
-        logout.setOnClickListener(view -> {
-            setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-            String storeIdList1 = sharedPreferences.getString("storeIdList", null);
-            if (storeIdList1 != null) {
-                for (String storeId : storeIdList1.split(" ")) {
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                }
-            }
-            sharedPreferences.edit().clear().apply();
-            startActivity(intent);
-            finish();
-        });
-
-        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
-        settings.setOnClickListener(view -> {
-            Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-        });
-
-        ImageView products = toolbar.findViewById(R.id.app_bar_products);
-        products.setOnClickListener(view -> {
-            Intent intent = new Intent(this, ProductsActivity.class);
-            startActivity(intent);
-        });
+//        logout.setOnClickListener(view -> {
+//            setResult(RESULT_OK, new Intent().putExtra("finish", 1));
+//            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//            String storeIdList1 = sharedPreferences.getString("storeIdList", null);
+//            if (storeIdList1 != null) {
+//                for (String storeId : storeIdList1.split(" ")) {
+//                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+//                }
+//            }
+//            sharedPreferences.edit().clear().apply();
+//            startActivity(intent);
+//            finish();
+//        });
+//
+//        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
+//        settings.setOnClickListener(view -> {
+//            Intent intent = new Intent(this, SettingsActivity.class);
+//            startActivity(intent);
+//        });
+//
+//        ImageView products = toolbar.findViewById(R.id.app_bar_products);
+//        products.setOnClickListener(view -> {
+//            Intent intent = new Intent(this, ProductsActivity.class);
+//            startActivity(intent);
+//        });
 
     }
 

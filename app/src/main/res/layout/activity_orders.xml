@@ -8,7 +8,15 @@
     android:keepScreenOn="true"
     tools:context=".OrdersActivity">
 
-<!--    <com.google.android.material.appbar.AppBarLayout-->
+    <include
+        android:id="@+id/toolbar"
+        layout="@layout/custom_action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_alignParentTop="true" />
+
+
+    <!--    <com.google.android.material.appbar.AppBarLayout-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="wrap_content"-->
 <!--        android:theme="@style/Theme.SymplifiedOrderUpdate.AppBarOverlay">-->
@@ -28,18 +36,18 @@
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="wrap_content" />-->
 <!--    </com.google.android.material.appbar.AppBarLayout>-->
-    <include
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        layout="@layout/custom_action_bar"
-        android:layout_alignParentTop="true"/>
+<!--    <include-->
+<!--        android:id="@+id/toolbar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="?attr/actionBarSize"-->
+<!--        layout="@layout/custom_action_bar"-->
+<!--        android:layout_alignParentTop="true"/>-->
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabs"
-        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar"/>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"

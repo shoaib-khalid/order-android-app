@@ -10,19 +10,25 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.apis.ProductApi;
+import com.symplified.order.databinding.ActivityOrdersBinding;
+import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductResponse;
 
@@ -38,23 +44,34 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class ProductsActivity extends AppCompatActivity {
+public class ProductsActivity extends NavbarActivity {
     private Toolbar toolbar;
     private RecyclerView productsrecyclerView;
     List<Product> products = new ArrayList<>();
     ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
-    private SharedPreferences sharedPreferences;
     private String storeId;
     private String BASE_URL;
     private Dialog progressDialog;
     private FloatingActionButton addFloatingActionButton;
+    private ActivityProductsBinding binding;
+    private DrawerLayout drawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceStatus) {
         super.onCreate(savedInstanceStatus);
-        setContentView(R.layout.activity_products);
+
+        binding = ActivityProductsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        initToolbar(sharedPreferences);
+
         productsrecyclerView = findViewById(R.id.productsRecyclerView);
         addFloatingActionButton = findViewById(R.id.add_product_btn);
 
@@ -67,7 +84,6 @@ public class ProductsActivity extends AppCompatActivity {
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
 
-        initToolbar(sharedPreferences);
         setData();
         getProductsList();
 
@@ -86,10 +102,9 @@ public class ProductsActivity extends AppCompatActivity {
 
     private void initToolbar(SharedPreferences sharedPreferences) {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        home.setImageDrawable(getDrawable(R.drawable.ic_home_black_24dp));
-        home.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setOnClickListener(view -> {
+                ProductsActivity.super.onBackPressed();
 //                setResult(4, new Intent().putExtra("finish", 1));
 //                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
 //                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
@@ -99,37 +114,43 @@ public class ProductsActivity extends AppCompatActivity {
 //                startActivity(intent);
 //                finish();
                 finish();
-            }
         });
 
-        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
-        logout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                String storeIdList = sharedPreferences.getString("storeIdList", null);
-                if (storeIdList != null) {
-                    for (String storeId : storeIdList.split(" ")) {
-                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                    }
-                }
-                sharedPreferences.edit().clear().apply();
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
-            }
-        });
 
-        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
-        settings.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-            startActivity(intent);
-        });
+        TextView title = toolbar.findViewById(R.id.app_bar_title);
+        title.setText("All Products");
 
-        ImageView products = toolbar.findViewById(R.id.app_bar_products);
-        products.setOnClickListener(view -> {
-            Toast.makeText(this, "Opened!", Toast.LENGTH_SHORT).show();
-        });
+        NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
+        navigationView.getMenu().getItem(2).setChecked(true);
+
+//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
+//        logout.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//                String storeIdList = sharedPreferences.getString("storeIdList", null);
+//                if (storeIdList != null) {
+//                    for (String storeId : storeIdList.split(" ")) {
+//                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+//                    }
+//                }
+//                sharedPreferences.edit().clear().apply();
+//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                startActivity(intent);
+//                finish();
+//            }
+//        });
+//
+//        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
+//        settings.setOnClickListener(view -> {
+//            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+//            startActivity(intent);
+//        });
+//
+//        ImageView products = toolbar.findViewById(R.id.app_bar_products);
+//        products.setOnClickListener(view -> {
+//            Toast.makeText(this, "Opened!", Toast.LENGTH_SHORT).show();
+//        });
     }
 
     private void getProductsList() {

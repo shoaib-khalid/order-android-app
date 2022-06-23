@@ -13,5 +13,10 @@
     <color name="card_red">#ff6850</color>
     <color name="dark_grey">#a9a9a9</color>
 
+    <color name="sf_primary">#0070BF</color>
+    <color name="sf_primaryVariant">#0067af</color>
+    <color name="sf_text">#7A7A7A</color>
+    <color name="sf_cancel_button">#FF0000</color>
+    <color name="sf_accept_button">#2FA94E</color>
 
 </resources>
