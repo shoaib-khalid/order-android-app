@@ -62,7 +62,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     private NavigationView navigationView;
     private SharedPreferences sharedPreferences;
     public FrameLayout frameLayout;
-    private Toolbar toolbar;
 
     @Override
     public void setContentView(View view) {
@@ -95,7 +94,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
         appVersion = navigationView.findViewById(R.id.nav_app_version);
-        appVersion.setText("Symplified 2022 version "+version);
+        appVersion.setText("Symplified 2022 | version "+version);
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
