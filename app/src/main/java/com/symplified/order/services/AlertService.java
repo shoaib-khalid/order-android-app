@@ -17,10 +17,11 @@ import com.symplified.order.App;
 import com.symplified.order.R;
 
 
-public class AlertService extends Service{
-
+public class AlertService extends Service {
 
     private static MediaPlayer mediaPlayer;
+    private static int repeatCount = 0;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -28,12 +29,12 @@ public class AlertService extends Service{
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
         mediaPlayer.setLooping(true);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Notification notification =  new Notification.Builder(this, App.ORDERS)
+            Notification notification = new Notification.Builder(this, App.ORDERS)
                     .setContentTitle("Symplified")
                     .setContentText("Waiting for orders")
                     .setPriority(Notification.PRIORITY_LOW)
                     .build();
-            startForeground(1 , notification);
+            startForeground(1, notification);
         }
     }
 
@@ -48,9 +49,24 @@ public class AlertService extends Service{
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
-        mediaPlayer.setLooping(true);
-//        if(intent != null && intent.getExtras().containsKey("first") && intent.getIntExtra("first",0) == 1)
-//            return START_STICKY;
+        String storeType = intent.getStringExtra(String.valueOf(R.string.store_type));
+        if (storeType != null && !storeType.equals("FnB")) {
+            mediaPlayer.setLooping(false);
+            repeatCount = 0;
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    if (repeatCount < 5) {
+                        repeatCount++;
+                        mp.seekTo(0);
+                        mp.start();
+                    }
+                }
+            });
+        } else {
+            mediaPlayer.setLooping(true);
+        }
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
@@ -63,22 +79,20 @@ public class AlertService extends Service{
         return START_STICKY;
     }
 
-    public static boolean isPlaying()
-    {
-        if(mediaPlayer != null){
+    public static boolean isPlaying() {
+        if (mediaPlayer != null) {
             return mediaPlayer.isPlaying();
         }
         return false;
     }
 
-    public static void start(){
-        if(null != mediaPlayer)
+    public static void start() {
+        if (null != mediaPlayer)
             mediaPlayer.start();
     }
 
-    public static void stop(){
-        if(null != mediaPlayer)
-        {
+    public static void stop() {
+        if (null != mediaPlayer) {
             mediaPlayer.stop();
         }
     }

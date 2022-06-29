@@ -53,7 +53,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     @Override
     public void onNewToken(@NonNull String s) {
-        Log.d("FIREBASE_SERVICE","Token refresh : " + s);
+        Log.d("FIREBASE_SERVICE", "Token refresh : " + s);
     }
 
     @Override
@@ -66,18 +66,18 @@ public class OrderNotificationService extends FirebaseMessagingService {
         List<String> storeIds = Arrays.asList(storeIdList.split(" "));
         String storeName = remoteMessage.getData().get("storeName");
         String currentStoreId = null;
-        for(String storeId: storeIds) {
-            if (sharedPreferences.getString(storeId+"-name", null).equals(storeName)) {
+        for (String storeId : storeIds) {
+            if (sharedPreferences.getString(storeId + "-name", null).equals(storeName)) {
                 currentStoreId = storeId;
             }
         }
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
         taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-        PendingIntent pendingIntent ;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
-        }else{
-            pendingIntent= taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
         Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
@@ -103,7 +103,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             headers.put("Authorization", "Bearer Bearer accessToken");
 
             Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                    .baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL)
+                    .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
 
@@ -117,19 +117,21 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     if (response.isSuccessful()) {
                         try {
                             StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
-                            if (responseBody.data.verticalCode.equals("FnB")) {
-                                if(!AlertService.isPlaying()) {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        startForegroundService(new Intent(getApplicationContext(), AlertService.class));
-                                    }else
-                                        startService(new Intent(getApplicationContext(), AlertService.class));
+//                            if (responseBody.data.verticalCode.equals("FnB")) {
+                            if (!AlertService.isPlaying()) {
+                                Intent intent = new Intent(getApplicationContext(), AlertService.class);
+                                intent.putExtra(String.valueOf(R.string.store_type), responseBody.data.verticalCode);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    startForegroundService(intent);
+                                } else {
+                                    startService(intent);
                                 }
                             }
-                            else {
-                                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                                Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
-                                ringtone.play();
-                            }
+//                            } else {
+//                                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+//                                Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
+//                                ringtone.play();
+//                            }
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -145,7 +147,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     }
 
-    public boolean isServiceRunning(){
+    public boolean isServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (AlertService.class.getName().equals(service.service.getClassName())) {
@@ -155,7 +157,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         return false;
     }
 
-    private boolean isAppOnForeground(Context context,String appPackageName) {
+    private boolean isAppOnForeground(Context context, String appPackageName) {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
         if (appProcesses == null) {
