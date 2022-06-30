@@ -56,7 +56,7 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class LoginActivity extends AppCompatActivity{
+public class LoginActivity extends AppCompatActivity {
 
     private static final int UPDATE_REQUEST_CODE = 112;
     private static final String TAG = LoginActivity.class.getName();
@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity{
     private ImageView header;
     private Dialog progressDialog;
     private FirebaseRemoteConfig mRemoteConfig;
-    private String testUser,testPass;
+    private String testUser, testPass;
     private String BASE_URL;
     private List<Store> stores;
 
@@ -129,22 +129,21 @@ public class LoginActivity extends AppCompatActivity{
         stores = new ArrayList<>();
         BASE_URL = mRemoteConfig.getString("base_url");
 
-        if(BASE_URL.equals("")){
+        if (BASE_URL.equals("")) {
             BASE_URL = App.BASE_URL;
         }
 
-        Log.i("TAG", "BASE_URL : "+ BASE_URL.length());
+        Log.i("TAG", "BASE_URL : " + BASE_URL.length());
 
         testUser = mRemoteConfig.getString("test_user");
         testPass = mRemoteConfig.getString("test_pass");
 
-        if(testUser.equals("") || testPass.equals(""))
-        {
+        if (testUser.equals("") || testPass.equals("")) {
             testUser = "qa_user";
             testPass = "qa@kalsym";
         }
 
-        Log.i("TAG", "test credentials  : user : "+ testUser+" : password : "+testPass );
+        Log.i("TAG", "test credentials  : user : " + testUser + " : password : " + testPass);
 
     }
 
@@ -153,12 +152,11 @@ public class LoginActivity extends AppCompatActivity{
      * onClick method for Login Button
      */
     private void onLoginButtonClick() {
-        if(email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass))
-        {
+        if (email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass)) {
             BASE_URL = App.BASE_URL_STAGING;
             sharedPreferences.edit().putBoolean("isStaging", true).apply();
             sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-            Log.e("TAG", "BASE_URL : "+ BASE_URL, new Error() );
+            Log.e("TAG", "BASE_URL : " + BASE_URL, new Error());
             Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
         }
         progressDialog.show();
@@ -166,7 +164,7 @@ public class LoginActivity extends AppCompatActivity{
 
         Retrofit retrofit = new Retrofit.Builder()
                 .client(new OkHttpClient())
-                .baseUrl(BASE_URL+App.USER_SERVICE_URL)
+                .baseUrl(BASE_URL + App.USER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -178,18 +176,14 @@ public class LoginActivity extends AppCompatActivity{
         loginResponse.clone().enqueue(new Callback<LoginResponse>() {
 
             String loginMessage = "";
+
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                Log.e(TAG, "onResponse: " + call.request().toString() );
-                progressDialog.dismiss();
-                if(response.isSuccessful())
-                {
+                if (response.isSuccessful()) {
                     LoginData res = response.body().data;
-                    Log.d("TAG", "Login Response : "+ response.body().data.toString());
                     loginMessage = "Logged In Successfully !";
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if(!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0)
-                    {
+                    if (!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0) {
                         editor.putString("email", res.session.username);
                         editor.putString("accessToken", res.session.accessToken);
                         editor.putString("refreshToken", res.session.refreshToken);
@@ -200,16 +194,8 @@ public class LoginActivity extends AppCompatActivity{
                         editor.apply();
                         sharedPreferences.edit().putString("base_url", BASE_URL).apply();
                         getStoresAndRegister(sharedPreferences);
-                        Log.i("getAllStore", "onResponse: " + stores );
-
                     }
-
-//                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                    startActivity(intent);
-
-                }
-                else {
+                } else {
                     Log.e("TAG", "Login response : Not successful : " + response.raw());
                     progressDialog.dismiss();
                     loginMessage = "Unsuccessful, Please try again";
@@ -218,10 +204,7 @@ public class LoginActivity extends AppCompatActivity{
                     email.getEditText().requestFocus();
                 }
 
-//                if(!(BASE_URL.contains(".it") && loginMessage.contains("success"))){
-//                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-//                }
-                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -236,46 +219,42 @@ public class LoginActivity extends AppCompatActivity{
 
     /**
      * method to store information to sharedPreferences for user session management
+     *
      * @param context
      * @param items
      * @param sharedPreferences
      */
     private void setStoreData(Context context, List<Store> items, SharedPreferences sharedPreferences) {
 
-            final SharedPreferences.Editor editor = sharedPreferences.edit();
-            StringBuilder timeZoneList = new StringBuilder();
-            StringBuilder storeIdList = new StringBuilder();
-            for(Store store : items)
-            {
-                timeZoneList.append(store.regionCountry.timezone).append(" ");
-                storeIdList.append(store.id).append(" ");
-                sharedPreferences.edit().putString(store.id+"-name", store.name).apply();
-            }
-            editor.putString("currency", items.get(0).regionCountry.currencySymbol);
-            editor.putString("storeId", storeIdList.toString().split(" ")[0]).apply();
-            editor.putString("timezone", timeZoneList.toString()).apply();
-            editor.putString("storeIdList", storeIdList.toString()).apply();
-            editor.putInt("hasLogos", 0).apply();
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        StringBuilder timeZoneList = new StringBuilder();
+        StringBuilder storeIdList = new StringBuilder();
+        for (Store store : items) {
+            timeZoneList.append(store.regionCountry.timezone).append(" ");
+            storeIdList.append(store.id).append(" ");
+            sharedPreferences.edit().putString(store.id + "-name", store.name).apply();
+        }
+        editor.putString("currency", items.get(0).regionCountry.currencySymbol);
+        editor.putString("storeId", storeIdList.toString().split(" ")[0]).apply();
+        editor.putString("timezone", timeZoneList.toString()).apply();
+        editor.putString("storeIdList", storeIdList.toString()).apply();
+        editor.putInt("hasLogos", 0).apply();
 
-        Log.i("TIMEZONELIST", "setStoreData: "+ timeZoneList);
+        progressDialog.dismiss();
+        Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+        startActivity(intent);
     }
 
     /**
      * method to subscribe the user to all the stores that belong to user, to receive new order notifications
+     *
      * @param stores
      * @param context
      */
     private void subscribeStores(List<Store> stores, Context context) {
-        Log.i("TAG", "subscribeStores: "+ stores);
+        Log.i("TAG", "subscribeStores: " + stores);
 
-        for(Store store : stores)
-        {
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    FirebaseHelper.initializeFirebase(store.id, context);
-//                }
-//            }).start();
+        for (Store store : stores) {
             FirebaseHelper.initializeFirebase(store.id, context);
         }
 
@@ -283,26 +262,27 @@ public class LoginActivity extends AppCompatActivity{
 
     /**
      * method to download and store Store logos Asynchronously to sharedPreferences to avoid frequent downloads.
+     *
      * @param stores
      * @param context
      * @param clientId
      */
-    public void downloadAndSaveLogos(String[] stores, Context context, String clientId){
+    public void downloadAndSaveLogos(String[] stores, Context context, String clientId) {
         LogoHandler logoHandler = new LogoHandler(stores, context, new Handler(), clientId);
         Thread thread = new Thread(logoHandler);
-            thread.setName("Logo Fetcher Thread");
-            thread.start();
+        thread.setName("Logo Fetcher Thread");
+        thread.start();
     }
-
 
     /**
      * method to make the api call to get all the stores of user from backend
+     *
      * @param sharedPreferences
      */
     private void getStoresAndRegister(SharedPreferences sharedPreferences) {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers.put("Authorization", "Bearer accessToken");
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
@@ -320,8 +300,8 @@ public class LoginActivity extends AppCompatActivity{
                     stores = response.body().data.content;
 //                    int storeCount = stores.size();
                     subscribeStores(stores, getApplicationContext());
-                    setStoreData(getApplicationContext(),stores, sharedPreferences);
-                    downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(),clientId);
+                    setStoreData(getApplicationContext(), stores, sharedPreferences);
+                    downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(), clientId);
                     Log.i("getMYSTORES", "onResponse: " + stores);
                 }
             }
@@ -329,6 +309,8 @@ public class LoginActivity extends AppCompatActivity{
             @Override
             public void onFailure(Call<StoreResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
+                Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
             }
         });
 
@@ -342,28 +324,21 @@ public class LoginActivity extends AppCompatActivity{
     protected void onStart() {
         callInAppUpdate();
         //check if user session already exists, for persistent login
-        if(sharedPreferences.getInt("isLoggedIn",-1) == 1
+        if (sharedPreferences.getInt("isLoggedIn", -1) == 1
                 && sharedPreferences.contains("storeIdList")
                 && sharedPreferences.getInt("versionCode", 0) == BuildConfig.VERSION_CODE) {
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
-        }
-        else{
+        } else {
             String storeIdList = sharedPreferences.getString("storeIdList", null);
-            if(storeIdList != null )
-            {
-                for(String storeId : storeIdList.split(" ")){
+            if (storeIdList != null) {
+                for (String storeId : storeIdList.split(" ")) {
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
             }
             sharedPreferences.edit().clear().apply();
         }
-//        else if(sharedPreferences.getInt("isLoggedIn",-1) == 1 && sharedPreferences.contains("storeId")){
-//            Intent intent = new Intent(getApplicationContext(), Orders.class);
-//            startActivity(intent);
-//            finish();
-//        }
 
         super.onStart();
     }
@@ -373,15 +348,13 @@ public class LoginActivity extends AppCompatActivity{
      */
     @Override
     public void onBackPressed() {
-        if(sharedPreferences.getInt("isLoggedIn", -1) == 1)
-        {
+        if (sharedPreferences.getInt("isLoggedIn", -1) == 1) {
             this.finishAffinity();
-        }
-        else
+        } else
             super.onBackPressed();
     }
 
-    public void callInAppUpdate(){
+    public void callInAppUpdate() {
         AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
 // Returns an intent object that you use to check for an update.
         Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
@@ -411,7 +384,7 @@ public class LoginActivity extends AppCompatActivity{
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == UPDATE_REQUEST_CODE && resultCode == RESULT_OK) {
             Toast.makeText(this, "Update Started !", Toast.LENGTH_SHORT).show();
-        } else if(resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
+        } else if (resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
             Log.d(TAG, "onActivityResult: " + "Update flow failed! Result code: " + resultCode);
             Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
         }

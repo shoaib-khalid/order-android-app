@@ -159,12 +159,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
 
-//        holder.name.setText(items.get(position).name);
-//        holder.phone.setText(items.get(position).phone);
-//        holder.qty.setText(items.get(position).quantity);
-//        holder.amount.setText(items.get(position).amount);
-//        holder.invoice.setText(items.get(position).invoice);
-
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
 //        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
@@ -230,7 +224,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers.put("Authorization", "Bearer accessToken");
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(BASE_URL+App.DELIVERY_SERVICE_URL)
