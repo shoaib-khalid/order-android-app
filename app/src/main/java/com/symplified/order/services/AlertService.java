@@ -20,7 +20,7 @@ import com.symplified.order.R;
 public class AlertService extends Service {
 
     private static MediaPlayer mediaPlayer;
-    private static int repeatCount = 0;
+    private static boolean hasRepeatedOnce = false;
 
     @Override
     public void onCreate() {
@@ -52,13 +52,14 @@ public class AlertService extends Service {
         String storeType = intent.getStringExtra(String.valueOf(R.string.store_type));
         if (storeType != null && !storeType.equals("FnB")) {
             mediaPlayer.setLooping(false);
-            repeatCount = 0;
+            hasRepeatedOnce = false;
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    if (repeatCount < 5) {
-                        repeatCount++;
+                    Log.d("AlertService mediaplayer", "onCompletion hasRepeatedOnce " + hasRepeatedOnce);
+                    if (!hasRepeatedOnce) {
+                        hasRepeatedOnce = true;
                         mp.seekTo(0);
                         mp.start();
                     }
