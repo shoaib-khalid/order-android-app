@@ -27,7 +27,9 @@ public class AlertService extends Service {
         super.onCreate();
 
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        mediaPlayer.setLooping(true);
+        if (mediaPlayer != null) {
+            mediaPlayer.setLooping(true);
+        }
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Notification notification = new Notification.Builder(this, App.ORDERS)
                     .setContentTitle("Symplified")

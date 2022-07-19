@@ -6,8 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_margin="10dp"
-    android:fitsSystemWindows="true"
-    android:theme="@style/Theme.SymplifiedOrderUpdate">
+    android:fitsSystemWindows="true">
 
     <ImageView
         android:id="@+id/nav_header_logo"
@@ -33,7 +32,7 @@
             android:id="@+id/nav_store_logo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:src="@drawable/ic_baseline_storefront_24"/>
 
     </androidx.cardview.widget.CardView>

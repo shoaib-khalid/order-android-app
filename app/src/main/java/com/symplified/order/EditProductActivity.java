@@ -2,11 +2,15 @@ package com.symplified.order;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
@@ -19,9 +23,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.symplified.order.apis.CategoryApi;
 import com.symplified.order.apis.ProductApi;
@@ -49,15 +55,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class EditProductActivity extends NavbarActivity {
 
-    private Button prodDetailsUpdateBtn, prodDetailsCancelBtn;
+    private Button updateButton;
     private Toolbar toolbar;
     private Product product = null;
-    private TextInputLayout prod_details_name, prod_details_price, prod_details_desc, prod_details_SKU, prod_details_Quantity;
-    private ImageView prod_details_img;
+    private TextInputLayout productName, productPrice, productDescription, productSKU, productQuantity;
+    private ImageView productImage;
     private AutoCompleteTextView categoryTextView;
     private TextInputLayout categoryMenu;
     private AutoCompleteTextView statusTextView;
     private TextInputLayout statusMenu;
+    private final int REQ_CODE = 100;
 
     private List<Category> categories;
     private String BASE_URL;
@@ -86,7 +93,11 @@ public class EditProductActivity extends NavbarActivity {
         BASE_URL = sharedPreferences.getString("base_url", null);
         storeId = sharedPreferences.getString("storeId", null);
         progressDialog = new Dialog(this);
-
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -107,7 +118,7 @@ public class EditProductActivity extends NavbarActivity {
         categoryTextView.setAdapter(categoryAdapter);
         fetchCategories();
 
-        statusList = new ArrayList();
+        statusList = new ArrayList<>();
         statusAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, statusList);
         statusTextView.setAdapter(statusAdapter);
         setStatus();
@@ -124,7 +135,7 @@ public class EditProductActivity extends NavbarActivity {
             }
         });
 
-        prodDetailsUpdateBtn.setOnClickListener(view -> {
+        updateButton.setOnClickListener(view -> {
             updateProduct();
         });
 
@@ -146,10 +157,10 @@ public class EditProductActivity extends NavbarActivity {
             }
         });
 
-        prodDetailsCancelBtn.setOnClickListener(view -> {
-            Intent intent1 = new Intent(this, ProductsActivity.class);
-            startActivity(intent1);
-        });
+//        prodDetailsCancelBtn.setOnClickListener(view -> {
+//            Intent intent1 = new Intent(this, ProductsActivity.class);
+//            startActivity(intent1);
+//        });
 
     }
 
@@ -179,27 +190,37 @@ public class EditProductActivity extends NavbarActivity {
 
     public void initViews() {
 
-        prodDetailsUpdateBtn = findViewById(R.id.prodDetailsUpdateBtn);
-        prodDetailsCancelBtn = findViewById(R.id.prodDetailsCancelBtn);
-        prod_details_img = findViewById(R.id.prodDetails_Img);
-        prod_details_name = findViewById(R.id.prodDetailsName);
-        prod_details_price = findViewById(R.id.prodDetails_Price);
-        prod_details_desc = findViewById(R.id.productDetails_Desc);
-        prod_details_SKU = findViewById(R.id.productDetails_SKU);
-        prod_details_Quantity = findViewById(R.id.productDetails_Quantity);
-        categoryMenu = findViewById(R.id.categoryMenu);
+        updateButton = findViewById(R.id.update_button);
+        productImage = findViewById(R.id.product_image);
+        productName = findViewById(R.id.product_name);
+        productPrice = findViewById(R.id.product_price);
+        productDescription = findViewById(R.id.product_description);
+        productSKU = findViewById(R.id.product_sku);
+        productQuantity = findViewById(R.id.product_quantity);
+        categoryMenu = findViewById(R.id.product_category);
         categoryTextView = findViewById(R.id.categoryTextView);
-        statusMenu = findViewById(R.id.statusMenu);
+        statusMenu = findViewById(R.id.product_status);
         statusTextView = findViewById(R.id.statusTextView);
+
+        productImage.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_PICK);
+            intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(intent, REQ_CODE);
+        });
     }
 
     public void updateProduct() {
 
-        product.name = prod_details_name.getEditText().getText().toString();
-        product.productInventories.get(0).price = Double.parseDouble(prod_details_price.getEditText().getText().toString());
-        product.description = prod_details_desc.getEditText().getText().toString();
-        product.productInventories.get(0).quantity = Integer.parseInt(prod_details_Quantity.getEditText().getText().toString());
-        product.productInventories.get(0).sku = prod_details_SKU.getEditText().getText().toString();
+        product.name = productName.getEditText().getText().toString();
+        product.productInventories.get(0).price = Double.parseDouble(productPrice.getEditText().getText().toString());
+        product.description = productDescription.getEditText().getText().toString();
+        product.productInventories.get(0).quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
+        product.productInventories.get(0).sku = productSKU.getEditText().getText().toString();
+
+        if (product.name.equals("") || product.description.equals("") || product.productInventories.get(0).sku.equals("")) {
+            Toast.makeText(this, "Please Fill all Fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
@@ -322,11 +343,17 @@ public class EditProductActivity extends NavbarActivity {
 
     private void getProductDetails() {
 
-        prod_details_name.getEditText().setText(product.name);
-        prod_details_price.getEditText().setText(Double.toString(product.productInventories.get(0).price));
-        prod_details_desc.getEditText().setText(Html.fromHtml(product.description));
-        prod_details_Quantity.getEditText().setText(Integer.toString(product.productInventories.get(0).quantity));
-        prod_details_SKU.getEditText().setText(product.productInventories.get(0).sku);
+        if (product.name != null) {
+            productName.getEditText().setText(product.name);
+        }
+        productPrice.getEditText().setText(Double.toString(product.productInventories.get(0).price));
+        if (product.description != null) {
+            productDescription.getEditText().setText(Html.fromHtml(product.description));
+        }
+        productQuantity.getEditText().setText(Integer.toString(product.productInventories.get(0).quantity));
+        if (product.productInventories.get(0).sku != null) {
+            productSKU.getEditText().setText(product.productInventories.get(0).sku);
+        }
         try {
             Bitmap bitmap = new DownloadImageTask().execute(product.thumbnailUrl).get();
             if (bitmap != null) {
@@ -334,7 +361,7 @@ public class EditProductActivity extends NavbarActivity {
                 bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
                 String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
                 if (encodedImage != null) {
-                    Utility.decodeAndSetImage(prod_details_img, encodedImage);
+                    Utility.decodeAndSetImage(productImage, encodedImage);
                 }
             }
         } catch (ExecutionException e) {
@@ -343,5 +370,16 @@ public class EditProductActivity extends NavbarActivity {
             e.printStackTrace();
         }
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQ_CODE) {
+                productImage.setImageURI(data.getData());
+            }
+        }
     }
 }

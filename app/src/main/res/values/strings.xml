@@ -6,7 +6,7 @@
     <string name="tv_date">Date: \u0020</string>
     <string name="tv_date_value">Day, Month, Year</string>
     <string name="tv_invoice_number">Invoice:\u0020</string>
-    <string name="tv_invoice_number_value">XXXXXXXXXXXXXX</string>
+    <string name="tv_invoice_number_value">XXXXXXXX</string>
     <string name="btn_process">Process</string>
     <string name="tv_shipment_address">Shipment Address: \u0020</string>
     <string name="tv_shipment_address_value"> 24, Jalan 1/2, Taman Puchong Prima</string>
@@ -39,11 +39,13 @@
     <string name="btn_print">Print</string>
     <string name="is_pickup">Pickup \u0020</string>
     <string name="title_activity_orders">Orders</string>
-    <string name="new_orders">New</string>
-    <string name="processed_orders">Processed</string>
+    <string name="new_orders">New Orders</string>
+    <string name="processed_orders">Processed </string>
     <string name="pickup_orders">PickUp</string>
+    <string name="dispatched_orders">Dispatched</string>
+    <string name="ongoing_orders">Ongoing Orders</string>
     <string name="sent_orders">Sent</string>
-
+    <string name="past_orders">Past Orders</string>
     <string name="card_name">Name:\u0020</string>
     <string name="card_name_value">Albert ul Muzrabani alhamed</string>
     <string name="card_phone">Phone:\u0020</string>
@@ -56,7 +58,7 @@
     <string name="symplified">Symplified</string>
     <string name="choose_a_store">Choose a Store</string>
     <string name="no_store_msg">No Stores Added Yet !</string>
-    <string name="total">Total</string>
+    <string name="total">Total:\u0020</string>
     <string name="set_store_status">Set Store Status</string>
     <string name="normal">Normal</string>
     <string name="paused">Paused Until</string>
@@ -72,11 +74,27 @@
     <string name="cancel_order">Cancel Order</string>
     <string name="update_order">Update Order</string>
     <string name="edit_order">Edit Order</string>
+    <string name="track_order">Track</string>
     <string name="contact_number">Contact Number: \u0020</string>
     <string name="delivery_time">Delivery Time: \u0020</string>
     <string name="request_failure">Sorry, we are unable to process your request now. Please try again.</string>
     <string name="no_internet">Please check your internet connection and try again!</string>
     <string name="forgot_password"><u>Forgot Password</u></string>
     <string name="welcome_message">Welcome to Symplified App for Merchant</string>
+    <string name="order_placed_date">Order Placed:\u0020</string>
+    <string name="order_placed_date_value">08-03-22  13:05 pm</string>
+    <string name="remember_me">Remember me</string>
+    <string name="accept_order">Accept Order</string>
+    <string name="order_status">"Order Status:\u0020"</string>
+    <string name="order_details">View Details</string>
+    <string name="order_status_value">Delivered</string>
+    <string name="order_type">Order Type:\u0020</string>
+    <string name="order_type_value">Delivery</string>
+    <string name="order_curr_status_value">Preparing</string>
     <string name="store_type">Store Type</string>
+    <string name="product_name">Red &amp; Hot Pizza</string>
+    <string name="product_status">Active</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="add">Add New</string>
 </resources>

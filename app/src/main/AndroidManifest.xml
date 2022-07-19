@@ -20,6 +20,9 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
+        <activity
+            android:name=".EditOrderActivity"
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
@@ -27,13 +30,12 @@
 
         <activity
             android:name=".NavbarActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"></activity>
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />
-        <activity android:name=".EditProductActivity"
+        <activity
+            android:name=".EditProductActivity"
             android:exported="true" />
         <activity
             android:name=".ProductsActivity"

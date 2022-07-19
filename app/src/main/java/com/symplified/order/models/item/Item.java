@@ -23,6 +23,7 @@ public class Item{
     public String specialInstruction;
     public String status;
     public Double weight;
+    public Integer newQuantity;
 
     public static class ItemList {
         public List<Item> content;

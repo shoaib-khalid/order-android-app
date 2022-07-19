@@ -54,7 +54,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/welcome"
                 app:layout_constraintWidth_percent="0.65"
-                app:startIconDrawable="@drawable/ic_email_24px"
+                app:startIconDrawable="@drawable/ic_username_outline_24px"
                 app:startIconTint="@color/sf_primary">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -86,30 +86,35 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <CheckBox
-                android:id="@+id/remember_checkbox"
+            <RelativeLayout
+                android:id="@+id/login_rel_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Remember me"
-                android:textColor="@color/sf_text"
-                app:layout_constraintEnd_toStartOf="@id/forgot_password"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tv_password"
-                app:layout_constraintWidth_percent="0.31" />
-
-
-            <TextView
-                android:id="@+id/forgot_password"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clickable="true"
-                android:text="@string/forgot_password"
-                android:textColor="@color/sf_text"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/remember_checkbox"
-                app:layout_constraintTop_toBottomOf="@+id/tv_password"
-                app:layout_constraintWidth_percent="0.16" />
+                app:layout_constraintWidth_percent="0.65"
+                app:layout_constraintTop_toBottomOf="@+id/tv_password">
+
+                <CheckBox
+                    android:id="@+id/remember_checkbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:text="Remember me"
+                    android:textColor="@color/sf_text" />
+
+                <TextView
+                    android:id="@+id/forgot_password"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="16dp"
+                    android:clickable="true"
+                    android:paddingRight="10dp"
+                    android:text="@string/forgot_password"
+                    android:textColor="@color/sf_text" />
+
+            </RelativeLayout>
 
             <com.google.android.material.button.MaterialButton
 
@@ -125,7 +130,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/gl_bottom"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/remember_checkbox"
+                app:layout_constraintTop_toBottomOf="@+id/login_rel_layout"
                 app:layout_constraintVertical_bias="1.0"
                 app:layout_constraintWidth_percent="0.65" />
 

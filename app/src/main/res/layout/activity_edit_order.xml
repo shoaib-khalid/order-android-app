@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:theme="@style/Theme.SymplifiedOrderUpdate"
+    android:layout_height="match_parent"
+    tools:context=".EditOrderActivity">
+
+    <RelativeLayout
+        android:id="@+id/rl_edit_order"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/toolbar"
+            layout="@layout/custom_action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_alignParentTop="true" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/edit_order_recyclerview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/layout_btn"
+            android:layout_margin="10dp"
+            android:layout_below="@+id/toolbar" />
+
+        <LinearLayout
+            android:id="@+id/layout_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/cancel_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:visibility="gone"
+                android:layout_gravity="left"
+                android:text="@string/cancel_order"
+                android:textSize="14sp"
+                android:padding="10dp"
+                android:layout_marginRight="5dp"
+                android:backgroundTint="@color/sf_cancel_button"/>
+
+            <Button
+                android:id="@+id/update_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="right"
+                android:visibility="gone"
+                android:textSize="14sp"
+                android:padding="10dp"
+                android:layout_marginLeft="5dp"
+                android:text="@string/update_order"
+                android:backgroundTint="@color/sf_primary"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

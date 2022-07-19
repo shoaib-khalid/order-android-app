@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_grey"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:keepScreenOn="true"
+    android:id="@+id/layout_products"
+    tools:context=".ProductsActivity">
 
     <include
         android:id="@+id/toolbar"
@@ -14,26 +17,10 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/productsRecyclerView"
+        android:id="@+id/products_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/toolbar"
-        tools:listitem="@layout/product_row">
-
-    </androidx.recyclerview.widget.RecyclerView>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_product_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:backgroundTint="@color/sf_500"
-        android:visibility="gone"
-        android:src="@drawable/add_icon"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="30dp">
-
-    </com.google.android.material.floatingactionbutton.FloatingActionButton>
+        android:layout_below="@+id/toolbar"
+        android:padding="10dp" />
 
 </RelativeLayout>

@@ -1,6 +1,5 @@
 package com.symplified.order.ui.tabs;
 
-import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.Dialog;
 import android.app.NotificationManager;
@@ -13,7 +12,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +21,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,15 +34,12 @@ import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.models.OrderDetailsModel;
 import com.symplified.order.models.order.OrderResponse;
 import com.symplified.order.services.AlertService;
-import com.symplified.order.services.StoreBroadcastReceiver;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -130,17 +124,6 @@ public class PlaceholderFragment extends Fragment {
 
 
         switch (section){
-            case "processed":
-            {
-                pageViewModel.setIndex(1);
-                orderResponse = orderApiService.getProcessedOrdersByClientId(headers, clientId);
-                break;
-            }
-            case "sent":{
-                pageViewModel.setIndex(3);
-                orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId);
-                break;
-            }
             case "new" :{
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.getNewOrdersByClientId(headers, clientId);
@@ -151,9 +134,14 @@ public class PlaceholderFragment extends Fragment {
                 notificationManager.cancelAll();
                 break;
             }
-            case "pickup": {
+            case "ongoing": {
+                pageViewModel.setIndex(1);
+                orderResponse = orderApiService.getOngoingOrdersByClientId(headers, clientId);
+                break;
+            }
+            case "past":{
                 pageViewModel.setIndex(2);
-                orderResponse = orderApiService.getPickupOrdersByClientId(headers, clientId);
+                orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId);
                 break;
             }
         }
@@ -181,10 +169,10 @@ public class PlaceholderFragment extends Fragment {
         recyclerView = root.findViewById(R.id.order_recycler);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
-                DividerItemDecoration.VERTICAL);
-        recyclerView.addItemDecoration(mDividerItemDecoration);
+//
+//        DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+//                DividerItemDecoration.VERTICAL);
+//        recyclerView.addItemDecoration(mDividerItemDecoration);
 
         Log.e("TAG", "URL : "+orderResponse.request().url(), new Error() );
 

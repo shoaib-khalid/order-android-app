@@ -149,6 +149,10 @@ public class Product implements Serializable {
         public List<Product> content;
     }
 
+    public static class SingleProductResponse implements Serializable {
+        public Product data;
+    }
+
     @Override
     public String toString() {
         return "Product{" +

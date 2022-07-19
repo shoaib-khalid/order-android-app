@@ -6,19 +6,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
 import com.symplified.order.EditProductActivity;
 import com.symplified.order.R;
@@ -47,13 +53,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     private List<Product> products;
     private static Dialog progressDialog;
     private String BASE_URL;
-    private static final String TAG = "ProductsAdapter";
+    private static final String TAG = "ProductAdapter";
     private SharedPreferences sharedPreferences;
     private String storeId, currency;
 
     public ProductAdapter(Context context, List<Product> products) {
         this.context = context;
         this.products = products;
+        Log.e("ALLPROD", products.toString());
     }
 
     @NonNull
@@ -71,77 +78,55 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         storeId = sharedPreferences.getString("storeId", null);
         currency = sharedPreferences.getString("currency", null);
         progressDialog = new Dialog(context);
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
 
-        holder.prodTitle.setText(products.get(position).name);
-        holder.prodPrice.setText(Double.toString(products.get(position).productInventories.get(0).price));
-        holder.currency.setText(" " + currency);
+        holder.productName.setText(products.get(position).name);
+        holder.productPrice.setText(currency+" "+Double.toString(products.get(position).productInventories.get(0).price));
+        String status = products.get(position).status;
+
+        switch (status) {
+            case "INACTIVE":
+                holder.productStatus.setText("Inactive");
+                holder.productStatus.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
+                holder.statusIcon.setColorFilter(context.getResources().getColor(R.color.sf_cancel_button));
+                break;
+            case "OUTOFSTOCK":
+                holder.productStatus.setText("Out of Stock");
+                holder.productStatus.setTextColor(ContextCompat.getColor(context, R.color.dark_grey));
+                holder.statusIcon.setColorFilter(context.getResources().getColor(R.color.dark_grey));
+                break;
+        }
+
+
+        holder.edit.setOnClickListener(view -> {
+            Intent intent = new Intent(context, EditProductActivity.class);
+            intent.putExtra("product", products.get(position));
+            context.startActivity(intent);
+        });
+
+        holder.delete.setOnClickListener(view ->  {
+            onDeleteClicked(holder);
+        });
 
         try {
             Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
             if (bitmap != null) {
-                holder.prodImage.setImageBitmap(bitmap);
-//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-//                if (encodedImage != null) {
-//                    Utility.decodeAndSetImage(holder.prodImage, encodedImage);
-//                }
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+                if (encodedImage != null) {
+                    Utility.decodeAndSetImage(holder.productImage, encodedImage);
+                }
             }
         } catch (ExecutionException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        holder.edit.setOnClickListener(view -> {
-            Intent intent = new Intent(context, EditProductActivity.class);
-            intent.putExtra("product", products.get(position));
-
-            context.startActivity(intent);
-        });
-
-        holder.delete.setOnClickListener(view ->  {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer Bearer accessToken");
-
-            Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                    .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            ProductApi api = retrofit.create(ProductApi.class);
-
-            Dialog dialog = new MaterialAlertDialogBuilder(context)
-                    .setTitle("Delete Product")
-                    .setMessage("Do you really want to delete this product ?")
-                    .setNegativeButton("No", null)
-                    .setPositiveButton("Yes", ((dialogInterface, i) -> {
-                        progressDialog.show();
-
-                        Call<ResponseBody> responseBodyCall = api.deleteProduct(headers, storeId, products.get(holder.getAdapterPosition()).id);
-                        progressDialog.show();
-                        responseBodyCall.clone().enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                if (response.isSuccessful()) {
-                                    products.remove(holder.getAdapterPosition());
-                                    notifyDataSetChanged();
-                                    progressDialog.dismiss();
-                                }
-                                progressDialog.dismiss();
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.e(TAG, "onFailure: ",t );
-                                progressDialog.dismiss();
-                            }
-                        });
-
-                    }))
-                    .create();
-            dialog.show();
-        });
     }
 
     @Override
@@ -149,20 +134,63 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         return products == null ? 0 : products.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView prodTitle, prodPrice, edit, delete, currency;
-        ImageView prodImage;
-        CardView prod_cardView;
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView productName, productPrice, productStatus;
+        Button edit, delete;
+        ImageView productImage, statusIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.prodTitle = itemView.findViewById(R.id.prodName);
-            this.prodPrice = itemView.findViewById(R.id.prodPrice);
-            this.prodImage = itemView.findViewById(R.id.prodImg);
-            this.prod_cardView = itemView.findViewById(R.id.product_card_parent);
+            productName = itemView.findViewById(R.id.product_name);
+            productPrice = itemView.findViewById(R.id.product_price);
+            productImage = itemView.findViewById(R.id.product_image);
             edit = itemView.findViewById(R.id.product_edit);
+            productStatus = itemView.findViewById(R.id.product_status);
+            statusIcon = itemView.findViewById(R.id.ic_product_status);
             delete = itemView.findViewById(R.id.product_delete);
-            currency = itemView.findViewById(R.id.prod_row_price);
         }
+    }
+
+    public void onDeleteClicked(ViewHolder holder) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        ProductApi api = retrofit.create(ProductApi.class);
+
+        Dialog dialog = new MaterialAlertDialogBuilder(context)
+                .setTitle("Delete Product")
+                .setMessage("Do you really want to delete this product ?")
+                .setNegativeButton("No", null)
+                .setPositiveButton("Yes", ((dialogInterface, i) -> {
+                    progressDialog.show();
+
+                    Call<ResponseBody> responseBodyCall = api.deleteProduct(headers, storeId, products.get(holder.getAdapterPosition()).id);
+                    progressDialog.show();
+                    responseBodyCall.clone().enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                products.remove(holder.getAdapterPosition());
+                                notifyDataSetChanged();
+                                progressDialog.dismiss();
+                            }
+                            progressDialog.dismiss();
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Log.e(TAG, "onFailure: ",t );
+                            progressDialog.dismiss();
+                        }
+                    });
+
+                }))
+                .create();
+        dialog.show();
     }
 }

@@ -65,8 +65,8 @@ public class ChooseStoreActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         sharedPreferences.edit().remove("logoImage").apply();
-        if (sharedPreferences.getBoolean("isStaging", false))
-            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
+//        if (sharedPreferences.getBoolean("isStaging", false))
+//            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
 

@@ -21,13 +21,13 @@
 
         <ImageView
             android:id="@+id/app_bar_home"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:layout_marginStart="5dp"
             android:onClick="ClickMenu"
-            android:src="@drawable/ic_baseline_menu_24"/>
+            android:src="@drawable/ic_baseline_menu_24" />
 
 <!--        <ImageView-->
 <!--            android:id="@+id/app_bar_products"-->
@@ -48,9 +48,22 @@
             android:layout_centerInParent="true"
             android:paddingVertical="5dp"
             android:text="@string/symplified"
+            android:textColor="@color/white"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/white" />
+            android:textStyle="bold" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/add_new_product"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerInParent="true"
+            android:paddingVertical="5dp"
+            android:visibility="gone"
+            android:text="@string/add"
+            android:layout_marginEnd="5dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"/>
 
 <!--        <ImageView-->
 <!--            android:id="@+id/app_bar_settings"-->

@@ -50,38 +50,12 @@ public class OrdersActivity extends NavbarActivity {
 
         initToolbar(sharedPreferences);
 
-//        ImageView logout = findViewById(R.id.app_bar_logout);
-//        logout.setOnClickListener(new View.OnClickListener() {
-//            @OverrideE
-//            public void onClick(View view) {
-//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//                String storeIdList = sharedPreferences.getString("storeIdList", null);
-//                if(storeIdList != null )
-//                {
-//                    for(String storeId : storeIdList.split(" ")){
-////                        new Thread(new Runnable() {
-////                            @Override
-////                            public void run() {
-////
-////                            }
-////                        }).start();
-//                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-//                    }
-//                }
-//                sharedPreferences.edit().clear().apply();
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//                finish();
-//            }
-//        });
-
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
         viewPager.setOffscreenPageLimit(0);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
-        tabs.setTabMode(TabLayout.MODE_AUTO);
 
         mViewPager = viewPager;
 

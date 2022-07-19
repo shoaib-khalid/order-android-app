@@ -54,11 +54,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class NavbarActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout drawerLayout;
-    private String storeId;
     private ImageView storeLogo;
     private TextView storeName, storeEmail, appVersion;
     private String version;
-    private String BASE_URL;
     private NavigationView navigationView;
     private SharedPreferences sharedPreferences;
     public FrameLayout frameLayout;
@@ -77,9 +75,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         version = BuildConfig.VERSION_NAME;
 
         sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        storeId = sharedPreferences.getString("storeId", null);
-        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
-
         navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
@@ -95,6 +90,10 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeEmail = header.findViewById(R.id.nav_store_email);
         appVersion = navigationView.findViewById(R.id.nav_app_version);
         appVersion.setText("Symplified 2022 | version "+version);
+
+        String storeId = sharedPreferences.getString("storeId", null);
+        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");

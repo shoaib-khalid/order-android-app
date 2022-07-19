@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.apis.ProductApi;
@@ -46,14 +47,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProductsActivity extends NavbarActivity {
     private Toolbar toolbar;
-    private RecyclerView productsrecyclerView;
+    private RecyclerView recyclerView;
     List<Product> products = new ArrayList<>();
     ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
     private String storeId;
     private String BASE_URL;
     private Dialog progressDialog;
-    private FloatingActionButton addFloatingActionButton;
     private ActivityProductsBinding binding;
     private DrawerLayout drawerLayout;
 
@@ -72,8 +72,9 @@ public class ProductsActivity extends NavbarActivity {
 
         initToolbar(sharedPreferences);
 
-        productsrecyclerView = findViewById(R.id.productsRecyclerView);
-        addFloatingActionButton = findViewById(R.id.add_product_btn);
+        recyclerView = findViewById(R.id.products_recyclerview);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         storeId = sharedPreferences.getString("storeId", null);
@@ -83,28 +84,21 @@ public class ProductsActivity extends NavbarActivity {
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
 
-        setData();
         getProductsList();
-
-        addFloatingActionButton.setOnClickListener(view -> {
-            Intent intent = new Intent(this, EditProductActivity.class);
-            startActivity(intent);
-        });
-
-        productsrecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
+        setData();
     }
 
     private void initToolbar(SharedPreferences sharedPreferences) {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
         home.setOnClickListener(view -> {
-                ProductsActivity.super.onBackPressed();
+            onBackPressed();
+//            Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+//            startActivity(intent);
+//                ProductsActivity.super.onBackPressed();
 //                setResult(4, new Intent().putExtra("finish", 1));
 //                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
 //                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
@@ -113,44 +107,16 @@ public class ProductsActivity extends NavbarActivity {
 //                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 //                startActivity(intent);
 //                finish();
-                finish();
+//                finish();
         });
 
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
+        toolbar.findViewById(R.id.add_new_product).setVisibility(View.VISIBLE);
         title.setText("All Products");
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(2).setChecked(true);
-
-//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
-//        logout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//                String storeIdList = sharedPreferences.getString("storeIdList", null);
-//                if (storeIdList != null) {
-//                    for (String storeId : storeIdList.split(" ")) {
-//                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-//                    }
-//                }
-//                sharedPreferences.edit().clear().apply();
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//                finish();
-//            }
-//        });
-//
-//        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
-//        settings.setOnClickListener(view -> {
-//            Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-//            startActivity(intent);
-//        });
-//
-//        ImageView products = toolbar.findViewById(R.id.app_bar_products);
-//        products.setOnClickListener(view -> {
-//            Toast.makeText(this, "Opened!", Toast.LENGTH_SHORT).show();
-//        });
     }
 
     private void getProductsList() {
@@ -176,25 +142,26 @@ public class ProductsActivity extends NavbarActivity {
                     products.addAll(response.body().data.content);
                     productAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
-                    addFloatingActionButton.setVisibility(View.VISIBLE);
                 }
                 progressDialog.dismiss();
-                addFloatingActionButton.setVisibility(View.VISIBLE);
             }
 
             @Override
             public void onFailure(Call<ProductResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ",t );
                 progressDialog.dismiss();
-                addFloatingActionButton.setVisibility(View.VISIBLE);
             }
         });
     }
 
     private void setData() {
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        productsrecyclerView.setLayoutManager(linearLayoutManager);
         productAdapter = new ProductAdapter(this, products);
-        productsrecyclerView.setAdapter(productAdapter);
+        recyclerView.setAdapter(productAdapter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, OrdersActivity.class);
+        startActivity(intent);
     }
 }

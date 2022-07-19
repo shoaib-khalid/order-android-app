@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/light_grey"
     android:keepScreenOn="true"
     tools:context=".OrdersActivity">
 
@@ -43,16 +42,34 @@
 <!--        layout="@layout/custom_action_bar"-->
 <!--        android:layout_alignParentTop="true"/>-->
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tabs"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/tabs_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/toolbar"/>
+        android:paddingVertical="10dp"
+        app:cardCornerRadius="5dp"
+        android:layout_marginHorizontal="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_below="@+id/toolbar">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            app:tabTextAppearance="@style/MyTabLayoutTextAppearance"
+            app:tabIndicatorHeight="0dp"
+            android:layout_margin="8dp"
+            app:tabBackground="@drawable/tab_color_selector"
+            app:tabGravity="fill"
+            app:tabSelectedTextColor="@color/white"
+            app:tabMode="fixed"/>
+
+    </androidx.cardview.widget.CardView>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_below="@+id/tabs"
+        android:layout_below="@+id/tabs_card"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
