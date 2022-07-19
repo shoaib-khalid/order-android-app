@@ -53,6 +53,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NavbarActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private String storeId, BASE_URL;
     private DrawerLayout drawerLayout;
     private ImageView storeLogo;
     private TextView storeName, storeEmail, appVersion;
@@ -63,6 +64,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
     @Override
     public void setContentView(View view) {
+        Log.d("navbar", "setContentView");
         drawerLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_navbar, null);
 
         frameLayout = drawerLayout.findViewById(R.id.navbar_framelayout);
@@ -75,46 +77,53 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         version = BuildConfig.VERSION_NAME;
 
         sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+
+        storeId = sharedPreferences.getString("storeId", null);
+
+        Log.d("imran-debug-navbar", "StoreId: " + storeId);
+
+        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+
         navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
         setUpNavbarData(sharedPreferences, header);
-
     }
 
     public void setUpNavbarData(SharedPreferences sharedPreferences, View header) {
-
         storeLogo = header.findViewById(R.id.nav_store_logo);
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
         appVersion = navigationView.findViewById(R.id.nav_app_version);
-        appVersion.setText("Symplified 2022 | version "+version);
-
-        String storeId = sharedPreferences.getString("storeId", null);
-        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+        appVersion.setText("Symplified 2022 | version " + version);
 
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers.put("Authorization", "Bearer accessToken");
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL)
+                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         StoreApi storeApi = retrofit.create(StoreApi.class);
 
         Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, storeId);
+        Log.d("imran-debug-navbar", "storeResponse: " + storeResponse.isExecuted());
 
-        storeResponse.clone().enqueue(new Callback<ResponseBody>() {
+        storeResponse.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
+                    Log.d("imran-debug-navbar", "onResponse: " + response.body().toString());
+
                     try {
-                        StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
+                        StoreResponse.SingleStoreResponse responseBody
+                                = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
+                        Log.d("navbar", "onResponse: " + responseBody.data.name);
                         if (responseBody != null) {
-                            for (Store.StoreAsset asset: responseBody.data.storeAssets) {
+                            for (Store.StoreAsset asset : responseBody.data.storeAssets) {
                                 if (asset.assetType.equals("LogoUrl")) {
                                     try {
                                         Bitmap bitmap = new DownloadImageTask().execute(asset.assetUrl).get();
@@ -140,7 +149,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                Log.e("imran-debug-navbar", t.getLocalizedMessage());
             }
         });
 
@@ -174,7 +183,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                             drawerLayout.closeDrawer(GravityCompat.START);
                             intent = new Intent(getApplicationContext(), OrdersActivity.class);
                             startActivity(intent);
-                        } else{
+                        } else {
                             Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
                             drawerLayout.closeDrawer(GravityCompat.START);
                         }
