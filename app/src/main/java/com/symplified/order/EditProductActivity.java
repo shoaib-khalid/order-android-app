@@ -1,17 +1,22 @@
 package com.symplified.order;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
@@ -24,9 +29,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
@@ -47,7 +59,9 @@ import com.symplified.order.utils.Utility;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,12 +112,16 @@ public class EditProductActivity extends NavbarActivity {
 
     private ActivityEditProductBinding binding;
 
+    private ActivityResultLauncher<Intent> selectImageActivityResultLauncher;
+
     @SuppressLint("WrongThread")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        requestStorageAccessPermission();
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
@@ -180,15 +198,16 @@ public class EditProductActivity extends NavbarActivity {
             }
         });
 
+        initImageSelector();
     }
 
     public void initToolbar() {
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
-        title.setText("Edit Prdocut");
+        title.setText(R.string.edit_product);
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
 
-        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_arrow_back_black_24dp));
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -220,10 +239,28 @@ public class EditProductActivity extends NavbarActivity {
         statusMenu = findViewById(R.id.product_status);
         statusTextView = findViewById(R.id.statusTextView);
 
+
+    }
+
+    public void initImageSelector() {
+        selectImageActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                            ActivityResult mResult = result;
+                            uri = result.getData().getData();
+                            productImage.setImageURI(uri);
+                        }
+                    }
+                }
+        );
+
         productImage.setOnClickListener(view -> {
-            Intent intent = new Intent(Intent.ACTION_PICK);
-            intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-            startActivityForResult(intent, REQ_CODE);
+            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            selectImageActivityResultLauncher.launch(intent);
         });
     }
 
@@ -247,7 +284,6 @@ public class EditProductActivity extends NavbarActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Log.d("imran-debug-navbar", "onResponse: " + response.body().toString());
                     try {
                         store = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class).data;
                     } catch (IOException e) {
@@ -281,6 +317,7 @@ public class EditProductActivity extends NavbarActivity {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
+        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -355,84 +392,84 @@ public class EditProductActivity extends NavbarActivity {
                 }
             });
         } else {
-            product.name = productName.getEditText().getText().toString();
-            product.productInventories.get(0).price = Double.parseDouble(productPrice.getEditText().getText().toString());
-            product.description = productDescription.getEditText().getText().toString();
-            product.productInventories.get(0).quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
-            product.productInventories.get(0).sku = productSKU.getEditText().getText().toString();
+            try {
+                product.name = productName.getEditText().getText().toString();
+                product.productInventories.get(0).price = Double.parseDouble(productPrice.getEditText().getText().toString());
+                product.description = productDescription.getEditText().getText().toString();
+                product.productInventories.get(0).quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
+                product.productInventories.get(0).sku = productSKU.getEditText().getText().toString();
 
-            if (uri != null) {
+                if (uri != null) {
+                    File file = new File(getPath(uri));
 
-                Log.e("URI: ", uri.getPath());
-                File file = new File(uri.getPath());
-//
-//                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file1);
+                    RequestBody requestFile =
+                            RequestBody.create(file, MediaType.parse("multipart/form-data"));
+                    MultipartBody.Part body =
+                            MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+                    Call<ResponseBody> updateThumbnailCall = api.updateThumbnail(headers, storeId, product.id, body);
+                    updateThumbnailCall.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            if (response.isSuccessful()) {
+                                Toast.makeText(getApplicationContext(), "Product Image Uploaded Successfully", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Log.e("edit-product-activity", "Error while uploading photo: " + response);
+                                Toast.makeText(getApplicationContext(), "Error while uploading photo", Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-                MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(MediaType.parse("image/*"), file));
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Log.e("edit-product-activity", "onFailure while uploading Photo: " + t.getLocalizedMessage());
+                            t.printStackTrace();
+                        }
+                    });
+                }
 
-                Log.e("ProductId: ", product.id + " " + product.productAssets.get(0).id);
+                Call<ResponseBody> responseCall = api.updateProduct(headers, storeId, product.id, product);
 
-                Call<ResponseBody> updateAssetCall = api.updateProductAsset(headers, storeId, product.id, product.productAssets.get(0).id, part);
-
-                updateAssetCall.clone().enqueue(new Callback<ResponseBody>() {
+                progressDialog.show();
+                responseCall.clone().enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
-                            Toast.makeText(getApplicationContext(), "Product Image Uploaded Successfully", Toast.LENGTH_SHORT).show();
+                            Call<ResponseBody> updateInvntoryCall = api.updateProductInventory(headers, storeId, product.id, product.productInventories.get(0).itemCode, product.productInventories.get(0));
+
+                            updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    if (response.isSuccessful()) {
+                                        progressDialog.dismiss();
+                                        Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
+                                        startActivity(intent);
+                                        Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Log.e("edit-product-activity", "ResponseError: " + response.toString());
+                                        progressDialog.dismiss();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    progressDialog.dismiss();
+                                }
+                            });
+
                         } else {
-                            Log.e("onImageErrorResponse: ", response.toString());
-                            Toast.makeText(getApplicationContext(), "Error Uploading", Toast.LENGTH_SHORT).show();
+                            Log.e("edit-product-activity", "ERROR: " + response.toString());
+                            progressDialog.dismiss();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.e("onImageFailure: ", t.toString());
-                        Toast.makeText(getApplicationContext(), "Uploading failed", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-
-            Call<ResponseBody> responseCall = api.updateProduct(headers, storeId, product.id, product);
-
-            progressDialog.show();
-            responseCall.clone().enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        Call<ResponseBody> updateInvntoryCall = api.updateProductInventory(headers, storeId, product.id, product.productInventories.get(0).itemCode, product.productInventories.get(0));
-
-                        updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                if (response.isSuccessful()) {
-                                    progressDialog.dismiss();
-                                    Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
-                                    startActivity(intent);
-                                    Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Log.e("ResponseError: ", response.toString());
-                                    progressDialog.dismiss();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                progressDialog.dismiss();
-                            }
-                        });
-
-                    } else {
-                        Log.e("ERROR: ", response.toString());
                         progressDialog.dismiss();
                     }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    progressDialog.dismiss();
-                }
-            });
+                });
+            } catch (Exception e) {
+                Log.e("edit-product-activity", "Error while editing product activity " + e.getLocalizedMessage());
+                e.printStackTrace();
+            }
         }
     }
 
@@ -526,25 +563,25 @@ public class EditProductActivity extends NavbarActivity {
                     Utility.decodeAndSetImage(productImage, encodedImage);
                 }
             }
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode == RESULT_OK) {
-            if (requestCode == REQ_CODE) {
-                if (data.getData() != null) {
-                    uri = data.getData();
-                }
-                productImage.setImageURI(data.getData());
-            }
-        }
+    public String getPath(Uri uri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor returnCursor =
+                getContentResolver().query(uri, proj, null, null, null);
+        returnCursor.moveToFirst();
+        int nameIndex = returnCursor.getColumnIndex(MediaStore.Images.Media.DATA);
+        String result = returnCursor.getString(nameIndex);
+        returnCursor.close();
+        return result;
     }
+
+    private void requestStorageAccessPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+    }
+
 }
+

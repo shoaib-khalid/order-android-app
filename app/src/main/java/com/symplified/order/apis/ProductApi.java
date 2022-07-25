@@ -47,4 +47,8 @@ public interface ProductApi {
 
     @DELETE("stores/{storeId}/products/{productId}")
     Call<ResponseBody> deleteProduct(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId);
+
+    @Multipart
+    @PUT("stores/{storeId}/products/{productId}/assets?isThumbnail=true")
+    Call<ResponseBody> updateThumbnail(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Part("file") MultipartBody.Part body);
 }
