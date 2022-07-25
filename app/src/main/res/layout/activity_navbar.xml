@@ -45,7 +45,7 @@
                 app:cornerRadius="25dp"
                 android:layout_marginLeft="16dp"
                 android:layout_marginBottom="16dp"
-                android:text="Logout"
+                android:text="@string/logout"
                 android:padding="8dp"
                 android:drawableLeft="@drawable/ic_logout"
                 android:textSize="14sp"/>
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:layout_margin="16dp"
-                android:text="Symplified 2022 version 1.3.2" />
+                android:text="@string/version" />
         </LinearLayout>
 
     </com.google.android.material.navigation.NavigationView>

@@ -22,7 +22,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -56,6 +55,7 @@ public class ProductsActivity extends NavbarActivity {
     private Dialog progressDialog;
     private ActivityProductsBinding binding;
     private DrawerLayout drawerLayout;
+    private TextView addNew;
 
     @Override
     protected void onCreate(Bundle savedInstanceStatus) {
@@ -112,8 +112,14 @@ public class ProductsActivity extends NavbarActivity {
 
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
-        toolbar.findViewById(R.id.add_new_product).setVisibility(View.VISIBLE);
         title.setText("All Products");
+        addNew = toolbar.findViewById(R.id.add_new_product);
+        toolbar.findViewById(R.id.add_new_product).setVisibility(View.VISIBLE);
+
+        addNew.setOnClickListener(view -> {
+            Intent intent = new Intent(this, EditProductActivity.class);
+            startActivity(intent);
+        });
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(2).setChecked(true);

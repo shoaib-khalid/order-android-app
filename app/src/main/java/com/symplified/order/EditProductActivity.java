@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Html;
@@ -29,9 +30,14 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 import com.symplified.order.apis.CategoryApi;
 import com.symplified.order.apis.ProductApi;
+import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.ActivityEditProductBinding;
+import com.symplified.order.models.Store.Store;
+import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.asset.Asset;
 import com.symplified.order.models.category.Category;
 import com.symplified.order.models.category.CategoryResponse;
 import com.symplified.order.models.product.Product;
@@ -39,19 +45,28 @@ import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.utils.Utility;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Multipart;
 
 public class EditProductActivity extends NavbarActivity {
 
@@ -66,6 +81,8 @@ public class EditProductActivity extends NavbarActivity {
     private TextInputLayout statusMenu;
     private final int REQ_CODE = 100;
 
+    private Store store = null;
+    private boolean isEdit = false;
     private List<Category> categories;
     private String BASE_URL;
     private String storeId;
@@ -73,10 +90,9 @@ public class EditProductActivity extends NavbarActivity {
     private List<String> categoryNames;
     private ArrayAdapter<String> categoryAdapter;
 
+    private Uri uri = null;
     private List<String> statusList;
     private ArrayAdapter<String> statusAdapter;
-
-    private String status;
 
     private static Dialog progressDialog;
 
@@ -92,6 +108,7 @@ public class EditProductActivity extends NavbarActivity {
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         storeId = sharedPreferences.getString("storeId", null);
+        Log.e("BASE URL: ", BASE_URL);
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -106,26 +123,32 @@ public class EditProductActivity extends NavbarActivity {
 
         initViews();
 
+        getStore(storeId);
+
         Intent intent = getIntent();
         if (intent.hasExtra("product")) {
             Bundle data = getIntent().getExtras();
             product = (Product) data.getSerializable("product");
+            isEdit = true;
+        } else {
+            product = new Product();
+            updateButton.setText("Add Product");
+        }
+
+        if (isEdit) {
+            getProductDetails();
         }
 
         categories = new ArrayList<>();
         categoryNames = new ArrayList<>();
         categoryAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, categoryNames);
         categoryTextView.setAdapter(categoryAdapter);
-        fetchCategories();
+        setCategory();
 
         statusList = new ArrayList<>();
         statusAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, statusList);
         statusTextView.setAdapter(statusAdapter);
         setStatus();
-
-        if (product != null) {
-            getProductDetails();
-        }
 
         categoryTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -156,11 +179,6 @@ public class EditProductActivity extends NavbarActivity {
                 }
             }
         });
-
-//        prodDetailsCancelBtn.setOnClickListener(view -> {
-//            Intent intent1 = new Intent(this, ProductsActivity.class);
-//            startActivity(intent1);
-//        });
 
     }
 
@@ -209,15 +227,53 @@ public class EditProductActivity extends NavbarActivity {
         });
     }
 
+    public void getStore(String storeId) {
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Authorization", "Bearer accessToken");
+
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        StoreApi storeApi = retrofit.create(StoreApi.class);
+
+        Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, storeId);
+
+        progressDialog.show();
+
+        storeResponse.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Log.d("imran-debug-navbar", "onResponse: " + response.body().toString());
+                    try {
+                        store = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class).data;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                progressDialog.dismiss();
+            }
+        });
+
+    }
+
+
     public void updateProduct() {
 
-        product.name = productName.getEditText().getText().toString();
-        product.productInventories.get(0).price = Double.parseDouble(productPrice.getEditText().getText().toString());
-        product.description = productDescription.getEditText().getText().toString();
-        product.productInventories.get(0).quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
-        product.productInventories.get(0).sku = productSKU.getEditText().getText().toString();
-
-        if (product.name.equals("") || product.description.equals("") || product.productInventories.get(0).sku.equals("")) {
+        if (productName.getEditText().getText().equals("") ||
+                productPrice.getEditText().getText().equals("") ||
+                productDescription.getEditText().getText().equals("") ||
+                productQuantity.getEditText().getText().equals("") ||
+                productSKU.getEditText().getText().equals("")
+        ) {
             Toast.makeText(this, "Please Fill all Fields", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -232,50 +288,156 @@ public class EditProductActivity extends NavbarActivity {
 
         ProductApi api = retrofit.create(ProductApi.class);
 
-        Call<ResponseBody> responseCall = api.updateProduct(headers, storeId, product.id, product);
 
-        progressDialog.show();
-        responseCall.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    Call<ResponseBody> updateInvntoryCall = api.updateProductInventory(headers, storeId, product.id, product.productInventories.get(0).itemCode, product.productInventories.get(0));
+        if (!isEdit) {
+            Product.ProductInventory inventory = product.new ProductInventory();
+            inventory.price = Double.parseDouble(productPrice.getEditText().getText().toString());
+            inventory.quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
+            inventory.sku = productSKU.getEditText().getText().toString();
+            product.name = productName.getEditText().getText().toString();
+            product.description = productDescription.getEditText().getText().toString();
+            product.seoName = product.name.toLowerCase(Locale.ROOT).replace("/ /g", "-").replace("/[-]+/g", "-").replace("/[^\b-]+/g", "");
+            product.seoUrl = "https://" + store.domain + "/product/" + product.seoName;
+            product.minQuantityForAlarm = -1;
+            product.packingSize = "S";
+            product.isPackage = false;
+            product.storeId = storeId;
+            product.allowOutOfStockPurchases = ((store.verticalCode.equals("FnB") || store.verticalCode.equals("FnB_PK")) && !product.status.equals("OUTOFSTOCK")) ? true : false;
 
-                    updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (response.isSuccessful()) {
-                                progressDialog.dismiss();
-                                Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
-                                startActivity(intent);
-                                Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Log.e("ResponseError: ", response.toString());
+            Call<ResponseBody> responseCall = api.postProduct(headers, storeId, product);
+
+            progressDialog.show();
+            responseCall.clone().enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.code() == 201) {
+
+                        Product temp = null;
+                        try {
+                            temp = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class).data;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        inventory.itemCode = temp.id + "aa";
+                        Call<ResponseBody> updateInvntoryCall = api.postProductInventory(headers, storeId, temp.id, inventory);
+
+                        updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if (response.isSuccessful()) {
+                                    progressDialog.dismiss();
+                                    Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
+                                    startActivity(intent);
+                                    Toast.makeText(getApplicationContext(), "Product Added Successfully", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
+                                    progressDialog.dismiss();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
                             }
-                        }
+                        });
 
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            progressDialog.dismiss();
-                        }
-                    });
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
+                }
 
-                } else {
-                    Log.e("ERROR: ", response.toString());
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                 }
+            });
+        } else {
+            product.name = productName.getEditText().getText().toString();
+            product.productInventories.get(0).price = Double.parseDouble(productPrice.getEditText().getText().toString());
+            product.description = productDescription.getEditText().getText().toString();
+            product.productInventories.get(0).quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
+            product.productInventories.get(0).sku = productSKU.getEditText().getText().toString();
+
+            if (uri != null) {
+
+                Log.e("URI: ", uri.getPath());
+                File file = new File(uri.getPath());
+//
+//                RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file1);
+
+                MultipartBody.Part part = MultipartBody.Part.createFormData("file", file.getName(), RequestBody.create(MediaType.parse("image/*"), file));
+
+                Log.e("ProductId: ", product.id + " " + product.productAssets.get(0).id);
+
+                Call<ResponseBody> updateAssetCall = api.updateProductAsset(headers, storeId, product.id, product.productAssets.get(0).id, part);
+
+                updateAssetCall.clone().enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getApplicationContext(), "Product Image Uploaded Successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Log.e("onImageErrorResponse: ", response.toString());
+                            Toast.makeText(getApplicationContext(), "Error Uploading", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e("onImageFailure: ", t.toString());
+                        Toast.makeText(getApplicationContext(), "Uploading failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                progressDialog.dismiss();
-            }
-        });
+            Call<ResponseBody> responseCall = api.updateProduct(headers, storeId, product.id, product);
+
+            progressDialog.show();
+            responseCall.clone().enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        Call<ResponseBody> updateInvntoryCall = api.updateProductInventory(headers, storeId, product.id, product.productInventories.get(0).itemCode, product.productInventories.get(0));
+
+                        updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                if (response.isSuccessful()) {
+                                    progressDialog.dismiss();
+                                    Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
+                                    startActivity(intent);
+                                    Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Log.e("ResponseError: ", response.toString());
+                                    progressDialog.dismiss();
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                progressDialog.dismiss();
+                            }
+                        });
+
+                    } else {
+                        Log.e("ERROR: ", response.toString());
+                        progressDialog.dismiss();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    progressDialog.dismiss();
+                }
+            });
+        }
     }
 
 
-    public void fetchCategories() {
+    public void setCategory() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
@@ -298,7 +460,7 @@ public class EditProductActivity extends NavbarActivity {
                     for (Category category : categories) {
                         categoryNames.add(category.name);
                     }
-                    if (product != null) {
+                    if (isEdit) {
                         for (int i = 0; i < categories.size(); i++) {
                             if (categories.get(i).id.equals(product.categoryId)) {
                                 categoryTextView.setText(categoryNames.get(i), false);
@@ -324,7 +486,7 @@ public class EditProductActivity extends NavbarActivity {
         statusList.add("Active");
         statusList.add("Inactive");
         statusList.add("Out of Stock");
-        if (product != null) {
+        if (isEdit) {
             String status = product.status;
             switch (status) {
                 case "ACTIVE":
@@ -378,6 +540,9 @@ public class EditProductActivity extends NavbarActivity {
 
         if (resultCode == RESULT_OK) {
             if (requestCode == REQ_CODE) {
+                if (data.getData() != null) {
+                    uri = data.getData();
+                }
                 productImage.setImageURI(data.getData());
             }
         }
