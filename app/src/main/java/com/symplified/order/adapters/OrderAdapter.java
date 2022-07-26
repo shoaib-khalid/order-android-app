@@ -144,6 +144,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.name.setText(orders.get(position).orderShipmentDetail.receiverName);
         holder.invoice.setText(orders.get(position).invoiceId);
         holder.total.setText(currency + " " + Double.toString(orders.get(position).total));
+
         holder.date.setText(orders.get(position).created);
 
         String orderStatus = orders.get(holder.getAdapterPosition()).completionStatus;
@@ -217,6 +218,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.editButton.setOnClickListener(view -> {
             onEditButtonClicked(orders.get(position));
         });
+
+        holder.detailsButton.setOnClickListener(view -> {
+            Intent intent = new Intent(context, OrderDetailsActivity.class);
+            intent.putExtra("selectedOrder", orders.get(position));
+            intent.putExtra("section", section);
+            context.startActivity(intent);
+        });
     }
 
     @Override
@@ -242,7 +250,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
-                    ItemAdapter itemsAdapter = new ItemAdapter(response.body().data.content, orders.get(position), context);
+                    ItemAdapter itemsAdapter = new ItemAdapter(response.body().data.content, orders.get(position), context, "edit");
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
                 } else {
@@ -275,7 +283,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 .setMessage("Do you really want to cancel this order ?")
                 .setNegativeButton("No", null)
                 .setPositiveButton("Yes", (dialogInterface, i) -> {
-                    progressDialog.show();
                     Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
                     progressDialog.show();
                     processOrder.clone().enqueue(new Callback<ResponseBody>() {

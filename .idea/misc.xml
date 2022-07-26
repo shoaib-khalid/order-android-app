@@ -47,6 +47,7 @@
         <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_baseline_menu_24.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_baseline_phone_24.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_baseline_storefront_24.xml" value="0.138" />
+        <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_call.xml" value="0.199" />
         <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_check_circle_black_24dp.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_cross.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/main/res/drawable/ic_decrement.xml" value="0.152" />
@@ -95,7 +96,7 @@
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_login.xml" value="0.2" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_main.xml" value="0.11302083333333333" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_navbar.xml" value="0.264" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/activity_order_details.xml" value="0.1" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/activity_order_details.xml" value="0.361890694239291" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_orders.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_products.xml" value="0.2" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_settings.xml" value="0.25416666666666665" />
@@ -117,7 +118,7 @@
         <entry key="..\:/order-android-app/app/src/main/res/layout/new_orders.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_header.xml" value="0.264" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_row.xml" value="0.3237250554323725" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_row_new.xml" value="0.12760416666666666" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_row_new.xml" value="0.5440494590417311" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_row.xml" value="0.27703984819734345" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_row_new.xml" value="0.35180722891566263" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/product_row.xml" value="0.264" />

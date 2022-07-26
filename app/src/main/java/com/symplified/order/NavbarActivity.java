@@ -1,9 +1,11 @@
 package com.symplified.order;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -29,6 +31,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
@@ -157,17 +160,34 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                String storeIdList = sharedPreferences.getString("storeIdList", null);
-                if (storeIdList != null) {
-                    for (String storeId : storeIdList.split(" ")) {
-                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                    }
+                Dialog dialog = new MaterialAlertDialogBuilder(getApplicationContext(), R.style.MaterialAlertDialog__Center)
+                        .setTitle("Logout")
+                        .setMessage("Are you sure you want to logout?")
+                        .setNegativeButton("No", null)
+                        .setPositiveButton("Yes", ((dialogInterface, i) -> {
+                            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                            String storeIdList = sharedPreferences.getString("storeIdList", null);
+                            if (storeIdList != null) {
+                                for (String storeId : storeIdList.split(" ")) {
+                                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+                                }
+                            }
+                            sharedPreferences.edit().clear().apply();
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                            finish();
+                        }))
+                        .create();
+
+                TextView title = dialog.findViewById(android.R.id.title);
+                TextView message = dialog.findViewById(android.R.id.message);
+                if (title != null && message != null) {
+                    title.setTypeface(Typeface.DEFAULT_BOLD);
+                    message.setTextSize(14);
+                    message.setTypeface(Typeface.DEFAULT_BOLD);
                 }
-                sharedPreferences.edit().clear().apply();
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
-                finish();
+                dialog.show();
+
             }
         });
 

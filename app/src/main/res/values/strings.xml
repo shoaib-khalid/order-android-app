@@ -9,7 +9,7 @@
     <string name="tv_invoice_number_value">XXXXXXXX</string>
     <string name="btn_process">Process</string>
     <string name="tv_shipment_address">Shipment Address: \u0020</string>
-    <string name="tv_shipment_address_value"> 24, Jalan 1/2, Taman Puchong Prima</string>
+    <string name="tv_shipment_address_value">24, Jalan ½, Taman Puchong Prima</string>
     <string name="tv_shipment_city">City: \u0020</string>
     <string name="tv_shipment_city_value">Puchong</string>
     <string name="tv_shipment_state">State: \u0020</string>
@@ -23,7 +23,7 @@
     <string name="header_item">Item</string>
     <string name="header_special_instruction">Special Instructions</string>
     <string name="header_variant">Variation</string>
-    <string name="header_qty">Qty</string>
+    <string name="header_qty">Quantity</string>
     <string name="header_org_qty">Org Qty</string>
     <string name="header_price">Price</string>
     <string name="sub_total">Sub-Total</string>
@@ -33,7 +33,7 @@
     <string name="service_charges">Service Charges</string>
     <string name="service_charges_value" />
     <string name="delivery_charges">Delivery Charges</string>
-    <string name="delivery_charges_value" />
+    <string name="delivery_charges_value">RM 0.00</string>
     <string name="delivery_charges_discount">Delivery Charges Discount</string>
     <string name="delivery_charges_discount_value" />
     <string name="btn_print">Print</string>
@@ -82,10 +82,10 @@
     <string name="forgot_password"><u>Forgot Password</u></string>
     <string name="welcome_message">Welcome to Symplified App for Merchant</string>
     <string name="order_placed_date">Order Placed:\u0020</string>
-    <string name="order_placed_date_value">08-03-22  13:05 pm</string>
+    <string name="order_placed_date_value">08–03–22 13:05 pm</string>
     <string name="remember_me">Remember me</string>
     <string name="accept_order">Accept Order</string>
-    <string name="order_status">"Order Status:\u0020"</string>
+    <string name="order_status">Order Status:\u0020</string>
     <string name="order_details">View Details</string>
     <string name="order_status_value">Delivered</string>
     <string name="order_type">Order Type:\u0020</string>
@@ -104,5 +104,7 @@
     <string name="dialog_confirmation">Are you sure you want to delete product?</string>
     <string name="logout">Logout</string>
     <string name="version">Symplified 2022 | version 1.3.2</string>
+    <string name="call">Call</string>
+    <string name="navigate">Navigate</string>
     <string name="edit_product">Edit Product</string>
 </resources>
