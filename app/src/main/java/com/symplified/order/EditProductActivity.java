@@ -4,11 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
-import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -16,7 +14,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.text.Html;
 import android.util.Base64;
 import android.util.Log;
@@ -33,12 +30,9 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
@@ -49,7 +43,6 @@ import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.ActivityEditProductBinding;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
-import com.symplified.order.models.asset.Asset;
 import com.symplified.order.models.category.Category;
 import com.symplified.order.models.category.CategoryResponse;
 import com.symplified.order.models.product.Product;
@@ -58,11 +51,7 @@ import com.symplified.order.utils.Utility;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +69,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Multipart;
 
 public class EditProductActivity extends NavbarActivity {
 
@@ -212,14 +200,6 @@ public class EditProductActivity extends NavbarActivity {
             @Override
             public void onClick(View view) {
                 EditProductActivity.super.onBackPressed();
-//                setResult(4, new Intent().putExtra("finish", 1));
-//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-//                sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//                finish();
                 finish();
             }
         });
@@ -356,6 +336,11 @@ public class EditProductActivity extends NavbarActivity {
                             e.printStackTrace();
                         }
                         inventory.itemCode = temp.id + "aa";
+
+                        if (uri != null) {
+                            uploadProductImage(uri, api, headers, temp);
+                        }
+
                         Call<ResponseBody> updateInvntoryCall = api.postProductInventory(headers, storeId, temp.id, inventory);
 
                         updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
@@ -367,8 +352,9 @@ public class EditProductActivity extends NavbarActivity {
                                     startActivity(intent);
                                     Toast.makeText(getApplicationContext(), "Product Added Successfully", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
                                     progressDialog.dismiss();
+                                    Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
+                                    logError("Unsuccessful when creating product Inventory: " + response.code() + ", " + response.message());
                                 }
                             }
 
@@ -376,12 +362,14 @@ public class EditProductActivity extends NavbarActivity {
                             public void onFailure(Call<ResponseBody> call, Throwable t) {
                                 Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
+                                logError("onFailure when creating product Inventory: " + t.getLocalizedMessage());
+                                t.printStackTrace();
                             }
                         });
-
                     } else {
                         Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
                         progressDialog.dismiss();
+                        logError("Unsuccessful when creating product: " + response.code() + ", " + response.message());
                     }
                 }
 
@@ -389,6 +377,8 @@ public class EditProductActivity extends NavbarActivity {
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
                     Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
+                    logError("onFailure when adding product: " + t.getLocalizedMessage());
+                    t.printStackTrace();
                 }
             });
         } else {
@@ -400,32 +390,8 @@ public class EditProductActivity extends NavbarActivity {
                 product.productInventories.get(0).sku = productSKU.getEditText().getText().toString();
 
                 if (uri != null) {
-                    File file = new File(getPath(uri));
-
-                    RequestBody requestFile =
-                            RequestBody.create(file, MediaType.parse("multipart/form-data"));
-                    MultipartBody.Part body =
-                            MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-                    Call<ResponseBody> updateThumbnailCall = api.updateThumbnail(headers, storeId, product.id, body);
-                    updateThumbnailCall.enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (response.isSuccessful()) {
-                                Toast.makeText(getApplicationContext(), "Product Image Uploaded Successfully", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Log.e("edit-product-activity", "Error while uploading photo: " + response);
-                                Toast.makeText(getApplicationContext(), "Error while uploading photo", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Log.e("edit-product-activity", "onFailure while uploading Photo: " + t.getLocalizedMessage());
-                            t.printStackTrace();
-                        }
-                    });
+                    uploadProductImage(uri, api, headers, product);
                 }
-
                 Call<ResponseBody> responseCall = api.updateProduct(headers, storeId, product.id, product);
 
                 progressDialog.show();
@@ -569,7 +535,7 @@ public class EditProductActivity extends NavbarActivity {
     }
 
     public String getPath(Uri uri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
+        String[] proj = {MediaStore.Images.Media.DATA};
         Cursor returnCursor =
                 getContentResolver().query(uri, proj, null, null, null);
         returnCursor.moveToFirst();
@@ -583,5 +549,34 @@ public class EditProductActivity extends NavbarActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
     }
 
+    private void uploadProductImage(Uri imageUri, ProductApi api, Map<String, String> headers, Product prod) {
+        File file = new File(getPath(imageUri));
+        RequestBody requestFile =
+                RequestBody.create(file, MediaType.parse("multipart/form-data"));
+        MultipartBody.Part body =
+                MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+        Call<ResponseBody> updateThumbnailCall = api.updateThumbnail(headers, storeId, prod.id, body);
+        updateThumbnailCall.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getApplicationContext(), "Product Image Uploaded Successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Log.e("edit-product-activity", "Error while uploading photo: " + response);
+                    Toast.makeText(getApplicationContext(), "Error while uploading photo. " + response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Log.e("edit-product-activity", "onFailure while uploading Photo: " + t.getLocalizedMessage());
+                t.printStackTrace();
+            }
+        });
+    }
+
+    private void logError(String errorMessage) {
+        Log.e("edit-product-activity", errorMessage);
+    }
 }
 
