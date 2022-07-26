@@ -16,12 +16,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -60,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final int UPDATE_REQUEST_CODE = 112;
     private static final String TAG = LoginActivity.class.getName();
-    private Button login;
+    private Button login, btnSwitchToProduction;
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
@@ -70,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
     private String testUser, testPass;
     private String BASE_URL;
     private List<Store> stores;
+    private TextView welcomeText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,11 +89,35 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
 
         login.setOnClickListener(view -> {
-
             onLoginButtonClick();
-
         });
 
+        btnSwitchToProduction.setOnClickListener(view -> {
+            switchToProductionMode();
+        });
+
+        if (sharedPreferences.getBoolean("isStaging", false)) {
+            switchToStagingMode();
+        }
+    }
+
+    private void switchToProductionMode() {
+        BASE_URL = App.BASE_URL;
+        sharedPreferences.edit().putBoolean("isStaging", false).apply();
+        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+        Toast.makeText(getApplicationContext(), "Switched to production", Toast.LENGTH_SHORT).show();
+        welcomeText.setText(R.string.welcome_message);
+        btnSwitchToProduction.setVisibility(View.GONE);
+    }
+
+    private void switchToStagingMode() {
+        BASE_URL = App.BASE_URL_STAGING;
+        sharedPreferences.edit().putBoolean("isStaging", true).apply();
+        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+        Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
+        MaterialTextView welcomeText = findViewById(R.id.welcome);
+        welcomeText.setText(R.string.staging_mode);
+        btnSwitchToProduction.setVisibility(View.VISIBLE);
     }
 
 
@@ -108,7 +136,8 @@ public class LoginActivity extends AppCompatActivity {
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
         header = findViewById(R.id.iv_header);
-
+        btnSwitchToProduction = findViewById(R.id.btn_production);
+        welcomeText = findViewById(R.id.welcome);
     }
 
     /**
@@ -153,68 +182,64 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void onLoginButtonClick() {
         if (email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass)) {
-            BASE_URL = App.BASE_URL_STAGING;
-            sharedPreferences.edit().putBoolean("isStaging", true).apply();
-            sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-            Log.e("TAG", "BASE_URL : " + BASE_URL, new Error());
-            Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
-        }
-        progressDialog.show();
+            switchToStagingMode();
+        } else {
+            progressDialog.show();
 
+            Retrofit retrofit = new Retrofit.Builder()
+                    .client(new OkHttpClient())
+                    .baseUrl(BASE_URL + App.USER_SERVICE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.USER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+            LoginApi loginApiService = retrofit.create(LoginApi.class);
 
-        LoginApi loginApiService = retrofit.create(LoginApi.class);
+            Call<LoginResponse> loginResponse = loginApiService.login("application/json",
+                    new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
 
-        Call<LoginResponse> loginResponse = loginApiService.login("application/json",
-                new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
+            loginResponse.clone().enqueue(new Callback<LoginResponse>() {
 
-        loginResponse.clone().enqueue(new Callback<LoginResponse>() {
+                String loginMessage = "";
 
-            String loginMessage = "";
-
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful()) {
-                    LoginData res = response.body().data;
-                    loginMessage = "Logged In Successfully !";
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if (!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0) {
-                        editor.putString("email", res.session.username);
-                        editor.putString("accessToken", res.session.accessToken);
-                        editor.putString("refreshToken", res.session.refreshToken);
-                        editor.putString("ownerId", res.session.ownerId);
-                        editor.putString("expiry", res.session.expiry.toGMTString());
-                        editor.putInt("isLoggedIn", 1);
-                        editor.putInt("versionCode", BuildConfig.VERSION_CODE);
-                        editor.apply();
-                        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-                        getStoresAndRegister(sharedPreferences);
+                @Override
+                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                    if (response.isSuccessful()) {
+                        LoginData res = response.body().data;
+                        loginMessage = "Logged In Successfully !";
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        if (!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0) {
+                            editor.putString("email", res.session.username);
+                            editor.putString("accessToken", res.session.accessToken);
+                            editor.putString("refreshToken", res.session.refreshToken);
+                            editor.putString("ownerId", res.session.ownerId);
+                            editor.putString("expiry", res.session.expiry.toGMTString());
+                            editor.putInt("isLoggedIn", 1);
+                            editor.putInt("versionCode", BuildConfig.VERSION_CODE);
+                            editor.apply();
+                            sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+                            getStoresAndRegister(sharedPreferences);
+                        }
+                    } else {
+                        Log.e("TAG", "Login response : Not successful : " + response.raw());
+                        progressDialog.dismiss();
+                        loginMessage = "Unsuccessful, Please try again";
+                        email.getEditText().setText("");
+                        password.getEditText().setText("");
+                        email.getEditText().requestFocus();
                     }
-                } else {
-                    Log.e("TAG", "Login response : Not successful : " + response.raw());
-                    progressDialog.dismiss();
-                    loginMessage = "Unsuccessful, Please try again";
-                    email.getEditText().setText("");
-                    password.getEditText().setText("");
-                    email.getEditText().requestFocus();
+
+                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
                 }
 
-                Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-            }
+                @Override
+                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    Log.e("TAG", "onFailure: ", t.getCause());
+                    Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                }
 
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.e("TAG", "onFailure: ", t.getCause());
-                Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
-            }
-
-        });
+            });
+        }
     }
 
     /**

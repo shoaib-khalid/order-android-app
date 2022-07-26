@@ -135,6 +135,7 @@
         <entry key="..\:/order-android-app/app/src/main/res/mipmap-anydpi-v26/ic_orders2.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/main/res/mipmap-anydpi-v26/ic_orders2_round.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/maissn/res/layout/order_item_row.xml" value="0.11302083333333333" />
+        <entry key="app/src/main/res/layout-land/activity_login.xml" value="0.17592592592592593" />
       </map>
     </option>
   </component>

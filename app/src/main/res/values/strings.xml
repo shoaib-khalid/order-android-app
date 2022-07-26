@@ -107,4 +107,6 @@
     <string name="call">Call</string>
     <string name="navigate">Navigate</string>
     <string name="edit_product">Edit Product</string>
+    <string name="staging_mode">Staging mode</string>
+    <string name="production_mode_text">Switch to production</string>
 </resources>
