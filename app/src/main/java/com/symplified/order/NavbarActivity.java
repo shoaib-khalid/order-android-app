@@ -1,5 +1,6 @@
 package com.symplified.order;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -113,18 +114,14 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         StoreApi storeApi = retrofit.create(StoreApi.class);
 
         Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, storeId);
-        Log.d("imran-debug-navbar", "storeResponse: " + storeResponse.isExecuted());
 
         storeResponse.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Log.d("imran-debug-navbar", "onResponse: " + response.body().toString());
-
                     try {
                         StoreResponse.SingleStoreResponse responseBody
                                 = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
-                        Log.d("navbar", "onResponse: " + responseBody.data.name);
                         if (responseBody != null) {
                             for (Store.StoreAsset asset : responseBody.data.storeAssets) {
                                 if (asset.assetType.equals("LogoUrl")) {
@@ -152,7 +149,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e("imran-debug-navbar", t.getLocalizedMessage());
             }
         });
 
@@ -160,33 +156,36 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Dialog dialog = new MaterialAlertDialogBuilder(getApplicationContext(), R.style.MaterialAlertDialog__Center)
-                        .setTitle("Logout")
-                        .setMessage("Are you sure you want to logout?")
-                        .setNegativeButton("No", null)
-                        .setPositiveButton("Yes", ((dialogInterface, i) -> {
-                            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-                            String storeIdList = sharedPreferences.getString("storeIdList", null);
-                            if (storeIdList != null) {
-                                for (String storeId : storeIdList.split(" ")) {
-                                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                                }
-                            }
-                            sharedPreferences.edit().clear().apply();
-                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
-                            finish();
-                        }))
-                        .create();
-
-                TextView title = dialog.findViewById(android.R.id.title);
-                TextView message = dialog.findViewById(android.R.id.message);
-                if (title != null && message != null) {
-                    title.setTypeface(Typeface.DEFAULT_BOLD);
-                    message.setTextSize(14);
-                    message.setTypeface(Typeface.DEFAULT_BOLD);
+                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+                String storeIdList = sharedPreferences.getString("storeIdList", null);
+                if (storeIdList != null) {
+                    for (String storeId : storeIdList.split(" ")) {
+                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+                    }
                 }
-                dialog.show();
+                sharedPreferences.edit().clear().apply();
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+
+                // This causes app to crash due to incompatibility with AppCompatActivity
+//                Dialog dialog = new MaterialAlertDialogBuilder(getApplicationContext(), R.style.MaterialAlertDialog__Center)
+//                        .setTitle("Logout")
+//                        .setMessage("Are you sure you want to logout?")
+//                        .setNegativeButton("No", null)
+//                        .setPositiveButton("Yes", ((dialogInterface, i) -> {
+//
+//                        }))
+//                        .create();
+//
+//                TextView title = dialog.findViewById(android.R.id.title);
+//                TextView message = dialog.findViewById(android.R.id.message);
+//                if (title != null && message != null) {
+//                    title.setTypeface(Typeface.DEFAULT_BOLD);
+//                    message.setTextSize(14);
+//                    message.setTypeface(Typeface.DEFAULT_BOLD);
+//                }
+//                dialog.show();
 
             }
         });
