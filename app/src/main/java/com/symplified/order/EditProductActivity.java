@@ -114,7 +114,7 @@ public class EditProductActivity extends NavbarActivity {
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         storeId = sharedPreferences.getString("storeId", null);
-        Log.e("BASE URL: ", BASE_URL);
+        Log.d("edit-product-activity", "Access token: " + sharedPreferences.getString("accessToken", null));
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -247,7 +247,7 @@ public class EditProductActivity extends NavbarActivity {
     public void getStore(String storeId) {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer accessToken");
+        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", "accessToken"));
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
@@ -295,7 +295,7 @@ public class EditProductActivity extends NavbarActivity {
         }
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", "accessToken"));
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
@@ -433,7 +433,7 @@ public class EditProductActivity extends NavbarActivity {
                     }
                 });
             } catch (Exception e) {
-                Log.e("edit-product-activity", "Error while editing product activity " + e.getLocalizedMessage());
+                Log.e("edit-product-activity", "Error while editing product" + e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
@@ -442,7 +442,7 @@ public class EditProductActivity extends NavbarActivity {
 
     public void setCategory() {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", "accessToken"));
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)

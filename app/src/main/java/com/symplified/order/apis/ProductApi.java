@@ -50,5 +50,5 @@ public interface ProductApi {
 
     @Multipart
     @PUT("stores/{storeId}/products/{productId}/assets?isThumbnail=true")
-    Call<ResponseBody> updateThumbnail(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Part("file") MultipartBody.Part body);
+    Call<ResponseBody> updateThumbnail(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Part MultipartBody.Part body);
 }
