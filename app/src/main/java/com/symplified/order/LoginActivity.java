@@ -181,8 +181,11 @@ public class LoginActivity extends AppCompatActivity {
      * onClick method for Login Button
      */
     private void onLoginButtonClick() {
-        if (email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass)) {
+        if (email.getEditText().getText().toString().equals(testUser)
+                && password.getEditText().getText().toString().equals(testPass)) {
             switchToStagingMode();
+            email.getEditText().getText().clear();
+            password.getEditText().getText().clear();
         } else {
             progressDialog.show();
 
