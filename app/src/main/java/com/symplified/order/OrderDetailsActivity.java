@@ -92,10 +92,11 @@ public class OrderDetailsActivity extends NavbarActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initToolbar();
-
+        Bundle data = getIntent().getExtras();
+        Order order = (Order) data.getSerializable("selectedOrder");
         section = null;
         section = getIntent().getStringExtra("section");
+        initToolbar(order);
 
         //initialize all views
         initViews();
@@ -104,8 +105,6 @@ public class OrderDetailsActivity extends NavbarActivity {
         nextStatus = "";
 
         //get details of selected order from previous activity
-        Bundle data = getIntent().getExtras();
-        Order order = (Order) data.getSerializable("selectedOrder");
 
 //        itemAdapter.order = order;
 
@@ -171,9 +170,27 @@ public class OrderDetailsActivity extends NavbarActivity {
         displayOrderDetails(sharedPreferences, order);
     }
 
-    public void initToolbar() {
+    public void initToolbar(Order order) {
         TextView title = toolbar.findViewById(R.id.app_bar_title);
-        title.setText("Edit Order");
+        switch (section) {
+            case "new":
+                title.setText("New Order Details");
+                break;
+            case "ongoing":
+                title.setText("Ongoing Order Details");
+                break;
+            case "past":
+                switch (order.completionStatus) {
+                    case "DELIVERED_TO_CUSTOMER":
+                        title.setText("Completed Order Details");
+                        break;
+                    case "CANCELED_BY_MERCHANT":
+                    case "CANCELED_BY_CUSTOMER":
+                        title.setText("Cancelled Order Details");
+                        break;
+                }
+                break;
+        }
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
 
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
