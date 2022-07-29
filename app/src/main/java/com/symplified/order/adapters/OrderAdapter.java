@@ -173,7 +173,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             switch (orderStatus) {
                 case "BEING_PREPARED":
                     holder.currStatus.setText("Preparing");
-                    holder.statusButton.setText("Rready");
+                    holder.statusButton.setText("Ready");
                     break;
                 case "AWAITING_PICKUP":
                     holder.currStatus.setText("Awaiting Pickup");
