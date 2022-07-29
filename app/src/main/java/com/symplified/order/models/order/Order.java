@@ -198,30 +198,6 @@ public class Order implements Serializable {
     }
 
     public static class UpdatedOrder extends HttpResponse implements Serializable{
-
-        public Order data;
-
-    }
-
-    public static class OrderStatusDetailsResponse extends HttpResponse implements Serializable{
-        public Order order;
-        public String currentCompletionStatus;
-        public String nextCompletionStatus;
-        public String nextActionText;
-
-        @Override
-        public String toString() {
-            return "OrderStatusDetailsResponse{" +
-                    "order=" + order +
-                    ", currentCompletionStatus='" + currentCompletionStatus + '\'' +
-                    ", nextCompletionStatus='" + nextCompletionStatus + '\'' +
-                    ", nextActionText='" + nextActionText + '\'' +
-                    '}';
-        }
-    }
-
-    public static class OrderByIdResponse extends HttpResponse implements Serializable{
         public Order data;
     }
-
 }

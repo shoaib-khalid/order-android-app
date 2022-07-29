@@ -19,6 +19,7 @@ import retrofit2.http.HeaderMap;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface OrderApi {
 
@@ -59,8 +60,11 @@ public interface OrderApi {
     @GET("orders/details/{orderId}")
     Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
 
-    @GET("orders/{orderId}")
-    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
+//    @GET("orders/{orderId}")
+//    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path(value = "orderId", encoded = true) String orderId);
+
+    @GET("orders")
+    Call<OrderResponse> getOrderByInvoiceId(@HeaderMap Map<String,String> headers, @Query("invoiceId") String invoiceId);
 
     @PUT("orders/reviseitem/{orderId}")
     Call<ResponseBody> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);

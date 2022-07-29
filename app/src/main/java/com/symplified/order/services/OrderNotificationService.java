@@ -8,10 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
@@ -25,21 +21,23 @@ import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
+import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.StoreApi;
-import com.symplified.order.models.Store.Store;
+import com.symplified.order.enums.Status;
 import com.symplified.order.models.Store.StoreResponse;
-import com.symplified.order.models.asset.Asset;
-
-import org.json.JSONObject;
+import com.symplified.order.models.order.Order;
+import com.symplified.order.models.order.OrderResponse;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -50,6 +48,24 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
+    OrderApi orderApi;
+    Pattern pattern;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        pattern = Pattern.compile("\\#(\\S+?)$");
+
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                .baseUrl(baseUrl + App.ORDER_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        orderApi = retrofit.create(OrderApi.class);
+    }
 
     @Override
     public void onNewToken(@NonNull String s) {
@@ -65,6 +81,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         List<String> storeIds = Arrays.asList(storeIdList.split(" "));
         String storeName = remoteMessage.getData().get("storeName");
+        Log.d("order-notif", remoteMessage.getData().toString());
         String currentStoreId = null;
         for (String storeId : storeIds) {
             if (sharedPreferences.getString(storeId + "-name", null).equals(storeName)) {
@@ -80,67 +97,87 @@ public class OrderNotificationService extends FirebaseMessagingService {
             pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(remoteMessage.getData().get("title"))
-                .setContentText(remoteMessage.getData().get("body"))
-                .setAutoCancel(false)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setColor(Color.CYAN)
-                .build();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(new Random().nextInt(), notification);
-
-        // && !isAppOnForeground(getApplicationContext(), getPackageName())
-        if (currentStoreId != null) {
+        String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
+        Log.d("order-notif", "Order Id is " + invoiceId);
+        if (currentStoreId != null && invoiceId != null) {
 
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "Bearer Bearer accessToken");
 
-            Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                    .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
+            Call<OrderResponse> orderRequest = orderApi.getOrderByInvoiceId(headers, invoiceId);
 
-            StoreApi storeApi = retrofit.create(StoreApi.class);
-
-            Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, currentStoreId);
-
-            storeResponse.clone().enqueue(new Callback<ResponseBody>() {
+            String finalCurrentStoreId = currentStoreId;
+            orderRequest.enqueue(new Callback<OrderResponse>() {
                 @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                public void onResponse(Call<OrderResponse> call, Response<OrderResponse> response) {
+                    Log.d("order-notif", "OrderRequest response: " + response);
+                    Log.d("order-notif", "OrderRequest response body: " + response.body().data);
+
                     if (response.isSuccessful()) {
-                        try {
-                            StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
-//                            if (responseBody.data.verticalCode.equals("FnB")) {
-                            if (!AlertService.isPlaying()) {
-                                Intent intent = new Intent(getApplicationContext(), AlertService.class);
-                                intent.putExtra(String.valueOf(R.string.store_type), responseBody.data.verticalCode);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    startForegroundService(intent);
-                                } else {
-                                    startService(intent);
+                        String completionStatus = response.body().data.content.get(0).completionStatus;
+                        if (completionStatus.equals(Status.PAYMENT_CONFIRMED.toString())
+                                || completionStatus.equals(Status.RECEIVED_AT_STORE.toString())) {
+                            Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
+                                    .setContentIntent(pendingIntent)
+                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setContentTitle(remoteMessage.getData().get("title"))
+                                    .setContentText(remoteMessage.getData().get("body"))
+                                    .setAutoCancel(false)
+                                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                                    .setCategory(NotificationCompat.CATEGORY_ALARM)
+                                    .setColor(Color.CYAN)
+                                    .build();
+
+                            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            notificationManager.notify(new Random().nextInt(), notification);
+
+                            Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+                                    .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build();
+
+                            StoreApi storeApi = retrofit.create(StoreApi.class);
+
+                            Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, finalCurrentStoreId);
+
+                            storeResponse.clone().enqueue(new Callback<ResponseBody>() {
+                                @Override
+                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                    Log.d("order-notif", "StoreRequest response: " + response);
+                                    Log.d("order-notif", "StoreRequest response body: " + response.body());
+
+                                    if (response.isSuccessful()) {
+                                        try {
+                                            StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
+                                            if (!AlertService.isPlaying()) {
+                                                Intent intent = new Intent(getApplicationContext(), AlertService.class);
+                                                intent.putExtra(String.valueOf(R.string.store_type), responseBody.data.verticalCode);
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                    startForegroundService(intent);
+                                                } else {
+                                                    startService(intent);
+                                                }
+                                            }
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
                                 }
-                            }
-//                            } else {
-//                                Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//                                Ringtone ringtone = RingtoneManager.getRingtone(getApplicationContext(), notification);
-//                                ringtone.play();
-//                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+
+                                @Override
+                                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    Log.e("order-notif", "onFailure on storeRequest" + t.getLocalizedMessage());
+                                }
+                            });
                         }
                     }
                 }
 
                 @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                public void onFailure(Call<OrderResponse> call, Throwable t) {
+                    Log.e("order-notif", "onFailure on orderRequest" + t.getLocalizedMessage());
                 }
             });
         }
@@ -165,11 +202,21 @@ public class OrderNotificationService extends FirebaseMessagingService {
         }
         final String packageName = appPackageName;
         for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
-                //                Log.e("app",appPackageName);
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    && appProcess.processName.equals(packageName)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private String parseInvoiceId(String body) {
+        Matcher matcher = pattern.matcher(body);
+        try {
+            matcher.find();
+            return matcher.group(0).replace("#", "");
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 }
