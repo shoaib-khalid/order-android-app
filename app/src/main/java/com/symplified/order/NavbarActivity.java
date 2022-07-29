@@ -30,16 +30,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.viewpager.widget.ViewPager;
-
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
-import com.symplified.order.services.AlertService;
 import com.symplified.order.services.DownloadImageTask;
 
 import java.io.IOException;

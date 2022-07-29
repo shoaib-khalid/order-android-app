@@ -227,9 +227,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             return;
         }
 
-        if (updatedItemsList.size() > 0) {
-            Log.e("UPDATEDLIST: ", updatedItemsList.toString());
-        }
         Call<ResponseBody> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, updatedItemsList);
         progressDialog.show();
 
@@ -243,8 +240,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                     ((Activity) context).finish();
                 }
                 else {
-                    Log.e("ITEMUPDATERESPONSE", response.toString());
-                    Log.i("TAG", "onResponse: " + response.raw());
                     Log.e(TAG, "onResponse: " + response.message() + " " );
                     Toast.makeText(context, "Failed to update order", Toast.LENGTH_SHORT).show();
                 }

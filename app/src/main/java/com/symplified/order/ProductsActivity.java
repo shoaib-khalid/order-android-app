@@ -113,13 +113,13 @@ public class ProductsActivity extends NavbarActivity {
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("All Products");
-        addNew = toolbar.findViewById(R.id.add_new_product);
-        toolbar.findViewById(R.id.add_new_product).setVisibility(View.VISIBLE);
+//        addNew = toolbar.findViewById(R.id.add_new_product);
+//        toolbar.findViewById(R.id.add_new_product).setVisibility(View.VISIBLE);
 
-        addNew.setOnClickListener(view -> {
-            Intent intent = new Intent(this, EditProductActivity.class);
-            startActivity(intent);
-        });
+//        addNew.setOnClickListener(view -> {
+//            Intent intent = new Intent(this, EditProductActivity.class);
+//            startActivity(intent);
+//        });
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(2).setChecked(true);
@@ -148,14 +148,19 @@ public class ProductsActivity extends NavbarActivity {
                     products.addAll(response.body().data.content);
                     productAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
+                } else {
+                    Toast.makeText(ProductsActivity.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
+                    progressDialog.dismiss();
+                    finish();
                 }
-                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ProductResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ",t );
+                Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
+                finish();
             }
         });
     }

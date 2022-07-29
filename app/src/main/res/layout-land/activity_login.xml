@@ -117,22 +117,32 @@
             </RelativeLayout>
 
             <com.google.android.material.button.MaterialButton
-
                 android:id="@+id/btn_login"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
                 android:paddingVertical="15dp"
                 android:text="Login"
-                app:cornerRadius="5dp"
-                app:layout_constraintBottom_toTopOf="@+id/gl_bottom"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/login_rel_layout"
                 app:layout_constraintVertical_bias="1.0"
                 app:layout_constraintWidth_percent="0.65" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_production"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/sf_primary"
+                android:paddingVertical="16dp"
+                android:text="@string/production_mode_text"
+                app:layout_constraintBottom_toTopOf="@+id/gl_bottom"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btn_login"
+                app:layout_constraintWidth_percent="0.65"
+                android:visibility="gone" />
 
             <androidx.constraintlayout.widget.Guideline
                 android:id="@+id/gl_top"

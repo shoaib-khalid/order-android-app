@@ -450,7 +450,7 @@ public class OrderDetailsActivity extends NavbarActivity {
 
     }
 
-    private void initViews() {
+        private void initViews() {
         customerName = findViewById(R.id.order_row_name_value);
         invoice = findViewById(R.id.card_invoice_value);
         date = findViewById(R.id.order_date_value);

@@ -39,13 +39,13 @@
     <string name="btn_print">Print</string>
     <string name="is_pickup">Pickup \u0020</string>
     <string name="title_activity_orders">Orders</string>
-    <string name="new_orders">New Orders</string>
+    <string name="new_orders">NEW</string>
     <string name="processed_orders">Processed </string>
     <string name="pickup_orders">PickUp</string>
     <string name="dispatched_orders">Dispatched</string>
-    <string name="ongoing_orders">Ongoing Orders</string>
+    <string name="ongoing_orders">ONGOING</string>
     <string name="sent_orders">Sent</string>
-    <string name="past_orders">Past Orders</string>
+    <string name="past_orders">HISTORY</string>
     <string name="card_name">Name:\u0020</string>
     <string name="card_name_value">Albert ul Muzrabani alhamed</string>
     <string name="card_phone">Phone:\u0020</string>
@@ -74,7 +74,7 @@
     <string name="cancel_order">Cancel Order</string>
     <string name="update_order">Update Order</string>
     <string name="edit_order">Edit Order</string>
-    <string name="track_order">Track</string>
+    <string name="track_order">Track Order</string>
     <string name="contact_number">Contact Number: \u0020</string>
     <string name="delivery_time">Delivery Time: \u0020</string>
     <string name="request_failure">Sorry, we are unable to process your request now. Please try again.</string>
@@ -86,6 +86,7 @@
     <string name="remember_me">Remember me</string>
     <string name="accept_order">Accept Order</string>
     <string name="order_status">Order Status:\u0020</string>
+    <string name="update_status">Update Status:\u0020</string>
     <string name="order_details">View Details</string>
     <string name="order_status_value">Delivered</string>
     <string name="order_type">Order Type:\u0020</string>

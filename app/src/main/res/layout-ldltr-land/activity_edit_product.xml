@@ -75,7 +75,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/eidt_product_cardview"
-                    app:layout_constraintWidth_percent="0.90"
+                    app:layout_constraintWidth_percent="0.65"
                     app:startIconTint="@color/sf_primary">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -189,7 +189,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/product_name"
-                    app:layout_constraintWidth_percent="0.90"
+                    app:layout_constraintWidth_percent="0.65"
                     tools:ignore="MissingConstraints">
 
                     <AutoCompleteTextView
@@ -211,7 +211,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/product_status"
-                    app:layout_constraintWidth_percent="0.90"
+                    app:layout_constraintWidth_percent="0.65"
                     app:startIconTint="@color/sf_500">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -233,7 +233,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/product_description"
-                    app:layout_constraintWidth_percent="0.90" />
+                    app:layout_constraintWidth_percent="0.65" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

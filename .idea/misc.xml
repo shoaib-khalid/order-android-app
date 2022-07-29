@@ -86,17 +86,18 @@
         <entry key="..\:/order-android-app/app/src/main/res/drawable/tab_color_selector.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout-land/activity_login.xml" value="0.2504930966469428" />
         <entry key="..\:/order-android-app/app/src/main/res/layout-land/activity_order_details.xml" value="0.2" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout-ldltr-land/activity_edit_product.xml" value="0.2144748455428067" />
         <entry key="..\:/order-android-app/app/src/main/res/layout-sw600dp/activity_login.xml" value="0.2" />
         <entry key="..\:/order-android-app/app/src/main/res/layout-sw600dp/activity_order_details.xml" value="0.29683698296836986" />
         <entry key="..\:/order-android-app/app/src/main/res/layout-sw600dp/activity_orders.xml" value="0.11633428300094967" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_choose_store.xml" value="0.25416666666666665" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_edit_order.xml" value="0.2" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/activity_edit_product.xml" value="0.41217798594847777" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/activity_edit_product.xml" value="0.2" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_edit_products.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_login.xml" value="0.2" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_main.xml" value="0.11302083333333333" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_navbar.xml" value="0.264" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/activity_order_details.xml" value="0.361890694239291" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/activity_order_details.xml" value="0.264" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_orders.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_products.xml" value="0.2" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/activity_settings.xml" value="0.25416666666666665" />
@@ -104,10 +105,10 @@
         <entry key="..\:/order-android-app/app/src/main/res/layout/app_bar_sidebar.xml" value="0.12760416666666666" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/content_layout.xml" value="0.12310030395136778" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/content_sidebar.xml" value="0.12760416666666666" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/custom_action_bar.xml" value="0.264" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/custom_action_bar.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/custom_alert_dialog.xml" value="0.25416666666666665" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/drop_down_item.xml" value="0.1" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/edit_order_item_row.xml" value="0.35609756097560974" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/edit_order_item_row.xml" value="0.264" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/fragment_gallery.xml" value="0.12760416666666666" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/fragment_home.xml" value="0.12760416666666666" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/fragment_slideshow.xml" value="0.12760416666666666" />
@@ -117,9 +118,9 @@
         <entry key="..\:/order-android-app/app/src/main/res/layout/nav_header_sidebar.xml" value="0.6" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/new_orders.xml" value="0.1" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_header.xml" value="0.264" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_row.xml" value="0.3237250554323725" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_row.xml" value="0.536" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_item_row_new.xml" value="0.5440494590417311" />
-        <entry key="..\:/order-android-app/app/src/main/res/layout/order_row.xml" value="0.27703984819734345" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/order_row.xml" value="0.27071823204419887" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/order_row_new.xml" value="0.35180722891566263" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/product_row.xml" value="0.264" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/products_card.xml" value="0.1" />
@@ -129,13 +130,13 @@
         <entry key="..\:/order-android-app/app/src/main/res/layout/store_status_dialog.xml" value="0.11302083333333333" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/sub_item_row.xml" value="0.152" />
         <entry key="..\:/order-android-app/app/src/main/res/layout/testing_order_layout.xml" value="0.1" />
+        <entry key="..\:/order-android-app/app/src/main/res/layout/track_order.xml" value="0.1047008547008547" />
         <entry key="..\:/order-android-app/app/src/main/res/menu/activity_main_drawer.xml" value="0.12760416666666666" />
         <entry key="..\:/order-android-app/app/src/main/res/menu/nav_menu.xml" value="0.8" />
         <entry key="..\:/order-android-app/app/src/main/res/menu/sidebar.xml" value="0.176" />
         <entry key="..\:/order-android-app/app/src/main/res/mipmap-anydpi-v26/ic_orders2.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/main/res/mipmap-anydpi-v26/ic_orders2_round.xml" value="0.138" />
         <entry key="..\:/order-android-app/app/src/maissn/res/layout/order_item_row.xml" value="0.11302083333333333" />
-        <entry key="app/src/main/res/layout-land/activity_login.xml" value="0.17592592592592593" />
       </map>
     </option>
   </component>

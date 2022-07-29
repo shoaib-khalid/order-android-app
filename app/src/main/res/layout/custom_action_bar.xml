@@ -52,19 +52,6 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/add_new_product"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerInParent="true"
-            android:paddingVertical="5dp"
-            android:visibility="gone"
-            android:text="@string/add"
-            android:layout_marginEnd="5dp"
-            android:textColor="@color/white"
-            android:textSize="18sp"/>
-
 <!--        <ImageView-->
 <!--            android:id="@+id/app_bar_settings"-->
 <!--            android:layout_width="40dp"-->

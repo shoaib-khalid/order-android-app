@@ -107,7 +107,30 @@ public class Order implements Serializable {
         public String customerTrackingUrl;
         public String trackingNumber;
         public DeliveryPeriod deliveryPeriodDetails;
+
+        @Override
+        public String toString() {
+            return "OrderShipmentDetail{" +
+                    "receiverName='" + receiverName + '\'' +
+                    ", phoneNumber='" + phoneNumber + '\'' +
+                    ", address='" + address + '\'' +
+                    ", city='" + city + '\'' +
+                    ", zipcode='" + zipcode + '\'' +
+                    ", email='" + email + '\'' +
+                    ", deliveryProviderId=" + deliveryProviderId +
+                    ", state='" + state + '\'' +
+                    ", country='" + country + '\'' +
+                    ", trackingUrl='" + trackingUrl + '\'' +
+                    ", orderId='" + orderId + '\'' +
+                    ", storePickup=" + storePickup +
+                    ", merchantTrackingUrl='" + merchantTrackingUrl + '\'' +
+                    ", customerTrackingUrl='" + customerTrackingUrl + '\'' +
+                    ", trackingNumber='" + trackingNumber + '\'' +
+                    ", deliveryPeriodDetails=" + deliveryPeriodDetails +
+                    '}';
+        }
     }
+
 
     public static class OrderPaymentDetail implements Serializable{
         public String accountName;

@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,11 +81,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView name, invoice, date, total, status;
-        private final MaterialButton editButton, detailsButton, cancelButton, acceptButton, statusButton, trackButton, dispatchedButton;
+        private final MaterialButton editButton, detailsButton, cancelButton, acceptButton, statusButton, trackButton;
         private final CardView cardView;
         private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus;
         private final RecyclerView recyclerView;
-        private final LinearLayout rightButtonsLayout, leftButtonsLayout, statusLayout, typeLayout, currStatusLayout;
+        private final LinearLayout currStatusLayout, newLayout, ongoingLayout;
+        private final RelativeLayout typeLayout;
+        private final View divider;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -106,21 +109,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             acceptButton = itemView.findViewById(R.id.btn_order_accept);
             statusButton = itemView.findViewById(R.id.btn_order_status);
             trackButton = itemView.findViewById(R.id.btn_track_order);
-            dispatchedButton = itemView.findViewById(R.id.btn_order_status_dispatched);
 
             cardView = itemView.findViewById(R.id.order_card_parent);
 
             invoiceLabel = itemView.findViewById(R.id.order_invoice);
             dateLabel = itemView.findViewById(R.id.order_date);
             totalLabel = itemView.findViewById(R.id.order_total);
-            statusLabel = itemView.findViewById(R.id.order_status);
+            statusLabel = itemView.findViewById(R.id.update_status);
 
-            rightButtonsLayout = itemView.findViewById(R.id.layout_buttons_right);
-            leftButtonsLayout = itemView.findViewById(R.id.layout_buttons_left);
-            statusLayout = itemView.findViewById(R.id.layout_order_status);
             typeLayout = itemView.findViewById(R.id.layout_order_type_row);
             currStatusLayout = itemView.findViewById(R.id.layout_order_curr_status);
+            newLayout = itemView.findViewById(R.id.layout_new);
+            ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
 
+            divider = itemView.findViewById(R.id.divider_card3);
         }
     }
 
@@ -150,7 +152,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String orderStatus = orders.get(holder.getAdapterPosition()).completionStatus;
         if (section.equals("new")) {
             holder.editButton.setVisibility(View.VISIBLE);
-            holder.rightButtonsLayout.setVisibility(View.VISIBLE);
+            holder.newLayout.setVisibility(View.VISIBLE);
             if (orders.get(position).orderShipmentDetail.storePickup) {
                 holder.type.setText("Self-Pickup");
             } else {
@@ -159,9 +161,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.currStatusLayout.setVisibility(View.GONE);
 
         } else if (section.equals("ongoing")) {
-            holder.statusLayout.setVisibility(View.VISIBLE);
+            holder.ongoingLayout.setVisibility(View.VISIBLE);
             holder.statusLabel.setVisibility(View.VISIBLE);
-            holder.statusLabel.setText("Change Status: ");
+            holder.statusLabel.setText("Update Status: ");
             holder.statusButton.setVisibility(View.VISIBLE);
             if (orders.get(position).orderShipmentDetail.storePickup) {
                 holder.type.setText("Self-Pickup");
@@ -171,32 +173,31 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             switch (orderStatus) {
                 case "BEING_PREPARED":
                     holder.currStatus.setText("Preparing");
-                    holder.statusButton.setText("Rready for pickup");
+                    holder.statusButton.setText("Rready");
                     break;
                 case "AWAITING_PICKUP":
-                    holder.currStatus.setText("Ready for Pickup");
-                    holder.statusButton.setText("Dispatched");
+                    holder.currStatus.setText("Awaiting Pickup");
+                    holder.statusButton.setText("Pickup");
                     break;
                 case "BEING_DELIVERED":
-                    holder.currStatus.setText("Order Dispatched");
+                    holder.currStatus.setText("Being Delivered");
                     holder.trackButton.setVisibility(View.VISIBLE);
                     holder.statusButton.setText("Delivered");
                     break;
             }
         } else if (section.equals("past")) {
+            holder.ongoingLayout.setVisibility(View.VISIBLE);
             holder.typeLayout.setVisibility(View.GONE);
-            holder.statusLayout.setVisibility(View.VISIBLE);
             holder.status.setVisibility(View.VISIBLE);
             holder.statusLabel.setVisibility(View.VISIBLE);
             if (orderStatus.equals("DELIVERED_TO_CUSTOMER")) {
-                holder.status.setText("Delivered");
+                holder.status.setText("Order Delivered");
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_accept_button));
             } else if (orderStatus.equals("CANCELED_BY_MERCHANT") || orderStatus.equals("CANCELED_BY_CUSTOMER")) {
-                holder.status.setText("Cancelled");
+                holder.status.setText("Order Cancelled");
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
-
             }
-
+            holder.divider.setVisibility(View.GONE);
         }
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);

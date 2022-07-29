@@ -60,7 +60,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public ProductAdapter(Context context, List<Product> products) {
         this.context = context;
         this.products = products;
-        Log.e("ALLPROD", products.toString());
     }
 
     @NonNull
@@ -108,10 +107,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             context.startActivity(intent);
         });
 
-        holder.delete.setOnClickListener(view ->  {
-            onDeleteClicked(holder);
-        });
-
         try {
             Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
             if (bitmap != null) {
@@ -136,8 +131,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView productName, productPrice, productStatus;
-        Button edit, delete;
-        ImageView productImage, statusIcon;
+        ImageView productImage, statusIcon, edit;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -147,50 +141,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             edit = itemView.findViewById(R.id.product_edit);
             productStatus = itemView.findViewById(R.id.product_status);
             statusIcon = itemView.findViewById(R.id.ic_product_status);
-            delete = itemView.findViewById(R.id.product_delete);
         }
-    }
-
-    public void onDeleteClicked(ViewHolder holder) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        ProductApi api = retrofit.create(ProductApi.class);
-
-        Dialog dialog = new MaterialAlertDialogBuilder(context)
-                .setTitle("Delete Product")
-                .setMessage("Do you really want to delete this product ?")
-                .setNegativeButton("No", null)
-                .setPositiveButton("Yes", ((dialogInterface, i) -> {
-                    progressDialog.show();
-
-                    Call<ResponseBody> responseBodyCall = api.deleteProduct(headers, storeId, products.get(holder.getAdapterPosition()).id);
-                    progressDialog.show();
-                    responseBodyCall.clone().enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            if (response.isSuccessful()) {
-                                products.remove(holder.getAdapterPosition());
-                                notifyDataSetChanged();
-                                progressDialog.dismiss();
-                            }
-                            progressDialog.dismiss();
-                        }
-
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Log.e(TAG, "onFailure: ",t );
-                            progressDialog.dismiss();
-                        }
-                    });
-
-                }))
-                .create();
-        dialog.show();
     }
 }
