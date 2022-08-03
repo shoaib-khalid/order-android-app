@@ -55,9 +55,9 @@ public class EditOrderActivity extends NavbarActivity {
     private List<Item> items;
     private EditItemAdapter adapter;
     private String BASE_URL;
-    private Dialog progressDialog;
+    private Dialog progressDialog, dialog;
     private Order order = null;
-    private Button cancel, update;
+    private Button cancel, update, negative, positive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,47 +180,86 @@ public class EditOrderActivity extends NavbarActivity {
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
 
-        Dialog dialog = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
-                .setTitle("Cancel Order")
-                .setMessage("Do you really want to cancel this order ?")
-                .setNegativeButton("No", null)
-                .setPositiveButton("Yes", (dialogInterface, i) -> {
-                    progressDialog.show();
-                    Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
-                    progressDialog.show();
-                    processOrder.clone().enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            progressDialog.dismiss();
-                            if (response.isSuccessful()) {
-                                Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
-                                progressDialog.dismiss();
-                                Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                                startActivity(intent);
-                                finish();
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_alert_dialog);
+        dialog.setCancelable(false);
+        dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
+            dialog.dismiss();
+            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
+            progressDialog.show();
+            processOrder.clone().enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    progressDialog.dismiss();
+                    if (response.isSuccessful()) {
+                        Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+                        startActivity(intent);
+                        finish();
 
-                            } else {
-                                Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-                                progressDialog.dismiss();
-                            }
-                        }
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
+                }
 
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-                            Log.e(TAG, "onFailure: ", t);
-                            progressDialog.dismiss();
-                        }
-                    });
-                })
-                .create();
-        TextView title = dialog.findViewById(android.R.id.title);
-        TextView message = dialog.findViewById(android.R.id.message);
-        if (title != null && message != null) {
-            title.setTypeface(Typeface.DEFAULT_BOLD);
-            message.setTextSize(14);
-            message.setTypeface(Typeface.DEFAULT_BOLD);
-        }
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ", t);
+                    progressDialog.dismiss();
+                }
+            });
+        });
+
+        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+
         dialog.show();
+
+//        Dialog dialog = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
+//                .setTitle("Cancel Order")
+//                .setMessage("Do you really want to cancel this order ?")
+//                .setNegativeButton("No", null)
+//                .setPositiveButton("Yes", (dialogInterface, i) -> {
+//                    progressDialog.show();
+//                    Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
+//                    progressDialog.show();
+//                    processOrder.clone().enqueue(new Callback<ResponseBody>() {
+//                        @Override
+//                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                            progressDialog.dismiss();
+//                            if (response.isSuccessful()) {
+//                                Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
+//                                progressDialog.dismiss();
+//                                Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+//                                startActivity(intent);
+//                                finish();
+//
+//                            } else {
+//                                Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
+//                                progressDialog.dismiss();
+//                            }
+//                        }
+//
+//                        @Override
+//                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+//                            Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+//                            Log.e(TAG, "onFailure: ", t);
+//                            progressDialog.dismiss();
+//                        }
+//                    });
+//                })
+//                .create();
+//        TextView title = dialog.findViewById(android.R.id.title);
+//        TextView message = dialog.findViewById(android.R.id.message);
+//        if (title != null && message != null) {
+//            title.setTypeface(Typeface.DEFAULT_BOLD);
+//            message.setTextSize(14);
+//            message.setTypeface(Typeface.DEFAULT_BOLD);
+//        }
+//        dialog.show();
     }
 }

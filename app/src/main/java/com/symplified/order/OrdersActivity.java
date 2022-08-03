@@ -45,8 +45,8 @@ public class OrdersActivity extends NavbarActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        if(sharedPreferences.getBoolean("isStaging", false))
-            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
+//        if(sharedPreferences.getBoolean("isStaging", false))
+//            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
 
         initToolbar(sharedPreferences);
 

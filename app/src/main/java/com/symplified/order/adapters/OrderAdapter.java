@@ -8,12 +8,15 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -63,7 +66,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public String section;
     public Context context;
     public final String TAG = OrderAdapter.class.getName();
-    public Dialog progressDialog;
+    public Dialog progressDialog, dialog;
     public String nextStatus;
 
     public OrderAdapter(List<Order> orders, String section, Context context) {
@@ -80,13 +83,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView name, invoice, date, total, status;
-        private final MaterialButton editButton, detailsButton, cancelButton, acceptButton, statusButton, trackButton;
+        private final TextView name, invoice, date, total, total2, status, phoneNumber, address, subTotal,
+                deliveryCharges, deliveryDiscount, discount, serviceCharges;
+        private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton,  callButton;
         private final CardView cardView;
         private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus;
         private final RecyclerView recyclerView;
         private final LinearLayout currStatusLayout, newLayout, ongoingLayout;
-        private final RelativeLayout typeLayout;
+        private final RelativeLayout typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount;
         private final View divider;
 
         public ViewHolder(@NonNull View itemView) {
@@ -99,12 +103,25 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             status = (TextView) itemView.findViewById(R.id.order_status_value);
             typeLabel = (TextView) itemView.findViewById(R.id.order_type);
             type = (TextView) itemView.findViewById(R.id.order_type_value);
+
+            phoneNumber = itemView.findViewById(R.id.contact_value);
+            address = itemView.findViewById(R.id.address_value);
+            subTotal = itemView.findViewById(R.id.subtotal_value);
+            deliveryCharges = itemView.findViewById(R.id.delivery_by_value);
+            discount = itemView.findViewById(R.id.discount_value);
+            deliveryDiscount = itemView.findViewById(R.id.billing_delivery_charges_discount_value);
+            serviceCharges = itemView.findViewById(R.id.service_charges_value);
+            total2 = itemView.findViewById(R.id.order_total_value_);
+            callButton = itemView.findViewById(R.id.btn_call);
+            rlDiscount = itemView.findViewById(R.id.rl_discount);
+            rlDeliveryDiscount = itemView.findViewById(R.id.rl_delivery_discount);
+            rlServiceCharges = itemView.findViewById(R.id.rl_service_charges);
+
             currStatusLabel = (TextView) itemView.findViewById(R.id.order_curr_status);
             currStatus = (TextView) itemView.findViewById(R.id.order_curr_status_value);
             recyclerView = itemView.findViewById(R.id.order_items_recycler);
 
             editButton = itemView.findViewById(R.id.btn_edit_order);
-            detailsButton = itemView.findViewById(R.id.btn_order_details);
             cancelButton = itemView.findViewById(R.id.btn_order_cancel);
             acceptButton = itemView.findViewById(R.id.btn_order_accept);
             statusButton = itemView.findViewById(R.id.btn_order_status);
@@ -122,7 +139,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             newLayout = itemView.findViewById(R.id.layout_new);
             ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
 
-            divider = itemView.findViewById(R.id.divider_card3);
+            divider = itemView.findViewById(R.id.divider_card6);
         }
     }
 
@@ -137,19 +154,48 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull OrderAdapter.ViewHolder holder, int position) {
 
+        Order order = orders.get(position);
+
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         String BASE_URL = sharedPreferences.getString("base_url", null);
         String currency = sharedPreferences.getString("currency", null);
         nextStatus = "";
 
-        holder.name.setText(orders.get(position).orderShipmentDetail.receiverName);
-        holder.invoice.setText(orders.get(position).invoiceId);
-        holder.total.setText(currency + " " + Double.toString(orders.get(position).total));
+        holder.name.setText(order.orderShipmentDetail.receiverName);
+        holder.invoice.setText(order.invoiceId);
+        holder.total.setText(currency + " " + Double.toString(order.total));
 
-        holder.date.setText(orders.get(position).created);
+        holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
+        String fullAddress = order.orderShipmentDetail.address+", "+order.orderShipmentDetail.city+", "+order.orderShipmentDetail.state+" "+order.orderShipmentDetail.zipcode;
+        holder.address.setText(fullAddress);
+        holder.subTotal.setText(currency + " " + Double.toString(order.subTotal));
+        if (order.appliedDiscount == null || order.appliedDiscount == 0.0) {
+            holder.rlDiscount.setVisibility(View.GONE);
+        } else {
+            holder.discount.setText("- " + currency + " " + Double.toString(order.appliedDiscount));
+        }
+        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + Double.toString(order.deliveryCharges) : currency + " " + "0.0");
+        holder.total2.setText(currency + " " +Double.toString(order.total));
+        if (order.deliveryDiscount == null || order.deliveryDiscount == 0.0) {
+            holder.rlDeliveryDiscount.setVisibility(View.GONE);
+        } else {
+            holder.deliveryDiscount.setText("- " + currency + " " + Double.toString(order.deliveryDiscount));
+        }
+        if (order.storeServiceCharges == null || order.storeServiceCharges == 0.0) {
+            holder.rlServiceCharges.setVisibility(View.GONE);
+        } else {
+            holder.serviceCharges.setText(currency + " " + Double.toString(order.storeServiceCharges));
+        }
+        holder.callButton.setOnClickListener(view -> {
+            Intent callDriver = new Intent(Intent.ACTION_DIAL);
+            callDriver.setData(Uri.parse("tel:" + order.orderShipmentDetail.phoneNumber));
+            context.startActivity(callDriver);
+        });
 
-        String orderStatus = orders.get(holder.getAdapterPosition()).completionStatus;
+        holder.date.setText(order.created);
+
+        String orderStatus = order.completionStatus;
         if (section.equals("new")) {
             holder.editButton.setVisibility(View.VISIBLE);
             holder.newLayout.setVisibility(View.VISIBLE);
@@ -180,8 +226,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     holder.statusButton.setText("Pickup");
                     break;
                 case "BEING_DELIVERED":
-                    holder.currStatus.setText("Being Delivered");
-                    holder.trackButton.setVisibility(View.VISIBLE);
+                    holder.currStatus.setText("Out for Delivery");
+                    if (order.orderShipmentDetail.trackingUrl != null)
+                        holder.trackButton.setVisibility(View.VISIBLE);
                     holder.statusButton.setText("Delivered");
                     break;
             }
@@ -220,12 +267,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             onEditButtonClicked(orders.get(position));
         });
 
-        holder.detailsButton.setOnClickListener(view -> {
-            Intent intent = new Intent(context, OrderDetailsActivity.class);
-            intent.putExtra("selectedOrder", orders.get(position));
-            intent.putExtra("section", section);
-            context.startActivity(intent);
-        });
+//        holder.detailsButton.setOnClickListener(view -> {
+//            Intent intent = new Intent(context, OrderDetailsActivity.class);
+//            intent.putExtra("selectedOrder", orders.get(position));
+//            intent.putExtra("section", section);
+//            context.startActivity(intent);
+//        });
     }
 
     @Override
@@ -251,7 +298,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
-                    ItemAdapter itemsAdapter = new ItemAdapter(response.body().data.content, orders.get(position), context, "edit");
+                    ItemAdapter itemsAdapter = new ItemAdapter(response.body().data.content, orders.get(position), context);
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
                 } else {
@@ -279,12 +326,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
 
-        Dialog dialog = new MaterialAlertDialogBuilder(context, R.style.MaterialAlertDialog__Center)
-                .setTitle("Cancel Order")
-                .setMessage("Do you really want to cancel this order ?")
-                .setNegativeButton("No", null)
-                .setPositiveButton("Yes", (dialogInterface, i) -> {
-                    Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
+        dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_alert_dialog);
+        dialog.setCancelable(false);
+        dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
+            dialog.dismiss();
+            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
                     progressDialog.show();
                     processOrder.clone().enqueue(new Callback<ResponseBody>() {
                         @Override
@@ -295,7 +342,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                                 orders.remove(holder.getAdapterPosition());
                                 notifyDataSetChanged();
                                 progressDialog.dismiss();
-
                             } else {
                                 Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
                                 progressDialog.dismiss();
@@ -309,16 +355,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                             progressDialog.dismiss();
                         }
                     });
-                })
-                .create();
-        TextView title = dialog.findViewById(android.R.id.title);
-        TextView message = dialog.findViewById(android.R.id.message);
-        if (title != null && message != null) {
-            title.setTypeface(Typeface.DEFAULT_BOLD);
-            message.setTextSize(14);
-            message.setTypeface(Typeface.DEFAULT_BOLD);
-        }
+        });
+        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+
         dialog.show();
+
     }
 
     private void getOrderStatusDetails(Order order, String BASE_URL, ViewHolder holder) {
@@ -405,6 +448,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         e.printStackTrace();
                     }
                 } else {
+                    Log.e(TAG, response.toString());
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
                 }
                 progressDialog.dismiss();

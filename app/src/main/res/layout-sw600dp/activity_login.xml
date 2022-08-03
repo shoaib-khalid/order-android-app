@@ -95,9 +95,9 @@
             android:id="@+id/remember_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/forgot_password"
+            android:layout_toStartOf="@+id/forgot_password"
             android:maxLines="1"
             android:text="@string/remember_me"
             android:textColor="@color/sf_text" />
@@ -106,10 +106,10 @@
             android:id="@+id/forgot_password"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:clickable="true"
-            android:paddingRight="10dp"
+            android:paddingEnd="10dp"
             android:text="@string/forgot_password"
             android:textColor="@color/sf_text" />
 

@@ -34,8 +34,8 @@
             android:id="@+id/rl_item_details"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@+id/product_row_cardview"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@+id/product_row_cardview"
             android:orientation="vertical"
             android:paddingVertical="2dp">
 
@@ -48,7 +48,7 @@
                     android:id="@+id/product_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_gravity="left"
                     android:text="@string/product_name"
                     android:textSize="18sp"
@@ -58,8 +58,8 @@
                     android:id="@+id/product_edit"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginLeft="10dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="10dp"
                     android:src="@drawable/ic_edit" />
 
             </RelativeLayout>
@@ -76,7 +76,7 @@
                     android:id="@+id/ic_product_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginEnd="5dp"
                     android:gravity="center"
                     android:src="@drawable/ic_status"
                     app:tint="@color/sf_primary" />
@@ -95,8 +95,6 @@
                 android:id="@+id/product_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
                 android:layout_weight="1"
                 android:gravity="bottom"
                 android:text="@string/order_amount_value"

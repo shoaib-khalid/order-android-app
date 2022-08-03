@@ -25,25 +25,22 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public Order order;
     public List<UpdatedItem> updatedItemsList;
     public Context context;
-    public String activity;
     private static String TAG = ItemAdapter.class.getName();
     public void setItems(List<Item> items) {
         this.items = items;
     }
 
     public ItemAdapter(){}
-    public ItemAdapter(List<Item> items, Order order, Context context, String activity){
+    public ItemAdapter(List<Item> items, Order order, Context context){
         this.items = items;
         this.order = order;
         this.updatedItemsList = new ArrayList<>();
         this.context = context;
-        this.activity = activity;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView name, qty, price, specialInstructions;
-        private final View divider;
 
         public ViewHolder(View view) {
             super(view);
@@ -52,7 +49,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             qty = view.findViewById(R.id.header_qty);
             price = view.findViewById(R.id.header_price);
             specialInstructions = view.findViewById(R.id.header_instruction_value);
-            divider = view.findViewById(R.id.divider_card);
         }
     }
 
@@ -70,20 +66,13 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
-        if (activity.equals("details")) {
-            holder.name.setTextSize(14);
-            holder.qty.setTextSize(14);
-            holder.price.setTextSize(14);
-            if (!items.get(position).specialInstruction.equals("")) {
-                holder.specialInstructions.setVisibility(View.VISIBLE);
-                holder.specialInstructions.setText(items.get(position).specialInstruction);
-            }
-            holder.divider.setVisibility(View.VISIBLE);
-        }
         holder.name.setText(items.get(position).productName);
-        String quantity = activity.equals("details") ? Integer.toString(items.get(position).quantity) : "Qty: " + Integer.toString(items.get(position).quantity);
-        holder.qty.setText(quantity);;
+        holder.qty.setText(Integer.toString(items.get(position).quantity));
         holder.price.setText(currency+ " " + Double.toString(items.get(position).price));
+        if (!items.get(position).specialInstruction.equals("") && items.get(position).specialInstruction != null) {
+            holder.specialInstructions.setVisibility(View.VISIBLE);
+            holder.specialInstructions.setText(items.get(position).specialInstruction);
+        }
 
     }
 

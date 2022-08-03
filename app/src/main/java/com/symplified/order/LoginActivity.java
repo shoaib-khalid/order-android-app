@@ -186,6 +186,7 @@ public class LoginActivity extends AppCompatActivity {
             switchToStagingMode();
             email.getEditText().getText().clear();
             password.getEditText().getText().clear();
+            email.getEditText().requestFocus();
         } else {
             progressDialog.show();
 

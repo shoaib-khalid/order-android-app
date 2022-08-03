@@ -17,38 +17,31 @@
             android:id="@+id/header_item_name"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:text="@string/header_item"
-            android:textColor="@color/sf_b_700"
-            android:textSize="12sp"/>
+            android:textColor="@color/sf_b_700"/>
 
 
         <TextView
             android:id="@+id/header_qty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/header_item"
             android:text="@string/header_qty"
             android:layout_weight="0.5"
             android:textAlignment="center"
-            android:textColor="@color/sf_b_700"
-            android:textSize="12sp"/>
+            android:textColor="@color/sf_b_700"/>
 
 
         <TextView
             android:id="@+id/header_price"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/header_item"
             android:layout_weight="0.5"
             android:text="@string/header_price"
             android:textAlignment="textEnd"
             android:textColor="@color/sf_b_700"
-            android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/header_item"
-            app:layout_constraintWidth_percent=".15" />
+            app:layout_constraintTop_toTopOf="@+id/header_item"/>
 
         <!--        app:layout_constraintStart_toEndOf="@+id/header_qty"-->
 
@@ -61,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/item_row_non_expanded"
         android:visibility="gone"
-        android:paddingTop="10dp"
+        android:layout_marginTop="10dp"
         android:text="@string/header_special_instruction"
         android:textStyle="italic"
         android:textSize="12sp"/>
@@ -71,8 +64,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@+id/header_instruction_value"
-        android:layout_marginVertical="10dp"
-        android:visibility="gone"
+        android:layout_marginTop="10dp"
         android:background="@color/light_grey" />
 
 </RelativeLayout>

@@ -8,10 +8,10 @@
 
     <TextView
         android:id="@+id/store_status_title"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:text="@string/set_store_status"/>
+        android:text="@string/set_store_status" />
 
     <RadioGroup
         android:id="@+id/store_status_options"
@@ -28,7 +28,7 @@
             android:elevation="2dp"
             android:text="@string/normal"
             android:textSize="18sp"
-            android:buttonTint="@color/sf_500"
+            android:buttonTint="@color/sf_primary"
             android:textStyle="bold" />
 
         <com.google.android.material.radiobutton.MaterialRadioButton
@@ -37,7 +37,7 @@
             android:layout_height="wrap_content"
             android:elevation="2dp"
             android:text="@string/paused"
-            android:buttonTint="@color/sf_500"
+            android:buttonTint="@color/sf_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -49,8 +49,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/store_status_options"
-        android:headerBackground="@color/sf_500"
-        android:numbersSelectorColor="@color/sf_500"
+        android:headerBackground="@color/sf_primary"
+        android:timePickerMode="spinner"
+        android:numbersSelectorColor="@color/sf_primary"
         android:visibility="gone" />
 
 <!--    <RadioGroup-->
@@ -99,11 +100,15 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/confirm_status"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/status_timePicker"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="5dp"
+        android:layout_marginBottom="5dp"
+        android:padding="12dp"
         android:text="@string/confirm"
-        app:cornerRadius="5dp"
-        android:layout_margin="5dp"
-        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-        android:layout_below="@+id/status_timePicker"/>
+        app:cornerRadius="5dp" />
 </RelativeLayout>

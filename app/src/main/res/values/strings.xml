@@ -74,10 +74,10 @@
     <string name="cancel_order">Cancel Order</string>
     <string name="update_order">Update Order</string>
     <string name="edit_order">Edit Order</string>
-    <string name="track_order">Track Order</string>
+    <string name="track_order">Track</string>
     <string name="contact_number">Contact Number: \u0020</string>
     <string name="delivery_time">Delivery Time: \u0020</string>
-    <string name="request_failure">Sorry, we are unable to process your request now. Please try again.</string>
+    <string name="request_failure">Unable to process your request now. Please try again.</string>
     <string name="no_internet">Please check your internet connection and try again!</string>
     <string name="forgot_password"><u>Forgot Password</u></string>
     <string name="welcome_message">Welcome to Symplified App for Merchant</string>
@@ -98,11 +98,11 @@
     <string name="edit">Edit</string>
     <string name="delete">Delete</string>
     <string name="add">Add New</string>
-    <string name="dialog_title">Delete Product</string>
+    <string name="dialog_title">Cancel Order</string>
     <string name="dialog_okay">Okay</string>
     <string name="dialog_no">No</string>
     <string name="dialog_yes">Yes</string>
-    <string name="dialog_confirmation">Are you sure you want to delete product?</string>
+    <string name="dialog_message">Are you sure you want to cancel the order?</string>
     <string name="logout">Logout</string>
     <string name="version">Symplified 2022 | version 1.3.2</string>
     <string name="call">Call</string>

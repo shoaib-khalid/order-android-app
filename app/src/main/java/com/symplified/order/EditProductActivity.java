@@ -15,6 +15,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.Html;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -238,7 +240,7 @@ public class EditProductActivity extends NavbarActivity {
     public void getStore(String storeId) {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", "accessToken"));
+        headers.put("Authorization", "Bearer Bearer accessToken");
 
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
@@ -283,7 +285,7 @@ public class EditProductActivity extends NavbarActivity {
         }
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", "accessToken"));
+        headers.put("Authorization", "Bearer Bearer accessToken");
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
@@ -372,7 +374,10 @@ public class EditProductActivity extends NavbarActivity {
 //        } else {
         try {
             product.name = productName.getEditText().getText().toString();
-            product.description = productDescription.getEditText().getText().toString();
+
+            SpannableStringBuilder spannableString = (SpannableStringBuilder) productDescription.getEditText().getText();
+
+            product.description = Html.toHtml(spannableString);
 
 //                if (uri != null) {
 //                    uploadProductImage(uri, api, headers, product);
@@ -398,6 +403,7 @@ public class EditProductActivity extends NavbarActivity {
                                     Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
                                     Log.e("edit-product-activity", "ResponseError: " + response.toString());
                                     progressDialog.dismiss();
+                                    Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
                                 }
                             }
 
@@ -409,6 +415,7 @@ public class EditProductActivity extends NavbarActivity {
                         });
 
                     } else {
+                        Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
                         Log.e("edit-product-activity", "ERROR: " + response.toString());
                         progressDialog.dismiss();
                     }
@@ -416,6 +423,7 @@ public class EditProductActivity extends NavbarActivity {
 
                 @Override
                 public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                 }
             });

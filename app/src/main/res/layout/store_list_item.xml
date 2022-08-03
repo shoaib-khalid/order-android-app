@@ -28,7 +28,7 @@
                 android:layout_alignParentStart="true"
                 android:layout_marginStart="20dp"
                 android:drawablePadding="5dp"
-                android:drawableTint="@color/sf_300"
+                android:drawableTint="@color/sf_primaryVariant"
                 android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                 />
 

@@ -28,7 +28,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layout_edit_product"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content">
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/eidt_product_cardview"
@@ -184,7 +184,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Status"
+                    android:hint="Status*"
                     android:paddingVertical="5dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -212,7 +212,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/product_status"
                     app:layout_constraintWidth_percent="0.90"
-                    app:startIconTint="@color/sf_500">
+                    app:startIconTint="@color/sf_primary">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"

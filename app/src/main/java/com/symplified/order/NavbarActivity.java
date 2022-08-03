@@ -149,6 +149,11 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         });
 
         TextView logout = navigationView.findViewById(R.id.nav_logout);
+
+
+        if (sharedPreferences.getBoolean("isStaging", false))
+            logout.setVisibility(View.VISIBLE);
+
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

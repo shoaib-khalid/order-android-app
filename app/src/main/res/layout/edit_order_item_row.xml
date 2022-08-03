@@ -37,8 +37,8 @@
             android:id="@+id/rl_item_details"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@+id/edit_order_cardview"
+            android:layout_marginStart="20dp"
+            android:layout_toEndOf="@+id/edit_order_cardview"
             android:paddingVertical="2dp">
 
             <RelativeLayout
@@ -52,9 +52,9 @@
                     android:id="@+id/item_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@+id/delete_icon"
+                    android:layout_toStartOf="@+id/delete_icon"
                     android:ellipsize="end"
                     android:maxLines="2"
                     android:text="@string/header_item"
@@ -65,8 +65,8 @@
                     android:id="@+id/delete_icon"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginLeft="10dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginStart="10dp"
                     android:src="@drawable/ic_cross" />
 
             </RelativeLayout>
@@ -84,7 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerInParent="true"
-                    android:layout_toLeftOf="@+id/quantity_layout"
+                    android:layout_toStartOf="@+id/quantity_layout"
                     android:text="@string/order_amount_value"
                     android:textColor="@color/sf_primary"
                     android:textSize="14sp"
@@ -96,7 +96,7 @@
                     android:id="@+id/quantity_layout"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_centerInParent="true"
                     android:orientation="horizontal">
 

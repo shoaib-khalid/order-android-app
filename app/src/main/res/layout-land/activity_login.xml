@@ -99,7 +99,7 @@
                     android:id="@+id/remember_checkbox"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
                     android:text="Remember me"
                     android:textColor="@color/sf_text" />
 
@@ -107,10 +107,10 @@
                     android:id="@+id/forgot_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_marginTop="16dp"
                     android:clickable="true"
-                    android:paddingRight="10dp"
+                    android:paddingEnd="10dp"
                     android:text="@string/forgot_password"
                     android:textColor="@color/sf_text" />
 
@@ -134,7 +134,6 @@
                 android:id="@+id/btn_production"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:backgroundTint="@color/sf_primary"
                 android:paddingVertical="16dp"
                 android:text="@string/production_mode_text"
                 app:layout_constraintBottom_toTopOf="@+id/gl_bottom"

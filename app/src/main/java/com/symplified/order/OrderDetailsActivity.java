@@ -133,7 +133,9 @@ public class OrderDetailsActivity extends NavbarActivity {
                             statusButton.setText("Dispatched");
                             break;
                         case "BEING_DELIVERED":
-                            trackButton.setVisibility(View.VISIBLE);
+                            if (!(order.orderShipmentDetail.trackingUrl == null || order.orderShipmentDetail.trackingUrl.equals(""))) {
+                                trackButton.setVisibility(View.VISIBLE);
+                            }
                             statusButton.setText("Delivered");
                             break;
                     }
@@ -272,7 +274,7 @@ public class OrderDetailsActivity extends NavbarActivity {
                 if (response.isSuccessful()) {
                     Log.e("TAG", "onResponse: " + order.id, new Error());
 //                    editOrder.setVisibility(View.VISIBLE);
-                    itemAdapter = new ItemAdapter(response.body().data.content, order, getApplicationContext(), "details");
+                    itemAdapter = new ItemAdapter(response.body().data.content, order, getApplicationContext());
                     recyclerView.setAdapter(itemAdapter);
                     itemAdapter.notifyDataSetChanged();
                 } else {
@@ -353,6 +355,7 @@ public class OrderDetailsActivity extends NavbarActivity {
         invoice.setText(order.invoiceId);
         date.setText(order.created);
         orderTotal.setText(currency + " " + Double.toString(order.total));
+
 
         subTotal.setText(currency + " " + Double.toString(order.subTotal));
         if (order.appliedDiscount == null || order.appliedDiscount == 0.0) {

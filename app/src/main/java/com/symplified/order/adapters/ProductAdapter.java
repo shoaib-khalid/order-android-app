@@ -51,11 +51,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     private Context context;
     private List<Product> products;
-    private static Dialog progressDialog;
-    private String BASE_URL;
     private static final String TAG = "ProductAdapter";
-    private SharedPreferences sharedPreferences;
-    private String storeId, currency;
 
     public ProductAdapter(Context context, List<Product> products) {
         this.context = context;
@@ -64,7 +60,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ProductAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.product_row, parent, false);
         return new ViewHolder(view);
     }
@@ -72,16 +68,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        BASE_URL = sharedPreferences.getString("base_url", null);
-        storeId = sharedPreferences.getString("storeId", null);
-        currency = sharedPreferences.getString("currency", null);
-        progressDialog = new Dialog(context);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        String currency = sharedPreferences.getString("currency", null);
 
         holder.productName.setText(products.get(position).name);
         holder.productPrice.setText(currency+" "+Double.toString(products.get(position).productInventories.get(0).price));
@@ -126,12 +114,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     @Override
     public int getItemCount() {
-        return products == null ? 0 : products.size();
+        return products.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView productName, productPrice, productStatus;
-        ImageView productImage, statusIcon, edit;
+        private final TextView productName, productPrice, productStatus;
+        private final ImageView productImage, statusIcon, edit;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
