@@ -22,6 +22,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
+            android:name=".TrackOrderActivity"
+            android:exported="false" />
+        <activity
             android:name=".EditOrderActivity"
             android:exported="false" />
 
@@ -31,7 +34,7 @@
 
         <activity
             android:name=".NavbarActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />

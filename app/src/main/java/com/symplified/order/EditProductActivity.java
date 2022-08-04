@@ -389,30 +389,10 @@ public class EditProductActivity extends NavbarActivity {
                 @Override
                 public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                     if (response.isSuccessful()) {
-                        Call<ResponseBody> updateInvntoryCall = api.updateProductInventory(headers, storeId, product.id, product.productInventories.get(0).itemCode, product.productInventories.get(0));
-
-                        updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                if (response.isSuccessful()) {
-                                    progressDialog.dismiss();
-                                    Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
-                                    startActivity(intent);
-                                    Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-                                    Log.e("edit-product-activity", "ResponseError: " + response.toString());
-                                    progressDialog.dismiss();
-                                    Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-                                progressDialog.dismiss();
-                            }
-                        });
+                        progressDialog.dismiss();
+                        Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
+                        startActivity(intent);
+                        Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
 
                     } else {
                         Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();

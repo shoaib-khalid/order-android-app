@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -36,6 +37,7 @@ import com.symplified.order.App;
 import com.symplified.order.EditOrderActivity;
 import com.symplified.order.OrderDetailsActivity;
 import com.symplified.order.R;
+import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.Item;
@@ -197,6 +199,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         String orderStatus = order.completionStatus;
         if (section.equals("new")) {
+            if (order.isRevised) {
+                holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
+                holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
+            }
             holder.editButton.setVisibility(View.VISIBLE);
             holder.newLayout.setVisibility(View.VISIBLE);
             if (orders.get(position).orderShipmentDetail.storePickup) {
@@ -265,6 +271,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.editButton.setOnClickListener(view -> {
             onEditButtonClicked(orders.get(position));
+        });
+
+        holder.trackButton.setOnClickListener(view -> {
+            Intent intent = new Intent(context, TrackOrderActivity.class);
+            intent.putExtra("url", order.orderShipmentDetail.trackingUrl);
+            context.startActivity(intent);
         });
 
 //        holder.detailsButton.setOnClickListener(view -> {

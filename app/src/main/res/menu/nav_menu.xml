@@ -16,6 +16,10 @@
             android:id="@+id/nav_products"
             android:icon="@drawable/ic_products"
             android:title="Manage Products" />
+
+        <item
+            android:enabled="false"
+            android:title=""/>
     </group>
 
 </menu>
