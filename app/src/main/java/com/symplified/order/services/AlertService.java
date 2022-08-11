@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.IBinder;
@@ -72,11 +73,15 @@ public class AlertService extends Service {
         }
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                AudioManager.FLAG_PLAY_SOUND);
-        mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+
+        if (!isExternalAudioOutputPluggedIn()) {
+            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                    AudioManager.FLAG_PLAY_SOUND);
+
+            mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        }
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
         return START_STICKY;
@@ -106,4 +111,16 @@ public class AlertService extends Service {
         mediaPlayer.stop();
     }
 
+    private boolean isExternalAudioOutputPluggedIn() {
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        for (AudioDeviceInfo device
+                : audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
+            if (device.getType() != AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
+                    && device.getType() != AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
+                    && device.getType() != AudioDeviceInfo.TYPE_BUILTIN_SPEAKER_SAFE) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
