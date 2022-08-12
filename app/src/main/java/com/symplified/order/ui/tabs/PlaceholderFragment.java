@@ -32,6 +32,7 @@ import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.models.OrderDetailsModel;
+import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderResponse;
 import com.symplified.order.services.AlertService;
 
@@ -64,7 +65,7 @@ public class PlaceholderFragment extends Fragment {
 
     private Map<String, String> headers;
     private OrderApi orderApiService;
-    private Call<ResponseBody> orderResponse;
+    private Call<OrderDetailsResponse> orderResponse;
     private String storeId;
     private RecyclerView recyclerView;
     private String section;
@@ -244,31 +245,24 @@ public class PlaceholderFragment extends Fragment {
 
     public void getOrders(){
         progressDialog.show();
-        orderResponse.clone().enqueue(new Callback<ResponseBody>() {
+        orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-
+            public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+                Log.d("ORDERSS: ", "Testing");
                 if(response.isSuccessful())
                 {
-                    try {
-                        OrderResponse orderResponse = new Gson().fromJson(response.body().string(), OrderResponse.class);
-                        orderAdapter = new OrderAdapter(orderResponse.data.content, section, getActivity());
-                        recyclerView.setAdapter(orderAdapter);
-                        orderAdapter.notifyDataSetChanged();
-                        progressDialog.dismiss();
-                        Log.e("TAG",  "Size: "+ orderResponse.data.content.size(),  new Error());
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
+                    orderAdapter = new OrderAdapter(response.body().data.content, section, getActivity());
+                    recyclerView.setAdapter(orderAdapter);
+                    orderAdapter.notifyDataSetChanged();
+                    progressDialog.dismiss();
+//                    Log.e("TAG",  "Size: "+ orderResponse.data.content.size(),  new Error());
 
                 }
 
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                 progressDialog.dismiss();
             }
         });

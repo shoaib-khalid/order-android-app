@@ -15,7 +15,7 @@
         <item
             android:id="@+id/nav_products"
             android:icon="@drawable/ic_products"
-            android:title="Manage Products" />
+            android:title="Update Products" />
 
         <item
             android:enabled="false"

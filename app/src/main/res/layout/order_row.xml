@@ -30,7 +30,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:text="@string/card_name_value"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:paddingHorizontal="10dp"
                 android:textStyle="bold" />
 
@@ -50,7 +50,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
-                    android:text="@string/order_placed_date" />
+                    android:text="@string/order_placed_date"
+                    android:textSize="12sp" />
 
                 <TextView
                     android:id="@+id/order_date_value"
@@ -60,7 +61,8 @@
                     android:layout_toEndOf="@+id/order_date"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:text="@string/order_placed_date_value" />
+                    android:text="@string/order_placed_date_value"
+                    android:textSize="12sp" />
 
             </RelativeLayout>
 
@@ -69,7 +71,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingTop="10dp"
+                android:layout_marginTop="10dp"
                 android:paddingHorizontal="10dp"
                 android:gravity="center_vertical"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -90,7 +92,8 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        android:text="@string/tv_invoice_number" />
+                        android:text="@string/tv_invoice_number"
+                        android:textSize="12sp" />
 
                     <TextView
                         android:id="@+id/card_invoice_value"
@@ -98,7 +101,8 @@
                         android:layout_height="wrap_content"
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/order_invoice"
-                        android:text="@string/tv_invoice_number_value" />
+                        android:text="@string/tv_invoice_number_value"
+                        android:textSize="12sp" />
 
                 </RelativeLayout>
 
@@ -117,7 +121,7 @@
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
                         android:text="@string/total"
-                        android:textStyle="bold" />
+                        android:textSize="12sp"/>
 
                     <TextView
                         android:id="@+id/order_total_value"
@@ -126,7 +130,7 @@
                         android:layout_centerVertical="true"
                         android:layout_toEndOf="@+id/order_total"
                         android:text="@string/order_amount_value"
-                        android:textStyle="bold" />
+                        android:textSize="12sp"/>
 
                 </RelativeLayout>
 
@@ -167,8 +171,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@+id/ic_address"
-                    android:text="@string/tv_shipment_address_value"
-                    android:textSize="16sp" />
+                    android:text="@string/tv_shipment_address_value"/>
 
 <!--                <com.google.android.material.button.MaterialButton-->
 <!--                    android:id="@+id/btn_navigate"-->
@@ -217,8 +220,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@+id/ic_contact"
-                    android:text="@string/card_phone_value"
-                    android:textSize="16sp" />
+                    android:text="@string/card_phone_value"/>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_call"
@@ -248,8 +250,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/header_item"
-                    android:layout_weight="1"
-                    android:textSize="16sp" />
+                    android:layout_weight="1"/>
 
                 <TextView
                     android:id="@+id/item_quantity"
@@ -257,8 +258,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
                     android:text="@string/header_qty"
-                    android:textAlignment="center"
-                    android:textSize="16sp" />
+                    android:textAlignment="center"/>
 
                 <TextView
                     android:id="@+id/item_price"
@@ -266,8 +266,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.5"
                     android:textAlignment="textEnd"
-                    android:text="@string/header_price"
-                    android:textSize="16sp" />
+                    android:text="@string/header_price"/>
 
             </LinearLayout>
 
@@ -314,7 +313,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:text="@string/sub_total"
-                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -322,8 +320,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/order_amount_value"
-                        android:textSize="16sp" />
+                        android:text="@string/order_amount_value"/>
 
                 </RelativeLayout>
 
@@ -342,7 +339,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:text="@string/discount"
-                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -350,8 +346,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"
-                        android:textSize="16sp"/>
+                        android:text="@string/delivery_charges_value"/>
 
                 </RelativeLayout>
 
@@ -370,7 +365,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:text="@string/service_charges"
-                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -378,8 +372,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"
-                        android:textSize="16sp"/>
+                        android:text="@string/delivery_charges_value"/>
 
                 </RelativeLayout>
 
@@ -398,7 +391,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:text="@string/delivery_charges"
-                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -406,8 +398,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"
-                        android:textSize="16sp"/>
+                        android:text="@string/delivery_charges_value"/>
 
                 </RelativeLayout>
 
@@ -426,7 +417,6 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:text="@string/delivery_charges_discount"
-                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -434,8 +424,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"
-                        android:textSize="16sp"/>
+                        android:text="@string/delivery_charges_value"/>
 
                 </RelativeLayout>
 
@@ -658,7 +647,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/order_status"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:layout_weight="1"
                     android:textAlignment="center"
                     android:visibility="gone"
@@ -673,15 +662,14 @@
                     android:padding="12dp"
                     android:text="@string/pickup_orders"
                     android:visibility="gone"
-                    android:backgroundTint="@color/sf_primary"
-                    android:textSize="14sp"/>
+                    android:backgroundTint="@color/sf_primary"/>
 
                 <TextView
                     android:id="@+id/order_status_value"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@string/order_status_value"
-                    android:textSize="20sp"
+                    android:textSize="16sp"
                     android:visibility="gone"
                     android:textAlignment="center"
                     android:layout_weight="1"

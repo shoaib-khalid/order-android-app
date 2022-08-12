@@ -84,7 +84,6 @@ public class EditProductActivity extends NavbarActivity {
     private AutoCompleteTextView statusTextView;
     private final int REQ_CODE = 100;
 
-    private Store store = null;
     private boolean isEdit = false;
 //    private List<Category> categories;
     private String BASE_URL;
@@ -95,6 +94,7 @@ public class EditProductActivity extends NavbarActivity {
 
 //    private Uri uri = null;
     private List<String> statusList;
+    private String accesToken;
     private ArrayAdapter<String> statusAdapter;
 
     private static Dialog progressDialog;
@@ -115,6 +115,7 @@ public class EditProductActivity extends NavbarActivity {
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         storeId = sharedPreferences.getString("storeId", null);
+        accesToken = sharedPreferences.getString("accessToken", null);
         Log.d("edit-product-activity", "Access token: " + sharedPreferences.getString("accessToken", null));
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -130,13 +131,13 @@ public class EditProductActivity extends NavbarActivity {
 
         initViews();
 
-        getStore(storeId);
-
         Intent intent = getIntent();
 //        if (intent.hasExtra("product")) {
         Bundle data = getIntent().getExtras();
         product = (Product) data.getSerializable("product");
         isEdit = true;
+
+        storeId = product.storeId;
 //        }
 
 //        if (isEdit) {
@@ -215,65 +216,6 @@ public class EditProductActivity extends NavbarActivity {
 
     }
 
-//    public void initImageSelector() {
-//        selectImageActivityResultLauncher = registerForActivityResult(
-//                new ActivityResultContracts.StartActivityForResult(),
-//                new ActivityResultCallback<ActivityResult>() {
-//                    @Override
-//                    public void onActivityResult(ActivityResult result) {
-//                        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-//                            ActivityResult mResult = result;
-//                            uri = result.getData().getData();
-//                            productImage.setImageURI(uri);
-//                        }
-//                    }
-//                }
-//        );
-//
-//        productImage.setOnClickListener(view -> {
-//            Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-////            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//            selectImageActivityResultLauncher.launch(intent);
-//        });
-//    }
-
-    public void getStore(String storeId) {
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        StoreApi storeApi = retrofit.create(StoreApi.class);
-
-        Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, storeId);
-
-        progressDialog.show();
-
-        storeResponse.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        store = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class).data;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                progressDialog.dismiss();
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                progressDialog.dismiss();
-            }
-        });
-
-    }
-
 
     public void updateProduct() {
 
@@ -285,7 +227,7 @@ public class EditProductActivity extends NavbarActivity {
         }
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers.put("Authorization", "Bearer "+ accesToken);
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())

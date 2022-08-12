@@ -89,7 +89,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         }
 
 
-        holder.edit.setOnClickListener(view -> {
+        holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, EditProductActivity.class);
             intent.putExtra("product", products.get(position));
             context.startActivity(intent);
@@ -119,14 +119,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView productName, productPrice, productStatus;
-        private final ImageView productImage, statusIcon, edit;
+        private final ImageView productImage, statusIcon;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             productName = itemView.findViewById(R.id.product_name);
             productPrice = itemView.findViewById(R.id.product_price);
             productImage = itemView.findViewById(R.id.product_image);
-            edit = itemView.findViewById(R.id.product_edit);
             productStatus = itemView.findViewById(R.id.product_status);
             statusIcon = itemView.findViewById(R.id.ic_product_status);
         }

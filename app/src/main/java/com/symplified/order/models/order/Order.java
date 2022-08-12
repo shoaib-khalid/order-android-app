@@ -187,6 +187,17 @@ public class Order implements Serializable {
         public List<Order> content;
     }
 
+    public static class OrderDetailsList implements Serializable {
+        public List<OrderDetailsResponse> content;
+    }
+
+    public static class OrderDetailsResponse implements Serializable {
+        public Order order;
+        public String currentCompletionStatus;
+        public String nextCompletionStatus;
+        public String nextActionText;
+    }
+
     public static class OrderUpdate{
         public String orderId;
         public Status status;

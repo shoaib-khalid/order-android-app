@@ -64,14 +64,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
 
-    public List<Order> orders;
+    public List<Order.OrderDetailsResponse> orders;
     public String section;
     public Context context;
     public final String TAG = OrderAdapter.class.getName();
     public Dialog progressDialog, dialog;
     public String nextStatus;
 
-    public OrderAdapter(List<Order> orders, String section, Context context) {
+    public OrderAdapter(List<Order.OrderDetailsResponse> orders, String section, Context context) {
         this.orders = orders;
         this.section = section;
         this.context = context;
@@ -156,15 +156,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull OrderAdapter.ViewHolder holder, int position) {
 
-        Order order = orders.get(position);
+        Order.OrderDetailsResponse orderDetails = orders.get(position);
+        Order order = orderDetails.order;
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         String BASE_URL = sharedPreferences.getString("base_url", null);
         String currency = sharedPreferences.getString("currency", null);
-        nextStatus = "";
 
-        holder.name.setText(order.orderShipmentDetail.receiverName);
+        if (order.customer != null && order.customer.name != null) {
+            holder.name.setText(order.customer.name);
+        } else
+            holder.name.setText(order.orderShipmentDetail.receiverName);
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(currency + " " + Double.toString(order.total));
 
@@ -205,7 +208,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
             holder.editButton.setVisibility(View.VISIBLE);
             holder.newLayout.setVisibility(View.VISIBLE);
-            if (orders.get(position).orderShipmentDetail.storePickup) {
+            holder.acceptButton.setText(orderDetails.nextActionText);
+            if (order.orderShipmentDetail.storePickup) {
                 holder.type.setText("Self-Pickup");
             } else {
                 holder.type.setText("Delivery");
@@ -213,11 +217,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.currStatusLayout.setVisibility(View.GONE);
 
         } else if (section.equals("ongoing")) {
-            holder.ongoingLayout.setVisibility(View.VISIBLE);
-            holder.statusLabel.setVisibility(View.VISIBLE);
-            holder.statusLabel.setText("Update Status: ");
-            holder.statusButton.setVisibility(View.VISIBLE);
-            if (orders.get(position).orderShipmentDetail.storePickup) {
+
+            if (orderDetails.nextActionText != null) {
+                holder.ongoingLayout.setVisibility(View.VISIBLE);
+                holder.statusLabel.setVisibility(View.VISIBLE);
+                holder.statusLabel.setText("Update Status: ");
+                holder.statusButton.setVisibility(View.VISIBLE);
+                holder.statusButton.setText(orderDetails.nextActionText);
+            }
+            if (order.orderShipmentDetail.storePickup) {
                 holder.type.setText("Self-Pickup");
             } else {
                 holder.type.setText("Delivery");
@@ -225,17 +233,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             switch (orderStatus) {
                 case "BEING_PREPARED":
                     holder.currStatus.setText("Preparing");
-                    holder.statusButton.setText("Ready");
                     break;
                 case "AWAITING_PICKUP":
                     holder.currStatus.setText("Awaiting Pickup");
-                    holder.statusButton.setText("Pickup");
                     break;
                 case "BEING_DELIVERED":
                     holder.currStatus.setText("Out for Delivery");
                     if (order.orderShipmentDetail.trackingUrl != null)
                         holder.trackButton.setVisibility(View.VISIBLE);
-                    holder.statusButton.setText("Delivered");
                     break;
             }
         } else if (section.equals("past")) {
@@ -257,20 +262,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.recyclerView.setLayoutManager(linearLayoutManager);
 
-        getOrderItems(orders.get(position), BASE_URL, holder, position);
+        getOrderItems(order, BASE_URL, holder);
 
-        holder.cancelButton.setOnClickListener(view -> {onCancelOrderButtonClick(orders.get(position), BASE_URL, holder);});
+        holder.cancelButton.setOnClickListener(view -> {onCancelOrderButtonClick(order, BASE_URL, holder);});
 
         holder.acceptButton.setOnClickListener(view -> {
-            getOrderStatusDetails(orders.get(position), BASE_URL, holder);
+            updateOrderStatus(orderDetails, BASE_URL, position);
         });
 
         holder.statusButton.setOnClickListener(view -> {
-            getOrderStatusDetails(orders.get(position), BASE_URL, holder);
+            updateOrderStatus(orderDetails, BASE_URL, position);
         });
 
         holder.editButton.setOnClickListener(view -> {
-            onEditButtonClicked(orders.get(position));
+            onEditButtonClicked(order);
         });
 
         holder.trackButton.setOnClickListener(view -> {
@@ -292,7 +297,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return orders.size();
     }
 
-    private void getOrderItems(Order order, String BASE_URL, ViewHolder holder, int position) {
+    private void getOrderItems(Order order, String BASE_URL, ViewHolder holder) {
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
@@ -310,7 +315,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
-                    ItemAdapter itemsAdapter = new ItemAdapter(response.body().data.content, orders.get(position), context);
+                    ItemAdapter itemsAdapter = new ItemAdapter(response.body().data.content, order, context);
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
                 } else {
@@ -376,7 +381,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     }
 
-    private void getOrderStatusDetails(Order order, String BASE_URL, ViewHolder holder) {
+    private void updateOrderStatus(Order.OrderDetailsResponse orderDetails, String BASE_URL, int position) {
 
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
@@ -387,68 +392,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         OrderApi orderApiService = retrofit.create(OrderApi.class);
 
-        Call<ResponseBody> orderStatusDetailsResponseCall = orderApiService.getOrderStatusDetails(headers, order.id);
-        progressDialog.show();
-        orderStatusDetailsResponseCall.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        JSONObject responseJson = new JSONObject(response.body().string().toString());
-                        Log.e(TAG, "onResponse: " + responseJson, new Error());
-                        new Handler().post(() -> {
-                            try {
-                                if (!section.equals("sent")) {
-                                    nextStatus += responseJson.getJSONObject("data").getString("nextCompletionStatus");
-                                    //get order items from API
-                                    updateOrderStatus(order, BASE_URL, holder);
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    } catch (IOException | JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
-                }
-                progressDialog.dismiss();
-            }
+        Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(orderDetails.order.id, Status.fromString(orderDetails.nextCompletionStatus)), orderDetails.order.id);
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "onFailure: ", t);
-            }
-        });
-
-    }
-
-    private void updateOrderStatus(Order order, String BASE_URL, ViewHolder holder) {
-
-        //add headers required for api calls
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
-
-        Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.fromString(nextStatus)), order.id);
-
-        onProcessButtonClick(processOrder, holder.getAdapterPosition());
-
-    }
-
-    private void onProcessButtonClick(Call<ResponseBody> processOrder, int position) {
         progressDialog.show();
         processOrder.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-//                    progressDialog.dismiss();
                     try {
                         Log.i(TAG, "onResponse: " + response.raw().toString());
                         Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
@@ -478,7 +428,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
    private void onEditButtonClicked(Order order) {
         if (order.isRevised) {
-            Toast.makeText(context, "Order already edited", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Order already updated.", Toast.LENGTH_SHORT).show();
             return;
         }
         Intent intent = new Intent(context, EditOrderActivity.class);

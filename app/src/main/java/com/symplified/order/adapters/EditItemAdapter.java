@@ -119,9 +119,11 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.price.setText(currency+ " " + Double.toString(items.get(position).price));
         holder.qty.setText(Integer.toString(items.get(position).newQuantity));
 
-        if (!items.get(position).specialInstruction.equals("")) {
-            holder.specialInstructions.setVisibility(View.VISIBLE);
-            holder.specialInstructions.setText(items.get(position).specialInstruction);
+        if (items.get(position).specialInstruction != null) {
+            if (!items.get(position).specialInstruction.equals("")) {
+                holder.specialInstructions.setVisibility(View.VISIBLE);
+                holder.specialInstructions.setText(items.get(position).specialInstruction);
+            }
         }
         getProductImage(items.get(position), BASE_URL, storeId, holder);
 
@@ -240,7 +242,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                     ((Activity) context).finish();
                 }
                 else {
-                    Log.e(TAG, "onResponse: " + response.message() + " " );
+                    Log.e(TAG, "onResponse: " + response.toString());
                     Toast.makeText(context, "Failed to update order", Toast.LENGTH_SHORT).show();
                 }
             }

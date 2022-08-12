@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:id="@+id/edit_order_item"
-    android:padding="10dp">
+    android:layout_margin="8dp">
 
     <RelativeLayout
         android:id="@+id/rl_edit_order_item"
@@ -87,7 +87,7 @@
                     android:layout_toStartOf="@+id/quantity_layout"
                     android:text="@string/order_amount_value"
                     android:textColor="@color/sf_primary"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:textStyle="bold">
 
                 </TextView>

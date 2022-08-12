@@ -69,9 +69,11 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.name.setText(items.get(position).productName);
         holder.qty.setText(Integer.toString(items.get(position).quantity));
         holder.price.setText(currency+ " " + Double.toString(items.get(position).price));
-        if (!items.get(position).specialInstruction.equals("") && items.get(position).specialInstruction != null) {
-            holder.specialInstructions.setVisibility(View.VISIBLE);
-            holder.specialInstructions.setText(items.get(position).specialInstruction);
+        if (items.get(position).specialInstruction != null) {
+            if (!items.get(position).specialInstruction.equals("")) {
+                holder.specialInstructions.setVisibility(View.VISIBLE);
+                holder.specialInstructions.setText(items.get(position).specialInstruction);
+            }
         }
 
     }

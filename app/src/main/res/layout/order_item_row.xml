@@ -18,6 +18,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:text="@string/header_item"
+            android:textSize="12sp"
             android:textColor="@color/sf_b_700"/>
 
 
@@ -27,6 +28,7 @@
             android:layout_height="wrap_content"
             android:text="@string/header_qty"
             android:layout_weight="0.5"
+            android:textSize="12sp"
             android:textAlignment="center"
             android:textColor="@color/sf_b_700"/>
 
@@ -41,6 +43,7 @@
             android:textColor="@color/sf_b_700"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="12sp"
             app:layout_constraintTop_toTopOf="@+id/header_item"/>
 
         <!--        app:layout_constraintStart_toEndOf="@+id/header_qty"-->
@@ -57,7 +60,7 @@
         android:layout_marginTop="10dp"
         android:text="@string/header_special_instruction"
         android:textStyle="italic"
-        android:textSize="12sp"/>
+        android:textSize="10sp"/>
 
     <View
         android:id="@+id/divider_card"
