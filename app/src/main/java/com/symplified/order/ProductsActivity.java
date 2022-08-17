@@ -50,7 +50,7 @@ public class ProductsActivity extends NavbarActivity {
     List<Product> products = new ArrayList<>();
     ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
-    private String storeId;
+    private String storeIdList;
     private String BASE_URL;
     private Dialog progressDialog;
     private ActivityProductsBinding binding;
@@ -77,7 +77,7 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        storeId = sharedPreferences.getString("storeId", null);
+        storeIdList = sharedPreferences.getString("storeIdList", null);
         BASE_URL = sharedPreferences.getString("base_url", null);
 
         progressDialog = new Dialog(this);
@@ -137,32 +137,36 @@ public class ProductsActivity extends NavbarActivity {
                 .build();
 
         ProductApi api = retrofit.create(ProductApi.class);
-        Call<ProductResponse> responseCall = api.getProducts(headers, storeId);
 
-        progressDialog.show();
+        for (String storeId: storeIdList.split(" ")) {
 
-        responseCall.clone().enqueue(new Callback<ProductResponse>() {
-            @Override
-            public void onResponse(Call<ProductResponse> call, Response<ProductResponse> response) {
-                if (response.isSuccessful()) {
-                    products.addAll(response.body().data.content);
-                    productAdapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
-                } else {
-                    Toast.makeText(ProductsActivity.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
+            Call<ProductResponse> responseCall = api.getProducts(headers, storeId);
+
+            progressDialog.show();
+
+            responseCall.clone().enqueue(new Callback<ProductResponse>() {
+                @Override
+                public void onResponse(Call<ProductResponse> call, Response<ProductResponse> response) {
+                    if (response.isSuccessful()) {
+                        products.addAll(response.body().data.content);
+                        productAdapter.notifyDataSetChanged();
+                        progressDialog.dismiss();
+                    } else {
+                        Toast.makeText(ProductsActivity.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        finish();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<ProductResponse> call, Throwable t) {
+                    Log.e(TAG, "onFailure: ", t);
+                    Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
                     finish();
                 }
-            }
-
-            @Override
-            public void onFailure(Call<ProductResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: ",t );
-                Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
-                finish();
-            }
-        });
+            });
+        }
     }
 
     private void setData() {

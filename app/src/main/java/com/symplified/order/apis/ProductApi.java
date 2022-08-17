@@ -20,7 +20,7 @@ import retrofit2.http.Path;
 
 public interface ProductApi {
 
-    @GET("stores/{storeId}/products?page=0&pageSize=10&sortByCol=name&sortingOrder=ASC&name=&status=ACTIVE,INACTIVE,OUTOFSTOCK")
+    @GET("stores/{storeId}/products?status=ACTIVE,INACTIVE,OUTOFSTOCK")
     Call<ProductResponse> getProducts(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId);
 
     @GET("stores/{storeId}/products/{productId}")

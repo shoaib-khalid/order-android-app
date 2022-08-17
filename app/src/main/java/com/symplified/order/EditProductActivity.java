@@ -84,7 +84,6 @@ public class EditProductActivity extends NavbarActivity {
     private AutoCompleteTextView statusTextView;
     private final int REQ_CODE = 100;
 
-    private boolean isEdit = false;
 //    private List<Category> categories;
     private String BASE_URL;
     private String storeId;
@@ -114,7 +113,6 @@ public class EditProductActivity extends NavbarActivity {
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
-        storeId = sharedPreferences.getString("storeId", null);
         accesToken = sharedPreferences.getString("accessToken", null);
         Log.d("edit-product-activity", "Access token: " + sharedPreferences.getString("accessToken", null));
         progressDialog = new Dialog(this);
@@ -135,8 +133,6 @@ public class EditProductActivity extends NavbarActivity {
 //        if (intent.hasExtra("product")) {
         Bundle data = getIntent().getExtras();
         product = (Product) data.getSerializable("product");
-        isEdit = true;
-
         storeId = product.storeId;
 //        }
 
@@ -405,19 +401,17 @@ public class EditProductActivity extends NavbarActivity {
         statusList.add("Active");
         statusList.add("Inactive");
         statusList.add("Out of Stock");
-        if (isEdit) {
-            String status = product.status;
-            switch (status) {
-                case "ACTIVE":
-                    statusTextView.setText(statusList.get(0), false);
-                    break;
-                case "INACTIVE":
-                    statusTextView.setText(statusList.get(1), false);
-                    break;
-                case "OUTOFSTOCK":
-                    statusTextView.setText(statusList.get(2), false);
-
-            }
+        String status = product.status;
+        switch (status) {
+            case "ACTIVE":
+                statusTextView.setText(statusList.get(0), false);
+                break;
+            case "INACTIVE":
+                statusTextView.setText(statusList.get(1), false);
+                break;
+            case "OUTOFSTOCK":
+                statusTextView.setText(statusList.get(2), false);
+                break;
         }
         statusAdapter.notifyDataSetChanged();
     }

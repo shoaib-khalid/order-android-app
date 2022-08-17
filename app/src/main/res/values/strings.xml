@@ -18,7 +18,7 @@
     <string name="tv_shipment_postcode_value">47150</string>
     <string name="tv_shipment_name">Customer Name: \u0020</string>
     <string name="tv_shipment_name_value">Albert</string>
-    <string name="tv_shipment_note">Customer Note: \u0020</string>
+    <string name="tv_shipment_note">Customer Notes: \u0020</string>
     <string name="tv_shipment_note_value">Please Ring the bell</string>
     <string name="header_item">Item</string>
     <string name="header_special_instruction">Special Instructions</string>

@@ -1,5 +1,6 @@
 package com.symplified.order.services;
 
+import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
@@ -16,6 +17,8 @@ import androidx.annotation.Nullable;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
+
+import java.util.List;
 
 
 public class AlertService extends Service {
@@ -53,7 +56,7 @@ public class AlertService extends Service {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
         String storeType = intent.getStringExtra(String.valueOf(R.string.store_type));
-        if (storeType != null && !storeType.equals("FnB")) {
+        if (isAppOnForeground(this) || (storeType != null && !storeType.contains("FnB"))) {
             mediaPlayer.setLooping(false);
             hasRepeatedOnce = false;
             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -118,6 +121,21 @@ public class AlertService extends Service {
             if (device.getType() != AudioDeviceInfo.TYPE_BUILTIN_SPEAKER
                     && device.getType() != AudioDeviceInfo.TYPE_BUILTIN_EARPIECE
                     && device.getType() != AudioDeviceInfo.TYPE_BUILTIN_SPEAKER_SAFE) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isAppOnForeground(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+        if (appProcesses == null) {
+            return false;
+        }
+        final String packageName = context.getPackageName();
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
                 return true;
             }
         }

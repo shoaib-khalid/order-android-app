@@ -171,7 +171,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@+id/ic_address"
-                    android:text="@string/tv_shipment_address_value"/>
+                    android:text="@string/tv_shipment_address_value" />
 
 <!--                <com.google.android.material.button.MaterialButton-->
 <!--                    android:id="@+id/btn_navigate"-->
@@ -237,13 +237,49 @@
 
             </RelativeLayout>
 
+            <View
+                android:id="@+id/divider_card3"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/light_grey"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/rl_contact"
+                />
+
+            <RelativeLayout
+                android:id="@+id/rl_customer_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:padding="10dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/divider_card3">
+
+                <TextView
+                    android:id="@+id/customer_note_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tv_shipment_note"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:id="@+id/customer_note_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/customer_note_label"
+                    android:text="@string/tv_shipment_note_value"
+                    android:textSize="12sp"/>
+
+            </RelativeLayout>
+
             <LinearLayout
                 android:id="@+id/rl_items_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="10dp"
                 android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@+id/rl_contact">
+                app:layout_constraintTop_toBottomOf="@+id/rl_customer_note">
 
                 <TextView
                     android:id="@+id/item_name"
@@ -429,7 +465,7 @@
                 </RelativeLayout>
 
                 <View
-                    android:id="@+id/divider_card3"
+                    android:id="@+id/divider_card5"
                     android:layout_width="match_parent"
                     android:layout_height="2dp"
                     android:layout_below="@+id/rl_delivery_discount"
@@ -440,7 +476,7 @@
                     android:id="@+id/rl_total_charges"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/divider_card3"
+                    android:layout_below="@+id/divider_card5"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -468,7 +504,7 @@
             </RelativeLayout>
 
             <View
-                android:id="@+id/divider_card5"
+                android:id="@+id/divider_card6"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/light_grey"
@@ -482,14 +518,15 @@
                 android:paddingHorizontal="10dp"
                 android:orientation="horizontal"
                 android:showDividers="middle"
-                app:layout_constraintTop_toBottomOf="@id/divider_card5">
+                app:layout_constraintTop_toBottomOf="@id/divider_card6">
 
                 <LinearLayout
                     android:id="@+id/layout_order_type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true">
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/btn_edit_order">
 
                     <TextView
                         android:id="@+id/order_type"
@@ -525,12 +562,34 @@
                     android:textSize="10sp"
                     app:strokeColor="@color/sf_primary" />
 
+
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider_card7"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="10dp"
+                android:background="@color/light_grey"
+                app:layout_constraintTop_toBottomOf="@id/layout_order_type_row" />
+
+            <RelativeLayout
+                android:id="@+id/layout_order_status_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingHorizontal="10dp"
+                android:orientation="horizontal"
+                android:showDividers="middle"
+                app:layout_constraintTop_toBottomOf="@id/divider_card7">
+
                 <LinearLayout
                     android:id="@+id/layout_order_curr_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true">
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/btn_track_order">
 
                     <TextView
                         android:id="@+id/order_curr_status"
@@ -551,63 +610,38 @@
 
                 </LinearLayout>
 
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card6"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="10dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@id/layout_order_type_row" />
-
-            <RelativeLayout
-                android:id="@+id/order_buttons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider_card6">
-
-<!--                <com.google.android.material.button.MaterialButton-->
-<!--                    android:id="@+id/btn_order_details"-->
-<!--                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
-<!--                    android:layout_width="100dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_alignParentLeft="true"-->
-<!--                    android:layout_gravity="left"-->
-<!--                    android:text="@string/order_details"-->
-<!--                    android:textColor="@color/sf_primary"-->
-<!--                    android:textSize="8sp"-->
-<!--                    app:strokeColor="@color/sf_primary" />-->
-
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_track_order"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:minWidth="100dp"
-                    android:textSize="10sp"
                     android:backgroundTint="@color/sf_primary"
+                    android:minWidth="100dp"
+                    android:visibility="gone"
                     android:text="@string/track_order"
-                    android:visibility="gone" />
+                    android:textSize="10sp" />
 
             </RelativeLayout>
+
+            <View
+                android:id="@+id/divider_card8"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="10dp"
+                android:background="@color/light_grey"
+                app:layout_constraintTop_toBottomOf="@id/layout_order_status_row" />
 
             <LinearLayout
                 android:id="@+id/layout_new"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:paddingHorizontal="10dp"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/order_buttons">
+                app:layout_constraintTop_toBottomOf="@id/divider_card8">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_order_cancel"
@@ -636,11 +670,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
+                android:layout_marginTop="10dp"
                 android:paddingHorizontal="10dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/order_buttons">
+                app:layout_constraintTop_toBottomOf="@id/layout_order_status_row">
 
                 <TextView
                     android:id="@+id/update_status"

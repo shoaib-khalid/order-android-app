@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.symplified.order.App;
@@ -119,11 +120,9 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.price.setText(currency+ " " + Double.toString(items.get(position).price));
         holder.qty.setText(Integer.toString(items.get(position).newQuantity));
 
-        if (items.get(position).specialInstruction != null) {
-            if (!items.get(position).specialInstruction.equals("")) {
-                holder.specialInstructions.setVisibility(View.VISIBLE);
-                holder.specialInstructions.setText(items.get(position).specialInstruction);
-            }
+        if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
+            holder.specialInstructions.setVisibility(View.VISIBLE);
+            holder.specialInstructions.setText(items.get(position).specialInstruction);
         }
         getProductImage(items.get(position), BASE_URL, storeId, holder);
 
@@ -185,20 +184,17 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                 if (response.isSuccessful()) {
                     try {
                         Product.SingleProductResponse product = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class);
-                        Bitmap bitmap = new DownloadImageTask().execute(product.data.thumbnailUrl).get();
-                        if (bitmap != null) {
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                            String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                            if (encodedImage != null) {
-                                Utility.decodeAndSetImage(holder.itemImage, encodedImage);
-                            }
-                        }
+                        Glide.with(context).load(product.data.thumbnailUrl).into(holder.itemImage);
+//                        Bitmap bitmap = new DownloadImageTask().execute(product.data.thumbnailUrl).get();
+//                        if (bitmap != null) {
+//                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                            bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+//                            String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+//                            if (encodedImage != null) {
+//                                Utility.decodeAndSetImage(holder.itemImage, encodedImage);
+//                            }
+//                        }
                     } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 } else {

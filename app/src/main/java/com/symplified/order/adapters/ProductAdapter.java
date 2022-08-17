@@ -22,6 +22,7 @@ import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -76,15 +77,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         String status = products.get(position).status;
 
         switch (status) {
+            case "ACTIVE":
+                holder.productStatus.setText("Active");
+                holder.productStatus.setTextColor(ContextCompat.getColor(context, R.color.sf_primary));
+                holder.statusIcon.setColorFilter(ContextCompat.getColor(context, R.color.sf_primary));
+                break;
             case "INACTIVE":
                 holder.productStatus.setText("Inactive");
                 holder.productStatus.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
-                holder.statusIcon.setColorFilter(context.getResources().getColor(R.color.sf_cancel_button));
+                holder.statusIcon.setColorFilter(ContextCompat.getColor(context, R.color.sf_cancel_button));
                 break;
             case "OUTOFSTOCK":
                 holder.productStatus.setText("Out of Stock");
                 holder.productStatus.setTextColor(ContextCompat.getColor(context, R.color.dark_grey));
-                holder.statusIcon.setColorFilter(context.getResources().getColor(R.color.dark_grey));
+                holder.statusIcon.setColorFilter(ContextCompat.getColor(context, R.color.dark_grey));
                 break;
         }
 
@@ -92,24 +98,28 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, EditProductActivity.class);
             intent.putExtra("product", products.get(position));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
 
-        try {
-            Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
-            if (bitmap != null) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                if (encodedImage != null) {
-                    Utility.decodeAndSetImage(holder.productImage, encodedImage);
-                }
-            }
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        if (products.get(position).thumbnailUrl != null)
+            Glide.with(context).load(products.get(position).thumbnailUrl).into(holder.productImage);
+
+//        try {
+//            Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
+//            if (bitmap != null) {
+//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+//                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+//                if (encodedImage != null) {
+//                    Utility.decodeAndSetImage(holder.productImage, encodedImage);
+//                }
+//            }
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override

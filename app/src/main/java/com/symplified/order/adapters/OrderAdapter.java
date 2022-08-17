@@ -89,11 +89,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 deliveryCharges, deliveryDiscount, discount, serviceCharges;
         private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton,  callButton;
         private final CardView cardView;
-        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus;
+        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus, customerNotes;
         private final RecyclerView recyclerView;
-        private final LinearLayout currStatusLayout, newLayout, ongoingLayout;
-        private final RelativeLayout typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount;
-        private final View divider;
+        private final LinearLayout newLayout, ongoingLayout;
+        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote;
+        private final View divider3, divider7, divider8;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -105,6 +105,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             status = (TextView) itemView.findViewById(R.id.order_status_value);
             typeLabel = (TextView) itemView.findViewById(R.id.order_type);
             type = (TextView) itemView.findViewById(R.id.order_type_value);
+            customerNotes = itemView.findViewById(R.id.customer_note_value);
 
             phoneNumber = itemView.findViewById(R.id.contact_value);
             address = itemView.findViewById(R.id.address_value);
@@ -137,11 +138,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             statusLabel = itemView.findViewById(R.id.update_status);
 
             typeLayout = itemView.findViewById(R.id.layout_order_type_row);
-            currStatusLayout = itemView.findViewById(R.id.layout_order_curr_status);
+            currStatusLayout = itemView.findViewById(R.id.layout_order_status_row);
             newLayout = itemView.findViewById(R.id.layout_new);
             ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
+            rlCustomerNote = itemView.findViewById(R.id.rl_customer_note);
 
-            divider = itemView.findViewById(R.id.divider_card6);
+            divider3 = itemView.findViewById(R.id.divider_card3);
+            divider7 = itemView.findViewById(R.id.divider_card7);
+            divider8 = itemView.findViewById(R.id.divider_card8);
         }
     }
 
@@ -164,10 +168,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String BASE_URL = sharedPreferences.getString("base_url", null);
         String currency = sharedPreferences.getString("currency", null);
 
-        if (order.customer != null && order.customer.name != null) {
-            holder.name.setText(order.customer.name);
-        } else
-            holder.name.setText(order.orderShipmentDetail.receiverName);
+        holder.name.setText(order.orderShipmentDetail.receiverName);
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(currency + " " + Double.toString(order.total));
 
@@ -200,6 +201,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.date.setText(order.created);
 
+        if (order.customerNotes != null && !order.customerNotes.equals("")) {
+            holder.rlCustomerNote.setVisibility(View.VISIBLE);
+            holder.divider3.setVisibility(View.VISIBLE);
+            holder.customerNotes.setText(order.customerNotes);
+        }
+
         String orderStatus = order.completionStatus;
         if (section.equals("new")) {
             if (order.isRevised) {
@@ -215,6 +222,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 holder.type.setText("Delivery");
             }
             holder.currStatusLayout.setVisibility(View.GONE);
+            holder.divider8.setVisibility(View.GONE);
 
         } else if (section.equals("ongoing")) {
 
@@ -246,6 +254,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         } else if (section.equals("past")) {
             holder.ongoingLayout.setVisibility(View.VISIBLE);
             holder.typeLayout.setVisibility(View.GONE);
+            holder.currStatusLayout.setVisibility(View.GONE);
             holder.status.setVisibility(View.VISIBLE);
             holder.statusLabel.setVisibility(View.VISIBLE);
             if (orderStatus.equals("DELIVERED_TO_CUSTOMER")) {
@@ -255,7 +264,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 holder.status.setText("Order Cancelled");
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
             }
-            holder.divider.setVisibility(View.GONE);
+            holder.divider7.setVisibility(View.GONE);
+            holder.divider8.setVisibility(View.GONE);
         }
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
