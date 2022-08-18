@@ -3,6 +3,7 @@ package com.symplified.order;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -14,11 +15,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +47,6 @@ import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +74,8 @@ public class LoginActivity extends AppCompatActivity {
     private String BASE_URL;
     private List<Store> stores;
     private TextView welcomeText;
+    private ProgressBar progressBar;
+    private ConstraintLayout mainLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,6 +140,9 @@ public class LoginActivity extends AppCompatActivity {
         header = findViewById(R.id.iv_header);
         btnSwitchToProduction = findViewById(R.id.btn_production);
         welcomeText = findViewById(R.id.welcome);
+
+        progressBar = findViewById(R.id.progress_bar);
+        mainLayout = findViewById(R.id.main_layout);
     }
 
     /**
@@ -188,7 +193,8 @@ public class LoginActivity extends AppCompatActivity {
             password.getEditText().getText().clear();
             email.getEditText().requestFocus();
         } else {
-            progressDialog.show();
+//            progressDialog.show();
+            startLoading();
 
             Retrofit retrofit = new Retrofit.Builder()
                     .client(new OkHttpClient())
@@ -202,14 +208,10 @@ public class LoginActivity extends AppCompatActivity {
                     new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
 
             loginResponse.clone().enqueue(new Callback<LoginResponse>() {
-
-                String loginMessage = "";
-
                 @Override
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful()) {
                         LoginData res = response.body().data;
-                        loginMessage = "Logged In Successfully !";
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         if (!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0) {
                             editor.putString("email", res.session.username);
@@ -224,15 +226,8 @@ public class LoginActivity extends AppCompatActivity {
                             getStoresAndRegister(sharedPreferences);
                         }
                     } else {
-                        Log.e("TAG", "Login response : Not successful : " + response.raw());
-                        progressDialog.dismiss();
-                        loginMessage = "Unsuccessful, Please try again";
-                        email.getEditText().setText("");
-                        password.getEditText().setText("");
-                        email.getEditText().requestFocus();
+                        handleError();
                     }
-
-                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -240,6 +235,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.e("TAG", "onFailure: ", t.getCause());
                     Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
+                    stopLoading();
                 }
 
             });
@@ -286,7 +282,6 @@ public class LoginActivity extends AppCompatActivity {
         for (Store store : stores) {
             FirebaseHelper.initializeFirebase(store.id, context);
         }
-
     }
 
     /**
@@ -320,7 +315,7 @@ public class LoginActivity extends AppCompatActivity {
         String clientId = sharedPreferences.getString("ownerId", null);
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-        progressDialog.show();
+//        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
@@ -332,6 +327,8 @@ public class LoginActivity extends AppCompatActivity {
                     setStoreData(getApplicationContext(), stores, sharedPreferences);
                     downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(), clientId);
                     Log.i("getMYSTORES", "onResponse: " + stores);
+                } else {
+                    handleError();
                 }
             }
 
@@ -423,5 +420,24 @@ public class LoginActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         callInAppUpdate();
+    }
+
+    private void startLoading() {
+        progressBar.setVisibility(View.VISIBLE);
+        mainLayout.setVisibility(View.GONE);
+    }
+
+    private void stopLoading() {
+        progressBar.setVisibility(View.GONE);
+        mainLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void handleError() {
+        progressDialog.dismiss();
+        Toast.makeText(this, R.string.request_failure, Toast.LENGTH_SHORT).show();
+        email.getEditText().setText("");
+        password.getEditText().setText("");
+        stopLoading();
+        email.getEditText().requestFocus();
     }
 }
