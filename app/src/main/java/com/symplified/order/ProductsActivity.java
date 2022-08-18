@@ -1,22 +1,16 @@
 package com.symplified.order;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,13 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.apis.ProductApi;
-import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
-import com.symplified.order.models.product.ProductResponse;
+import com.symplified.order.models.product.ProductListResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,13 +132,13 @@ public class ProductsActivity extends NavbarActivity {
 
         for (String storeId: storeIdList.split(" ")) {
 
-            Call<ProductResponse> responseCall = api.getProducts(headers, storeId);
+            Call<ProductListResponse> responseCall = api.getProducts(headers, storeId);
 
             progressDialog.show();
 
-            responseCall.clone().enqueue(new Callback<ProductResponse>() {
+            responseCall.clone().enqueue(new Callback<ProductListResponse>() {
                 @Override
-                public void onResponse(Call<ProductResponse> call, Response<ProductResponse> response) {
+                public void onResponse(Call<ProductListResponse> call, Response<ProductListResponse> response) {
                     if (response.isSuccessful()) {
                         products.addAll(response.body().data.content);
                         productAdapter.notifyDataSetChanged();
@@ -159,7 +151,7 @@ public class ProductsActivity extends NavbarActivity {
                 }
 
                 @Override
-                public void onFailure(Call<ProductResponse> call, Throwable t) {
+                public void onFailure(Call<ProductListResponse> call, Throwable t) {
                     Log.e(TAG, "onFailure: ", t);
                     Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();

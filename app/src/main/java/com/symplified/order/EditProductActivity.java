@@ -114,7 +114,6 @@ public class EditProductActivity extends NavbarActivity {
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         accesToken = sharedPreferences.getString("accessToken", null);
-        Log.d("edit-product-activity", "Access token: " + sharedPreferences.getString("accessToken", null));
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -331,7 +330,6 @@ public class EditProductActivity extends NavbarActivity {
                         Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
                         startActivity(intent);
                         Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
-
                     } else {
                         Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
                         Log.e("edit-product-activity", "ERROR: " + response.toString());
