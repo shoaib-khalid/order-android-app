@@ -57,7 +57,10 @@ public class EditOrderActivity extends NavbarActivity {
     private String BASE_URL;
     private Dialog progressDialog, dialog;
     private Order order = null;
-    private Button cancel, update, negative, positive;
+    private Button update, negative, positive;
+
+    Map<String, String> headers;
+    OrderApi orderApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,25 +92,24 @@ public class EditOrderActivity extends NavbarActivity {
         if (intent.hasExtra("order")) {
             Bundle data = getIntent().getExtras();
             order = (Order) data.getSerializable("order");
-            Log.e("OrderEDIT:", order.toString());
         }
+
+        headers = new HashMap<>();
+        headers.put("Authorization", "Bearer Bearer accessToken");
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
+                .addConverterFactory(GsonConverterFactory.create()).build();
+        orderApiService = retrofit.create(OrderApi.class);
 
         if (order != null) {
             getOrderItems(order);
         }
-
     }
 
     private void initToolbar(SharedPreferences sharedPreferences) {
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditOrderActivity.super.onBackPressed();
-            }
-        });
+        home.setOnClickListener(view -> EditOrderActivity.super.onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("Edit Order");
@@ -117,29 +119,10 @@ public class EditOrderActivity extends NavbarActivity {
 
         recyclerView = findViewById(R.id.edit_order_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        cancel = findViewById(R.id.cancel_btn);
         update = findViewById(R.id.update_btn);
-
-        cancel.setOnClickListener(view -> {
-            onCancelOrderButtonClick(order);
-        });
-
-        update.setOnClickListener(view -> {
-            adapter.updateOrderItems(order, BASE_URL, progressDialog);
-        });
-
     }
 
     private void getOrderItems(Order order) {
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
-
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
         progressDialog.show();
@@ -148,10 +131,12 @@ public class EditOrderActivity extends NavbarActivity {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
-                    adapter = new EditItemAdapter(response.body().data.content, getApplicationContext(), order);
+                    items = response.body().data.content;
+                    adapter = new EditItemAdapter(items, getApplicationContext(), order);
                     recyclerView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
-                    cancel.setVisibility(View.VISIBLE);
+
+                    update.setOnClickListener(v -> updateOrderItems());
                     update.setVisibility(View.VISIBLE);
                 } else {
                     Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
@@ -170,96 +155,31 @@ public class EditOrderActivity extends NavbarActivity {
         });
     }
 
-    public void onCancelOrderButtonClick(Order order) {
-        //add headers required for api calls
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+    public void updateOrderItems(){
+        Call<ResponseBody> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, items);
+        progressDialog.show();
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
-
-        dialog = new Dialog(this);
-        dialog.setContentView(R.layout.custom_alert_dialog);
-        dialog.setCancelable(false);
-        dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
-            dialog.dismiss();
-            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
-            progressDialog.show();
-            processOrder.clone().enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    progressDialog.dismiss();
-                    if (response.isSuccessful()) {
-                        Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
-                        Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                        startActivity(intent);
-                        finish();
-
-                    } else {
-                        Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
-                    }
+        updateItemsCall.clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                Log.i("updatedItemListTAG", "onResponse: " + call.request());
+                progressDialog.dismiss();
+                if(response.isSuccessful()){
+                    Toast.makeText(getApplicationContext(), "Order Updated Successfully", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "onFailure: ", t);
-                    progressDialog.dismiss();
+                else {
+                    Log.e(TAG, "onResponse: " + response);
+                    Toast.makeText(getApplicationContext(), "Failed to update order. Try again", Toast.LENGTH_SHORT).show();
                 }
-            });
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
+                Log.e("TAG", "onFailure: ", t);
+                progressDialog.dismiss();
+            }
         });
-
-        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
-            dialog.dismiss();
-        });
-
-        dialog.show();
-
-//        Dialog dialog = new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
-//                .setTitle("Cancel Order")
-//                .setMessage("Do you really want to cancel this order ?")
-//                .setNegativeButton("No", null)
-//                .setPositiveButton("Yes", (dialogInterface, i) -> {
-//                    progressDialog.show();
-//                    Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
-//                    progressDialog.show();
-//                    processOrder.clone().enqueue(new Callback<ResponseBody>() {
-//                        @Override
-//                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                            progressDialog.dismiss();
-//                            if (response.isSuccessful()) {
-//                                Toast.makeText(getApplicationContext(), "Order Cancelled", Toast.LENGTH_SHORT).show();
-//                                progressDialog.dismiss();
-//                                Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-//                                startActivity(intent);
-//                                finish();
-//
-//                            } else {
-//                                Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-//                                progressDialog.dismiss();
-//                            }
-//                        }
-//
-//                        @Override
-//                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                            Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-//                            Log.e(TAG, "onFailure: ", t);
-//                            progressDialog.dismiss();
-//                        }
-//                    });
-//                })
-//                .create();
-//        TextView title = dialog.findViewById(android.R.id.title);
-//        TextView message = dialog.findViewById(android.R.id.message);
-//        if (title != null && message != null) {
-//            title.setTypeface(Typeface.DEFAULT_BOLD);
-//            message.setTextSize(14);
-//            message.setTypeface(Typeface.DEFAULT_BOLD);
-//        }
-//        dialog.show();
     }
 }

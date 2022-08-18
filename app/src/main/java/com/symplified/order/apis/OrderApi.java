@@ -1,6 +1,7 @@
 package com.symplified.order.apis;
 
 import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
@@ -68,6 +69,6 @@ public interface OrderApi {
     Call<OrderResponse> getOrderByInvoiceId(@HeaderMap Map<String,String> headers, @Query("invoiceId") String invoiceId);
 
     @PUT("orders/reviseitem/{orderId}")
-    Call<ResponseBody> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
+    Call<ResponseBody> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<Item> bodyOrderItemList);
 
 }

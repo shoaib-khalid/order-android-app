@@ -1,15 +1,9 @@
 package com.symplified.order.adapters;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Typeface;
-import android.net.Uri;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,33 +13,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 import com.symplified.order.App;
-import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
-import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.ProductApi;
-import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.product.Product;
-import com.symplified.order.services.DownloadImageTask;
-import com.symplified.order.utils.Utility;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -64,7 +53,9 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     public Order order;
 
     public String TAG = EditItemAdapter.class.getName();
-    public EditItemAdapter() {};
+
+    public EditItemAdapter() {
+    }
 
     public EditItemAdapter(List<Item> items, Context context, Order order) {
         this.items = items;
@@ -77,6 +68,10 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             items.forEach(item -> {
                 item.newQuantity = item.quantity;
             });
+        } else {
+            for (Item item : items) {
+                item.newQuantity = item.quantity;
+            }
         }
     }
 
@@ -97,6 +92,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             price = itemView.findViewById(R.id.item_price);
             qty = itemView.findViewById(R.id.item_quantity);
             specialInstructions = itemView.findViewById(R.id.item_special_instructions);
+
         }
     }
 
@@ -117,14 +113,17 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         String storeId = sharedPreferences.getString("storeId", null);
 
         holder.name.setText(items.get(position).productName);
-        holder.price.setText(currency+ " " + Double.toString(items.get(position).price));
+        holder.price.setText(currency + " " + Double.toString(items.get(position).price));
         holder.qty.setText(Integer.toString(items.get(position).newQuantity));
 
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
             holder.specialInstructions.setVisibility(View.VISIBLE);
             holder.specialInstructions.setText(items.get(position).specialInstruction);
         }
-        getProductImage(items.get(position), BASE_URL, storeId, holder);
+
+        if (holder.itemImage.getDrawable() == null) {
+            getProductImage(items.get(position), BASE_URL, storeId, holder);
+        }
 
         UpdatedItem updatedItem = new UpdatedItem();
 
@@ -132,13 +131,14 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         updatedItem.itemCode = items.get(position).itemCode;
         updatedItem.quantity = items.get(position).newQuantity;
 
-        if(!updatedItemsList.contains(updatedItem) && items.get(position).newQuantity != items.get(position).quantity){
+        if (!updatedItemsList.contains(updatedItem) && items.get(position).newQuantity != items.get(position).quantity) {
             updatedItemsList.add(updatedItem);
         }
 
         holder.decrement.setOnClickListener(view -> {
             if (items.get(position).newQuantity > 0) {
                 items.get(position).newQuantity--;
+//                notifyItemChanged(position);
                 notifyDataSetChanged();
             }
         });
@@ -146,6 +146,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.increment.setOnClickListener(view -> {
             if (items.get(position).newQuantity < items.get(position).quantity) {
                 items.get(position).newQuantity++;
+//                notifyItemChanged(position);
                 notifyDataSetChanged();
             }
         });
@@ -155,7 +156,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             updatedItemsList.add(updatedItem);
             items.remove(position);
             Toast.makeText(context, "Item Removed", Toast.LENGTH_SHORT).show();
-            notifyDataSetChanged();
+            notifyItemRemoved(position);
         });
     }
 
@@ -165,7 +166,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     }
 
     private void getProductImage(Item item, String BASE_URL, String storeId, ViewHolder holder) {
-
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
@@ -184,16 +184,8 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                 if (response.isSuccessful()) {
                     try {
                         Product.SingleProductResponse product = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class);
-                        Glide.with(context).load(product.data.thumbnailUrl).into(holder.itemImage);
-//                        Bitmap bitmap = new DownloadImageTask().execute(product.data.thumbnailUrl).get();
-//                        if (bitmap != null) {
-//                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                            bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                            String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-//                            if (encodedImage != null) {
-//                                Utility.decodeAndSetImage(holder.itemImage, encodedImage);
-//                            }
-//                        }
+                        Glide.with(context)
+                                .load(product.data.thumbnailUrl).into(holder.itemImage);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -205,49 +197,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Log.e(TAG, "onFailure", t);
-            }
-        });
-    }
-
-    public void updateOrderItems(Order order, String BASE_URL, Dialog progressDialog){
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+ App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
-
-        Log.i("updatedItemListTAG", "updateOrderItems: " + updatedItemsList);
-
-        if(updatedItemsList.size() == 0){
-            Toast.makeText(context, "No changes to update", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Call<ResponseBody> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, updatedItemsList);
-        progressDialog.show();
-
-        updateItemsCall.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.i("updatedItemListTAG", "onResponse: " + call.request().toString());
-                progressDialog.dismiss();
-                if(response.isSuccessful()){
-                    Toast.makeText(context, "Order Updated Successfully", Toast.LENGTH_SHORT).show();
-                    ((Activity) context).finish();
-                }
-                else {
-                    Log.e(TAG, "onResponse: " + response.toString());
-                    Toast.makeText(context, "Failed to update order", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
-                Log.e("TAG", "onFailure: ", t);
-                progressDialog.dismiss();
             }
         });
     }

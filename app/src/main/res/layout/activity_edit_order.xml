@@ -38,18 +38,6 @@
             android:layout_alignParentBottom="true">
 
             <Button
-                android:id="@+id/cancel_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:visibility="gone"
-                android:layout_gravity="left"
-                android:text="@string/cancel_order"
-                android:padding="12dp"
-                android:layout_marginRight="5dp"
-                android:backgroundTint="@color/sf_cancel_button"/>
-
-            <Button
                 android:id="@+id/update_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
