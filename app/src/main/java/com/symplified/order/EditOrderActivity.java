@@ -28,8 +28,10 @@ import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.ActivityEditOrderBinding;
 import com.symplified.order.enums.Status;
+import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
+import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 
 import java.util.HashMap;
@@ -155,27 +157,38 @@ public class EditOrderActivity extends NavbarActivity {
         });
     }
 
-    public void updateOrderItems(){
-        Call<ResponseBody> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, items);
+    public void updateOrderItems() {
+        Log.d("edit-order", order.id);
+        List<UpdatedItem> updatedItems = adapter.getUpdatedItems();
+        Log.d("edit-order", "Updated Items");
+        for (UpdatedItem item : updatedItems) {
+            Log.d("edit-order", item.id + " " + item.quantity);
+        }
+        Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, adapter.getUpdatedItems());
         progressDialog.show();
 
-        updateItemsCall.clone().enqueue(new Callback<ResponseBody>() {
+        updateItemsCall.clone().enqueue(new Callback<HttpResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
                 Log.i("updatedItemListTAG", "onResponse: " + call.request());
                 progressDialog.dismiss();
-                if(response.isSuccessful()){
+                if (response.isSuccessful()) {
                     Toast.makeText(getApplicationContext(), "Order Updated Successfully", Toast.LENGTH_SHORT).show();
                     finish();
-                }
-                else {
+                } else {
                     Log.e(TAG, "onResponse: " + response);
-                    Toast.makeText(getApplicationContext(), "Failed to update order. Try again", Toast.LENGTH_SHORT).show();
+                    try {
+                        Toast.makeText(getApplicationContext(), response.body().message,
+                                Toast.LENGTH_SHORT).show();
+                    } catch (NullPointerException e) {
+                        Toast.makeText(getApplicationContext(),
+                                "Failed to update order. Try again", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<HttpResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
                 Log.e("TAG", "onFailure: ", t);
                 progressDialog.dismiss();

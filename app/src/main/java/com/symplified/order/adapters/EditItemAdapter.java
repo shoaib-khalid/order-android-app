@@ -138,7 +138,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.decrement.setOnClickListener(view -> {
             if (items.get(position).newQuantity > 0) {
                 items.get(position).newQuantity--;
-//                notifyItemChanged(position);
                 notifyDataSetChanged();
             }
         });
@@ -146,7 +145,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.increment.setOnClickListener(view -> {
             if (items.get(position).newQuantity < items.get(position).quantity) {
                 items.get(position).newQuantity++;
-//                notifyItemChanged(position);
                 notifyDataSetChanged();
             }
         });
@@ -199,5 +197,9 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                 Log.e(TAG, "onFailure", t);
             }
         });
+    }
+
+    public List<UpdatedItem> getUpdatedItems() {
+        return updatedItemsList;
     }
 }
