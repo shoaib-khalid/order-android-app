@@ -51,52 +51,10 @@ public class SettingsActivity extends NavbarActivity {
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SettingsActivity.super.onBackPressed();
-//                setResult(4, new Intent().putExtra("finish", 1));
-//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-//                sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//                finish();
-//                finish();
-            }
-        });
+        home.setOnClickListener(view -> SettingsActivity.super.onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
-        title.setText("Choose a Store");
-//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
-//        logout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//                String storeIdList = sharedPreferences.getString("storeIdList", null);
-//                if (storeIdList != null) {
-//                    for (String storeId : storeIdList.split(" ")) {
-//                        FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-//                    }
-//                }
-//                sharedPreferences.edit().clear().apply();
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//                finish();
-//            }
-//        });
-//
-//        ImageView settings = toolbar.findViewById(R.id.app_bar_settings);
-//        settings.setOnClickListener(view -> {
-//            Toast.makeText(this, "Select a store !", Toast.LENGTH_SHORT).show();
-//        });
-//
-//        ImageView products = toolbar.findViewById(R.id.app_bar_products);
-//        products.setOnClickListener(view -> {
-//            Intent intent = new Intent(this, ProductsActivity.class);
-//            startActivity(intent);
-//        });
+        title.setText("Stores");
     }
 
     @Override

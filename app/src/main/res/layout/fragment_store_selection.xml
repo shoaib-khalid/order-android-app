@@ -3,14 +3,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.settings.StoreSelectionFragment">
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/layout_store_progress">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <RelativeLayout
+        android:id="@+id/layout_stores"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:paddingVertical="10dp">
-
+        android:paddingVertical="10dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/choose_store"
@@ -22,25 +39,29 @@
             android:layout_marginBottom="30dp"
             android:text="@string/choose_a_store" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/store_recycler"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/layout_store_refresh"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/choose_store"
-            android:scrollbars="vertical"
+            android:layout_below="@+id/choose_store">
 
-            />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/store_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <TextView
+            android:id="@+id/no_store"
+            style="@style/TextAppearance.MaterialComponents.Headline4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/no_store"
-            android:text="@string/no_store_msg"
             android:layout_centerInParent="true"
-            android:visibility="gone"
+            android:text="@string/no_store_msg"
             android:textAlignment="center"
-            style="@style/TextAppearance.MaterialComponents.Headline4"/>
-
+            android:visibility="gone" />
 
     </RelativeLayout>
 

@@ -9,15 +9,19 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,11 +52,14 @@ public class StoreSelectionFragment extends Fragment {
     private Dialog progressDialog;
     private CircularProgressIndicator progressIndicator;
     private StoreAdapter storeAdapter;
+    private ConstraintLayout progressBarLayout;
+    private RelativeLayout storesLayout;
+    private SwipeRefreshLayout refreshLayout;
     private final String TAG = StoreSelectionFragment.class.getName();
+
     public StoreSelectionFragment() {
         // Required empty public constructor
     }
-
 
     public static StoreSelectionFragment newInstance() {
         StoreSelectionFragment fragment = new StoreSelectionFragment();
@@ -77,14 +84,14 @@ public class StoreSelectionFragment extends Fragment {
             progressIndicator.setIndicatorColor(getContext().getResources().getColor(R.color.sf_b_800, getContext().getTheme()));
         }
 
-        getStores(sharedPreferences);
-
         if (getArguments() != null) {
 
         }
     }
 
     private void getStores(SharedPreferences sharedPreferences) {
+        startLoading();
+
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
@@ -100,7 +107,7 @@ public class StoreSelectionFragment extends Fragment {
         headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-        progressDialog.show();
+//        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
@@ -109,12 +116,14 @@ public class StoreSelectionFragment extends Fragment {
                     storeAdapter = new StoreAdapter(response.body().data.content, getContext(), progressDialog, sharedPreferences);
                     recyclerView.setAdapter(storeAdapter);
                     storeAdapter.notifyDataSetChanged();
+                    stopLoading();
                 }
             }
 
             @Override
             public void onFailure(Call<StoreResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ", t);
+                stopLoading();
             }
         });
     }
@@ -129,6 +138,13 @@ public class StoreSelectionFragment extends Fragment {
         chooseStore = view.findViewById(R.id.choose_store);
         noStore = view.findViewById(R.id.no_store);
 
+        progressBarLayout = view.findViewById(R.id.layout_store_progress);
+        storesLayout = view.findViewById(R.id.layout_stores);
+        refreshLayout = view.findViewById(R.id.layout_store_refresh);
+        refreshLayout.setOnRefreshListener(() -> getStores(sharedPreferences));
+
+        getStores(sharedPreferences);
+
         return view;
     }
 
@@ -142,5 +158,17 @@ public class StoreSelectionFragment extends Fragment {
     public void onResume() {
         super.onResume();
         getStores(sharedPreferences);
+    }
+
+    private void startLoading() {
+        refreshLayout.setRefreshing(true);
+        storesLayout.setVisibility(View.GONE);
+        progressBarLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void stopLoading() {
+        refreshLayout.setRefreshing(false);
+        progressBarLayout.setVisibility(View.GONE);
+        storesLayout.setVisibility(View.VISIBLE);
     }
 }
