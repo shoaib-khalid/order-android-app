@@ -110,4 +110,6 @@
     <string name="edit_product">Edit Product</string>
     <string name="staging_mode">Staging mode</string>
     <string name="production_mode_text">Switch to production</string>
+    <string name="empty_orders_text">No orders to show. Swipe down to refresh.</string>
+    <string name="error_text_pull_to_refresh">An error occurred. Please pull to retry.</string>
 </resources>

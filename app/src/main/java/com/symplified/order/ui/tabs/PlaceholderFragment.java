@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.gson.Gson;
@@ -60,7 +63,6 @@ public class PlaceholderFragment extends Fragment {
     private NewOrdersBinding binding;
     private OrderAdapter orderAdapter;
 
-    private Retrofit retrofit;
     private List<OrderDetailsModel> orders;
 
     private Map<String, String> headers;
@@ -71,7 +73,11 @@ public class PlaceholderFragment extends Fragment {
     private String section;
     private Dialog progressDialog;
     private BroadcastReceiver ordersReceiver;
-    String BASE_URL;
+    private String BASE_URL;
+
+    private ProgressBar progressBar;
+    private SwipeRefreshLayout mainLayout, emptyLayout;
+    private TextView emptyOrdersTextView;
 
     public static PlaceholderFragment newInstance(String type) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -98,14 +104,13 @@ public class PlaceholderFragment extends Fragment {
 
         String clientId = sharedPreferences.getString("ownerId", null);
 
-        if(clientId == null)
+        if(clientId == null) {
             Toast.makeText(getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
-
-        Log.i("CHECKCLIENTID", "onCreate: clientId = " + clientId );
+        }
 
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
-        retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL+App.ORDER_SERVICE_URL)
+        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
 
         orders = new ArrayList<>();
@@ -115,14 +120,12 @@ public class PlaceholderFragment extends Fragment {
 
         orderApiService = retrofit.create(OrderApi.class);
 
-
         section = null;
         if (getArguments() != null) {
             section = getArguments().getString(ARG_SECTION);
         }
 
         pageViewModel.setIndex(0);
-
 
         switch (section){
             case "new" :{
@@ -166,20 +169,18 @@ public class PlaceholderFragment extends Fragment {
         binding = NewOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-
         recyclerView = root.findViewById(R.id.order_recycler);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//
-//        DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
-//                DividerItemDecoration.VERTICAL);
-//        recyclerView.addItemDecoration(mDividerItemDecoration);
-
-        Log.i("TAG", "URL : "+orderResponse.request().url());
 
         updateOrdersEveryFiveMinutes();
 
-//        getOrders();
+        progressBar = binding.ordersProgressBar;
+        emptyOrdersTextView = binding.emptyOrdersTextView;
+
+        mainLayout = binding.fullSwipeRefreshLayout;
+        emptyLayout = binding.emptySwipeRefreshLayout;
+
         return root;
     }
 
@@ -244,7 +245,8 @@ public class PlaceholderFragment extends Fragment {
     }
 
     public void getOrders(){
-        progressDialog.show();
+//        progressDialog.show();
+        startLoading();
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
@@ -255,17 +257,50 @@ public class PlaceholderFragment extends Fragment {
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
-//                    Log.e("TAG",  "Size: "+ orderResponse.data.content.size(),  new Error());
-
+                    showOrders();
+                } else {
+                    showErrorMessage();
                 }
+                stopLoading();
 
             }
 
             @Override
             public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                 progressDialog.dismiss();
+                stopLoading();
+                showErrorMessage();
             }
         });
     }
 
+    public void startLoading() {
+        mainLayout.setRefreshing(true);
+        emptyLayout.setRefreshing(true);
+
+        mainLayout.setVisibility(View.GONE);
+        emptyLayout.setVisibility(View.GONE);
+
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    public void stopLoading() {
+        mainLayout.setRefreshing(false);
+        emptyLayout.setRefreshing(false);
+        progressBar.setVisibility(View.GONE);
+    }
+
+    public void showOrders() {
+        mainLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void showEmptyOrdersMessage() {
+        emptyOrdersTextView.setText(R.string.empty_orders_text);
+        emptyLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void showErrorMessage() {
+        emptyOrdersTextView.setText(R.string.error_text_pull_to_refresh);
+        emptyLayout.setVisibility(View.VISIBLE);
+    }
 }
