@@ -35,6 +35,7 @@ import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.models.OrderDetailsModel;
+import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderResponse;
 import com.symplified.order.services.AlertService;
@@ -181,6 +182,9 @@ public class PlaceholderFragment extends Fragment {
         mainLayout = binding.fullSwipeRefreshLayout;
         emptyLayout = binding.emptySwipeRefreshLayout;
 
+        mainLayout.setOnRefreshListener(this::getOrders);
+        emptyLayout.setOnRefreshListener(this::getOrders);
+
         return root;
     }
 
@@ -250,14 +254,17 @@ public class PlaceholderFragment extends Fragment {
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
-                Log.d("ORDERSS: ", "Testing");
-                if(response.isSuccessful())
-                {
-                    orderAdapter = new OrderAdapter(response.body().data.content, section, getActivity());
+                if(response.isSuccessful()) {
+                    List<Order.OrderDetailsResponse> orders = response.body().data.content;
+                    orderAdapter = new OrderAdapter(orders, section, getActivity());
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
-                    showOrders();
+                    if (orders.size() > 0) {
+                        showOrders();
+                    } else {
+                        showEmptyOrdersMessage();
+                    }
                 } else {
                     showErrorMessage();
                 }

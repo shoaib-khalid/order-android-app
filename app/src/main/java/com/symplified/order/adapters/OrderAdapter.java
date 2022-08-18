@@ -7,18 +7,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,27 +26,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.EditOrderActivity;
-import com.symplified.order.OrderDetailsActivity;
 import com.symplified.order.R;
 import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
-import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.utils.Utility;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,10 +78,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton,  callButton;
         private final CardView cardView;
         private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus, customerNotes;
-        private final RecyclerView recyclerView;
         private final LinearLayout newLayout, ongoingLayout;
         private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote;
         private final View divider3, divider7, divider8;
+
+        private final RecyclerView recyclerView;
+        private final ProgressBar itemsProgressBar;
+        private final TextView itemsErrorTextView;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -147,6 +137,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             divider3 = itemView.findViewById(R.id.divider_card3);
             divider7 = itemView.findViewById(R.id.divider_card7);
             divider8 = itemView.findViewById(R.id.divider_card8);
+
+            itemsProgressBar = itemView.findViewById(R.id.order_items_progress_bar);
+            itemsErrorTextView = itemView.findViewById(R.id.order_items_fail_textview);
+
         }
     }
 
@@ -226,19 +220,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.divider8.setVisibility(View.GONE);
 
         } else if (section.equals("ongoing")) {
-
             if (orderDetails.nextActionText != null) {
                 holder.ongoingLayout.setVisibility(View.VISIBLE);
                 holder.statusLabel.setVisibility(View.VISIBLE);
                 holder.statusLabel.setText("Update Status: ");
-                holder.statusButton.setVisibility(View.VISIBLE);
                 holder.statusButton.setText(orderDetails.nextActionText);
+                holder.statusButton.setVisibility(View.VISIBLE);
             }
+
             if (order.orderShipmentDetail.storePickup) {
                 holder.type.setText("Self-Pickup");
             } else {
                 holder.type.setText("Delivery");
             }
+
             switch (orderStatus) {
                 case "BEING_PREPARED":
                     holder.currStatus.setText("Preparing");
@@ -330,16 +325,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
                 } else {
-                    Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    holder.itemsErrorTextView.setVisibility(View.VISIBLE);
                 }
+                holder.itemsProgressBar.setVisibility(View.GONE);
                 progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
-                Toast.makeText(context, "Failed to retrieve items. " + R.string.no_internet, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onFailureItems: ", t);
                 progressDialog.dismiss();
+                holder.itemsProgressBar.setVisibility(View.GONE);
+                holder.itemsErrorTextView.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -359,6 +356,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         dialog.setCancelable(false);
         dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
             dialog.dismiss();
+
+            int position = holder.getAdapterPosition();
+            Order.OrderDetailsResponse removedOrder = orders.remove(position);
+            notifyItemRemoved(position);
+
             Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
 //                    progressDialog.show();
                     processOrder.clone().enqueue(new Callback<ResponseBody>() {
@@ -367,12 +369,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                             progressDialog.dismiss();
                             if (response.isSuccessful()) {
                                 Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
-                                orders.remove(holder.getAdapterPosition());
-                                notifyDataSetChanged();
-                                progressDialog.dismiss();
                             } else {
                                 Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
-                                progressDialog.dismiss();
+                                reAddOrder(position, removedOrder);
                             }
                         }
 
@@ -381,6 +380,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                             Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                             Log.e(TAG, "onFailure: ", t);
                             progressDialog.dismiss();
+
+                            reAddOrder(position, removedOrder);
                         }
                     });
         });
@@ -405,7 +406,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(orderDetails.order.id, Status.fromString(orderDetails.nextCompletionStatus)), orderDetails.order.id);
 
-//        progressDialog.show();
+        progressDialog.show();
         processOrder.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -447,4 +448,22 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         context.startActivity(intent);
     }
 
+    private void reAddOrder(int position, Order.OrderDetailsResponse removedOrder) {
+        try {
+            orders.add(position, removedOrder);
+            notifyItemInserted(position);
+        } catch (Exception e) {
+            orders.add(removedOrder);
+            notifyItemInserted(orders.size() - 1);
+        }
+    }
+
+    private boolean isOrderNew(Order.OrderDetailsResponse order) {
+        return order.currentCompletionStatus.equals(Status.PAYMENT_CONFIRMED.toString())
+                || order.currentCompletionStatus.equals(Status.RECEIVED_AT_STORE.toString());
+    }
+
+    private boolean isOrderOngoing(Order.OrderDetailsResponse order) {
+        return !isOrderNew(order) && order.nextCompletionStatus != null;
+    }
 }

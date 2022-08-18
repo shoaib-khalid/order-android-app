@@ -111,5 +111,6 @@
     <string name="staging_mode">Staging mode</string>
     <string name="production_mode_text">Switch to production</string>
     <string name="empty_orders_text">No orders to show. Swipe down to refresh.</string>
-    <string name="error_text_pull_to_refresh">An error occurred. Please pull to retry.</string>
+    <string name="error_text_pull_to_refresh">An error occurred. Please swipe down to retry.</string>
+    <string name="order_items_fail_text">Failed to get items. Please swipe down to refresh.</string>
 </resources>
