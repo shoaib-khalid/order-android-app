@@ -18,16 +18,16 @@ import com.symplified.order.models.item.SubItem;
 import java.util.List;
 
 public class SubItemsAdapter extends RecyclerView.Adapter<SubItemsAdapter.ViewHolder> {
-    public List<SubItem> items;
+    public List<String> items;
     public List<String> testItems;
 
-    public void setItems(List<SubItem> items) {
+    public void setItems(List<String> items) {
         this.items = items;
     }
 
 
     public SubItemsAdapter (){}
-    public SubItemsAdapter(List<SubItem> items){
+    public SubItemsAdapter(List<String> items){
         this.items = items;
     }
 
@@ -59,7 +59,7 @@ public class SubItemsAdapter extends RecyclerView.Adapter<SubItemsAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
-        holder.subItemChip.setText(items.get(position).productName);
+        holder.subItemChip.setText(items.get(position));
 
     }
 

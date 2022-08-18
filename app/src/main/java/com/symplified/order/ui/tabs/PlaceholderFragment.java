@@ -175,7 +175,7 @@ public class PlaceholderFragment extends Fragment {
 //                DividerItemDecoration.VERTICAL);
 //        recyclerView.addItemDecoration(mDividerItemDecoration);
 
-        Log.e("TAG", "URL : "+orderResponse.request().url(), new Error() );
+        Log.i("TAG", "URL : "+orderResponse.request().url());
 
         updateOrdersEveryFiveMinutes();
 

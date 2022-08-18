@@ -36,6 +36,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
@@ -422,19 +423,8 @@ public class EditProductActivity extends NavbarActivity {
         if (product.description != null) {
             productDescription.getEditText().setText(Html.fromHtml(product.description));
         }
-        try {
-            Bitmap bitmap = new DownloadImageTask().execute(product.thumbnailUrl).get();
-            if (bitmap != null) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                if (encodedImage != null) {
-                    Utility.decodeAndSetImage(productImage, encodedImage);
-                }
-            }
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+        if (product.thumbnailUrl != null)
+            Glide.with(this).load(product.thumbnailUrl).into(productImage);
     }
 
 //    public String getPath(Uri uri) {

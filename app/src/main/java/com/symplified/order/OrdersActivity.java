@@ -88,7 +88,7 @@ public class OrdersActivity extends NavbarActivity {
         if(mViewPager.getCurrentItem() != 0){
             mViewPager.setCurrentItem(0);
         }else{
-            super.onBackPressed();
+            finishAffinity();
         }
     }
 }

@@ -2,14 +2,17 @@ package com.symplified.order.adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.App;
@@ -22,6 +25,7 @@ import com.symplified.order.models.order.Order;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
@@ -46,7 +50,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView name, qty, price, specialInstructions;
-        private final LinearLayout layoutVariantCombo;
+        private final RelativeLayout subItemLayout;
+        private final RecyclerView subItemsRecyclerView;
 
         public ViewHolder(View view) {
             super(view);
@@ -55,7 +60,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             qty = view.findViewById(R.id.header_qty);
             price = view.findViewById(R.id.header_price);
             specialInstructions = view.findViewById(R.id.header_instruction_value);
-            layoutVariantCombo = view.findViewById(R.id.layout_variant_combo);
+            subItemsRecyclerView = (RecyclerView) view.findViewById(R.id.subItemRecyclerView);
+            subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(), RecyclerView.HORIZONTAL, false));
+            subItemLayout = view.findViewById(R.id.subItems);
         }
     }
 
@@ -74,29 +81,33 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         String currency = sharedPreferences.getString("currency", null);
 
         holder.name.setText(items.get(position).productName);
-        holder.qty.setText(Integer.toString(items.get(position).quantity));
-        holder.price.setText(currency+ " " + Double.toString(items.get(position).price));LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(5, 5, 5, 5);
-        if (items.get(position).productVariant != null) {
-            for (String variant : items.get(position).productVariant.split(",")) {
-                holder.layoutVariantCombo.setVisibility(View.VISIBLE);
-                TextView textView = new TextView(context);
-                textView.setTextSize(10);
-                textView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_corner));
-                textView.setLayoutParams(params);
-                textView.setText(variant);
-                holder.layoutVariantCombo.addView(textView);
+
+        if(items.get(position).orderSubItem != null && items.get(position).orderSubItem.size() > 0){
+
+            List<String> subItems = new ArrayList<>();
+            SubItemsAdapter adapter = new SubItemsAdapter();
+            for (SubItem subItem: items.get(position).orderSubItem) {
+                subItems.add(subItem.productName);
             }
+            adapter.items = subItems;
+            holder.subItemsRecyclerView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+            holder.subItemLayout.setVisibility(View.VISIBLE);
+
         }
-        for (SubItem subItem: items.get(position).orderSubItem) {
-            holder.layoutVariantCombo.setVisibility(View.VISIBLE);
-            TextView textView = new TextView(context);
-            textView.setTextSize(10);
-            textView.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_corner));
-            textView.setLayoutParams(params);
-            textView.setText(subItem.productName);
-            holder.layoutVariantCombo.addView(textView);
+        if (items.get(position).productVariant != null) {
+            List<String> subItems = new ArrayList<>();
+            SubItemsAdapter adapter = new SubItemsAdapter();
+            subItems = Arrays.asList(items.get(position).productVariant.split(","));
+            adapter.items = subItems;
+            holder.subItemsRecyclerView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+            holder.subItemLayout.setVisibility(View.VISIBLE);
         }
+
+        holder.qty.setText(Integer.toString(items.get(position).quantity));
+        holder.price.setText(currency+ " " + String.format("%.2f", items.get(position).price));
+
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
             holder.specialInstructions.setVisibility(View.VISIBLE);
             holder.specialInstructions.setText(items.get(position).specialInstruction);

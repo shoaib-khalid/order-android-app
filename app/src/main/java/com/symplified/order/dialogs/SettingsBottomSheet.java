@@ -147,7 +147,7 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         storeSnoozeCall.clone().enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.e(TAG, "onResponse: "+call.request().toString(), new Error() );
+                Log.i(TAG, "onResponse: "+call.request().toString());
                 if(response.isSuccessful()){
                     if(!isClosed){
                         Log.i(TAG, "onResponse: "+ response.raw());

@@ -108,8 +108,6 @@ public class OrderDetailsActivity extends NavbarActivity {
 
 //        itemAdapter.order = order;
 
-        Log.e(TAG, "onCreateORDERID: " + order.id);
-
         //set Cancel Order buttton click listener
         cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order));
 
@@ -224,7 +222,7 @@ public class OrderDetailsActivity extends NavbarActivity {
                 if (response.isSuccessful()) {
                     try {
                         JSONObject responseJson = new JSONObject(response.body().string().toString());
-                        Log.e(TAG, "onResponse: " + responseJson, new Error());
+                        Log.i(TAG, "onResponse: " + responseJson);
                         new Handler().post(() -> {
                             try {
                                 if (!section.equals("sent")) {
@@ -272,7 +270,7 @@ public class OrderDetailsActivity extends NavbarActivity {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
-                    Log.e("TAG", "onResponse: " + order.id, new Error());
+                    Log.i("TAG", "onResponse: " + order.id);
 //                    editOrder.setVisibility(View.VISIBLE);
                     itemAdapter = new ItemAdapter(response.body().data.content, order, getApplicationContext());
                     recyclerView.setAdapter(itemAdapter);
@@ -354,26 +352,26 @@ public class OrderDetailsActivity extends NavbarActivity {
         address.setText(fullAddress);
         invoice.setText(order.invoiceId);
         date.setText(order.created);
-        orderTotal.setText(currency + " " + Double.toString(order.total));
+        orderTotal.setText(currency + " " + String.format("%.2f", order.total));
 
 
-        subTotal.setText(currency + " " + Double.toString(order.subTotal));
+        subTotal.setText(currency + " " + String.format("%.2f", order.subTotal));
         if (order.appliedDiscount == null || order.appliedDiscount == 0.0) {
             rlDiscount.setVisibility(View.GONE);
         } else {
-            discount.setText("- " + currency + " " + Double.toString(order.appliedDiscount));
+            discount.setText("- " + currency + " " + String.format("%.2f", order.appliedDiscount));
         }
-        deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + Double.toString(order.deliveryCharges) : currency + " " + "0.0");
-        orderTotal2.setText(currency + " " +Double.toString(order.total));
+        deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + String.format("%.2f", order.deliveryCharges) : currency + " " + "0.0");
+        orderTotal2.setText(currency + " " +String.format("%.2f", order.total));
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.0) {
             rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
-            deliveryDiscount.setText("- " + currency + " " + Double.toString(order.deliveryDiscount));
+            deliveryDiscount.setText("- " + currency + " " + String.format("%.2f", order.deliveryDiscount));
         }
         if (order.storeServiceCharges == null || order.storeServiceCharges == 0.0) {
             rlServiceCharges.setVisibility(View.GONE);
         } else {
-            serviceCharges.setText(currency + " " + Double.toString(order.storeServiceCharges));
+            serviceCharges.setText(currency + " " + String.format("%.2f", order.storeServiceCharges));
         }
         callButton.setOnClickListener(view -> {
             Intent callDriver = new Intent(Intent.ACTION_DIAL);

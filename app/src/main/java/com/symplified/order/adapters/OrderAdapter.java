@@ -49,6 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -170,28 +171,28 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
         holder.invoice.setText(order.invoiceId);
-        holder.total.setText(currency + " " + Double.toString(order.total));
+        holder.total.setText(currency + " " + String.format("%.2f", order.total));
 
         holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
         String fullAddress = order.orderShipmentDetail.address+", "+order.orderShipmentDetail.city+", "+order.orderShipmentDetail.state+" "+order.orderShipmentDetail.zipcode;
         holder.address.setText(fullAddress);
-        holder.subTotal.setText(currency + " " + Double.toString(order.subTotal));
+        holder.subTotal.setText(currency + " " + String.format("%.2f", order.subTotal));
         if (order.appliedDiscount == null || order.appliedDiscount == 0.0) {
             holder.rlDiscount.setVisibility(View.GONE);
         } else {
-            holder.discount.setText("- " + currency + " " + Double.toString(order.appliedDiscount));
+            holder.discount.setText("- " + currency + " " + String.format("%.2f", order.appliedDiscount));
         }
-        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + Double.toString(order.deliveryCharges) : currency + " " + "0.0");
-        holder.total2.setText(currency + " " +Double.toString(order.total));
+        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + String.format("%.2f", order.deliveryCharges) : currency + " " + "0.00");
+        holder.total2.setText(currency + " " + String.format("%.2f", order.total));
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.0) {
             holder.rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
-            holder.deliveryDiscount.setText("- " + currency + " " + Double.toString(order.deliveryDiscount));
+            holder.deliveryDiscount.setText("- " + currency + " " + String.format("%.2f", order.deliveryDiscount));
         }
         if (order.storeServiceCharges == null || order.storeServiceCharges == 0.0) {
             holder.rlServiceCharges.setVisibility(View.GONE);
         } else {
-            holder.serviceCharges.setText(currency + " " + Double.toString(order.storeServiceCharges));
+            holder.serviceCharges.setText(currency + " " + String.format("%.2f", order.storeServiceCharges));
         }
         holder.callButton.setOnClickListener(view -> {
             Intent callDriver = new Intent(Intent.ACTION_DIAL);

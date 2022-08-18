@@ -51,20 +51,25 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/layout_variant_combo"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/subItems"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/item_row_non_expanded"
-        android:visibility="gone"
-        android:orientation="horizontal"
-        />
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/subItemRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/header_instruction_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/layout_variant_combo"
+        android:layout_below="@id/subItems"
         android:visibility="gone"
         android:layout_marginTop="10dp"
         android:text="@string/header_special_instruction"

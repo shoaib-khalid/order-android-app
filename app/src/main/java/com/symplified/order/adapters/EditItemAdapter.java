@@ -113,7 +113,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         String storeId = sharedPreferences.getString("storeId", null);
 
         holder.name.setText(items.get(position).productName);
-        holder.price.setText(currency + " " + Double.toString(items.get(position).price));
+        holder.price.setText(currency + " " + String.format("%.2f", items.get(position).price));
         holder.qty.setText(Integer.toString(items.get(position).newQuantity));
 
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
@@ -182,7 +182,8 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                 if (response.isSuccessful()) {
                     try {
                         Product.SingleProductResponse product = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class);
-                        Glide.with(context)
+                        if (product.data.thumbnailUrl != null)
+                            Glide.with(context)
                                 .load(product.data.thumbnailUrl).into(holder.itemImage);
                     } catch (IOException e) {
                         e.printStackTrace();

@@ -175,7 +175,7 @@ public class EditOrderActivity extends NavbarActivity {
                                 Toast.LENGTH_SHORT).show();
                     } catch (NullPointerException e) {
                         Toast.makeText(getApplicationContext(),
-                                "Failed to update order. Try again", Toast.LENGTH_SHORT).show();
+                                R.string.request_failure, Toast.LENGTH_SHORT).show();
                     }
                 }
             }

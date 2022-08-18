@@ -70,7 +70,7 @@ public class LogoHandler implements Runnable{
 
                                             Bitmap bitmap = new DownloadImageTask().execute(asset.logoUrl).get();
                                             if (bitmap != null) {
-                                                Log.e("TAG", "bitmapLogo: " + bitmap, new Error());
+                                                Log.i("TAG", "bitmapLogo: " + bitmap);
                                                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                                                 bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
                                                 String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);

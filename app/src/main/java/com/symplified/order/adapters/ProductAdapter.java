@@ -73,7 +73,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         String currency = sharedPreferences.getString("currency", null);
 
         holder.productName.setText(products.get(position).name);
-        holder.productPrice.setText(currency+" "+Double.toString(products.get(position).productInventories.get(0).price));
+        holder.productPrice.setText(currency+" "+ String.format("%.2f", products.get(position).productInventories.get(0).price));
         String status = products.get(position).status;
 
         switch (status) {

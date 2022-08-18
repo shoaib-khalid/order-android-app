@@ -113,7 +113,7 @@ public class ChooseStoreActivity extends AppCompatActivity {
         Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
-        Log.e("TAG", "onEnterLogoUrl: " + sharedPreferences.getAll(), new Error());
+        Log.i("TAG", "onEnterLogoUrl: " + sharedPreferences.getAll());
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer Bearer accessToken");
 
@@ -138,7 +138,7 @@ public class ChooseStoreActivity extends AppCompatActivity {
                     }
 
                     FirebaseHelper.initializeFirebase(stores.get(0).id, context);
-                    Log.e("TAG", "preferences: " + sharedPreferences.getAll(), new Error());
+                    Log.i("TAG", "preferences: " + sharedPreferences.getAll());
                     startActivity(intent);
                     finish();
 

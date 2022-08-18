@@ -98,4 +98,10 @@ public class SettingsActivity extends NavbarActivity {
 //            startActivity(intent);
 //        });
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(this, OrdersActivity.class);
+        startActivity(intent);
+    }
 }
