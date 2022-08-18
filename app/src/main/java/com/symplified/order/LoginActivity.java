@@ -363,7 +363,9 @@ public class LoginActivity extends AppCompatActivity {
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
             }
+            boolean isStaging = sharedPreferences.getBoolean("isStaging", false);
             sharedPreferences.edit().clear().apply();
+            sharedPreferences.edit().putBoolean("isStaging", isStaging).apply();
         }
 
         super.onStart();

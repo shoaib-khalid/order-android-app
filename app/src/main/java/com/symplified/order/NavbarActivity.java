@@ -164,30 +164,13 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                         FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                     }
                 }
+                boolean isStaging = sharedPreferences.getBoolean("isStaging", false);
                 sharedPreferences.edit().clear().apply();
+                sharedPreferences.edit().putBoolean("isStaging", isStaging).apply();
+
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 finish();
-
-                // This causes app to crash due to incompatibility with AppCompatActivity
-//                Dialog dialog = new MaterialAlertDialogBuilder(getApplicationContext(), R.style.MaterialAlertDialog__Center)
-//                        .setTitle("Logout")
-//                        .setMessage("Are you sure you want to logout?")
-//                        .setNegativeButton("No", null)
-//                        .setPositiveButton("Yes", ((dialogInterface, i) -> {
-//
-//                        }))
-//                        .create();
-//
-//                TextView title = dialog.findViewById(android.R.id.title);
-//                TextView message = dialog.findViewById(android.R.id.message);
-//                if (title != null && message != null) {
-//                    title.setTypeface(Typeface.DEFAULT_BOLD);
-//                    message.setTextSize(14);
-//                    message.setTypeface(Typeface.DEFAULT_BOLD);
-//                }
-//                dialog.show();
-
             }
         });
 
