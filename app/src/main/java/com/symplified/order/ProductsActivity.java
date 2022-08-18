@@ -7,7 +7,9 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,6 +17,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -48,6 +51,8 @@ public class ProductsActivity extends NavbarActivity {
     private ActivityProductsBinding binding;
     private DrawerLayout drawerLayout;
     private TextView addNew;
+    private SwipeRefreshLayout refreshLayout;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceStatus) {
@@ -66,6 +71,8 @@ public class ProductsActivity extends NavbarActivity {
 
         recyclerView = findViewById(R.id.products_recyclerview);
 
+        productAdapter = new ProductAdapter(this, products);
+        recyclerView.setAdapter(productAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
@@ -79,45 +86,27 @@ public class ProductsActivity extends NavbarActivity {
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
 
+        progressBar = findViewById(R.id.product_progress_bar);
+        refreshLayout = findViewById(R.id.layout_products_refresh);
+        refreshLayout.setOnRefreshListener(() -> getProductsList());
+
         getProductsList();
-        setData();
     }
 
     private void initToolbar(SharedPreferences sharedPreferences) {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(view -> {
-            onBackPressed();
-//            Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-//            startActivity(intent);
-//                ProductsActivity.super.onBackPressed();
-//                setResult(4, new Intent().putExtra("finish", 1));
-//                Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-//                FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-//                sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                startActivity(intent);
-//                finish();
-//                finish();
-        });
-
+        home.setOnClickListener(view -> onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("All Products");
-//        addNew = toolbar.findViewById(R.id.add_new_product);
-//        toolbar.findViewById(R.id.add_new_product).setVisibility(View.VISIBLE);
-
-//        addNew.setOnClickListener(view -> {
-//            Intent intent = new Intent(this, EditProductActivity.class);
-//            startActivity(intent);
-//        });
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(2).setChecked(true);
     }
 
     private void getProductsList() {
+        startLoading();
 
         Map<String, String> headers = new HashMap<>();
 
@@ -134,7 +123,7 @@ public class ProductsActivity extends NavbarActivity {
 
             Call<ProductListResponse> responseCall = api.getProducts(headers, storeId);
 
-            progressDialog.show();
+//            progressDialog.show();
 
             responseCall.clone().enqueue(new Callback<ProductListResponse>() {
                 @Override
@@ -144,10 +133,9 @@ public class ProductsActivity extends NavbarActivity {
                         productAdapter.notifyDataSetChanged();
                         progressDialog.dismiss();
                     } else {
-                        Toast.makeText(ProductsActivity.this, "An Error Occurred", Toast.LENGTH_SHORT).show();
-                        progressDialog.dismiss();
-                        finish();
+                        Toast.makeText(ProductsActivity.this, "An Error Occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
                     }
+                    stopLoading();
                 }
 
                 @Override
@@ -155,20 +143,27 @@ public class ProductsActivity extends NavbarActivity {
                     Log.e(TAG, "onFailure: ", t);
                     Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
-                    finish();
+                    stopLoading();
                 }
             });
         }
-    }
-
-    private void setData() {
-        productAdapter = new ProductAdapter(this, products);
-        recyclerView.setAdapter(productAdapter);
     }
 
     @Override
     public void onBackPressed() {
         Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
+    }
+
+    private void startLoading() {
+        refreshLayout.setRefreshing(true);
+        refreshLayout.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void stopLoading() {
+        refreshLayout.setRefreshing(false);
+        progressBar.setVisibility(View.GONE);
+        refreshLayout.setVisibility(View.VISIBLE);
     }
 }
