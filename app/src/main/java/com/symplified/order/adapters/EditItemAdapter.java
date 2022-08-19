@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +80,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
         private final ImageView itemImage, delete, decrement, increment;
         private final TextView name, price, qty, specialInstructions;
+        private final RelativeLayout layoutSpecialInstructions;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -91,7 +93,8 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             name = itemView.findViewById(R.id.item_name);
             price = itemView.findViewById(R.id.item_price);
             qty = itemView.findViewById(R.id.item_quantity);
-            specialInstructions = itemView.findViewById(R.id.item_special_instructions);
+            specialInstructions = itemView.findViewById(R.id.item_special_instructions_value);
+            layoutSpecialInstructions = itemView.findViewById(R.id.rl_special_instructions);
 
         }
     }
@@ -117,7 +120,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.qty.setText(Integer.toString(items.get(position).newQuantity));
 
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
-            holder.specialInstructions.setVisibility(View.VISIBLE);
+            holder.layoutSpecialInstructions.setVisibility(View.VISIBLE);
             holder.specialInstructions.setText(items.get(position).specialInstruction);
         }
 

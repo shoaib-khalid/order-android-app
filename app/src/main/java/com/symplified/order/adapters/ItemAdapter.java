@@ -52,6 +52,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         private final TextView name, qty, price, specialInstructions;
         private final RelativeLayout subItemLayout;
         private final RecyclerView subItemsRecyclerView;
+        private final RelativeLayout layoutSpecialInstructions;
 
         public ViewHolder(View view) {
             super(view);
@@ -61,8 +62,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             price = view.findViewById(R.id.header_price);
             specialInstructions = view.findViewById(R.id.header_instruction_value);
             subItemsRecyclerView = (RecyclerView) view.findViewById(R.id.subItemRecyclerView);
-            subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(), RecyclerView.HORIZONTAL, false));
+            subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(), RecyclerView.VERTICAL, false));
             subItemLayout = view.findViewById(R.id.subItems);
+            layoutSpecialInstructions = view.findViewById(R.id.rl_special_instructions);
         }
     }
 
@@ -109,7 +111,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.price.setText(currency+ " " + String.format("%.2f", items.get(position).price));
 
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
-            holder.specialInstructions.setVisibility(View.VISIBLE);
+            holder.layoutSpecialInstructions.setVisibility(View.VISIBLE);
             holder.specialInstructions.setText(items.get(position).specialInstruction);
         }
 

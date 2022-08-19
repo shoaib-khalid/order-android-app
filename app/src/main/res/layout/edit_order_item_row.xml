@@ -128,19 +128,35 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/item_special_instructions"
+    <RelativeLayout
+        android:id="@+id/rl_special_instructions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:paddingHorizontal="5dp"
-        android:textStyle="italic"
-        android:text="@string/header_special_instruction"
         app:layout_constraintTop_toBottomOf="@+id/rl_edit_order_item"
         app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="10dp"
+        android:paddingHorizontal="5dp"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" >
 
+        <TextView
+            android:id="@+id/item_special_instructions_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="italic|bold"
+            android:textSize="12sp"
+            android:text="@string/header_special_instruction"/>
+
+        <TextView
+            android:id="@+id/item_special_instructions_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="italic"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/item_special_instructions_label"
+            android:text="@string/header_special_instruction"/>
+
+    </RelativeLayout>
 
     <View
         android:id="@+id/divider"
@@ -148,7 +164,7 @@
         android:layout_height="1dp"
         android:layout_marginTop="20dp"
         android:background="@color/light_grey"
-        app:layout_constraintTop_toBottomOf="@id/item_special_instructions"
+        app:layout_constraintTop_toBottomOf="@id/rl_special_instructions"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

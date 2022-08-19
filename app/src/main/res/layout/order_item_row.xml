@@ -65,22 +65,38 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/header_instruction_value"
+    <RelativeLayout
+        android:id="@+id/rl_special_instructions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/subItems"
         android:visibility="gone"
-        android:layout_marginTop="10dp"
-        android:text="@string/header_special_instruction"
-        android:textStyle="italic"
-        android:textSize="10sp"/>
+        android:layout_marginTop="10dp">
+
+        <TextView
+            android:id="@+id/header_instruction_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/header_special_instruction"
+            android:textStyle="italic|bold"
+            android:textSize="10sp"/>
+
+        <TextView
+            android:id="@+id/header_instruction_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/header_special_instruction"
+            android:layout_toRightOf="@id/header_instruction_label"
+            android:textStyle="italic"
+            android:textSize="10sp"/>
+
+    </RelativeLayout>
 
     <View
         android:id="@+id/divider_card"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/header_instruction_value"
+        android:layout_below="@+id/rl_special_instructions"
         android:layout_marginTop="10dp"
         android:background="@color/light_grey" />
 

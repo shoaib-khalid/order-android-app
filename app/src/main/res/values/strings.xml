@@ -21,7 +21,7 @@
     <string name="tv_shipment_note">Customer Notes: \u0020</string>
     <string name="tv_shipment_note_value">Please Ring the bell</string>
     <string name="header_item">Item</string>
-    <string name="header_special_instruction">Special Instructions</string>
+    <string name="header_special_instruction">Special Instructions: \u0020</string>
     <string name="header_variant">Variation</string>
     <string name="header_qty">Quantity</string>
     <string name="header_org_qty">Org Qty</string>
@@ -71,7 +71,7 @@
     <string name="setting_title">Store Settings</string>
     <string name="store_status">Store Status</string>
     <string name="click_here"><u>Click Here</u></string>
-    <string name="cancel_order">Cancel Order</string>
+    <string name="cancel_order">Cancel</string>
     <string name="update_order">Update Order</string>
     <string name="edit_order">Edit Order</string>
     <string name="track_order">Track</string>
