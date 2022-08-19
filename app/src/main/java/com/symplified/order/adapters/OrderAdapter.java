@@ -171,19 +171,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String fullAddress = order.orderShipmentDetail.address+", "+order.orderShipmentDetail.city+", "+order.orderShipmentDetail.state+" "+order.orderShipmentDetail.zipcode;
         holder.address.setText(fullAddress);
         holder.subTotal.setText(currency + " " + String.format("%.2f", order.subTotal));
-        if (order.appliedDiscount == null || order.appliedDiscount == 0.0) {
+        if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
             holder.rlDiscount.setVisibility(View.GONE);
         } else {
             holder.discount.setText("- " + currency + " " + String.format("%.2f", order.appliedDiscount));
         }
         holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + String.format("%.2f", order.deliveryCharges) : currency + " " + "0.00");
         holder.total2.setText(currency + " " + String.format("%.2f", order.total));
-        if (order.deliveryDiscount == null || order.deliveryDiscount == 0.0) {
+        if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
             holder.rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
             holder.deliveryDiscount.setText("- " + currency + " " + String.format("%.2f", order.deliveryDiscount));
         }
-        if (order.storeServiceCharges == null || order.storeServiceCharges == 0.0) {
+        if (order.storeServiceCharges == null || order.storeServiceCharges == 0.00) {
             holder.rlServiceCharges.setVisibility(View.GONE);
         } else {
             holder.serviceCharges.setText(currency + " " + String.format("%.2f", order.storeServiceCharges));
