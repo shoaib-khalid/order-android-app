@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -359,6 +360,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_alert_dialog);
         dialog.setCancelable(false);
+        dialog.findViewById(R.id.btn_positive).setVisibility(View.VISIBLE);
+        dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
         dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
             dialog.dismiss();
 
@@ -447,10 +450,29 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         if (order.isRevised) {
             Toast.makeText(context, "Order already updated.", Toast.LENGTH_SHORT).show();
             return;
+        } else {
+            dialog = new Dialog(context);
+            dialog.setContentView(R.layout.custom_alert_dialog);
+            dialog.setCancelable(false);
+            ImageView imageView = dialog.findViewById(R.id.alert_icon);
+            TextView title = dialog.findViewById(R.id.alert_title);
+            TextView message = dialog.findViewById(R.id.alert_message);
+            dialog.findViewById(R.id.btn_positive).setVisibility(View.VISIBLE);
+            dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
+            title.setText(R.string.edit_order);
+            message.setText(R.string.edit_order_warning);
+            imageView.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_warning_24));
+            dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
+                dialog.dismiss();
+                Intent intent = new Intent(context, EditOrderActivity.class);
+                intent.putExtra("order", order);
+                context.startActivity(intent);
+            });
+            dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
+                dialog.dismiss();
+            });
+            dialog.show();
         }
-        Intent intent = new Intent(context, EditOrderActivity.class);
-        intent.putExtra("order", order);
-        context.startActivity(intent);
     }
 
     private void reAddOrder(int position, Order.OrderDetailsResponse removedOrder) {

@@ -65,8 +65,8 @@ public interface OrderApi {
     @GET("orders/details/{orderId}")
     Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
 
-//    @GET("orders/{orderId}")
-//    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path(value = "orderId", encoded = true) String orderId);
+    @GET("orders/{orderId}")
+    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path(value = "orderId", encoded = true) String orderId);
 
     @GET("orders")
     Call<OrderResponse> getOrderByInvoiceId(@HeaderMap Map<String,String> headers, @Query("invoiceId") String invoiceId);

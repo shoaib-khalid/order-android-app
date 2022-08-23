@@ -211,4 +211,8 @@ public class Order implements Serializable {
     public static class UpdatedOrder extends HttpResponse implements Serializable{
         public Order data;
     }
+
+    public static class OrderByIdResponse extends HttpResponse implements Serializable{
+        public Order data;
+    }
 }

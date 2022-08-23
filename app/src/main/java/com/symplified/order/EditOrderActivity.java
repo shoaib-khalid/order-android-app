@@ -159,35 +159,94 @@ public class EditOrderActivity extends NavbarActivity {
         for (UpdatedItem item : updatedItems) {
             Log.d("edit-order", item.id + " " + item.quantity);
         }
-        Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, adapter.getUpdatedItems());
-        progressDialog.show();
 
-        updateItemsCall.clone().enqueue(new Callback<HttpResponse>() {
-            @Override
-            public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
-                Log.i("updatedItemListTAG", "onResponse: " + call.request());
-                progressDialog.dismiss();
-                if (response.isSuccessful()) {
-                    Toast.makeText(getApplicationContext(), "Order Updated Successfully", Toast.LENGTH_SHORT).show();
-                    finish();
-                } else {
-                    Log.e(TAG, "onResponse: " + response);
-                    try {
-                        Toast.makeText(getApplicationContext(), response.body().message,
-                                Toast.LENGTH_SHORT).show();
-                    } catch (NullPointerException e) {
-                        Toast.makeText(getApplicationContext(),
-                                R.string.request_failure, Toast.LENGTH_SHORT).show();
+        if(adapter.updatedItemsList.size() == 0){
+            Toast.makeText(this, "No changes to update", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_alert_dialog);
+        dialog.setCancelable(false);
+        ImageView imageView = dialog.findViewById(R.id.alert_icon);
+        TextView title = dialog.findViewById(R.id.alert_title);
+        TextView message = dialog.findViewById(R.id.alert_message);
+        dialog.findViewById(R.id.btn_positive).setVisibility(View.VISIBLE);
+        dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
+        title.setText(R.string.update_order);
+        message.setText(R.string.update_order_warning);
+        imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_warning_24));
+
+        dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
+            dialog.dismiss();
+            Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, adapter.getUpdatedItems());
+            progressDialog.show();
+
+            updateItemsCall.clone().enqueue(new Callback<HttpResponse>() {
+                @Override
+                public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
+                    Log.i("updatedItemListTAG", "onResponse: " + call.request());
+                    progressDialog.dismiss();
+                    if (response.isSuccessful()) {
+                        getOrderById(order.id);
+//                        Toast.makeText(getApplicationContext(), "Order Updated Successfully", Toast.LENGTH_SHORT).show();
+//                        finish();
+                    } else {
+                        Log.e(TAG, "onResponse: " + response);
+                        try {
+                            Toast.makeText(getApplicationContext(), response.body().message,
+                                    Toast.LENGTH_SHORT).show();
+                        } catch (NullPointerException e) {
+                            Toast.makeText(getApplicationContext(),
+                                    R.string.request_failure, Toast.LENGTH_SHORT).show();
+                        }
                     }
+                }
+
+                @Override
+                public void onFailure(Call<HttpResponse> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    Log.e("TAG", "onFailure: ", t);
+                    progressDialog.dismiss();
+                }
+            });
+        });
+        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+        dialog.show();
+    }
+
+    public void getOrderById(String id) {
+
+        Call<Order.OrderByIdResponse> orderByIdResponseCall = orderApiService.getOrderById(headers, id);
+
+        orderByIdResponseCall.clone().enqueue(new Callback<Order.OrderByIdResponse>() {
+            @Override
+            public void onResponse(Call<Order.OrderByIdResponse> call, Response<Order.OrderByIdResponse> response) {
+                if (response.isSuccessful()) {
+                    Order order = response.body().data;
+                    dialog = new Dialog(getApplicationContext());
+                    dialog.setContentView(R.layout.custom_alert_dialog);
+                    dialog.setCancelable(false);
+                    ImageView imageView = dialog.findViewById(R.id.alert_icon);
+                    TextView title = dialog.findViewById(R.id.alert_title);
+                    TextView message = dialog.findViewById(R.id.alert_message);
+                    dialog.findViewById(R.id.btn_neutral).setVisibility(View.VISIBLE);
+                    title.setText(R.string.order_updated);
+                    message.setText(R.string.order_updated_message + Double.toString(order.orderRefund.get(0).refundAmount));
+                    imageView.setImageDrawable(getDrawable(R.drawable.ic_success));
+                    dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
+                        finish();
+                    });
+                    dialog.show();
                 }
             }
 
             @Override
-            public void onFailure(Call<HttpResponse> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-                Log.e("TAG", "onFailure: ", t);
-                progressDialog.dismiss();
+            public void onFailure(Call<Order.OrderByIdResponse> call, Throwable t) {
             }
         });
+
     }
 }

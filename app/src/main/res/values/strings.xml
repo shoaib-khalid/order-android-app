@@ -113,4 +113,8 @@
     <string name="empty_orders_text">No orders to show. Swipe down to refresh.</string>
     <string name="error_text_pull_to_refresh">An error occurred. Please swipe down to retry.</string>
     <string name="order_items_fail_text">Failed to get items. Please swipe down to refresh.</string>
+    <string name="edit_order_warning">You are about to change a confirmed order.\u000AYou can only perform this once.\u000AAny extra money will be refunded to customer.</string>
+    <string name="update_order_warning">You have made changes to a confirmed order.\u000AThis action cannot be undone.\u000ADo you want to continue?</string>
+    <string name="order_updated">Order Updated</string>
+    <string name="order_updated_message">The refund will be in place.\u000ARefund Amount:\u0020</string>
 </resources>
