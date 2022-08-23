@@ -27,6 +27,7 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.HashMap;
 import java.util.List;
@@ -90,10 +91,11 @@ public class EditOrderActivity extends NavbarActivity {
         }
 
         headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-        orderApiService = retrofit.create(OrderApi.class);
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create()).build();
+//        orderApiService = retrofit.create(OrderApi.class);
+        orderApiService = ServiceGenerator.createOrderService();
 
         if (order != null) {
             getOrderItems(order);

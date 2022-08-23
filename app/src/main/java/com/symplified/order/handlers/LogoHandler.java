@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.asset.Asset;
+import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.DownloadImageTask;
 
 import java.io.ByteArrayOutputStream;
@@ -33,11 +34,14 @@ public class LogoHandler implements Runnable{
     Context context;
     Handler handler;
     String clientId;
+    StoreApi storeApiService;
+
     public LogoHandler(String[] storeIdList, Context context, Handler handler, String clientId){
         this.stores = storeIdList;
         this.context = context;
         this.handler = handler;
         this.clientId = clientId;
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
     @Override
@@ -45,13 +49,18 @@ public class LogoHandler implements Runnable{
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(sharedPreferences.getString("base_url", App.BASE_URL) + App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+//        Retrofit retrofitLogo = new Retrofit.Builder()
+//                .client(new OkHttpClient())
+//                .baseUrl(sharedPreferences.getString("base_url", App.BASE_URL) + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+//        headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Call<ResponseBody> getAllLogosCall = storeApiSerivice.getAllAssets(headers, clientId);
+
+        Call<ResponseBody> getAllLogosCall = storeApiService.getAllAssets(headers, clientId);
 
         getAllLogosCall.clone().enqueue(new Callback<ResponseBody>() {
             @Override

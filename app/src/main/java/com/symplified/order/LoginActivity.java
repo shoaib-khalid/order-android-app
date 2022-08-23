@@ -1,7 +1,6 @@
 package com.symplified.order;
 
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -12,7 +11,6 @@ import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -46,6 +44,7 @@ import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,30 +76,39 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ConstraintLayout mainLayout;
 
+    private LoginApi loginApiService;
+    private StoreApi storeApiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTheme(R.style.Theme_SymplifiedOrderUpdate);
+        setContentView(R.layout.activity_login);
+        initViews();
+
+        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
 
         callInAppUpdate();
 
         configureRemoteConfig();
 
-        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        setContentView(R.layout.activity_login);
-        initViews();
-
-        login.setOnClickListener(view -> {
-            onLoginButtonClick();
-        });
-
-        btnSwitchToProduction.setOnClickListener(view -> {
-            switchToProductionMode();
-        });
-
         if (sharedPreferences.getBoolean("isStaging", false)) {
             switchToStagingMode();
         }
+
+        loginApiService = ServiceGenerator.createLoginService();
+        storeApiService = ServiceGenerator.createStoreService();
+
+        // TODO: Switch to ServiceGenerator service when server stops returning error with user's access token
+//        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
+//        Retrofit storeRetrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(baseUrl + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        storeApiService = storeRetrofit.create(StoreApi.class);
+
+        login.setOnClickListener(view -> onLoginButtonClick());
+        btnSwitchToProduction.setOnClickListener(view -> switchToProductionMode());
     }
 
     private void switchToProductionMode() {
@@ -121,7 +129,6 @@ public class LoginActivity extends AppCompatActivity {
         welcomeText.setText(R.string.staging_mode);
         btnSwitchToProduction.setVisibility(View.VISIBLE);
     }
-
 
     /**
      * method to initialize all the views in this activity
@@ -167,8 +174,6 @@ public class LoginActivity extends AppCompatActivity {
             BASE_URL = App.BASE_URL;
         }
 
-        Log.i("TAG", "BASE_URL : " + BASE_URL.length());
-
         testUser = mRemoteConfig.getString("test_user");
         testPass = mRemoteConfig.getString("test_pass");
 
@@ -193,16 +198,7 @@ public class LoginActivity extends AppCompatActivity {
             password.getEditText().getText().clear();
             email.getEditText().requestFocus();
         } else {
-//            progressDialog.show();
             startLoading();
-
-            Retrofit retrofit = new Retrofit.Builder()
-                    .client(new OkHttpClient())
-                    .baseUrl(BASE_URL + App.USER_SERVICE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-
-            LoginApi loginApiService = retrofit.create(LoginApi.class);
 
             Call<LoginResponse> loginResponse = loginApiService.login("application/json",
                     new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
@@ -212,21 +208,20 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful()) {
                         LoginData res = response.body().data;
+                        Log.d("interceptor", "Access token received after login: " + res.session.accessToken);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        if (!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0) {
-                            editor.putString("email", res.session.username);
-                            editor.putString("accessToken", res.session.accessToken);
-                            editor.putString("refreshToken", res.session.refreshToken);
-                            editor.putString("ownerId", res.session.ownerId);
-                            editor.putString("expiry", res.session.expiry.toGMTString());
-                            editor.putInt("isLoggedIn", 1);
-                            editor.putInt("versionCode", BuildConfig.VERSION_CODE);
-                            editor.apply();
-                            sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-                            getStoresAndRegister(sharedPreferences);
-                        }
+                        editor.putString("email", res.session.username);
+                        editor.putString("accessToken", res.session.accessToken);
+                        editor.putString("refreshToken", res.session.refreshToken);
+                        editor.putString("ownerId", res.session.ownerId);
+                        editor.putString("expiry", res.session.expiry.toGMTString());
+                        editor.putBoolean("isLoggedIn", true);
+                        editor.putInt("versionCode", BuildConfig.VERSION_CODE);
+                        editor.putString("base_url", BASE_URL);
+                        editor.apply();
+                        getStoresAndRegister(sharedPreferences);
                     } else {
-                        handleError();
+                        handleError(response.raw());
                     }
                 }
 
@@ -249,7 +244,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param items
      * @param sharedPreferences
      */
-    private void setStoreData(Context context, List<Store> items, SharedPreferences sharedPreferences) {
+    private void setStoreDataAndProceed(Context context, List<Store> items, SharedPreferences sharedPreferences) {
 
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         StringBuilder timeZoneList = new StringBuilder();
@@ -308,27 +303,26 @@ public class LoginActivity extends AppCompatActivity {
         Map<String, String> headers = new HashMap<>();
         headers.put("Authorization", "Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        StoreApi storeApiService = retrofit.create(StoreApi.class);
         String clientId = sharedPreferences.getString("ownerId", null);
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
 //        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
+
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
                 if (response.isSuccessful()) {
                     stores = response.body().data.content;
-//                    int storeCount = stores.size();
                     subscribeStores(stores, getApplicationContext());
-                    setStoreData(getApplicationContext(), stores, sharedPreferences);
-                    downloadAndSaveLogos(sharedPreferences.getString("storeIdList", null).split(" "), getApplicationContext(), clientId);
-                    Log.i("getMYSTORES", "onResponse: " + stores);
+                    setStoreDataAndProceed(getApplicationContext(), stores, sharedPreferences);
+
+                    String storeIds = sharedPreferences.getString("storeIdList", null);
+                    if (storeIds != null) {
+                        String[] storeIdList = storeIds.split(" ");
+                        downloadAndSaveLogos(storeIdList, getApplicationContext(), clientId);
+                    }
                 } else {
-                    handleError();
+                    handleError(response.raw());
                 }
             }
 
@@ -350,7 +344,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         callInAppUpdate();
         //check if user session already exists, for persistent login
-        if (sharedPreferences.getInt("isLoggedIn", -1) == 1
+        if (sharedPreferences.getBoolean("isLoggedIn", false)
                 && sharedPreferences.contains("storeIdList")
                 && sharedPreferences.getInt("versionCode", 0) == BuildConfig.VERSION_CODE) {
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
@@ -376,17 +370,18 @@ public class LoginActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed() {
-        if (sharedPreferences.getInt("isLoggedIn", -1) == 1) {
+        if (sharedPreferences.getBoolean("isLoggedIn", false)) {
             this.finishAffinity();
-        } else
+        } else {
             super.onBackPressed();
+        }
     }
 
     public void callInAppUpdate() {
         AppUpdateManager appUpdateManager = AppUpdateManagerFactory.create(this);
-// Returns an intent object that you use to check for an update.
+        // Returns an intent object that you use to check for an update.
         Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
-// Checks that the platform will allow the specified type of update.
+        // Checks that the platform will allow the specified type of update.
         appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
                     && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
@@ -434,12 +429,13 @@ public class LoginActivity extends AppCompatActivity {
         mainLayout.setVisibility(View.VISIBLE);
     }
 
-    private void handleError() {
+    private void handleError(okhttp3.Response rawResponse) {
         progressDialog.dismiss();
         Toast.makeText(this, R.string.request_failure, Toast.LENGTH_SHORT).show();
         email.getEditText().setText("");
         password.getEditText().setText("");
         stopLoading();
         email.getEditText().requestFocus();
+        Log.e("login-activity", rawResponse.toString());
     }
 }

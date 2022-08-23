@@ -36,6 +36,7 @@ import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -59,6 +60,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public Dialog progressDialog, dialog;
     public String nextStatus;
 
+    private OrderApi orderApiService;
+
     public OrderAdapter(List<Order.OrderDetailsResponse> orders, String section, Context context) {
         this.orders = orders;
         this.section = section;
@@ -70,6 +73,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
+
+        orderApiService = ServiceGenerator.createOrderService();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -306,12 +311,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private void getOrderItems(Order order, String BASE_URL, ViewHolder holder) {
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create()).build();
+//
+//        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
@@ -344,12 +349,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public void onCancelOrderButtonClick(Order order, String BASE_URL, ViewHolder holder) {
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create()).build();
+//
+//        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_alert_dialog);
@@ -397,12 +402,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        OrderApi orderApiService = retrofit.create(OrderApi.class);
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create()).build();
+//
+//        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(orderDetails.order.id, Status.fromString(orderDetails.nextCompletionStatus)), orderDetails.order.id);
 

@@ -30,6 +30,7 @@ import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.StoreBroadcastReceiver;
 
 import org.json.JSONException;
@@ -58,6 +59,7 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
     private final String TAG = SettingsBottomSheet.class.getName();
     TimePicker timePicker;
     StoreAdapter storeAdapter;
+    StoreApi storeApiService;
     public SettingsBottomSheet (){
         super();
     }
@@ -73,6 +75,8 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         this.storeId = storeId;
         this.status = status;
         this.storeAdapter = storeAdapter;
+
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
     @Nullable
@@ -129,18 +133,18 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
     private void snoozeStore(int minutes, boolean isClosed) {
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL_STAGING);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(new OkHttpClient())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .build();
-        StoreApi storeApiService = retrofit.create(StoreApi.class);
+//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+//        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL_STAGING);
+//
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .client(new OkHttpClient())
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .build();
+//        StoreApi storeApiService = retrofit.create(StoreApi.class);
 
         Map<String,String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+//        headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<ResponseBody> storeSnoozeCall = storeApiService.updateStoreStatus(headers, storeId, isClosed, minutes);
 

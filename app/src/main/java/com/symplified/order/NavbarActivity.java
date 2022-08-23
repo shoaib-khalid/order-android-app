@@ -36,6 +36,7 @@ import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.DownloadImageTask;
 
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     private String version;
     private NavigationView navigationView;
     private SharedPreferences sharedPreferences;
+    private StoreApi storeApiService;
     public FrameLayout frameLayout;
 
     @Override
@@ -88,6 +90,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
+        storeApiService = ServiceGenerator.createStoreService();
         setUpNavbarData(sharedPreferences, header);
     }
 
@@ -100,16 +103,16 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer accessToken");
+//        headers.put("Authorization", "Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        StoreApi storeApi = retrofit.create(StoreApi.class);
 
-        StoreApi storeApi = retrofit.create(StoreApi.class);
-
-        Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, storeId);
+        Call<ResponseBody> storeResponse = storeApiService.getStoreById(headers, storeId);
 
         storeResponse.enqueue(new Callback<ResponseBody>() {
             @Override

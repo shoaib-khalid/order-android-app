@@ -31,6 +31,7 @@ import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class StoreSelectionFragment extends Fragment {
     private RelativeLayout storesLayout;
     private SwipeRefreshLayout refreshLayout;
     private final String TAG = StoreSelectionFragment.class.getName();
+    private StoreApi storeApiService;
 
     public StoreSelectionFragment() {
         // Required empty public constructor
@@ -83,28 +85,22 @@ public class StoreSelectionFragment extends Fragment {
         {
             progressIndicator.setIndicatorColor(getContext().getResources().getColor(R.color.sf_b_800, getContext().getTheme()));
         }
-
-        if (getArguments() != null) {
-
-        }
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
     private void getStores(SharedPreferences sharedPreferences) {
         startLoading();
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        StoreApi storeApiService = retrofit.create(StoreApi.class);
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create()).build();
+//
+//        StoreApi storeApiService = retrofit.create(StoreApi.class);
         String clientId = sharedPreferences.getString("ownerId", null);
 
-        if (null == clientId) {
-            Log.d("Client-ID", "onCreate: client id is null");
-        }
-        headers.put("Authorization", "Bearer Bearer accessToken");
+//        headers.put("Authorization", "Bearer Bearer accessToken");
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
 //        progressDialog.show();

@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
@@ -37,22 +36,21 @@ import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.models.OrderDetailsModel;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
-import com.symplified.order.models.order.OrderResponse;
+import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -74,7 +72,6 @@ public class PlaceholderFragment extends Fragment {
     private String section;
     private Dialog progressDialog;
     private BroadcastReceiver ordersReceiver;
-    private String BASE_URL;
 
     private ProgressBar progressBar;
     private SwipeRefreshLayout mainLayout, emptyLayout;
@@ -109,17 +106,21 @@ public class PlaceholderFragment extends Fragment {
             Toast.makeText(getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
         }
 
-        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
         orders = new ArrayList<>();
 
         headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", ""));
 
-        orderApiService = retrofit.create(OrderApi.class);
+        // TODO: Switch to ServiceGenerator service when server stops returning error with user's access token
+//        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .client(new OkHttpClient())
+//                .baseUrl(baseUrl + App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        orderApiService = retrofit.create(OrderApi.class);
+        orderApiService = ServiceGenerator.createOrderService();
 
         section = null;
         if (getArguments() != null) {
@@ -132,6 +133,7 @@ public class PlaceholderFragment extends Fragment {
             case "new" :{
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.getNewOrdersByClientId(headers, clientId);
+//                orderResponse = orderApiService.getNewOrdersByClientId(clientId);
                 if(AlertService.isPlaying()){
                     getActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
@@ -267,6 +269,7 @@ public class PlaceholderFragment extends Fragment {
                     }
                 } else {
                     showErrorMessage();
+                    Log.e("order-activity", "onResponse error getting orders: " + response.raw());
                 }
                 stopLoading();
 
@@ -277,6 +280,38 @@ public class PlaceholderFragment extends Fragment {
                 progressDialog.dismiss();
                 stopLoading();
                 showErrorMessage();
+                Log.e("order-activity", "onFailure error getting orders: " + t.getLocalizedMessage());
+            }
+        });
+
+        orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
+            @Override
+            public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+                if(response.isSuccessful()) {
+                    List<Order.OrderDetailsResponse> orders = response.body().data.content;
+                    orderAdapter = new OrderAdapter(orders, section, getActivity());
+                    recyclerView.setAdapter(orderAdapter);
+                    orderAdapter.notifyDataSetChanged();
+                    progressDialog.dismiss();
+                    if (orders.size() > 0) {
+                        showOrders();
+                    } else {
+                        showEmptyOrdersMessage();
+                    }
+                } else {
+                    showErrorMessage();
+                    Log.e("order-activity", "onResponse error getting orders: " + response.raw());
+                }
+                stopLoading();
+
+            }
+
+            @Override
+            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
+                progressDialog.dismiss();
+                stopLoading();
+                showErrorMessage();
+                Log.e("order-activity", "onFailure error getting orders: " + t.getLocalizedMessage());
             }
         });
     }

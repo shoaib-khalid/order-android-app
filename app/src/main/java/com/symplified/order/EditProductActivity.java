@@ -49,6 +49,7 @@ import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.category.Category;
 import com.symplified.order.models.category.CategoryResponse;
 import com.symplified.order.models.product.Product;
+import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.utils.Utility;
 
@@ -102,6 +103,8 @@ public class EditProductActivity extends NavbarActivity {
     private ActivityEditProductBinding binding;
 
     private ActivityResultLauncher<Intent> selectImageActivityResultLauncher;
+
+    private ProductApi productApiService;
 
     @SuppressLint("WrongThread")
     @Override
@@ -182,6 +185,7 @@ public class EditProductActivity extends NavbarActivity {
         });
 
 //        initImageSelector();
+        productApiService = ServiceGenerator.createProductService();
     }
 
     public void initToolbar() {
@@ -223,15 +227,15 @@ public class EditProductActivity extends NavbarActivity {
         }
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer "+ accesToken);
+//        headers.put("Authorization", "Bearer "+ accesToken);
 
-        OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        ProductApi api = retrofit.create(ProductApi.class);
 
-        ProductApi api = retrofit.create(ProductApi.class);
 
 
 //        if (!isEdit) {
@@ -320,7 +324,7 @@ public class EditProductActivity extends NavbarActivity {
 //                if (uri != null) {
 //                    uploadProductImage(uri, api, headers, product);
 //                }
-            Call<ResponseBody> responseCall = api.updateProduct(headers, storeId, product.id, product);
+            Call<ResponseBody> responseCall = productApiService.updateProduct(headers, storeId, product.id, product);
 
             progressDialog.show();
             responseCall.clone().enqueue(new Callback<ResponseBody>() {

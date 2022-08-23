@@ -26,6 +26,7 @@ import com.symplified.order.apis.ProductApi;
 import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +54,7 @@ public class ProductsActivity extends NavbarActivity {
     private TextView addNew;
     private SwipeRefreshLayout refreshLayout;
     private ProgressBar progressBar;
+    private ProductApi productApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceStatus) {
@@ -90,6 +92,8 @@ public class ProductsActivity extends NavbarActivity {
         refreshLayout = findViewById(R.id.layout_products_refresh);
         refreshLayout.setOnRefreshListener(() -> getProductsList());
 
+        productApiService = ServiceGenerator.createProductService();
+
         getProductsList();
     }
 
@@ -109,19 +113,19 @@ public class ProductsActivity extends NavbarActivity {
         startLoading();
 
         Map<String, String> headers = new HashMap<>();
-
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        ProductApi api = retrofit.create(ProductApi.class);
+//
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        ProductApi api = retrofit.create(ProductApi.class);
 
         for (String storeId: storeIdList.split(" ")) {
 
-            Call<ProductListResponse> responseCall = api.getProducts(headers, storeId);
+            Call<ProductListResponse> responseCall = productApiService.getProducts(headers, storeId);
 
 //            progressDialog.show();
 

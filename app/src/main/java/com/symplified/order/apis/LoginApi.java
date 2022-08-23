@@ -24,6 +24,7 @@ public interface LoginApi {
     @POST("authenticate")
     Call<LoginResponse> login(@Header("Content-Type") String contentType, @Body LoginRequest loginRequest);
 
+    @Headers("Content-Type: application/plain")
     @POST("session/refresh")
-    Call<LoginResponse> refreshToken(@Body RequestBody refreshToken);
+    Call<LoginResponse> refreshAccessToken(@Body String refreshToken);
 }

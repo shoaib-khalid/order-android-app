@@ -30,6 +30,7 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.product.Product;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -168,14 +169,16 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
     private void getProductImage(Item item, String BASE_URL, String storeId, ViewHolder holder) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+//        headers.put("Authorization", "Bearer Bearer accessToken");
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        ProductApi productApi = retrofit.create(ProductApi.class);
 
-        ProductApi productApi = retrofit.create(ProductApi.class);
+        ProductApi productApi = ServiceGenerator.createProductService();
 
         Call<ResponseBody> responseBodyCall = productApi.getProductById(headers, storeId, item.productId);
 
@@ -185,9 +188,10 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                 if (response.isSuccessful()) {
                     try {
                         Product.SingleProductResponse product = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class);
-                        if (product.data.thumbnailUrl != null)
+                        if (product.data.thumbnailUrl != null) {
                             Glide.with(context)
-                                .load(product.data.thumbnailUrl).into(holder.itemImage);
+                                    .load(product.data.thumbnailUrl).into(holder.itemImage);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

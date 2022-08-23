@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.Callback;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -34,7 +35,8 @@ public interface OrderApi {
     @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE")
     Call<OrderDetailsResponse> getNewOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
 
-
+    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE")
+    Call<OrderDetailsResponse> getNewOrdersByClientId(@Query("clientId") String clientId);
 
     @GET("orders?receiverName=&phoneNumber=&completionStatus=AWAITING_PICKUP&pageSize=10&")
     Call<ResponseBody> getPickupOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);

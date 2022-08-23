@@ -23,6 +23,7 @@ import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.models.Store.Store;
 import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.asset.Asset;
+import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.DownloadImageTask;
 
 import java.io.ByteArrayOutputStream;
@@ -46,6 +47,8 @@ public class ChooseStoreActivity extends AppCompatActivity {
     private String BASE_URL;
     private Toolbar toolbar;
     private Dialog progressDialog;
+    private Map<String, String> headers;
+    StoreApi storeApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,15 +86,20 @@ public class ChooseStoreActivity extends AppCompatActivity {
 //        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
         Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+        headers = new HashMap<>();
+//        headers.put("Authorization", "Bearer Bearer accessToken");
 //        storeLogo.setBackgroundResource(R.drawable.header);
 
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .client(new OkHttpClient())
+//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        StoreApi storeApiService = retrofit.create(StoreApi.class);
+        storeApiService = ServiceGenerator.createStoreService();
 
-        StoreApi storeApiService = retrofit.create(StoreApi.class);
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", null);
 
@@ -109,15 +117,7 @@ public class ChooseStoreActivity extends AppCompatActivity {
         editor.putString("timezone", stores.get(0).regionCountry.timezone).apply();
         editor.putString("storeId", stores.get(0).id).apply();
 
-        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
-        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
-        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
-
-        Log.i("TAG", "onEnterLogoUrl: " + sharedPreferences.getAll());
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Call<ResponseBody> responseLogo = storeApiSerivice.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
+        Call<ResponseBody> responseLogo = storeApiService.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
         Intent intent = new Intent(context, OrdersActivity.class);
 
         responseLogo.clone().enqueue(new Callback<ResponseBody>() {
@@ -151,7 +151,6 @@ public class ChooseStoreActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 progressDialog.dismiss();
-
             }
         });
 

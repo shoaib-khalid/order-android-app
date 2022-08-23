@@ -25,8 +25,8 @@ import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.Store.StoreResponse;
-import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderResponse;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -37,7 +37,6 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -48,8 +47,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
-    OrderApi orderApi;
+    OrderApi orderApiService;
+    StoreApi storeApiService;
     Pattern pattern;
+    Map<String, String> headers;
 
     @Override
     public void onCreate() {
@@ -58,13 +59,24 @@ public class OrderNotificationService extends FirebaseMessagingService {
         pattern = Pattern.compile("\\#(\\S+?)$");
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(baseUrl + App.ORDER_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        headers = new HashMap<>();
+//        headers.put("Authorization", "Bearer Bearer accessToken");
+//        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
 
-        orderApi = retrofit.create(OrderApi.class);
+//        Retrofit orderRetrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(baseUrl + App.ORDER_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        orderApiService = orderRetrofit.create(OrderApi.class);
+//
+//        Retrofit storeRetrofit = new Retrofit.Builder().client(new OkHttpClient())
+//                .baseUrl(baseUrl + App.PRODUCT_SERVICE_URL)
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//        storeApiService = storeRetrofit.create(StoreApi.class);
+
+        orderApiService = ServiceGenerator.createOrderService();
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
     @Override
@@ -77,7 +89,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         List<String> storeIds = Arrays.asList(storeIdList.split(" "));
         String storeName = remoteMessage.getData().get("storeName");
@@ -101,10 +112,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         Log.d("order-notif", "Order Id is " + invoiceId);
         if (currentStoreId != null && invoiceId != null) {
 
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer Bearer accessToken");
-
-            Call<OrderResponse> orderRequest = orderApi.getOrderByInvoiceId(headers, invoiceId);
+            Call<OrderResponse> orderRequest = orderApiService.getOrderByInvoiceId(headers, invoiceId);
 
             String finalCurrentStoreId = currentStoreId;
             orderRequest.enqueue(new Callback<OrderResponse>() {
@@ -133,14 +141,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                             notificationManager.notify(new Random().nextInt(), notification);
 
-                            Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                                    .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                                    .addConverterFactory(GsonConverterFactory.create())
-                                    .build();
-
-                            StoreApi storeApi = retrofit.create(StoreApi.class);
-
-                            Call<ResponseBody> storeResponse = storeApi.getStoreById(headers, finalCurrentStoreId);
+                            Call<ResponseBody> storeResponse = storeApiService.getStoreById(headers, finalCurrentStoreId);
 
                             storeResponse.clone().enqueue(new Callback<ResponseBody>() {
                                 @Override

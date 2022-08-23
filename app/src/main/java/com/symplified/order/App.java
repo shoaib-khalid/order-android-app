@@ -25,6 +25,9 @@ import java.util.concurrent.Executors;
  */
 public class App extends Application {
 
+    private static Context context;
+    public static final String DEV_TAG = "dev-logging";
+
     public static String BASE_URL = "https://api.symplified.biz/";
     public static String BASE_URL_STAGING = "https://api.symplified.it/";
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
@@ -65,5 +68,11 @@ public class App extends Application {
             notificationManager.createNotificationChannel(channel);
             notificationManager.createNotificationChannel(orders);
         }
+
+        App.context = getApplicationContext();
+    }
+
+    public static Context getAppContext() {
+        return App.context;
     }
 }
