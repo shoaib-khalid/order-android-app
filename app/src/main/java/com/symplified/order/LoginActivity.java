@@ -76,9 +76,6 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ConstraintLayout mainLayout;
 
-    private LoginApi loginApiService;
-    private StoreApi storeApiService;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -95,9 +92,6 @@ public class LoginActivity extends AppCompatActivity {
         if (sharedPreferences.getBoolean("isStaging", false)) {
             switchToStagingMode();
         }
-
-        loginApiService = ServiceGenerator.createLoginService();
-        storeApiService = ServiceGenerator.createStoreService();
 
         // TODO: Switch to ServiceGenerator service when server stops returning error with user's access token
 //        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
@@ -200,6 +194,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             startLoading();
 
+            LoginApi loginApiService = ServiceGenerator.createLoginService();
             Call<LoginResponse> loginResponse = loginApiService.login("application/json",
                     new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
 
@@ -305,6 +300,7 @@ public class LoginActivity extends AppCompatActivity {
 
         String clientId = sharedPreferences.getString("ownerId", null);
 
+        StoreApi storeApiService = ServiceGenerator.createStoreService();
         Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
 //        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
