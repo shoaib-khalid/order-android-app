@@ -24,6 +24,7 @@ import com.symplified.order.models.order.Order;
 
 import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +35,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public Order order;
     public List<UpdatedItem> updatedItemsList;
     public Context context;
+    public DecimalFormat formatter;
     private static String TAG = ItemAdapter.class.getName();
     public void setItems(List<Item> items) {
         this.items = items;
@@ -82,6 +84,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
+        formatter = new DecimalFormat("#,###.00");
         holder.name.setText(items.get(position).productName);
 
         if(items.get(position).orderSubItem != null && items.get(position).orderSubItem.size() > 0){
@@ -108,7 +111,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         }
 
         holder.qty.setText(Integer.toString(items.get(position).quantity));
-        holder.price.setText(currency+ " " + String.format("%.2f", items.get(position).price));
+        holder.price.setText(currency+ " " + formatter.format(items.get(position).price));
 
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
             holder.layoutSpecialInstructions.setVisibility(View.VISIBLE);

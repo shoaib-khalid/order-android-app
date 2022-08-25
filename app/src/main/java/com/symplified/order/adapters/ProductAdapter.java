@@ -35,6 +35,7 @@ import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.utils.Utility;
 
 import java.io.ByteArrayOutputStream;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     private Context context;
     private List<Product> products;
     private static final String TAG = "ProductAdapter";
+    private DecimalFormat formatter;
 
     public ProductAdapter(Context context, List<Product> products) {
         this.context = context;
@@ -72,8 +74,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
+        formatter = new DecimalFormat("#,###.00");
+
         holder.productName.setText(products.get(position).name);
-        holder.productPrice.setText(currency+" "+ String.format("%.2f", products.get(position).productInventories.get(0).price));
+        holder.productPrice.setText(currency+" "+ formatter.format(products.get(position).productInventories.get(0).price));
         String status = products.get(position).status;
 
         switch (status) {

@@ -40,6 +40,7 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public final String TAG = OrderAdapter.class.getName();
     public Dialog progressDialog, dialog;
     public String nextStatus;
+    public DecimalFormat formatter;
 
     private OrderApi orderApiService;
 
@@ -164,6 +166,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         Order.OrderDetailsResponse orderDetails = orders.get(position);
         Order order = orderDetails.order;
 
+        formatter = new DecimalFormat("#,###.00");
+
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         String BASE_URL = sharedPreferences.getString("base_url", null);
@@ -171,28 +175,28 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
         holder.invoice.setText(order.invoiceId);
-        holder.total.setText(currency + " " + String.format("%.2f", order.total));
+        holder.total.setText(currency + " " + formatter.format(order.total));
 
         holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
         String fullAddress = order.orderShipmentDetail.address+", "+order.orderShipmentDetail.city+", "+order.orderShipmentDetail.state+" "+order.orderShipmentDetail.zipcode;
         holder.address.setText(fullAddress);
-        holder.subTotal.setText(currency + " " + String.format("%.2f", order.subTotal));
+        holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
         if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
             holder.rlDiscount.setVisibility(View.GONE);
         } else {
-            holder.discount.setText("- " + currency + " " + String.format("%.2f", order.appliedDiscount));
+            holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
         }
-        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + String.format("%.2f", order.deliveryCharges) : currency + " " + "0.00");
-        holder.total2.setText(currency + " " + String.format("%.2f", order.total));
+        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + formatter.format(order.deliveryCharges) : currency + " " + "0.00");
+        holder.total2.setText(currency + " " + formatter.format(order.total));
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
             holder.rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
-            holder.deliveryDiscount.setText("- " + currency + " " + String.format("%.2f", order.deliveryDiscount));
+            holder.deliveryDiscount.setText("- " + currency + " " + formatter.format(order.deliveryDiscount));
         }
         if (order.storeServiceCharges == null || order.storeServiceCharges == 0.00) {
             holder.rlServiceCharges.setVisibility(View.GONE);
         } else {
-            holder.serviceCharges.setText(currency + " " + String.format("%.2f", order.storeServiceCharges));
+            holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
         }
         holder.callButton.setOnClickListener(view -> {
             Intent callDriver = new Intent(Intent.ACTION_DIAL);
