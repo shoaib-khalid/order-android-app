@@ -17,6 +17,7 @@ import retrofit2.http.Header;
 import retrofit2.http.HeaderMap;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface LoginApi {
@@ -27,4 +28,8 @@ public interface LoginApi {
     @Headers("Content-Type: application/plain")
     @POST("session/refresh")
     Call<LoginResponse> refreshAccessToken(@Body String refreshToken);
+
+    @PUT("{clientId}/pingResponse/{transactionId}")
+    Call<HttpResponse> ping(@Path("clientId") String clientId,
+                            @Path("transactionId") String transactionId);
 }
