@@ -47,12 +47,7 @@ public class CustomInterceptor implements Interceptor {
         Request originalRequest = chain.request();
         Request request = addTokenToRequest(originalRequest, accessToken);
 
-        Log.d(App.DEV_TAG, request.method() + ", URL: " + request.url());
-        Log.d(App.DEV_TAG, "Access token: " + request.header("Authorization"));
-
         Response response = chain.proceed(request);
-
-        Log.d(App.DEV_TAG, "Response code: " + response.code());
 
         if (response.code() == 401 && sharedPrefs.getBoolean("isLoggedIn", false)) {
             try {

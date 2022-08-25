@@ -33,6 +33,7 @@ import com.symplified.order.models.product.Product;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,6 +56,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     public Order order;
 
     public String TAG = EditItemAdapter.class.getName();
+    public DecimalFormat formatter;
 
     public EditItemAdapter() {
     }
@@ -116,8 +118,10 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         String BASE_URL = sharedPreferences.getString("base_url", null);
         String storeId = sharedPreferences.getString("storeId", null);
 
+        formatter = new DecimalFormat("#,###.00");
+
         holder.name.setText(items.get(position).productName);
-        holder.price.setText(currency + " " + String.format("%.2f", items.get(position).price));
+        holder.price.setText(currency + " " + formatter.format(items.get(position).price));
         holder.qty.setText(Integer.toString(items.get(position).newQuantity));
 
         if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {

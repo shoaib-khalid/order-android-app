@@ -92,7 +92,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         List<String> storeIds = Arrays.asList(storeIdList.split(" "));
         String storeName = remoteMessage.getData().get("storeName");
-        Log.d("order-notif", remoteMessage.getData().toString());
+        Log.d("order-notif", "onMessageReceived messageId: " + remoteMessage.getMessageId()
+                + ", messageType: " + remoteMessage.getMessageType());
+        Log.d("order-notif", "onMessageReceived data: " + remoteMessage.getData());
         String currentStoreId = null;
         for (String storeId : storeIds) {
             if (sharedPreferences.getString(storeId + "-name", null).equals(storeName)) {
@@ -119,7 +121,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 @Override
                 public void onResponse(Call<OrderResponse> call, Response<OrderResponse> response) {
                     Log.d("order-notif", "OrderRequest response: " + response);
-                    Log.d("order-notif", "OrderRequest response body: " + response.body().data);
+                    Log.d("order-notif", "OrderRequest response body: " + response.body().data.content);
 
                     if (response.isSuccessful()) {
                         String completionStatus = response.body().data.content.get(0).completionStatus;

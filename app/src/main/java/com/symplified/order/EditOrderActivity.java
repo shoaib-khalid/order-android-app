@@ -29,16 +29,14 @@ import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.networking.ServiceGenerator;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class EditOrderActivity extends NavbarActivity {
 
@@ -51,9 +49,10 @@ public class EditOrderActivity extends NavbarActivity {
     private List<Item> items;
     private EditItemAdapter adapter;
     private String BASE_URL;
-    private Dialog progressDialog, dialog;
+    private Dialog progressDialog;
     private Order order = null;
     private Button update, negative, positive;
+    private DecimalFormat formatter;
 
     Map<String, String> headers;
     OrderApi orderApiService;
@@ -71,6 +70,7 @@ public class EditOrderActivity extends NavbarActivity {
         progressDialog.setCancelable(false);
         CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
+        formatter = new DecimalFormat("#,###.00");
 
         binding = ActivityEditOrderBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -165,7 +165,7 @@ public class EditOrderActivity extends NavbarActivity {
             return;
         }
 
-        dialog = new Dialog(this);
+        Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.custom_alert_dialog);
         dialog.setCancelable(false);
         ImageView imageView = dialog.findViewById(R.id.alert_icon);
@@ -192,6 +192,7 @@ public class EditOrderActivity extends NavbarActivity {
 //                        Toast.makeText(getApplicationContext(), "Order Updated Successfully", Toast.LENGTH_SHORT).show();
 //                        finish();
                     } else {
+                        progressDialog.dismiss();
                         Log.e(TAG, "onResponse: " + response);
                         try {
                             Toast.makeText(getApplicationContext(), response.body().message,
@@ -226,27 +227,48 @@ public class EditOrderActivity extends NavbarActivity {
             public void onResponse(Call<Order.OrderByIdResponse> call, Response<Order.OrderByIdResponse> response) {
                 if (response.isSuccessful()) {
                     Order order = response.body().data;
-                    dialog = new Dialog(getApplicationContext());
-                    dialog.setContentView(R.layout.custom_alert_dialog);
-                    dialog.setCancelable(false);
-                    ImageView imageView = dialog.findViewById(R.id.alert_icon);
-                    TextView title = dialog.findViewById(R.id.alert_title);
-                    TextView message = dialog.findViewById(R.id.alert_message);
-                    dialog.findViewById(R.id.btn_neutral).setVisibility(View.VISIBLE);
-                    title.setText(R.string.order_updated);
-                    message.setText(R.string.order_updated_message + Double.toString(order.orderRefund.get(0).refundAmount));
-                    imageView.setImageDrawable(getDrawable(R.drawable.ic_success));
-                    dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
-                        finish();
-                    });
-                    dialog.show();
+                    progressDialog.dismiss();
+                    showInformationDialog(order);
+                } else {
+                    progressDialog.dismiss();
+                    closeActivityWithSuccessMessage();
                 }
             }
 
             @Override
             public void onFailure(Call<Order.OrderByIdResponse> call, Throwable t) {
+                progressDialog.dismiss();
+                closeActivityWithSuccessMessage();
             }
         });
 
+    }
+
+    public void showInformationDialog(Order order) {
+        if (order != null && order.orderRefund.size() > 0) {
+            Dialog dialog = new Dialog(this);
+            dialog.setContentView(R.layout.custom_alert_dialog);
+            dialog.setCancelable(false);
+            ImageView imageView = dialog.findViewById(R.id.alert_icon);
+            TextView title = dialog.findViewById(R.id.alert_title);
+            TextView message = dialog.findViewById(R.id.alert_message);
+            dialog.findViewById(R.id.btn_neutral).setVisibility(View.VISIBLE);
+            title.setText(R.string.order_updated);
+            String messageText = getResources().getString(R.string.order_updated_message) + formatter.format(order.orderRefund.get(0).refundAmount);
+            message.setText(messageText);
+            imageView.setImageDrawable(getDrawable(R.drawable.ic_success));
+            dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
+                dialog.dismiss();
+                closeActivityWithSuccessMessage();
+            });
+            dialog.show();
+        } else {
+            closeActivityWithSuccessMessage();
+        }
+    }
+
+    private void closeActivityWithSuccessMessage() {
+        Toast.makeText(this, "Order successfully updated", Toast.LENGTH_SHORT).show();
+        finish();
     }
 }

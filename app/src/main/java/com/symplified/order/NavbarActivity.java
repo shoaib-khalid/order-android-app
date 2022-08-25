@@ -181,37 +181,32 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
+                drawerLayout.closeDrawer(GravityCompat.START);
                 int id = item.getItemId();
                 Intent intent;
                 switch (id) {
                     case R.id.nav_orders:
                         if (!item.isChecked()) {
-                            drawerLayout.closeDrawer(GravityCompat.START);
                             intent = new Intent(getApplicationContext(), OrdersActivity.class);
                             startActivity(intent);
                         } else {
                             Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
-                            drawerLayout.closeDrawer(GravityCompat.START);
                         }
                         break;
                     case R.id.nav_products:
                         if (!item.isChecked()) {
-                            drawerLayout.closeDrawer(GravityCompat.START);
                             intent = new Intent(getApplicationContext(), ProductsActivity.class);
                             startActivity(intent);
                         } else {
                             Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
-                            drawerLayout.closeDrawer(GravityCompat.START);
                         }
                         break;
                     case R.id.nav_stores:
                         if (!item.isChecked()) {
-                            drawerLayout.closeDrawer(GravityCompat.START);
                             intent = new Intent(getApplicationContext(), SettingsActivity.class);
                             startActivity(intent);
                         } else {
                             Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
-                            drawerLayout.closeDrawer(GravityCompat.START);
                         }
                         break;
                 }
