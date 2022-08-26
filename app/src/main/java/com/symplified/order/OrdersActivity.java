@@ -1,10 +1,18 @@
 package com.symplified.order;
 
+import static com.symplified.order.App.CHANNEL_ID;
+
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,6 +21,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.NotificationCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
@@ -77,17 +86,17 @@ public class OrdersActivity extends NavbarActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-            if(resultCode == RESULT_OK){
-                this.finishActivity(4);
-                this.finish();
-            }
+        if (resultCode == RESULT_OK) {
+            this.finishActivity(4);
+            this.finish();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        if(mViewPager.getCurrentItem() != 0){
+        if (mViewPager.getCurrentItem() != 0) {
             mViewPager.setCurrentItem(0);
-        }else{
+        } else {
             finishAffinity();
         }
     }
