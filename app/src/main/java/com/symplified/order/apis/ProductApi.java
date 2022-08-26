@@ -1,5 +1,6 @@
 package com.symplified.order.apis;
 
+import com.symplified.order.models.asset.StoreProductAsset;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductEditRequest;
 import com.symplified.order.models.product.ProductListResponse;
@@ -18,6 +19,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Part;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ProductApi {
 
@@ -55,4 +57,8 @@ public interface ProductApi {
     @Multipart
     @PUT("stores/{storeId}/products/{productId}/assets?isThumbnail=true")
     Call<ResponseBody> updateThumbnail(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Part MultipartBody.Part body);
+
+    @GET("stores/{storeId}/products/{productId}/assets")
+    Call<StoreProductAsset.StoreProductAssetListResponse> getStoreProductAssets(
+            @Path("storeId") String storeId, @Path("productId") String productId);
 }

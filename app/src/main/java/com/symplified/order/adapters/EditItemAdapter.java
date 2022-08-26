@@ -2,7 +2,6 @@ package com.symplified.order.adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,38 +13,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
-import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.apis.ProductApi;
+import com.symplified.order.models.asset.StoreProductAsset;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.models.product.Product;
 import com.symplified.order.networking.ServiceGenerator;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHolder> {
 
@@ -130,7 +116,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         }
 
         if (holder.itemImage.getDrawable() == null) {
-            getProductImage(items.get(position), BASE_URL, storeId, holder);
+            getProductImageFromAssets(items.get(position), BASE_URL, storeId, holder);
         }
 
         UpdatedItem updatedItem = new UpdatedItem();
@@ -146,6 +132,8 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.decrement.setOnClickListener(view -> {
             if (items.get(position).newQuantity > 0) {
                 items.get(position).newQuantity--;
+                items.get(position).price
+                        = items.get(position).productPrice * items.get(position).newQuantity;
                 notifyDataSetChanged();
             }
         });
@@ -153,6 +141,8 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.increment.setOnClickListener(view -> {
             if (items.get(position).newQuantity < items.get(position).quantity) {
                 items.get(position).newQuantity++;
+                items.get(position).price
+                        = items.get(position).productPrice * items.get(position).newQuantity;
                 notifyDataSetChanged();
             }
         });
@@ -171,47 +161,50 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         return items.size();
     }
 
-    private void getProductImage(Item item, String BASE_URL, String storeId, ViewHolder holder) {
-        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
+    private void getProductImageFromAssets(Item item, String BASE_URL, String storeId, ViewHolder holder) {
+        Log.d("edit-item", "Item code: " + item.itemCode);
+        Log.d("edit-item", "Item productId: " + item.productId);
+        Log.d("edit-item", "Order storeId: " + order.storeId);
 
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        ProductApi productApi = retrofit.create(ProductApi.class);
-
-        ProductApi productApi = ServiceGenerator.createProductService();
-
-        Call<ResponseBody> responseBodyCall = productApi.getProductById(headers, storeId, item.productId);
-
-        responseBodyCall.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        Product.SingleProductResponse product = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class);
-                        if (product.data.thumbnailUrl != null) {
-                            Glide.with(context)
-                                    .load(product.data.thumbnailUrl).into(holder.itemImage);
+        ProductApi productApiService = ServiceGenerator.createProductService();
+        productApiService.getStoreProductAssets(order.storeId, item.productId)
+                .clone().enqueue(new Callback<StoreProductAsset.StoreProductAssetListResponse>() {
+                    @Override
+                    public void onResponse(Call<StoreProductAsset.StoreProductAssetListResponse> call,
+                                           Response<StoreProductAsset.StoreProductAssetListResponse> response) {
+                        if (response.isSuccessful()) {
+                            boolean foundAsset = false;
+                            List<StoreProductAsset> assets = response.body().data;
+                            for (StoreProductAsset asset : assets) {
+                                if (item.itemCode.equals(asset.itemCode)
+                                        && asset.url != null) {
+                                    loadItemImageFromUrl(asset.url, holder);
+                                    foundAsset = true;
+                                }
+                            }
+                            if (!foundAsset && assets.size() >= 1) {
+                                loadItemImageFromUrl(assets.get(0).url, holder);
+                            }
+                        } else {
+                            Log.e("edit-item", "onResponse Failed to load item image: " + response.code());
+                            Toast.makeText(context, "Failed to load item image", Toast.LENGTH_SHORT).show();
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
-                } else {
-                    Log.e(TAG, "Error Downloading Image");
-                }
-            }
 
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(TAG, "onFailure", t);
-            }
-        });
+                    @Override
+                    public void onFailure(Call<StoreProductAsset.StoreProductAssetListResponse> call, Throwable t) {
+                        Log.e("edit-item", "onFailure Failed to load item image: " + t.getLocalizedMessage());
+                        Toast.makeText(context, "Failed to load item image", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     public List<UpdatedItem> getUpdatedItems() {
         return updatedItemsList;
+    }
+
+    private void loadItemImageFromUrl(String url, ViewHolder holder) {
+        Glide.with(context)
+                .load(url).into(holder.itemImage);
     }
 }

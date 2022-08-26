@@ -18,16 +18,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LogoHandler implements Runnable{
     String[] stores;
@@ -68,7 +64,7 @@ public class LogoHandler implements Runnable{
                 if(response.isSuccessful()){
 
                     try {
-                        Asset.AllAssetResponse assets = new Gson().fromJson(response.body().string(), Asset.AllAssetResponse.class);
+                        Asset.AssetListResponse assets = new Gson().fromJson(response.body().string(), Asset.AssetListResponse.class);
 
                         if (assets.data != null) {
                             new Thread(new Runnable() {
