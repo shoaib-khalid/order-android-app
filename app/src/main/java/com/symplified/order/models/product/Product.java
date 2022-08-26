@@ -180,7 +180,7 @@ public class Product implements Serializable {
                 ", productVariants=" + productVariants.toString() +
                 ", productInventories=" + productInventories.toString() +
                 ", productAssets=" + productAssets.toString() +
-                ", productDeliveryDetail=" + productDeliveryDetail.toString() +
+                (productDeliveryDetail != null ? (", productDeliveryDetail=" + productDeliveryDetail) : "") +
                 '}';
     }
 }

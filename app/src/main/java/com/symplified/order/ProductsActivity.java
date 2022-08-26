@@ -136,6 +136,7 @@ public class ProductsActivity extends NavbarActivity {
                         products.addAll(response.body().data.content);
                         productAdapter.notifyDataSetChanged();
                         progressDialog.dismiss();
+
                     } else {
                         Toast.makeText(ProductsActivity.this, "An Error Occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
                     }

@@ -1,6 +1,7 @@
 package com.symplified.order.apis;
 
 import com.symplified.order.models.product.Product;
+import com.symplified.order.models.product.ProductEditRequest;
 import com.symplified.order.models.product.ProductListResponse;
 
 import java.util.Map;
@@ -37,6 +38,9 @@ public interface ProductApi {
 
     @PUT("stores/{storeId}/products/{productId}")
     Call<ResponseBody> updateProduct(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Body Product product);
+
+    @PUT("stores/{storeId}/products/{productId}")
+    Call<ResponseBody> updateProduct(@Path("storeId") String storeId, @Path("productId") String productId, @Body ProductEditRequest body);
 
     @PUT("stores/{storeId}/products/{productId}/inventory/{inventoryId}")
     Call<ResponseBody> updateProductInventory(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Path("inventoryId") String inventoryId, @Body Product.ProductInventory productInventory);

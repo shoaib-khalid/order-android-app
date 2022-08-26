@@ -49,6 +49,7 @@ import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.category.Category;
 import com.symplified.order.models.category.CategoryResponse;
 import com.symplified.order.models.product.Product;
+import com.symplified.order.models.product.ProductEditRequest;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.DownloadImageTask;
 import com.symplified.order.utils.Utility;
@@ -81,19 +82,13 @@ public class EditProductActivity extends NavbarActivity {
     private Product product = null;
     private TextInputLayout productName, productDescription, statusMenu;
     private ImageView productImage;
-//    private AutoCompleteTextView categoryTextView;
-//    private TextInputLayout categoryMenu;
     private AutoCompleteTextView statusTextView;
     private final int REQ_CODE = 100;
 
-//    private List<Category> categories;
     private String BASE_URL;
     private String storeId;
     private SharedPreferences sharedPreferences;
-//    private List<String> categoryNames;
-//    private ArrayAdapter<String> categoryAdapter;
 
-//    private Uri uri = null;
     private List<String> statusList;
     private String accesToken;
     private ArrayAdapter<String> statusAdapter;
@@ -113,8 +108,6 @@ public class EditProductActivity extends NavbarActivity {
         binding = ActivityEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-//        requestStorageAccessPermission();
-
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         BASE_URL = sharedPreferences.getString("base_url", null);
         accesToken = sharedPreferences.getString("accessToken", null);
@@ -132,35 +125,16 @@ public class EditProductActivity extends NavbarActivity {
 
         initViews();
 
-        Intent intent = getIntent();
-//        if (intent.hasExtra("product")) {
         Bundle data = getIntent().getExtras();
         product = (Product) data.getSerializable("product");
         storeId = product.storeId;
-//        }
 
-//        if (isEdit) {
         getProductDetails();
-//        }
-
-//        categories = new ArrayList<>();
-//        categoryNames = new ArrayList<>();
-//        categoryAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, categoryNames);
-//        categoryTextView.setAdapter(categoryAdapter);
-//        setCategory();
 
         statusList = new ArrayList<>();
         statusAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, statusList);
         statusTextView.setAdapter(statusAdapter);
         setStatus();
-
-//        categoryTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                product.categoryId = categories.get(i).id;
-//            }
-//        });
 
         updateButton.setOnClickListener(view -> {
             updateProduct();
@@ -184,7 +158,6 @@ public class EditProductActivity extends NavbarActivity {
             }
         });
 
-//        initImageSelector();
         productApiService = ServiceGenerator.createProductService();
     }
 
@@ -195,25 +168,19 @@ public class EditProductActivity extends NavbarActivity {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
 
         home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                EditProductActivity.super.onBackPressed();
-                finish();
-            }
+        home.setOnClickListener(view -> {
+            EditProductActivity.super.onBackPressed();
+            finish();
         });
     }
 
     public void initViews() {
-
         updateButton = findViewById(R.id.update_button);
         productImage = findViewById(R.id.product_image);
         productName = findViewById(R.id.product_name);
         productDescription = findViewById(R.id.product_description);
         statusMenu = findViewById(R.id.product_status);
         statusTextView = findViewById(R.id.statusTextView);
-
-
     }
 
 
@@ -227,104 +194,11 @@ public class EditProductActivity extends NavbarActivity {
         }
 
         Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer "+ accesToken);
-
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        ProductApi api = retrofit.create(ProductApi.class);
-
-
-
-//        if (!isEdit) {
-//            Product.ProductInventory inventory = product.new ProductInventory();
-//            inventory.price = Double.parseDouble(productPrice.getEditText().getText().toString());
-//            inventory.quantity = Integer.parseInt(productQuantity.getEditText().getText().toString());
-//            inventory.sku = productSKU.getEditText().getText().toString();
-//            product.name = productName.getEditText().getText().toString();
-//            product.description = productDescription.getEditText().getText().toString();
-//            product.seoName = product.name.toLowerCase(Locale.ROOT).replace("/ /g", "-").replace("/[-]+/g", "-").replace("/[^\b-]+/g", "");
-//            product.seoUrl = "https://" + store.domain + "/product/" + product.seoName;
-//            product.minQuantityForAlarm = -1;
-//            product.packingSize = "S";
-//            product.isPackage = false;
-//            product.storeId = storeId;
-//            product.allowOutOfStockPurchases = ((store.verticalCode.equals("FnB") || store.verticalCode.equals("FnB_PK")) && !product.status.equals("OUTOFSTOCK")) ? true : false;
-//
-//            Call<ResponseBody> responseCall = api.postProduct(headers, storeId, product);
-//
-//            progressDialog.show();
-//            responseCall.clone().enqueue(new Callback<ResponseBody>() {
-//                @Override
-//                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                    if (response.code() == 201) {
-//
-//                        Product temp = null;
-//                        try {
-//                            temp = new Gson().fromJson(response.body().string(), Product.SingleProductResponse.class).data;
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                        inventory.itemCode = temp.id + "aa";
-//
-//                        if (uri != null) {
-//                            uploadProductImage(uri, api, headers, temp);
-//                        }
-//
-//                        Call<ResponseBody> updateInvntoryCall = api.postProductInventory(headers, storeId, temp.id, inventory);
-//
-//                        updateInvntoryCall.clone().enqueue(new Callback<ResponseBody>() {
-//                            @Override
-//                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                                if (response.isSuccessful()) {
-//                                    progressDialog.dismiss();
-//                                    Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
-//                                    startActivity(intent);
-//                                    Toast.makeText(getApplicationContext(), "Product Added Successfully", Toast.LENGTH_SHORT).show();
-//                                } else {
-//                                    progressDialog.dismiss();
-//                                    Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
-//                                    logError("Unsuccessful when creating product Inventory: " + response.code() + ", " + response.message());
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                                Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
-//                                progressDialog.dismiss();
-//                                logError("onFailure when creating product Inventory: " + t.getLocalizedMessage());
-//                                t.printStackTrace();
-//                            }
-//                        });
-//                    } else {
-//                        Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
-//                        progressDialog.dismiss();
-//                        logError("Unsuccessful when creating product: " + response.code() + ", " + response.message());
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                    Toast.makeText(getApplicationContext(), "Failed to Add Product", Toast.LENGTH_SHORT).show();
-//                    progressDialog.dismiss();
-//                    logError("onFailure when adding product: " + t.getLocalizedMessage());
-//                    t.printStackTrace();
-//                }
-//            });
-//        } else {
         try {
             product.name = productName.getEditText().getText().toString();
 
-            SpannableStringBuilder spannableString = (SpannableStringBuilder) productDescription.getEditText().getText();
-
-            product.description = Html.toHtml(spannableString);
-
-//                if (uri != null) {
-//                    uploadProductImage(uri, api, headers, product);
-//                }
-            Call<ResponseBody> responseCall = productApiService.updateProduct(headers, storeId, product.id, product);
+            ProductEditRequest requestBody = new ProductEditRequest(product);
+            Call<ResponseBody> responseCall = productApiService.updateProduct(storeId, product.id, requestBody);
 
             progressDialog.show();
             responseCall.clone().enqueue(new Callback<ResponseBody>() {
@@ -355,52 +229,7 @@ public class EditProductActivity extends NavbarActivity {
     }
 
 
-//    public void setCategory() {
-//        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", "accessToken"));
-//
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        CategoryApi api = retrofit.create(CategoryApi.class);
-//
-//        Call<CategoryResponse> responseCall = api.getCategories(headers, storeId);
-//
-//        progressDialog.show();
-//
-//        responseCall.clone().enqueue(new Callback<CategoryResponse>() {
-//            @Override
-//            public void onResponse(Call<CategoryResponse> call, Response<CategoryResponse> response) {
-//                if (response.isSuccessful()) {
-//                    categories.addAll(response.body().data.content);
-//                    for (Category category : categories) {
-//                        categoryNames.add(category.name);
-//                    }
-//                    if (isEdit) {
-//                        for (int i = 0; i < categories.size(); i++) {
-//                            if (categories.get(i).id.equals(product.categoryId)) {
-//                                categoryTextView.setText(categoryNames.get(i), false);
-//                            }
-//                        }
-//                    }
-//                    categoryAdapter.notifyDataSetChanged();
-//                }
-//                progressDialog.dismiss();
-//            }
-//
-//            @Override
-//            public void onFailure(Call<CategoryResponse> call, Throwable t) {
-//                progressDialog.dismiss();
-//
-//            }
-//        });
-//
-//    }
-
     public void setStatus() {
-
         statusList.add("Active");
         statusList.add("Inactive");
         statusList.add("Out of Stock");
@@ -427,53 +256,9 @@ public class EditProductActivity extends NavbarActivity {
         if (product.description != null) {
             productDescription.getEditText().setText(Html.fromHtml(product.description));
         }
-        if (product.thumbnailUrl != null)
+        if (product.thumbnailUrl != null) {
             Glide.with(this).load(product.thumbnailUrl).into(productImage);
-    }
-
-//    public String getPath(Uri uri) {
-//        String[] proj = {MediaStore.Images.Media.DATA};
-//        Cursor returnCursor =
-//                getContentResolver().query(uri, proj, null, null, null);
-//        returnCursor.moveToFirst();
-//        int nameIndex = returnCursor.getColumnIndex(MediaStore.Images.Media.DATA);
-//        String result = returnCursor.getString(nameIndex);
-//        returnCursor.close();
-//        return result;
-//    }
-
-//    private void requestStorageAccessPermission() {
-//        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-//    }
-
-//    private void uploadProductImage(Uri imageUri, ProductApi api, Map<String, String> headers, Product prod) {
-//        File file = new File(getPath(imageUri));
-//        RequestBody requestFile =
-//                RequestBody.create(file, MediaType.parse("multipart/form-data"));
-//        MultipartBody.Part body =
-//                MultipartBody.Part.createFormData("file", file.getName(), requestFile);
-//        Call<ResponseBody> updateThumbnailCall = api.updateThumbnail(headers, storeId, prod.id, body);
-//        updateThumbnailCall.enqueue(new Callback<ResponseBody>() {
-//            @Override
-//            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                if (response.isSuccessful()) {
-//                    Toast.makeText(getApplicationContext(), "Product Image Uploaded Successfully", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    Log.e("edit-product-activity", "Error while uploading photo: " + response);
-//                    Toast.makeText(getApplicationContext(), "Error while uploading photo. " + response.message(), Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResponseBody> call, Throwable t) {
-//                Log.e("edit-product-activity", "onFailure while uploading Photo: " + t.getLocalizedMessage());
-//                t.printStackTrace();
-//            }
-//        });
-//    }
-
-    private void logError(String errorMessage) {
-        Log.e("edit-product-activity", errorMessage);
+        }
     }
 }
 

@@ -50,19 +50,6 @@
                 </androidx.cardview.widget.CardView>
 
 
-                <!--    <ScrollView-->
-                <!--        android:id="@+id/details_activity_scroll_view"-->
-                <!--        app:layout_constraintLeft_toLeftOf="parent"-->
-                <!--        app:layout_constraintRight_toRightOf="parent"-->
-                <!--        app:layout_constraintTop_toBottomOf="@+id/toolbar"-->
-                <!--        android:layout_width="match_parent"-->
-                <!--        android:layout_height="wrap_content">-->
-
-                <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-                <!--            android:layout_width="match_parent"-->
-                <!--            android:layout_height="match_parent">-->
-
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/product_name"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -85,98 +72,6 @@
                         android:maxLines="1" />
 
                 </com.google.android.material.textfield.TextInputLayout>
-
-
-                <!--                <com.google.android.material.textfield.TextInputLayout-->
-                <!--                    android:id="@+id/product_price"-->
-                <!--                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-                <!--                    android:layout_width="0dp"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:hint="Price*"-->
-                <!--                    android:paddingVertical="5dp"-->
-                <!--                    app:boxBackgroundColor="@color/white"-->
-                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
-                <!--                    app:layout_constraintStart_toStartOf="parent"-->
-                <!--                    app:layout_constraintTop_toBottomOf="@+id/product_name"-->
-                <!--                    app:layout_constraintWidth_percent="0.90"-->
-                <!--                    app:startIconTint="@color/sf_500">-->
-
-                <!--                    <com.google.android.material.textfield.TextInputEditText-->
-                <!--                        android:layout_width="match_parent"-->
-                <!--                        android:layout_height="match_parent"-->
-                <!--                        android:ellipsize="end"-->
-                <!--                        android:inputType="numberDecimal"-->
-                <!--                        android:maxLines="1" />-->
-
-                <!--                </com.google.android.material.textfield.TextInputLayout>-->
-
-
-                <!--                <com.google.android.material.textfield.TextInputLayout-->
-                <!--                    android:id="@+id/product_sku"-->
-                <!--                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-                <!--                    android:layout_width="0dp"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:hint="SKU*"-->
-                <!--                    android:paddingVertical="5dp"-->
-                <!--                    app:boxBackgroundColor="@color/white"-->
-                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
-                <!--                    app:layout_constraintStart_toStartOf="parent"-->
-                <!--                    app:layout_constraintTop_toBottomOf="@+id/product_price"-->
-                <!--                    app:layout_constraintWidth_percent="0.90"-->
-                <!--                    app:startIconTint="@color/sf_500">-->
-
-                <!--                    <com.google.android.material.textfield.TextInputEditText-->
-                <!--                        android:layout_width="match_parent"-->
-                <!--                        android:layout_height="match_parent"-->
-                <!--                        android:ellipsize="end"-->
-                <!--                        android:inputType="text"-->
-                <!--                        android:maxLines="1" />-->
-
-                <!--                </com.google.android.material.textfield.TextInputLayout>-->
-
-
-                <!--                <com.google.android.material.textfield.TextInputLayout-->
-                <!--                    android:id="@+id/product_quantity"-->
-                <!--                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-                <!--                    android:layout_width="0dp"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:hint="Quantity*"-->
-                <!--                    android:paddingVertical="5dp"-->
-                <!--                    app:boxBackgroundColor="@color/white"-->
-                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
-                <!--                    app:layout_constraintStart_toStartOf="parent"-->
-                <!--                    app:layout_constraintTop_toBottomOf="@+id/product_sku"-->
-                <!--                    app:layout_constraintWidth_percent="0.90"-->
-                <!--                    app:startIconTint="@color/sf_500">-->
-
-                <!--                    <com.google.android.material.textfield.TextInputEditText-->
-                <!--                        android:layout_width="match_parent"-->
-                <!--                        android:layout_height="match_parent"-->
-                <!--                        android:inputType="number"-->
-                <!--                        android:maxLines="1" />-->
-
-                <!--                </com.google.android.material.textfield.TextInputLayout>-->
-
-                <!--                <com.google.android.material.textfield.TextInputLayout-->
-                <!--                    android:id="@+id/product_category"-->
-                <!--                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"-->
-                <!--                    android:layout_width="0dp"-->
-                <!--                    android:layout_height="wrap_content"-->
-                <!--                    android:hint="Category"-->
-                <!--                    android:paddingVertical="5dp"-->
-                <!--                    app:layout_constraintEnd_toEndOf="parent"-->
-                <!--                    app:layout_constraintStart_toStartOf="parent"-->
-                <!--                    app:layout_constraintTop_toBottomOf="@+id/product_description"-->
-                <!--                    app:layout_constraintWidth_percent="0.90"-->
-                <!--                    tools:ignore="MissingConstraints">-->
-
-                <!--                    <AutoCompleteTextView-->
-                <!--                        android:id="@+id/categoryTextView"-->
-                <!--                        android:layout_width="match_parent"-->
-                <!--                        android:layout_height="wrap_content"-->
-                <!--                        android:inputType="none" />-->
-
-                <!--                </com.google.android.material.textfield.TextInputLayout>-->
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/product_status"
@@ -215,9 +110,9 @@
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_height="wrap_content"
                         android:inputType="textMultiLine"
-                        android:maxLines="5" />
+                        android:enabled="false" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 

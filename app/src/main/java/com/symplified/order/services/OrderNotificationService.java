@@ -39,13 +39,10 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
@@ -59,7 +56,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
         pattern = Pattern.compile("\\#(\\S+?)$");
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         headers = new HashMap<>();
     }
 
@@ -217,11 +213,13 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private String parseInvoiceId(String body) {
         Matcher matcher = pattern.matcher(body);
-        try {
-            matcher.find();
-            return matcher.group(0).replace("#", "");
-        } catch (NullPointerException e) {
-            return null;
+        if (matcher.find() && matcher.group(0) != null) {
+            try {
+                return matcher.group(0).replace("#", "");
+            } catch (Exception e) {
+                Log.e(TAG, "Error while parsing invoiceId: " + e.getLocalizedMessage());
+            }
         }
+        return null;
     }
 }

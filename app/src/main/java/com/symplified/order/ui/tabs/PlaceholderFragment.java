@@ -44,12 +44,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -258,6 +255,9 @@ public class PlaceholderFragment extends Fragment {
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                 if(response.isSuccessful()) {
                     List<Order.OrderDetailsResponse> orders = response.body().data.content;
+                    for (Order.OrderDetailsResponse order : orders) {
+                        Log.d("order-activity", "Order id: " + order.order.id + ", Invoice Id: " + order.order.invoiceId);
+                    }
                     orderAdapter = new OrderAdapter(orders, section, getActivity());
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();
@@ -320,10 +320,10 @@ public class PlaceholderFragment extends Fragment {
         mainLayout.setRefreshing(true);
         emptyLayout.setRefreshing(true);
 
-        mainLayout.setVisibility(View.GONE);
-        emptyLayout.setVisibility(View.GONE);
-
-        progressBar.setVisibility(View.VISIBLE);
+//        mainLayout.setVisibility(View.GONE);
+//        emptyLayout.setVisibility(View.GONE);
+//
+//        progressBar.setVisibility(View.VISIBLE);
     }
 
     public void stopLoading() {
@@ -333,16 +333,19 @@ public class PlaceholderFragment extends Fragment {
     }
 
     public void showOrders() {
+        emptyLayout.setVisibility(View.GONE);
         mainLayout.setVisibility(View.VISIBLE);
     }
 
     private void showEmptyOrdersMessage() {
         emptyOrdersTextView.setText(R.string.empty_orders_text);
+        mainLayout.setVisibility(View.GONE);
         emptyLayout.setVisibility(View.VISIBLE);
     }
 
     private void showErrorMessage() {
         emptyOrdersTextView.setText(R.string.error_text_pull_to_refresh);
+        mainLayout.setVisibility(View.GONE);
         emptyLayout.setVisibility(View.VISIBLE);
     }
 }
