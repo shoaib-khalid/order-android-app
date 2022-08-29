@@ -640,8 +640,9 @@
                     android:id="@+id/btn_track_order"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_alignParentEnd="true"
-                    android:backgroundTint="@color/sf_primary"
+                    app:strokeColor="@color/sf_primary"
                     android:minWidth="100dp"
                     android:visibility="gone"
                     android:text="@string/track_order"
@@ -700,7 +701,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/layout_order_status_row">
+                app:layout_constraintTop_toBottomOf="@id/divider_card9">
 
                 <TextView
                     android:id="@+id/update_status"
@@ -736,6 +737,81 @@
                     android:textStyle="bold" />
 
             </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_rider_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@+id/divider_card8">
+
+                <RelativeLayout
+                    android:id="@+id/layout_driver"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/driver_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:minWidth="60dp"
+                        android:textStyle="bold"
+                        android:text="Driver:" />
+
+                    <TextView
+                        android:id="@+id/driver_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@+id/driver_label" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/layout_contact"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/layout_driver"
+                    android:layout_marginTop="5dp">
+
+                    <TextView
+                        android:id="@+id/driver_contact_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="10dp"
+                        android:minWidth="60dp"
+                        android:textStyle="bold"
+                        android:text="Contact:" />
+
+                    <TextView
+                        android:id="@+id/driver_contact_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@+id/driver_contact_label" />
+
+                    <ImageView
+                        android:id="@+id/address_icon_phone"
+                        android:layout_width="21dp"
+                        android:layout_height="21dp"
+                        android:layout_marginLeft="5dp"
+                        android:visibility="gone"
+                        android:layout_toEndOf="@+id/driver_contact_value"
+                        android:src="@drawable/ic_baseline_phone_24" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <View
+                android:id="@+id/divider_card9"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="10dp"
+                android:background="@color/light_grey"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/rl_rider_details" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

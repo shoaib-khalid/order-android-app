@@ -74,7 +74,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
-        formatter = new DecimalFormat("#,###.00");
+        formatter = new DecimalFormat("#,###0.00");
 
         holder.productName.setText(products.get(position).name);
         holder.productPrice.setText(currency+" "+ formatter.format(products.get(position).productInventories.get(0).price));
@@ -106,7 +106,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             context.startActivity(intent);
         });
 
-        if (products.get(position).thumbnailUrl != null)
+//        if (products.get(position).thumbnailUrl != null)
             Glide.with(context).load(products.get(position).thumbnailUrl).into(holder.productImage);
 
 //        try {

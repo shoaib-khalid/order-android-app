@@ -84,7 +84,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
-        formatter = new DecimalFormat("#,###.00");
+        formatter = new DecimalFormat("#,###0.00");
         holder.name.setText(items.get(position).productName);
 
         if(items.get(position).orderSubItem != null && items.get(position).orderSubItem.size() > 0){

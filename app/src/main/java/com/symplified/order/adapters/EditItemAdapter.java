@@ -104,7 +104,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         String BASE_URL = sharedPreferences.getString("base_url", null);
         String storeId = sharedPreferences.getString("storeId", null);
 
-        formatter = new DecimalFormat("#,###.00");
+        formatter = new DecimalFormat("#,###0.00");
 
         holder.name.setText(items.get(position).productName);
         holder.price.setText(currency + " " + formatter.format(items.get(position).price));

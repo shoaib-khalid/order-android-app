@@ -33,10 +33,12 @@ import com.symplified.order.App;
 import com.symplified.order.EditOrderActivity;
 import com.symplified.order.R;
 import com.symplified.order.TrackOrderActivity;
+import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
@@ -64,6 +66,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public DecimalFormat formatter;
 
     private OrderApi orderApiService;
+    private DeliveryApi deliveryApiService;
 
     public OrderAdapter(List<Order.OrderDetailsResponse> orders, String section, Context context) {
         this.orders = orders;
@@ -78,6 +81,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         progressIndicator.setIndeterminate(true);
 
         orderApiService = ServiceGenerator.createOrderService();
+        deliveryApiService = ServiceGenerator.createDeliveryService();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -85,10 +89,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 deliveryCharges, deliveryDiscount, discount, serviceCharges;
         private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton,  callButton;
         private final CardView cardView;
-        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus, customerNotes;
+        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
-        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote;
-        private final View divider3, divider7, divider8;
+        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote, rlRiderDetails;
+        private final View divider3, divider7, divider8, divider9;
+        private final ImageView riderCallIcon;
 
         private final RecyclerView recyclerView;
         private final ProgressBar itemsProgressBar;
@@ -119,6 +124,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             rlDeliveryDiscount = itemView.findViewById(R.id.rl_delivery_discount);
             rlServiceCharges = itemView.findViewById(R.id.rl_service_charges);
 
+            riderName = itemView.findViewById(R.id.driver_value);
+            riderContact = itemView.findViewById(R.id.driver_contact_value);
+
+            riderCallIcon = itemView.findViewById(R.id.address_icon_phone);
+
             currStatusLabel = (TextView) itemView.findViewById(R.id.order_curr_status);
             currStatus = (TextView) itemView.findViewById(R.id.order_curr_status_value);
             recyclerView = itemView.findViewById(R.id.order_items_recycler);
@@ -141,10 +151,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             newLayout = itemView.findViewById(R.id.layout_new);
             ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
             rlCustomerNote = itemView.findViewById(R.id.rl_customer_note);
+            rlRiderDetails = itemView.findViewById(R.id.rl_rider_details);
 
             divider3 = itemView.findViewById(R.id.divider_card3);
             divider7 = itemView.findViewById(R.id.divider_card7);
             divider8 = itemView.findViewById(R.id.divider_card8);
+            divider9 = itemView.findViewById(R.id.divider_card9);
 
             itemsProgressBar = itemView.findViewById(R.id.order_items_progress_bar);
             itemsErrorTextView = itemView.findViewById(R.id.order_items_fail_textview);
@@ -166,7 +178,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         Order.OrderDetailsResponse orderDetails = orders.get(position);
         Order order = orderDetails.order;
 
-        formatter = new DecimalFormat("#,###.00");
+        formatter = new DecimalFormat("#,###0.00");
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
@@ -247,13 +259,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             switch (orderStatus) {
                 case "BEING_PREPARED":
                     holder.currStatus.setText("Preparing");
+                    holder.trackButton.setVisibility(View.GONE);
                     break;
                 case "AWAITING_PICKUP":
                     holder.currStatus.setText("Awaiting Pickup");
+                    if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null)
+                        holder.trackButton.setVisibility(View.VISIBLE);
                     break;
                 case "BEING_DELIVERED":
                     holder.currStatus.setText("Out for Delivery");
-                    if (order.orderShipmentDetail.trackingUrl != null)
+                    if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null)
+//                    if (order.orderShipmentDetail.trackingUrl != null)
                         holder.trackButton.setVisibility(View.VISIBLE);
                     break;
             }
@@ -272,6 +288,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
             holder.divider7.setVisibility(View.GONE);
             holder.divider8.setVisibility(View.GONE);
+
+            if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                getRiderDetails(holder, order, 2);
+            }
         }
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
@@ -295,9 +315,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         });
 
         holder.trackButton.setOnClickListener(view -> {
-            Intent intent = new Intent(context, TrackOrderActivity.class);
-            intent.putExtra("url", order.orderShipmentDetail.trackingUrl);
-            context.startActivity(intent);
+            getRiderDetails(holder, order, 1);
         });
 
 //        holder.detailsButton.setOnClickListener(view -> {
@@ -496,5 +514,54 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private boolean isOrderOngoing(Order.OrderDetailsResponse order) {
         return !isOrderNew(order) && order.nextCompletionStatus != null;
+    }
+
+    private void getRiderDetails(ViewHolder holder, Order order, int tag) {
+
+        Map<String, String> headers = new HashMap<>();
+
+        Call<OrderDeliveryDetailsResponse> riderDetails = deliveryApiService.getOrderDeliveryDetailsById(headers, order.id);
+
+        riderDetails.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
+            @Override
+            public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
+                if (response.isSuccessful()) {
+                    if (tag == 1) {
+                        Intent intent = new Intent(context, TrackOrderActivity.class);
+                        intent.putExtra("riderDetails", response.body().data);
+                        context.startActivity(intent);
+                    } else if (tag == 2) {
+                        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData data = response.body().data;
+                        if (data.name != null || data.phoneNumber != null) {
+                            holder.rlRiderDetails.setVisibility(View.VISIBLE);
+                            holder.divider9.setVisibility(View.VISIBLE);
+                            if (data.name != null)
+                                holder.riderName.setText(data.name);
+                            if (data.phoneNumber != null) {
+                                holder.riderContact.setText(data.phoneNumber);
+                                holder.riderCallIcon.setVisibility(View.VISIBLE);
+                                holder.riderCallIcon.setOnClickListener(view -> {
+                                    Intent callDriver = new Intent(Intent.ACTION_DIAL);
+                                    callDriver.setData(Uri.parse("tel:" + data.phoneNumber));
+                                    context.startActivity(callDriver);
+                                });
+                            }
+                        } else {
+                            holder.rlRiderDetails.setVisibility(View.GONE);
+                            holder.divider9.setVisibility(View.GONE);
+                        }
+                    }
+                } else {
+                    if (tag == 1)
+                        Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "ERROR: " + response.toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
+                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

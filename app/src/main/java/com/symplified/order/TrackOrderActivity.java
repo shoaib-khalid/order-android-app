@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.databinding.ActivityTrackOrderBinding;
+import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 
 public class TrackOrderActivity extends NavbarActivity {
 
@@ -29,7 +31,10 @@ public class TrackOrderActivity extends NavbarActivity {
     private ActivityTrackOrderBinding binding;
     private DrawerLayout drawerLayout;
     private WebView webView;
+    private TextView deliveryProvider, driver, contact;
+    private ImageView call;
     public Dialog progressDialog;
+    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData riderDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,17 +47,12 @@ public class TrackOrderActivity extends NavbarActivity {
         setSupportActionBar(toolbar);
         initToolbar();
 
-        progressDialog = new Dialog(this);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
+        initViews();
 
-        webView = findViewById(R.id.track_order_webview);
+        Bundle data = getIntent().getExtras();
+        riderDetails = (OrderDeliveryDetailsResponse.OrderDeliveryDetailsData) data.getSerializable("riderDetails");
 
-        Intent intent = getIntent();
-        String url = intent.getStringExtra("url");
+        setDriverDetails();
 
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
@@ -61,7 +61,9 @@ public class TrackOrderActivity extends NavbarActivity {
 
         webView.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                view.loadUrl(url);
+                if (riderDetails.trackingUrl != null)
+                    view.loadUrl(riderDetails.trackingUrl);
+                progressDialog.dismiss();
                 return true;
             }
 
@@ -78,7 +80,11 @@ public class TrackOrderActivity extends NavbarActivity {
             }
         });
 
-        webView.loadUrl(url);
+        if (riderDetails.trackingUrl != null)
+            webView.loadUrl(riderDetails.trackingUrl);
+        else {
+            progressDialog.dismiss();
+        }
     }
 
     private void initToolbar() {
@@ -94,5 +100,40 @@ public class TrackOrderActivity extends NavbarActivity {
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("Track Order");
+    }
+
+    private void initViews() {
+        progressDialog = new Dialog(this);
+        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        progressDialog.setContentView(R.layout.progress_dialog);
+        progressDialog.setCancelable(false);
+        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
+        progressIndicator.setIndeterminate(true);
+
+        webView = findViewById(R.id.track_order_webview);
+
+        deliveryProvider = findViewById(R.id.delivery_by_value);
+        driver = findViewById(R.id.driver_value);
+        contact = findViewById(R.id.contact_value);
+        call = findViewById(R.id.address_icon_phone);
+    }
+
+    public void setDriverDetails() {
+        if (riderDetails.provider.name != null) {
+            deliveryProvider.setText(riderDetails.provider.name);
+        }
+        if (riderDetails.name != null) {
+            driver.setText(riderDetails.name);
+        }
+        if (riderDetails.phoneNumber != null) {
+            contact.setText(riderDetails.phoneNumber);
+            call.setVisibility(View.VISIBLE);
+        }
+
+        call.setOnClickListener(view -> {
+            Intent callDriver = new Intent(Intent.ACTION_DIAL);
+            callDriver.setData(Uri.parse("tel:" + riderDetails.phoneNumber));
+            startActivity(callDriver);
+        });
     }
 }
