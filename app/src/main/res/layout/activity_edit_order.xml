@@ -43,8 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_gravity="right"
-                android:visibility="gone"
-                android:padding="12dp"
+                android:paddingVertical="16dp"
                 android:layout_marginLeft="5dp"
                 android:text="@string/update_order"
                 android:backgroundTint="@color/sf_primary"/>
