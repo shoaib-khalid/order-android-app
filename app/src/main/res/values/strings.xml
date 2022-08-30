@@ -110,7 +110,7 @@
     <string name="edit_product">Edit Product</string>
     <string name="staging_mode">Staging mode</string>
     <string name="production_mode_text">Switch to production</string>
-    <string name="empty_orders_text">No orders to show. Swipe down to refresh.</string>
+    <string name="empty_orders_text">No orders to show. Swipe down to refresh or check back later.</string>
     <string name="error_text_pull_to_refresh">An error occurred. Please swipe down to retry.</string>
     <string name="order_items_fail_text">Failed to get items. Please swipe down to refresh.</string>
     <string name="edit_order_warning">You are about to change a confirmed order.\u000AYou can only perform this once.\u000AAny extra money will be refunded to customer.</string>
