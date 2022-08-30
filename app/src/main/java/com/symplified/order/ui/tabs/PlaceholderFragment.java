@@ -39,7 +39,9 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +147,10 @@ public class PlaceholderFragment extends Fragment {
             }
             case "past":{
                 pageViewModel.setIndex(2);
-                orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId);
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                Date current = new Date();
+                String formatDate = formatter.format(current);
+                orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId, formatDate, formatDate);
                 break;
             }
         }

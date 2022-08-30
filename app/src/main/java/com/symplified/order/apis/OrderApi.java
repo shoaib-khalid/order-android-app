@@ -53,7 +53,7 @@ public interface OrderApi {
 
 
     @GET("orders/search?completionStatus=CANCELED_BY_MERCHANT&completionStatus=DELIVERED_TO_CUSTOMER&completionStatus=CANCELED_BY_CUSTOMER")
-    Call<OrderDetailsResponse> getSentOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
+    Call<OrderDetailsResponse> getSentOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId, @Query("from") String from, @Query("to") String to);
 
 
     @GET("orders/{orderId}/items")
