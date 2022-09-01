@@ -8,10 +8,10 @@ import android.content.Intent;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -55,7 +55,12 @@ public class AlertService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
-        String storeType = intent.getStringExtra(String.valueOf(R.string.store_type));
+        Bundle extras = intent.getExtras();
+        String storeType = "";
+        if (extras != null) {
+            storeType = extras.getString(String.valueOf(R.string.store_type));
+        }
+
         if (isAppOnForeground(this) || (storeType != null && !storeType.contains("FnB"))) {
             mediaPlayer.setLooping(false);
             hasRepeatedOnce = false;

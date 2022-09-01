@@ -183,7 +183,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String storeIdList = sharedPreferences.getString("storeIdList", null);
         String BASE_URL = sharedPreferences.getString("base_url", null);
-        String currency = sharedPreferences.getString("currency", null);
+        String currency = order.store != null
+                ? order.store.regionCountry.currencySymbol
+                : sharedPreferences.getString("currency", "");
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
         holder.invoice.setText(order.invoiceId);

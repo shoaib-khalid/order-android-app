@@ -4,6 +4,8 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -11,6 +13,7 @@ import android.os.Build;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
@@ -39,12 +42,6 @@ public class App extends Application {
     public static final String SESSION_DETAILS_TITLE = "session";
     public static final String CHANNEL_ID = "CHANNEL_ID";
     public static final String ORDERS = "ORDERS";
-    public static final Uri SOUND = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-    public static Ringtone ringtone;
-    public static Ringtone play(Context context){
-        ringtone = RingtoneManager.getRingtone(context, SOUND);
-        return ringtone;
-    }
 
     @Override
     public void onCreate(){

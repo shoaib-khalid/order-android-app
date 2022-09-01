@@ -27,8 +27,6 @@ public class SettingsActivity extends NavbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-//        if (sharedPreferences.getBoolean("isStaging", false))
-//            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
 
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

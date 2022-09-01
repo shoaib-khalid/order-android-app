@@ -144,31 +144,28 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                 notificationManager.notify(new Random().nextInt(), notification);
 
                                 StoreApi storeApiService = ServiceGenerator.createStoreService();
-                                Call<ResponseBody> storeResponse = storeApiService.getStoreById(headers, finalCurrentStoreId);
+                                Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreByIdNew(headers, finalCurrentStoreId);
 
-                                storeResponse.clone().enqueue(new Callback<ResponseBody>() {
+                                storeResponse.clone().enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
                                     @Override
-                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                        if (response.isSuccessful()) {
-                                            try {
-                                                StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
-                                                if (!AlertService.isPlaying()) {
-                                                    Intent intent = new Intent(getApplicationContext(), AlertService.class);
-                                                    intent.putExtra(String.valueOf(R.string.store_type), responseBody.data.verticalCode);
-                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                        startForegroundService(intent);
-                                                    } else {
-                                                        startService(intent);
-                                                    }
-                                                }
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
+                                    public void onResponse(Call<StoreResponse.SingleStoreResponse> call, Response<StoreResponse.SingleStoreResponse> response) {
+                                        if (response.isSuccessful()
+                                                && response.body() != null
+                                                && response.body().data != null
+                                                && !AlertService.isPlaying()) {
+                                            Intent intent = new Intent(getApplicationContext(), AlertService.class);
+                                            intent.putExtra(String.valueOf(R.string.store_type),
+                                                    response.body().data.verticalCode);
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                startForegroundService(intent);
+                                            } else {
+                                                startService(intent);
                                             }
                                         }
                                     }
 
                                     @Override
-                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                    public void onFailure(Call<StoreResponse.SingleStoreResponse> call, Throwable t) {
                                         Log.e(TAG, "onFailure on storeRequest. " + t.getLocalizedMessage());
                                     }
                                 });
@@ -212,12 +209,14 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     private String parseInvoiceId(String body) {
-        Matcher matcher = pattern.matcher(body);
-        if (matcher.find() && matcher.group(0) != null) {
-            try {
-                return matcher.group(0).replace("#", "");
-            } catch (Exception e) {
-                Log.e(TAG, "Error while parsing invoiceId: " + e.getLocalizedMessage());
+        if (body != null) {
+            Matcher matcher = pattern.matcher(body);
+            if (matcher.find() && matcher.group(0) != null) {
+                try {
+                    return matcher.group().replace("#", "");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while parsing invoiceId: " + e.getLocalizedMessage());
+                }
             }
         }
         return null;

@@ -35,10 +35,10 @@ public class Order implements Serializable {
     public String deliveryDiscountDescription;
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
-//    private Store store;
     public Customer customer;
     public List<OrderRefund> orderRefund;
     public boolean isRevised;
+    public Store store;
 
     @Override
     public String toString() {

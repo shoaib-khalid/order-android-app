@@ -29,6 +29,9 @@ public interface StoreApi {
     @GET("stores/{storeId}")
     Call<ResponseBody> getStoreById(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId);
 
+    @GET("stores/{storeId}")
+    Call<StoreResponse.SingleStoreResponse> getStoreByIdNew(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId);
+
     @GET("stores/{storeId}/timings/snooze")
     Call<ResponseBody> getStoreStatusById(@HeaderMap Map<String,String> headers, @Path("storeId") String storeId);
 

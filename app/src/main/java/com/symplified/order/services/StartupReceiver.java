@@ -35,6 +35,7 @@ import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.Keys;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -53,7 +54,7 @@ public class StartupReceiver extends BroadcastReceiver {
                 .getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         if ((Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
                 Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(intent.getAction()))
-                && sharedPrefs.getBoolean("isLoggedIn", false)) {
+                && sharedPrefs.getBoolean(Keys.IS_LOGGED_IN, false)) {
             if (isConnectedToInternet(context)) {
                 Toast.makeText(context, "Connected to network", Toast.LENGTH_SHORT).show();
                 checkForNewOrders(context);

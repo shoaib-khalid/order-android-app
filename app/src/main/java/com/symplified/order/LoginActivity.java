@@ -45,6 +45,7 @@ import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.Keys;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -210,7 +211,7 @@ public class LoginActivity extends AppCompatActivity {
                         editor.putString("refreshToken", res.session.refreshToken);
                         editor.putString("ownerId", res.session.ownerId);
                         editor.putString("expiry", res.session.expiry.toGMTString());
-                        editor.putBoolean("isLoggedIn", true);
+                        editor.putBoolean(Keys.IS_LOGGED_IN, true);
                         editor.putInt("versionCode", BuildConfig.VERSION_CODE);
                         editor.putString("base_url", BASE_URL);
                         editor.apply();
@@ -340,7 +341,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         callInAppUpdate();
         //check if user session already exists, for persistent login
-        if (sharedPreferences.getBoolean("isLoggedIn", false)
+        if (sharedPreferences.getBoolean(Keys.IS_LOGGED_IN, false)
                 && sharedPreferences.contains("storeIdList")
                 && sharedPreferences.getInt("versionCode", 0) == BuildConfig.VERSION_CODE) {
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
@@ -366,7 +367,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed() {
-        if (sharedPreferences.getBoolean("isLoggedIn", false)) {
+        if (sharedPreferences.getBoolean(Keys.IS_LOGGED_IN, false)) {
             this.finishAffinity();
         } else {
             super.onBackPressed();
