@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -133,7 +134,10 @@ public class TrackOrderActivity extends NavbarActivity {
         call.setOnClickListener(view -> {
             Intent callDriver = new Intent(Intent.ACTION_DIAL);
             callDriver.setData(Uri.parse("tel:" + riderDetails.phoneNumber));
-            startActivity(callDriver);
+            if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY))
+                startActivity(callDriver);
+            else
+                Toast.makeText(this, R.string.call_error_message, Toast.LENGTH_SHORT).show();
         });
     }
 }

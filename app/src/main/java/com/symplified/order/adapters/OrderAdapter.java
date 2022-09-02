@@ -5,10 +5,13 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,10 +45,16 @@ import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
+import java.sql.Time;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
@@ -187,6 +196,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 ? order.store.regionCountry.currencySymbol
                 : sharedPreferences.getString("currency", "");
 
+        SimpleDateFormat actualFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        actualFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date actualDate = null;
+        try {
+            actualDate = actualFormat.parse(order.created);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        SimpleDateFormat storeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        storeFormat.setTimeZone(TimeZone.getTimeZone(order.store.regionCountry.timezone));
+
+        holder.date.setText(actualDate != null ? storeFormat.format(actualDate) : order.created);
+
         holder.name.setText(order.orderShipmentDetail.receiverName);
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(currency + " " + formatter.format(order.total));
@@ -215,10 +237,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.callButton.setOnClickListener(view -> {
             Intent callDriver = new Intent(Intent.ACTION_DIAL);
             callDriver.setData(Uri.parse("tel:" + order.orderShipmentDetail.phoneNumber));
-            context.startActivity(callDriver);
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY))
+                context.startActivity(callDriver);
+            else
+                Toast.makeText(context, R.string.call_error_message, Toast.LENGTH_SHORT).show();
         });
 
-        holder.date.setText(order.created);
 
         if (order.customerNotes != null && !order.customerNotes.equals("")) {
             holder.rlCustomerNote.setVisibility(View.VISIBLE);
@@ -545,7 +569,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                                 holder.riderCallIcon.setOnClickListener(view -> {
                                     Intent callDriver = new Intent(Intent.ACTION_DIAL);
                                     callDriver.setData(Uri.parse("tel:" + data.phoneNumber));
-                                    context.startActivity(callDriver);
+                                    if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY))
+                                        context.startActivity(callDriver);
+                                    else
+                                        Toast.makeText(context, R.string.call_error_message, Toast.LENGTH_SHORT).show();
                                 });
                             }
                         } else {
