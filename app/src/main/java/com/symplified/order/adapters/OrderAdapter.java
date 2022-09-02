@@ -87,7 +87,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView name, invoice, date, total, total2, status, phoneNumber, address, subTotal,
                 deliveryCharges, deliveryDiscount, discount, serviceCharges;
-        private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton,  callButton;
+        private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton, callButton;
         private final CardView cardView;
         private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
@@ -192,7 +192,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.total.setText(currency + " " + formatter.format(order.total));
 
         holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
-        String fullAddress = order.orderShipmentDetail.address+", "+order.orderShipmentDetail.city+", "+order.orderShipmentDetail.state+" "+order.orderShipmentDetail.zipcode;
+        String fullAddress = order.orderShipmentDetail.address + ", " + order.orderShipmentDetail.city + ", " + order.orderShipmentDetail.state + " " + order.orderShipmentDetail.zipcode;
         holder.address.setText(fullAddress);
         holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
         if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
@@ -212,11 +212,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         } else {
             holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
         }
-        holder.callButton.setOnClickListener(view -> {
-            Intent callDriver = new Intent(Intent.ACTION_DIAL);
-            callDriver.setData(Uri.parse("tel:" + order.orderShipmentDetail.phoneNumber));
-            context.startActivity(callDriver);
-        });
+        holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
 
         holder.date.setText(order.created);
 
@@ -302,7 +298,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         getOrderItems(order, BASE_URL, holder);
 
-        holder.cancelButton.setOnClickListener(view -> {onCancelOrderButtonClick(order, BASE_URL, holder);});
+        holder.cancelButton.setOnClickListener(view -> {
+            onCancelOrderButtonClick(order, BASE_URL, holder);
+        });
 
         holder.acceptButton.setOnClickListener(view -> {
             updateOrderStatus(orderDetails, BASE_URL, position);
@@ -319,13 +317,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.trackButton.setOnClickListener(view -> {
             getRiderDetails(holder, order, 1);
         });
-
-//        holder.detailsButton.setOnClickListener(view -> {
-//            Intent intent = new Intent(context, OrderDetailsActivity.class);
-//            intent.putExtra("selectedOrder", orders.get(position));
-//            intent.putExtra("section", section);
-//            context.startActivity(intent);
-//        });
     }
 
     @Override
@@ -336,16 +327,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private void getOrderItems(Order order, String BASE_URL, ViewHolder holder) {
 
         Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create()).build();
-//
-//        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
-
-//        progressDialog.show();
 
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
@@ -358,13 +341,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     holder.itemsErrorTextView.setVisibility(View.VISIBLE);
                 }
                 holder.itemsProgressBar.setVisibility(View.GONE);
-                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<ItemResponse> call, Throwable t) {
                 Log.e(TAG, "onFailureItems: ", t);
-                progressDialog.dismiss();
                 holder.itemsProgressBar.setVisibility(View.GONE);
                 holder.itemsErrorTextView.setVisibility(View.VISIBLE);
             }
@@ -374,12 +355,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public void onCancelOrderButtonClick(Order order, String BASE_URL, ViewHolder holder) {
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create()).build();
-//
-//        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_alert_dialog);
@@ -393,29 +368,27 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             Order.OrderDetailsResponse removedOrder = orders.remove(position);
             notifyItemRemoved(position);
 
-            Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
-//                    progressDialog.show();
-                    processOrder.clone().enqueue(new Callback<ResponseBody>() {
-                        @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                            progressDialog.dismiss();
-                            if (response.isSuccessful()) {
-                                Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
-                                reAddOrder(position, removedOrder);
-                            }
-                        }
+            Call<ResponseBody> processOrder = orderApiService
+                    .updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
+            processOrder.clone().enqueue(new Callback<ResponseBody>() {
+                @Override
+                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                        reAddOrder(position, removedOrder);
+                    }
+                }
 
-                        @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t) {
-                            Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
-                            Log.e(TAG, "onFailure: ", t);
-                            progressDialog.dismiss();
+                @Override
+                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                    Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ", t);
 
-                            reAddOrder(position, removedOrder);
-                        }
-                    });
+                    reAddOrder(position, removedOrder);
+                }
+            });
         });
         dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
             dialog.dismiss();
@@ -429,12 +402,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create()).build();
-//
-//        OrderApi orderApiService = retrofit.create(OrderApi.class);
 
         Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers, new Order.OrderUpdate(orderDetails.order.id, Status.fromString(orderDetails.nextCompletionStatus)), orderDetails.order.id);
 
@@ -470,10 +437,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     }
 
-   private void onEditButtonClicked(Order order) {
+    private void onEditButtonClicked(Order order) {
         if (order.isRevised) {
             Toast.makeText(context, "Order already updated.", Toast.LENGTH_SHORT).show();
-            return;
         } else {
             dialog = new Dialog(context);
             dialog.setContentView(R.layout.custom_alert_dialog);
@@ -502,11 +468,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private void reAddOrder(int position, Order.OrderDetailsResponse removedOrder) {
         try {
             orders.add(position, removedOrder);
-            notifyItemInserted(position);
         } catch (Exception e) {
             orders.add(removedOrder);
-            notifyItemInserted(orders.size() - 1);
+            position = orders.size() - 1;
         }
+        notifyItemInserted(position);
     }
 
     private boolean isOrderNew(Order.OrderDetailsResponse order) {
@@ -543,9 +509,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                                 holder.riderContact.setText(data.phoneNumber);
                                 holder.riderCallIcon.setVisibility(View.VISIBLE);
                                 holder.riderCallIcon.setOnClickListener(view -> {
-                                    Intent callDriver = new Intent(Intent.ACTION_DIAL);
-                                    callDriver.setData(Uri.parse("tel:" + data.phoneNumber));
-                                    context.startActivity(callDriver);
+                                    startCallActivity(data.phoneNumber);
                                 });
                             }
                         } else {
@@ -565,5 +529,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void startCallActivity(String phoneNumber) {
+        try {
+            Intent callDriver = new Intent(Intent.ACTION_DIAL);
+            callDriver.setData(Uri.parse("tel:" + phoneNumber));
+            context.startActivity(callDriver);
+        } catch (Exception e) {
+            Toast.makeText(context, "Your device does not have this functionality.", Toast.LENGTH_SHORT).show();
+        }
     }
 }
