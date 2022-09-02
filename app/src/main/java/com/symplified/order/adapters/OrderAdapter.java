@@ -43,17 +43,18 @@ import com.symplified.order.networking.ServiceGenerator;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
 
@@ -214,7 +215,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
         holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
 
-        holder.date.setText(order.created);
+        TimeZone storeTimeZone = order.store != null
+                ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
+                : TimeZone.getDefault();
+        holder.date.setText(convertUtcTimeToStoreTimezone(order.created, storeTimeZone));
 
         if (order.customerNotes != null && !order.customerNotes.equals("")) {
             holder.rlCustomerNote.setVisibility(View.VISIBLE);
@@ -539,5 +543,25 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         } catch (Exception e) {
             Toast.makeText(context, "Your device does not have this functionality.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String convertUtcTimeToStoreTimezone(String dateTime, TimeZone localTimeZone) {
+        TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
+
+        SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateParser.setTimeZone(utcTimeZone);
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy hh:mm aa");
+        dateFormatter.setTimeZone(localTimeZone);
+
+        try {
+            dateTime = dateFormatter.format(dateParser.parse(dateTime));
+        } catch (ParseException e) {
+            Log.e("datetime", "Failed to parse date. " + e.getLocalizedMessage());
+        } catch (NullPointerException e) {
+            Log.e("datetime", "Parsed date was null. " + e.getLocalizedMessage());
+        }
+
+        return dateTime;
     }
 }
