@@ -117,4 +117,5 @@
     <string name="update_order_warning">You have made changes to a confirmed order.\u000AThis action cannot be undone.\u000ADo you want to continue?</string>
     <string name="order_updated">Order Updated</string>
     <string name="order_updated_message">The refund will be in place.\u000ARefund Amount:\u0020</string>
+    <string name="call_error_message">Your device does not support this function.</string>
 </resources>
