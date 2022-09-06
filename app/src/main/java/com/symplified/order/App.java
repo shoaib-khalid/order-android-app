@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.symplified.order.helpers.SunmiPrintHelper;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -67,6 +68,7 @@ public class App extends Application {
         }
 
         App.context = getApplicationContext();
+        SunmiPrintHelper.getInstance().initSunmiPrinterService(this);
     }
 
     public static Context getAppContext() {

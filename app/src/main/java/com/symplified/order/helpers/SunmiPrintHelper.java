@@ -3,11 +3,13 @@ package com.symplified.order.helpers;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.sunmi.peripheral.printer.InnerPrinterCallback;
 import com.sunmi.peripheral.printer.InnerPrinterException;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
+import com.symplified.order.App;
 import com.symplified.order.enums.SunmiPrinterStatus;
 
 public class SunmiPrintHelper {
@@ -33,7 +35,7 @@ public class SunmiPrintHelper {
         @Override
         protected void onConnected(SunmiPrinterService service) {
             printerService = service;
-            checkSunmiPrinterService(service);
+            updateSunmiPrinterService(service);
         }
 
         @Override
@@ -51,8 +53,8 @@ public class SunmiPrintHelper {
             if (!isServiceBound) {
                 status = SunmiPrinterStatus.NOT_FOUND;
             }
-        } catch (InnerPrinterException e) {
-            handleException("Error while initSunmiPrinterService.", e);
+        } catch (Exception e) {
+            handleException("Error while initSunmiPrinterService", e);
         }
     }
 
@@ -63,24 +65,24 @@ public class SunmiPrintHelper {
                 printerService = null;
                 status = SunmiPrinterStatus.LOST;
             }
-        } catch (InnerPrinterException e) {
-            handleException("Error occurred while deInitSunmiPrinterService. ", e);
+        } catch (Exception e) {
+            handleException("Error occurred while deInitSunmiPrinterService", e);
         }
     }
 
     public void printText(String content) {
         try {
             printerService.printText(content, null);
-        } catch (RemoteException e) {
-            handleException("Error occurred when printing.", e);
+        } catch (Exception e) {
+            handleException("Error occurred when printing", e);
         }
     }
 
-    private void checkSunmiPrinterService(SunmiPrinterService service) {
+    private void updateSunmiPrinterService(SunmiPrinterService service) {
         boolean hasPrinter = false;
         try {
             hasPrinter = InnerPrinterManager.getInstance().hasPrinter(service);
-        } catch (InnerPrinterException e) {
+        } catch (Exception e) {
             handleException("Error while checking service ", e);
         }
         status = hasPrinter
@@ -89,7 +91,9 @@ public class SunmiPrintHelper {
     }
 
     private void handleException(String preamble, Exception ex) {
-        Log.e(TAG, preamble + " " + ex.getLocalizedMessage());
+        String errorMessage = preamble + ": " + ex.getLocalizedMessage();
+        Toast.makeText(App.getAppContext(), errorMessage, Toast.LENGTH_SHORT).show();
+        Log.e(TAG, errorMessage);
         ex.printStackTrace();
     }
 }

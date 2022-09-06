@@ -29,7 +29,7 @@ public interface LoginApi {
     @POST("session/refresh")
     Call<LoginResponse> refreshAccessToken(@Body String refreshToken);
 
-    @PUT("{clientId}/pingResponse/{transactionId}")
+    @PUT("{clientId}/pingresponse/{transactionId}")
     Call<HttpResponse> ping(@Path("clientId") String clientId,
                             @Path("transactionId") String transactionId);
 }

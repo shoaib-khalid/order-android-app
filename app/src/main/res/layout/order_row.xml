@@ -34,6 +34,17 @@
                 android:paddingHorizontal="10dp"
                 android:textStyle="bold" />
 
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/btn_print_order"
+                android:src="@drawable/ic_print"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/call"
+                android:textSize="10sp" />
+
+
             <RelativeLayout
                 android:id="@+id/date_rel_layout"
                 android:layout_width="wrap_content"
