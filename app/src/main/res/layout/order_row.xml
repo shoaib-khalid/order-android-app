@@ -41,9 +41,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:text="@string/call"
                 android:textSize="10sp" />
-
 
             <RelativeLayout
                 android:id="@+id/date_rel_layout"

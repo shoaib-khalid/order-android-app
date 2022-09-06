@@ -48,6 +48,7 @@ import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.Utility;
 
 import java.io.IOException;
 import java.sql.Time;
@@ -585,6 +586,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> orderItems) {
 
+        if (SunmiPrintHelper.getInstance().getStatus() != SunmiPrinterStatus.FOUND) {
+            Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Utility.saveToFile("Building Receipt\n");
+
         String currency = getCurrencySymbol(order);
 
         StringBuilder text = new StringBuilder();
@@ -640,16 +648,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String toPrint = String.valueOf(text);
         Log.d("print", toPrint);
 
-        String toastText = "Not currently connected to a Sunmi printer";
-        if (SunmiPrintHelper.getInstance().getStatus() == SunmiPrinterStatus.FOUND) {
-            toastText = "Printing receipt";
-            SunmiPrintHelper.getInstance().printText(toPrint);
-        }
-        Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
+        Utility.saveToFile(toPrint);
+
+        Toast.makeText(context, "Printing receipt", Toast.LENGTH_SHORT).show();
+        SunmiPrintHelper.getInstance().printText(toPrint);
     }
 
     String getCurrencySymbol(Order order) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences
+                = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         return order.store != null
                 ? order.store.regionCountry.currencySymbol
                 : sharedPreferences.getString("currency", "");

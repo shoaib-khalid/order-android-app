@@ -11,6 +11,9 @@ import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.symplified.order.App;
 import com.symplified.order.enums.SunmiPrinterStatus;
+import com.symplified.order.utils.Utility;
+
+import java.util.Arrays;
 
 public class SunmiPrintHelper {
     private String TAG = "sunmi-print-helper";
@@ -35,11 +38,13 @@ public class SunmiPrintHelper {
         @Override
         protected void onConnected(SunmiPrinterService service) {
             printerService = service;
+            Utility.saveToFile("\nPrinter connected\n");
             updateSunmiPrinterService(service);
         }
 
         @Override
         protected void onDisconnected() {
+            Utility.saveToFile("\nPrinter disconnected\n");
             printerService = null;
             status = SunmiPrinterStatus.LOST;
         }
@@ -49,7 +54,7 @@ public class SunmiPrintHelper {
         try {
             boolean isServiceBound = InnerPrinterManager.getInstance()
                     .bindService(context, innerPrinterCallback);
-
+            Utility.saveToFile("\ninitSunmiPrinterService\n");
             if (!isServiceBound) {
                 status = SunmiPrinterStatus.NOT_FOUND;
             }
@@ -72,6 +77,7 @@ public class SunmiPrintHelper {
 
     public void printText(String content) {
         try {
+            Utility.saveToFile("\nPrinting receipt text\n");
             printerService.printText(content, null);
         } catch (Exception e) {
             handleException("Error occurred when printing", e);
@@ -92,6 +98,9 @@ public class SunmiPrintHelper {
 
     private void handleException(String preamble, Exception ex) {
         String errorMessage = preamble + ": " + ex.getLocalizedMessage();
+
+        Utility.saveToFile("\n" + errorMessage + "\n" + Arrays.toString(ex.getStackTrace()) + "\n");
+
         Toast.makeText(App.getAppContext(), errorMessage, Toast.LENGTH_SHORT).show();
         Log.e(TAG, errorMessage);
         ex.printStackTrace();

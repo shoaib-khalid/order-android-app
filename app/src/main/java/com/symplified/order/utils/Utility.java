@@ -2,12 +2,20 @@ package com.symplified.order.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.symplified.order.App;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 public class Utility {
 
@@ -40,6 +48,20 @@ public class Utility {
 
     public static String removeUnderscores(String s){
         return s.replace("_", " ");
+    }
+
+    public static void saveToFile(String text) {
+        File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
+        Log.d("print", "File path: " + file.getAbsolutePath());
+
+        try {
+            FileWriter fr = new FileWriter(file, true);
+            fr.write(text);
+            fr.close();
+        } catch (Exception e) {
+            String errorText = "Failed to write to file. " + e.getLocalizedMessage();
+            Log.e("print", errorText);
+        }
     }
 
 }
