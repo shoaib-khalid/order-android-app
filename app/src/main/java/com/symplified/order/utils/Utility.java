@@ -50,7 +50,7 @@ public class Utility {
         return s.replace("_", " ");
     }
 
-    public static void saveToFile(String text) {
+    public static void logToFile(String text) {
         File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
         Log.d("print", "File path: " + file.getAbsolutePath());
 

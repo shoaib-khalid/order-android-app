@@ -1,12 +1,10 @@
 package com.symplified.order.helpers;
 
 import android.content.Context;
-import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.sunmi.peripheral.printer.InnerPrinterCallback;
-import com.sunmi.peripheral.printer.InnerPrinterException;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.symplified.order.App;
@@ -38,13 +36,13 @@ public class SunmiPrintHelper {
         @Override
         protected void onConnected(SunmiPrinterService service) {
             printerService = service;
-            Utility.saveToFile("\nPrinter connected\n");
+            Utility.logToFile("\nPrinter connected\n");
             updateSunmiPrinterService(service);
         }
 
         @Override
         protected void onDisconnected() {
-            Utility.saveToFile("\nPrinter disconnected\n");
+            Utility.logToFile("\nPrinter disconnected\n");
             printerService = null;
             status = SunmiPrinterStatus.LOST;
         }
@@ -54,7 +52,7 @@ public class SunmiPrintHelper {
         try {
             boolean isServiceBound = InnerPrinterManager.getInstance()
                     .bindService(context, innerPrinterCallback);
-            Utility.saveToFile("\ninitSunmiPrinterService\n");
+            Utility.logToFile("\ninitSunmiPrinterService\n");
             if (!isServiceBound) {
                 status = SunmiPrinterStatus.NOT_FOUND;
             }
@@ -77,7 +75,7 @@ public class SunmiPrintHelper {
 
     public void printText(String content) {
         try {
-            Utility.saveToFile("\nPrinting receipt text\n");
+            Utility.logToFile("\nPrinting receipt text\n");
             printerService.printText(content, null);
         } catch (Exception e) {
             handleException("Error occurred when printing", e);
@@ -99,7 +97,7 @@ public class SunmiPrintHelper {
     private void handleException(String preamble, Exception ex) {
         String errorMessage = preamble + ": " + ex.getLocalizedMessage();
 
-        Utility.saveToFile("\n" + errorMessage + "\n" + Arrays.toString(ex.getStackTrace()) + "\n");
+        Utility.logToFile("\n" + errorMessage + "\n" + Arrays.toString(ex.getStackTrace()) + "\n");
 
         Toast.makeText(App.getAppContext(), errorMessage, Toast.LENGTH_SHORT).show();
         Log.e(TAG, errorMessage);

@@ -6,12 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,11 +49,9 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Utility;
 
 import java.io.IOException;
-import java.sql.Time;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -591,7 +587,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             return;
         }
 
-        Utility.saveToFile("Building Receipt\n");
+        Utility.logToFile("Building Receipt\n");
 
         String currency = getCurrencySymbol(order);
 
@@ -648,7 +644,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String toPrint = String.valueOf(text);
         Log.d("print", toPrint);
 
-        Utility.saveToFile(toPrint);
+        Utility.logToFile(toPrint);
 
         Toast.makeText(context, "Printing receipt", Toast.LENGTH_SHORT).show();
         SunmiPrintHelper.getInstance().printText(toPrint);
