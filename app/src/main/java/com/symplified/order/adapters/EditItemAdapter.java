@@ -130,29 +130,33 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         }
 
         holder.decrement.setOnClickListener(view -> {
-            if (items.get(position).newQuantity > 0) {
-                items.get(position).newQuantity--;
-                items.get(position).price
-                        = items.get(position).productPrice * items.get(position).newQuantity;
+            Item item = items.get(holder.getAdapterPosition());
+            Log.d("edit-item", "itemPosition: " + holder.getAdapterPosition());
+            if (item.newQuantity > 0) {
+                item.newQuantity--;
+                item.price = item.productPrice * item.newQuantity;
                 notifyDataSetChanged();
             }
         });
 
         holder.increment.setOnClickListener(view -> {
-            if (items.get(position).newQuantity < items.get(position).quantity) {
-                items.get(position).newQuantity++;
-                items.get(position).price
-                        = items.get(position).productPrice * items.get(position).newQuantity;
+            Item item = items.get(holder.getAdapterPosition());
+
+            Log.d("edit-item", "itemPosition: " + holder.getAdapterPosition());
+            if (item.newQuantity < item.quantity) {
+                item.newQuantity++;
+                item.price = item.productPrice * item.newQuantity;
                 notifyDataSetChanged();
             }
         });
 
         holder.delete.setOnClickListener(view -> {
+            int currentPosition = holder.getAdapterPosition();
             updatedItem.quantity = 0;
             updatedItemsList.add(updatedItem);
-            items.remove(position);
+            items.remove(currentPosition);
             Toast.makeText(context, "Item Removed", Toast.LENGTH_SHORT).show();
-            notifyItemRemoved(position);
+            notifyItemRemoved(currentPosition);
         });
     }
 
@@ -186,14 +190,12 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                                 loadItemImageFromUrl(assets.get(0).url, holder);
                             }
                         } else {
-                            Log.e("edit-item", "onResponse Failed to load item image: " + response.code());
                             Toast.makeText(context, "Failed to load item image", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<StoreProductAsset.StoreProductAssetListResponse> call, Throwable t) {
-                        Log.e("edit-item", "onFailure Failed to load item image: " + t.getLocalizedMessage());
                         Toast.makeText(context, "Failed to load item image", Toast.LENGTH_SHORT).show();
                     }
                 });

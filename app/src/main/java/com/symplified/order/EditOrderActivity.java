@@ -91,10 +91,6 @@ public class EditOrderActivity extends NavbarActivity {
         }
 
         headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.ORDER_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create()).build();
-//        orderApiService = retrofit.create(OrderApi.class);
         orderApiService = ServiceGenerator.createOrderService();
 
         if (order != null) {
