@@ -33,10 +33,12 @@ import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
+import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.OrderDetailsModel;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.observers.PrinterObserver;
 import com.symplified.order.services.AlertService;
 
 import java.text.SimpleDateFormat;
@@ -53,7 +55,7 @@ import retrofit2.Response;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlaceholderFragment extends Fragment {
+public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
     private static final String ARG_SECTION = "section";
 
@@ -108,17 +110,6 @@ public class PlaceholderFragment extends Fragment {
         orders = new ArrayList<>();
 
         headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//        headers.put("Authorization", "Bearer " + sharedPreferences.getString("accessToken", ""));
-
-        // TODO: Switch to ServiceGenerator service when server stops returning error with user's access token
-//        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .client(new OkHttpClient())
-//                .baseUrl(baseUrl + App.ORDER_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//        orderApiService = retrofit.create(OrderApi.class);
         orderApiService = ServiceGenerator.createOrderService();
 
         section = null;
@@ -131,8 +122,7 @@ public class PlaceholderFragment extends Fragment {
         switch (section){
             case "new" :{
                 pageViewModel.setIndex(0);
-                orderResponse = orderApiService.getNewOrdersByClientId(headers, clientId);
-//                orderResponse = orderApiService.getNewOrdersByClientId(clientId);
+                orderResponse = orderApiService.getNewOrdersByClientId(clientId);
                 if(AlertService.isPlaying()){
                     getActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
@@ -164,6 +154,8 @@ public class PlaceholderFragment extends Fragment {
 //                }
             }
         };
+
+        SunmiPrintHelper.getInstance().addObserver(this);
     }
 
     @Override
@@ -324,11 +316,6 @@ public class PlaceholderFragment extends Fragment {
     public void startLoading() {
         mainLayout.setRefreshing(true);
         emptyLayout.setRefreshing(true);
-
-//        mainLayout.setVisibility(View.GONE);
-//        emptyLayout.setVisibility(View.GONE);
-//
-//        progressBar.setVisibility(View.VISIBLE);
     }
 
     public void stopLoading() {
@@ -352,5 +339,19 @@ public class PlaceholderFragment extends Fragment {
         emptyOrdersTextView.setText(R.string.error_text_pull_to_refresh);
         mainLayout.setVisibility(View.GONE);
         emptyLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onPrinterConnected() {
+        if (orderAdapter != null) {
+            orderAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onPrinterDisconnected() {
+        if (orderAdapter != null) {
+            orderAdapter.notifyDataSetChanged();
+        }
     }
 }

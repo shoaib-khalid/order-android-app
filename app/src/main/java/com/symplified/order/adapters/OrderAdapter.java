@@ -1,6 +1,5 @@
 package com.symplified.order.adapters;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -46,13 +45,11 @@ import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.utils.Utility;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -82,7 +79,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.section = section;
         this.context = context;
 
-        progressDialog = new Dialog((Activity) context);
+        progressDialog = new Dialog(context);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
         progressDialog.setCancelable(false);
@@ -94,14 +91,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView name, invoice, date, total, total2, status, phoneNumber, address, subTotal,
-                deliveryCharges, deliveryDiscount, discount, serviceCharges;
-        private final MaterialButton editButton, cancelButton, acceptButton, statusButton, trackButton, callButton;
+        private final TextView name, invoice, date, total, total2, status, phoneNumber, address,
+                subTotal, deliveryCharges, deliveryDiscount, discount, serviceCharges;
+        private final MaterialButton editButton, cancelButton, acceptButton, statusButton,
+                trackButton, callButton;
         private final ImageButton printButton;
         private final CardView cardView;
-        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type, currStatusLabel, currStatus, customerNotes, riderName, riderContact;
+        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type,
+                currStatusLabel, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
-        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote, rlRiderDetails;
+        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges,
+                rlDeliveryDiscount, rlCustomerNote, rlRiderDetails;
         private final View divider3, divider7, divider8, divider9;
         private final ImageView riderCallIcon;
 
@@ -112,13 +112,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            name = (TextView) itemView.findViewById(R.id.order_row_name_value);
-            invoice = (TextView) itemView.findViewById(R.id.card_invoice_value);
-            date = (TextView) itemView.findViewById(R.id.order_date_value);
-            total = (TextView) itemView.findViewById(R.id.order_total_value);
-            status = (TextView) itemView.findViewById(R.id.order_status_value);
-            typeLabel = (TextView) itemView.findViewById(R.id.order_type);
-            type = (TextView) itemView.findViewById(R.id.order_type_value);
+            name = itemView.findViewById(R.id.order_row_name_value);
+            invoice = itemView.findViewById(R.id.card_invoice_value);
+            date = itemView.findViewById(R.id.order_date_value);
+            total = itemView.findViewById(R.id.order_total_value);
+            status = itemView.findViewById(R.id.order_status_value);
+            typeLabel = itemView.findViewById(R.id.order_type);
+            type = itemView.findViewById(R.id.order_type_value);
             customerNotes = itemView.findViewById(R.id.customer_note_value);
 
             phoneNumber = itemView.findViewById(R.id.contact_value);
@@ -140,8 +140,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             riderCallIcon = itemView.findViewById(R.id.address_icon_phone);
 
-            currStatusLabel = (TextView) itemView.findViewById(R.id.order_curr_status);
-            currStatus = (TextView) itemView.findViewById(R.id.order_curr_status_value);
+            currStatusLabel = itemView.findViewById(R.id.order_curr_status);
+            currStatus = itemView.findViewById(R.id.order_curr_status_value);
             recyclerView = itemView.findViewById(R.id.order_items_recycler);
 
             editButton = itemView.findViewById(R.id.btn_edit_order);
@@ -335,6 +335,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
 
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
+
+        if (SunmiPrintHelper.getInstance().isPrinterConnected()) {
+            holder.printButton.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -382,9 +386,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
             dialog.dismiss();
 
-            int position = holder.getAdapterPosition();
-            Order.OrderDetailsResponse removedOrder = orders.remove(position);
-            notifyItemRemoved(position);
+            Order.OrderDetailsResponse removedOrder = orders.remove(holder.getAdapterPosition());
+            notifyItemRemoved(holder.getAdapterPosition());
+            notifyItemRangeChanged(holder.getAdapterPosition(), orders.size());
 
             Call<ResponseBody> processOrder = orderApiService
                     .updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
@@ -395,7 +399,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
-                        reAddOrder(position, removedOrder);
+                        reAddOrder(holder.getAdapterPosition(), removedOrder);
                     }
                 }
 
@@ -404,7 +408,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ", t);
 
-                    reAddOrder(position, removedOrder);
+                    reAddOrder(holder.getAdapterPosition(), removedOrder);
                 }
             });
         });
@@ -413,7 +417,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         });
 
         dialog.show();
-
     }
 
     private void updateOrderStatus(Order.OrderDetailsResponse orderDetails, int position) {
@@ -586,12 +589,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> items) {
 
-        if (SunmiPrintHelper.getInstance().getStatus() != SunmiPrinterStatus.FOUND) {
+        if (SunmiPrintHelper.getInstance().isPrinterConnected()) {
             Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        Utility.logToFile("Building Receipt\n");
 
         String currency = getCurrencySymbol(order);
 
@@ -651,14 +652,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String toPrint = String.valueOf(text);
         Log.d("print", toPrint);
 
-        Utility.logToFile(toPrint);
-
         Toast.makeText(context, "Printing receipt", Toast.LENGTH_SHORT).show();
         SunmiPrintHelper.getInstance().printText(toPrint);
         SunmiPrintHelper.getInstance().feedPaper();
     }
 
-    String getCurrencySymbol(Order order) {
+    private String getCurrencySymbol(Order order) {
         SharedPreferences sharedPreferences
                 = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         return order.store != null
