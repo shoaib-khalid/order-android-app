@@ -103,7 +103,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
         String clientId = sharedPreferences.getString("ownerId", null);
 
-        if(clientId == null) {
+        if (clientId == null) {
             Toast.makeText(getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
         }
 
@@ -119,11 +119,11 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
         pageViewModel.setIndex(0);
 
-        switch (section){
-            case "new" :{
+        switch (section) {
+            case "new": {
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.getNewOrdersByClientId(clientId);
-                if(AlertService.isPlaying()){
+                if (AlertService.isPlaying()) {
                     getActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
                 NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -135,7 +135,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
                 orderResponse = orderApiService.getOngoingOrdersByClientId(headers, clientId);
                 break;
             }
-            case "past":{
+            case "past": {
                 pageViewModel.setIndex(2);
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date current = new Date();
@@ -148,10 +148,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
         ordersReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-//                if(section.equals("new")){
-                    Toast.makeText(getContext(), "Updating orders", Toast.LENGTH_SHORT).show();
-                    onResume();
-//                }
+                onResume();
             }
         };
 
@@ -192,7 +189,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
         getOrders();
 
-        if(AlertService.isPlaying()){
+        if (AlertService.isPlaying()) {
             getActivity().stopService(new Intent(getContext(), AlertService.class));
         }
         NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
@@ -204,7 +201,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
     public void onStart() {
         super.onStart();
         IntentFilter filter = new IntentFilter("com.symplified.order.GET_ORDERS");
-        if(getContext() != null){
+        if (getContext() != null) {
             getContext().registerReceiver(ordersReceiver, filter);
         }
     }
@@ -212,7 +209,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
     @Override
     public void onStop() {
         super.onStop();
-        if(getContext() != null){
+        if (getContext() != null) {
             getContext().unregisterReceiver(ordersReceiver);
         }
     }
@@ -223,15 +220,19 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
         binding = null;
     }
 
-    public void updateOrdersEveryFiveMinutes(){
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SunmiPrintHelper.getInstance().removeObserver(this);
+    }
+
+    public void updateOrdersEveryFiveMinutes() {
         AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
         Intent fetchOrdersIntent = new Intent("com.symplified.order.GET_ORDERS");
         PendingIntent pendingIntent;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_IMMUTABLE);
-        }
-        else
-        {
+        } else {
             pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
 //        getActivity().sendBroadcast(fetchOrdersIntent);
@@ -244,13 +245,13 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
     }
 
-    public void getOrders(){
+    public void getOrders() {
 //        progressDialog.show();
         startLoading();
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     List<Order.OrderDetailsResponse> orders = response.body().data.content;
                     for (Order.OrderDetailsResponse order : orders) {
                         Log.d("order-activity", "Order id: " + order.order.id + ", Invoice Id: " + order.order.invoiceId);
@@ -284,7 +285,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     List<Order.OrderDetailsResponse> orders = response.body().data.content;
                     orderAdapter = new OrderAdapter(orders, section, getActivity());
                     recyclerView.setAdapter(orderAdapter);

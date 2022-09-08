@@ -39,6 +39,10 @@ public class SunmiPrintHelper {
         printerObservers.add(observer);
     }
 
+    public void removeObserver(PrinterObserver observer) {
+        printerObservers.remove(observer);
+    }
+
     private InnerPrinterCallback innerPrinterCallback = new InnerPrinterCallback() {
         @Override
         protected void onConnected(SunmiPrinterService service) {
