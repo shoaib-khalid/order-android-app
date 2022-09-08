@@ -82,6 +82,27 @@ public class SunmiPrintHelper {
         }
     }
 
+    public void feedPaper() {
+        if (printerService != null) {
+            try {
+                printerService.autoOutPaper(null);
+            } catch (Exception e) {
+                handleException("Error while calling autoOutPaper. Printing 3 lines instead", e);
+                print3Lines();
+            }
+        }
+    }
+
+    public void print3Lines() {
+        if (printerService != null) {
+            try {
+                printerService.lineWrap(3, null);
+            } catch (Exception e) {
+                handleException("Error while printing 3 lines", e);
+            }
+        }
+    }
+
     private void updateSunmiPrinterService(SunmiPrinterService service) {
         boolean hasPrinter = false;
         try {
@@ -99,7 +120,7 @@ public class SunmiPrintHelper {
 
         Utility.logToFile("\n" + errorMessage + "\n" + Arrays.toString(ex.getStackTrace()) + "\n");
 
-        Toast.makeText(App.getAppContext(), errorMessage, Toast.LENGTH_SHORT).show();
+        Toast.makeText(App.getAppContext(), "Error occurred while printing. Please try again", Toast.LENGTH_SHORT).show();
         Log.e(TAG, errorMessage);
         ex.printStackTrace();
     }

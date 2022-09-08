@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public String nextStatus;
     public DecimalFormat formatter;
 
-    private List<Item> orderItems;
+    private List<Item> orderItems = new ArrayList<>();
     private OrderApi orderApiService;
     private DeliveryApi deliveryApiService;
 
@@ -191,7 +192,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         formatter = new DecimalFormat("#,###0.00");
 
-
         String currency = getCurrencySymbol(order);
 
         SimpleDateFormat actualFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -233,7 +233,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
         }
         holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
-        holder.printButton.setOnClickListener(view -> printReceipt(order, orderItems));
+        holder.printButton.setOnClickListener(view -> printReceipt(order));
 
         TimeZone storeTimeZone = order.store != null
                 ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
@@ -350,6 +350,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
                     orderItems = response.body().data.content;
+                    Log.d("print", "Received order items order with id " + order.invoiceId);
+                    for (Item item : orderItems) {
+                        Log.d("print", item.productName);
+                    }
                     ItemAdapter itemsAdapter = new ItemAdapter(orderItems, order, context);
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
@@ -419,8 +423,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
 
-        Call<ResponseBody> processOrder = orderApiService.updateOrderStatus(headers,
-                new Order.OrderUpdate(orderDetails.order.id, Status.fromString(orderDetails.nextCompletionStatus)), orderDetails.order.id);
+        Call<ResponseBody> processOrder = orderApiService
+                .updateOrderStatus(headers,
+                        new Order.OrderUpdate(orderDetails.order.id,
+                                Status.fromString(orderDetails.nextCompletionStatus)),
+                        orderDetails.order.id);
 
         progressDialog.show();
         processOrder.clone().enqueue(new Callback<ResponseBody>() {
@@ -580,30 +587,33 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return dateTime;
     }
 
-    private void printReceipt(Order order, List<Item> orderItems) {
+    private void printReceipt(Order order) {
 
         if (SunmiPrintHelper.getInstance().getStatus() != SunmiPrinterStatus.FOUND) {
             Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
-            return;
+//            return;
         }
 
         Utility.logToFile("Building Receipt\n");
 
         String currency = getCurrencySymbol(order);
 
+        String divider = "\n-------------------------------";
         StringBuilder text = new StringBuilder();
-        text.append("\tDeliverin.MY Order Chit");
+        text.append(divider);
+        text.append("\n\tDeliverin.MY Order Chit");
+        text.append(divider);
         text.append("\nOrder Id: ").append(order.invoiceId);
 
         text.append("\nOrder Type: ");
         text.append(order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
 
-        text.append("\nCustomer contact no.: ").append(order.orderShipmentDetail.phoneNumber);
+        text.append("\nCustomer contact no.: \n").append(order.orderShipmentDetail.phoneNumber);
 
-        text.append("\n----------------------------------------------");
+        text.append(divider);
 
         for (Item item : orderItems) {
-            text.append("\n\n").append(item.productName);
+            text.append("\n").append(item.productName);
             if (item.productVariant != null && !item.productVariant.equals("")) {
                 text.append("\n").append(item.productVariant);
             }
@@ -616,29 +626,34 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 text.append("\nInstructions: ").append(item.specialInstruction);
             }
             text.append("\nQuantity: ").append(item.quantity);
-            text.append("\nPrice: ").append(currency).append(" ").append(formatter.format(item.price));
+            text.append("\nTotal Price: ")
+                    .append(currency)
+                    .append(" ")
+                    .append(formatter.format(item.price))
+                    .append("\n");
         }
 
-        text.append("\n----------------------------------------------");
+        text.append(divider);
 
-        text.append("\nSub-total\t\t\t\t\t\t\t");
+        text.append("\nSub-total           ");
         text.append(currency).append(" ").append(formatter.format(order.subTotal));
 
-        text.append("\nService Charges\t\t\t\t\t\t");
+        text.append("\nService Charges     ");
         text.append(currency).append(" ");
         text.append(order.storeServiceCharges != null
                 ? formatter.format(order.storeServiceCharges)
                 : "0.00");
 
-        text.append("\nDelivery Charges\t\t\t\t\t");
+        text.append("\nDelivery Charges    ");
         text.append(currency).append(" ");
         text.append(order.deliveryCharges != null
                 ? formatter.format(order.deliveryCharges)
                 : "0.00");
 
-        text.append("\n----------------------------------------------");
+        text.append(divider);
 
-        text.append("\nTotal\t\t\t\t\t\t\t\t").append(currency).append(" ")
+        text.append("\nTotal               ")
+                .append(currency).append(" ")
                 .append(formatter.format(order.total));
 
         String toPrint = String.valueOf(text);
@@ -648,6 +663,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         Toast.makeText(context, "Printing receipt", Toast.LENGTH_SHORT).show();
         SunmiPrintHelper.getInstance().printText(toPrint);
+        SunmiPrintHelper.getInstance().feedPaper();
     }
 
     String getCurrencySymbol(Order order) {
