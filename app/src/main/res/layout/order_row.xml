@@ -41,10 +41,10 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:text="@string/call"
-                android:visibility="gone"
-                android:textSize="10sp" />
-
+                android:padding="5dp"
+                android:background="@drawable/rounted_imagebutton"
+                android:layout_marginEnd="3dp"
+                android:visibility="gone" />
 
             <RelativeLayout
                 android:id="@+id/date_rel_layout"
@@ -184,18 +184,6 @@
                     android:layout_centerVertical="true"
                     android:layout_toEndOf="@+id/ic_address"
                     android:text="@string/tv_shipment_address_value" />
-
-<!--                <com.google.android.material.button.MaterialButton-->
-<!--                    android:id="@+id/btn_navigate"-->
-<!--                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"-->
-<!--                    android:layout_width="110dp"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_alignParentRight="true"-->
-<!--                    android:layout_centerVertical="true"-->
-<!--                    android:layout_marginLeft="16dp"-->
-<!--                    android:text="@string/navigate"-->
-<!--                    android:textColor="@color/sf_primary"-->
-<!--                    app:strokeColor="@color/sf_primary" />-->
 
             </RelativeLayout>
 

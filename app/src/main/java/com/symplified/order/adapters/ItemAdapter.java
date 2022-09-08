@@ -124,4 +124,6 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public int getItemCount() {
         return items.size();
     }
+
+    public List<Item> getItems() { return items; }
 }

@@ -102,7 +102,7 @@ public class StartupReceiver extends BroadcastReceiver {
         String clientId = sharedPrefs.getString("ownerId", "");
 
         OrderApi orderApiService = ServiceGenerator.createOrderService();
-        Call<OrderDetailsResponse> orderResponse = orderApiService.getNewOrdersByClientId(new HashMap<>(), clientId);
+        Call<OrderDetailsResponse> orderResponse = orderApiService.getNewOrdersByClientId(clientId);
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {

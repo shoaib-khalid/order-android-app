@@ -27,34 +27,17 @@ import retrofit2.http.Url;
 
 public interface OrderApi {
 
-////    https://api.symplified.it/order-service/v1/orders
-//    @GET("orders?receiverName=&phoneNumber=&completionStatus=PAYMENT_CONFIRMED&pageSize=10&")
-//    Call<ResponseBody> getNewOrders(@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
-
-
-    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE")
-    Call<OrderDetailsResponse> getNewOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
-
-    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE")
+    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE&sortingOrder=ASC")
     Call<OrderDetailsResponse> getNewOrdersByClientId(@Query("clientId") String clientId);
 
     @GET("orders?receiverName=&phoneNumber=&completionStatus=AWAITING_PICKUP&pageSize=10&")
     Call<ResponseBody> getPickupOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
-//
-//    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_PREPARED&pageSize=10&")
-//    Call<ResponseBody> getProcessedOrders (@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
 
-    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED")
+    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED&sortingOrder=ASC")
     Call<OrderDetailsResponse> getOngoingOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
-
-//
-//    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_DELIVERED&pageSize=10&")
-//    Call<ResponseBody> getSentOrders (@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
-
 
     @GET("orders/search?completionStatus=CANCELED_BY_MERCHANT&completionStatus=DELIVERED_TO_CUSTOMER&completionStatus=CANCELED_BY_CUSTOMER")
     Call<OrderDetailsResponse> getSentOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId, @Query("from") String from, @Query("to") String to);
-
 
     @GET("orders/{orderId}/items")
     Call<ItemResponse> getItemsForOrder(@HeaderMap Map<String,String> headers , @Path("orderId") String storeId);
@@ -73,5 +56,4 @@ public interface OrderApi {
 
     @PUT("orders/reviseitem/{orderId}")
     Call<HttpResponse> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
-
 }

@@ -156,7 +156,7 @@ public class EditOrderActivity extends NavbarActivity {
             Log.d("edit-order", item.id + " " + item.quantity);
         }
 
-        if(adapter.updatedItemsList.size() == 0){
+        if(adapter.updatedItemsList.size() == 0) {
             Toast.makeText(this, "No changes to update", Toast.LENGTH_SHORT).show();
             return;
         }
