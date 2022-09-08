@@ -74,7 +74,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public String nextStatus;
     public DecimalFormat formatter;
 
-    private List<Item> orderItems = new ArrayList<>();
     private OrderApi orderApiService;
     private DeliveryApi deliveryApiService;
 
@@ -233,7 +232,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
         }
         holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
-        holder.printButton.setOnClickListener(view -> printReceipt(order));
+        holder.printButton.setOnClickListener(view -> {
+            ItemAdapter adapter = (ItemAdapter) holder.recyclerView.getAdapter();
+            List<Item> items = adapter.getItems();
+            printReceipt(order, items);
+        });
 
         TimeZone storeTimeZone = order.store != null
                 ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
@@ -342,18 +345,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private void getOrderItems(Order order, ViewHolder holder) {
 
         Map<String, String> headers = new HashMap<>();
-
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
-                    orderItems = response.body().data.content;
-                    Log.d("print", "Received order items order with id " + order.invoiceId);
-                    for (Item item : orderItems) {
-                        Log.d("print", item.productName);
-                    }
+                    List<Item> orderItems = response.body().data.content;
                     ItemAdapter itemsAdapter = new ItemAdapter(orderItems, order, context);
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
@@ -373,7 +371,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     public void onCancelOrderButtonClick(Order order, ViewHolder holder) {
-        //add headers required for api calls
+
         Map<String, String> headers = new HashMap<>();
 
         dialog = new Dialog(context);
@@ -420,7 +418,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void updateOrderStatus(Order.OrderDetailsResponse orderDetails, int position) {
 
-        //add headers required for api calls
         Map<String, String> headers = new HashMap<>();
 
         Call<ResponseBody> processOrder = orderApiService
@@ -587,11 +584,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return dateTime;
     }
 
-    private void printReceipt(Order order) {
+    private void printReceipt(Order order, List<Item> items) {
 
         if (SunmiPrintHelper.getInstance().getStatus() != SunmiPrinterStatus.FOUND) {
             Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
-//            return;
+            return;
         }
 
         Utility.logToFile("Building Receipt\n");
@@ -600,19 +597,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         String divider = "\n-------------------------------";
         StringBuilder text = new StringBuilder();
+
         text.append(divider);
         text.append("\n\tDeliverin.MY Order Chit");
+
         text.append(divider);
         text.append("\nOrder Id: ").append(order.invoiceId);
-
         text.append("\nOrder Type: ");
         text.append(order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
-
         text.append("\nCustomer contact no.: \n").append(order.orderShipmentDetail.phoneNumber);
+        text.append(divider).append("\n");
 
-        text.append(divider);
-
-        for (Item item : orderItems) {
+        for (Item item : items) {
             text.append("\n").append(item.productName);
             if (item.productVariant != null && !item.productVariant.equals("")) {
                 text.append("\n").append(item.productVariant);
@@ -634,22 +630,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         text.append(divider);
-
         text.append("\nSub-total           ");
         text.append(currency).append(" ").append(formatter.format(order.subTotal));
-
         text.append("\nService Charges     ");
         text.append(currency).append(" ");
         text.append(order.storeServiceCharges != null
                 ? formatter.format(order.storeServiceCharges)
                 : "0.00");
-
         text.append("\nDelivery Charges    ");
         text.append(currency).append(" ");
         text.append(order.deliveryCharges != null
                 ? formatter.format(order.deliveryCharges)
                 : "0.00");
-
         text.append(divider);
 
         text.append("\nTotal               ")

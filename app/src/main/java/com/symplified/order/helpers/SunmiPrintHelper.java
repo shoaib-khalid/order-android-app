@@ -74,11 +74,13 @@ public class SunmiPrintHelper {
     }
 
     public void printText(String content) {
-        try {
-            Utility.logToFile("\nPrinting receipt text\n");
-            printerService.printText(content, null);
-        } catch (Exception e) {
-            handleException("Error occurred when printing", e);
+        if (printerService != null) {
+            try {
+                Utility.logToFile("\nPrinting receipt text\n");
+                printerService.printText(content, null);
+            } catch (Exception e) {
+                handleException("Error occurred when printing", e);
+            }
         }
     }
 
