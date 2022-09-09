@@ -591,7 +591,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private void printReceipt(Order order, List<Item> items) {
 
         if (!SunmiPrintHelper.getInstance().isPrinterConnected()) {
-            Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
             return;
         }
 

@@ -29,12 +29,7 @@ public class SunmiPrintHelper {
     }
 
     public boolean isPrinterConnected() {
-        try {
-            return InnerPrinterManager.getInstance().hasPrinter(printerService);
-        } catch (Exception e) {
-            handleException("Error while checking service ", e);
-        }
-        return false;
+        return isPrinterConnected;
     }
 
     public void addObserver(PrinterObserver observer) {
@@ -120,7 +115,15 @@ public class SunmiPrintHelper {
     }
 
     private void updateSunmiPrinterService(SunmiPrinterService service) {
-        if (isPrinterConnected()) {
+        boolean hasPrinter = false;
+        try {
+            hasPrinter = InnerPrinterManager.getInstance().hasPrinter(service);
+        } catch (Exception e) {
+            handleException("Error while checking service ", e);
+        }
+
+        isPrinterConnected = hasPrinter;
+        if (isPrinterConnected) {
             for (PrinterObserver observer : printerObservers) {
                 observer.onPrinterConnected();
             }
