@@ -29,7 +29,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.EditOrderActivity;
 import com.symplified.order.R;
@@ -45,17 +44,14 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,7 +63,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public Context context;
     public final String TAG = OrderAdapter.class.getName();
     public Dialog progressDialog, dialog;
-    public String nextStatus;
     public DecimalFormat formatter;
 
     private OrderApi orderApiService;
@@ -192,20 +187,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         String currency = getCurrencySymbol(order);
 
-        SimpleDateFormat actualFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        actualFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date actualDate = null;
-        try {
-            actualDate = actualFormat.parse(order.created);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        SimpleDateFormat storeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        storeFormat.setTimeZone(TimeZone.getTimeZone(order.store.regionCountry.timezone));
-
-        holder.date.setText(actualDate != null ? storeFormat.format(actualDate) : order.created);
-
         holder.name.setText(order.orderShipmentDetail.receiverName);
+
+        TimeZone storeTimeZone = order.store != null
+                ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
+                : TimeZone.getDefault();
+        holder.date.setText(convertUtcTimeToStoreTimezone(order.created, storeTimeZone));
+
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(currency + " " + formatter.format(order.total));
 
@@ -213,34 +201,34 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         String fullAddress = order.orderShipmentDetail.address + ", " + order.orderShipmentDetail.city + ", " + order.orderShipmentDetail.state + " " + order.orderShipmentDetail.zipcode;
         holder.address.setText(fullAddress);
         holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
+
         if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
             holder.rlDiscount.setVisibility(View.GONE);
         } else {
             holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
         }
+
         holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + formatter.format(order.deliveryCharges) : currency + " " + "0.00");
         holder.total2.setText(currency + " " + formatter.format(order.total));
+
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
             holder.rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
             holder.deliveryDiscount.setText("- " + currency + " " + formatter.format(order.deliveryDiscount));
         }
+
         if (order.storeServiceCharges == null || order.storeServiceCharges == 0.00) {
             holder.rlServiceCharges.setVisibility(View.GONE);
         } else {
             holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
         }
+
         holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
         holder.printButton.setOnClickListener(view -> {
             ItemAdapter adapter = (ItemAdapter) holder.recyclerView.getAdapter();
             List<Item> items = adapter.getItems();
             printReceipt(order, items);
         });
-
-        TimeZone storeTimeZone = order.store != null
-                ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
-                : TimeZone.getDefault();
-        holder.date.setText(convertUtcTimeToStoreTimezone(order.created, storeTimeZone));
 
         if (order.customerNotes != null && !order.customerNotes.equals("")) {
             holder.rlCustomerNote.setVisibility(View.VISIBLE);
@@ -257,11 +245,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.editButton.setVisibility(View.VISIBLE);
             holder.newLayout.setVisibility(View.VISIBLE);
             holder.acceptButton.setText(orderDetails.nextActionText);
-//            if (order.orderShipmentDetail.storePickup) {
-//                holder.type.setText("Self-Pickup");
-//            } else {
-//                holder.type.setText("Delivery");
-//            }
             holder.type.setText(order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
             holder.currStatusLayout.setVisibility(View.GONE);
             holder.divider8.setVisibility(View.GONE);
@@ -288,14 +271,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     break;
                 case "AWAITING_PICKUP":
                     holder.currStatus.setText("Awaiting Pickup");
-                    if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null)
+                    if (!order.orderShipmentDetail.storePickup
+                            && order.orderShipmentDetail.deliveryPeriodDetails != null) {
                         holder.trackButton.setVisibility(View.VISIBLE);
+                    }
                     break;
                 case "BEING_DELIVERED":
                     holder.currStatus.setText("Out for Delivery");
-                    if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null)
-//                    if (order.orderShipmentDetail.trackingUrl != null)
+                    if (!order.orderShipmentDetail.storePickup
+                            && order.orderShipmentDetail.deliveryPeriodDetails != null) {
                         holder.trackButton.setVisibility(View.VISIBLE);
+                    }
                     break;
             }
         } else if (section.equals("past")) {
@@ -323,7 +309,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.recyclerView.setLayoutManager(linearLayoutManager);
 
-        getOrderItems(order, holder);
+        getOrderItemsForView(order, holder);
 
         holder.cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order, holder));
 
@@ -345,10 +331,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return orders.size();
     }
 
-    private void getOrderItems(Order order, ViewHolder holder) {
+    private void getOrderItemsForView(Order order, ViewHolder holder) {
 
-        Map<String, String> headers = new HashMap<>();
-        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
+        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
 
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
@@ -373,6 +358,24 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         });
     }
 
+    private void getOrderItemsForPrint(Order order) {
+        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
+
+        itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
+            @Override
+            public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+                if (response.isSuccessful()) {
+                    printReceipt(order, response.body().data.content);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ItemResponse> call, Throwable t) {
+                Log.e(TAG, "onFailureItems: ", t);
+            }
+        });
+    }
+
     public void onCancelOrderButtonClick(Order order, ViewHolder holder) {
 
         Map<String, String> headers = new HashMap<>();
@@ -389,11 +392,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             notifyItemRemoved(holder.getAdapterPosition());
             notifyItemRangeChanged(holder.getAdapterPosition(), orders.size());
 
-            Call<ResponseBody> processOrder = orderApiService
+            Call<Order.UpdatedOrder> processOrder = orderApiService
                     .updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
-            processOrder.clone().enqueue(new Callback<ResponseBody>() {
+            processOrder.clone().enqueue(new Callback<Order.UpdatedOrder>() {
                 @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                public void onResponse(Call<Order.UpdatedOrder> call, Response<Order.UpdatedOrder> response) {
                     if (response.isSuccessful()) {
                         Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
                     } else {
@@ -403,7 +406,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 }
 
                 @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
+                public void onFailure(Call<Order.UpdatedOrder> call, Throwable t) {
                     Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ", t);
 
@@ -422,27 +425,26 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         Map<String, String> headers = new HashMap<>();
 
-        Call<ResponseBody> processOrder = orderApiService
+        Call<Order.UpdatedOrder> processOrder = orderApiService
                 .updateOrderStatus(headers,
                         new Order.OrderUpdate(orderDetails.order.id,
                                 Status.fromString(orderDetails.nextCompletionStatus)),
                         orderDetails.order.id);
 
         progressDialog.show();
-        processOrder.clone().enqueue(new Callback<ResponseBody>() {
+        processOrder.clone().enqueue(new Callback<Order.UpdatedOrder>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<Order.UpdatedOrder> call, Response<Order.UpdatedOrder> response) {
                 if (response.isSuccessful()) {
-                    try {
-                        Log.i(TAG, "onResponse: " + response.raw().toString());
-                        Order.UpdatedOrder currentOrder = new Gson().fromJson(response.body().string(), Order.UpdatedOrder.class);
-                        Toast.makeText(context, "Status Updated", Toast.LENGTH_SHORT).show();
-                        orders.remove(position);
-                        notifyDataSetChanged();
-                    } catch (IOException e) {
-                        progressDialog.dismiss();
-                        e.printStackTrace();
+                    if (section.equals("new")) {
+                        Log.d("order-adapter", "Processed new order");
+                        getOrderItemsForPrint(orderDetails.order);
                     }
+                    Order data = response.body().data;
+                    Toast.makeText(context, "Status Updated", Toast.LENGTH_SHORT).show();
+                    // TODO:  Update ongoing order with new status rather than removing
+                    orders.remove(position);
+                    notifyDataSetChanged();
                 } else {
                     Log.e(TAG, response.toString());
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
@@ -451,7 +453,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<Order.UpdatedOrder> call, Throwable t) {
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
                 Log.e(TAG, "onFailure: ", t);
@@ -588,7 +590,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> items) {
 
-        if (SunmiPrintHelper.getInstance().isPrinterConnected()) {
+        if (!SunmiPrintHelper.getInstance().isPrinterConnected()) {
             Toast.makeText(context, "Not connected to a Sunmi Printer", Toast.LENGTH_SHORT).show();
             return;
         }

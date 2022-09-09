@@ -94,14 +94,6 @@ public class LoginActivity extends AppCompatActivity {
             switchToStagingMode();
         }
 
-        // TODO: Switch to ServiceGenerator service when server stops returning error with user's access token
-//        String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
-//        Retrofit storeRetrofit = new Retrofit.Builder().client(new OkHttpClient())
-//                .baseUrl(baseUrl + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//        storeApiService = storeRetrofit.create(StoreApi.class);
-
         login.setOnClickListener(view -> onLoginButtonClick());
         btnSwitchToProduction.setOnClickListener(view -> switchToProductionMode());
     }

@@ -31,17 +31,13 @@ import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
-    public List<Item> items;
+    public List<Item> items = new ArrayList<>();
     public Order order;
     public List<UpdatedItem> updatedItemsList;
     public Context context;
     public DecimalFormat formatter;
     private static String TAG = ItemAdapter.class.getName();
-    public void setItems(List<Item> items) {
-        this.items = items;
-    }
 
-    public ItemAdapter(){}
     public ItemAdapter(List<Item> items, Order order, Context context){
         this.items = items;
         this.order = order;

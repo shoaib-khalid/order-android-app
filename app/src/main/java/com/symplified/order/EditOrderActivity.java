@@ -116,7 +116,7 @@ public class EditOrderActivity extends NavbarActivity {
     }
 
     private void getOrderItems(Order order) {
-        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
+        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
 
         progressDialog.show();
 
