@@ -9,6 +9,8 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderResponse;
+import com.symplified.order.models.order.OrderUpdateResponse;
+import com.symplified.order.models.order.UpdatedOrder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,8 +32,8 @@ public interface OrderApi {
     @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE&sortingOrder=ASC")
     Call<OrderDetailsResponse> getNewOrdersByClientId(@Query("clientId") String clientId);
 
-//    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED")
-    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED&sortingOrder=ASC")
+    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED")
+//    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED&sortingOrder=ASC")
     Call<OrderDetailsResponse> getOngoingOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
 
     @GET("orders/search?completionStatus=CANCELED_BY_MERCHANT&completionStatus=DELIVERED_TO_CUSTOMER&completionStatus=CANCELED_BY_CUSTOMER")
@@ -41,7 +43,7 @@ public interface OrderApi {
     Call<ItemResponse> getItemsForOrder(@Path("orderId") String storeId);
 
     @PUT("orders/{orderId}/completion-status-updates")
-    Call<Order.UpdatedOrder> updateOrderStatus(@HeaderMap Map<String, String> headers, @Body Order.OrderUpdate body, @Path("orderId") String orderId);
+    Call<OrderUpdateResponse> updateOrderStatus(@HeaderMap Map<String, String> headers, @Body Order.OrderUpdate body, @Path("orderId") String orderId);
 
     @GET("orders/details/{orderId}")
     Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);

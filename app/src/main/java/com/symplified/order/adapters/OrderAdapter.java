@@ -42,6 +42,7 @@ import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
+import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.text.DecimalFormat;
@@ -58,7 +59,7 @@ import retrofit2.Response;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
 
-    public List<Order.OrderDetailsResponse> orders;
+    public List<Order.OrderDetails> orders;
     public String section;
     public Context context;
     public final String TAG = OrderAdapter.class.getName();
@@ -68,7 +69,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     private OrderApi orderApiService;
     private DeliveryApi deliveryApiService;
 
-    public OrderAdapter(List<Order.OrderDetailsResponse> orders, String section, Context context) {
+    public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context) {
         this.orders = orders;
         this.section = section;
         this.context = context;
@@ -165,7 +166,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             itemsProgressBar = itemView.findViewById(R.id.order_items_progress_bar);
             itemsErrorTextView = itemView.findViewById(R.id.order_items_fail_textview);
-
         }
     }
 
@@ -180,7 +180,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull OrderAdapter.ViewHolder holder, int position) {
 
-        Order.OrderDetailsResponse orderDetails = orders.get(position);
+        Order.OrderDetails orderDetails = orders.get(position);
         Order order = orderDetails.order;
 
         formatter = new DecimalFormat("#,###0.00");
@@ -312,13 +312,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         getOrderItemsForView(order, holder);
 
         holder.cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order, holder));
-
         holder.acceptButton.setOnClickListener(view -> updateOrderStatus(orderDetails, position));
-
         holder.statusButton.setOnClickListener(view -> updateOrderStatus(orderDetails, position));
-
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
-
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
 
         if (SunmiPrintHelper.getInstance().isPrinterConnected()) {
@@ -388,15 +384,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
             dialog.dismiss();
 
-            Order.OrderDetailsResponse removedOrder = orders.remove(holder.getAdapterPosition());
+            Order.OrderDetails removedOrder = orders.remove(holder.getAdapterPosition());
             notifyItemRemoved(holder.getAdapterPosition());
             notifyItemRangeChanged(holder.getAdapterPosition(), orders.size());
 
-            Call<Order.UpdatedOrder> processOrder = orderApiService
+            Call<OrderUpdateResponse> processOrder = orderApiService
                     .updateOrderStatus(headers, new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
-            processOrder.clone().enqueue(new Callback<Order.UpdatedOrder>() {
+            processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
                 @Override
-                public void onResponse(Call<Order.UpdatedOrder> call, Response<Order.UpdatedOrder> response) {
+                public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
                     if (response.isSuccessful()) {
                         Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
                     } else {
@@ -406,7 +402,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 }
 
                 @Override
-                public void onFailure(Call<Order.UpdatedOrder> call, Throwable t) {
+                public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
                     Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ", t);
 
@@ -421,30 +417,42 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         dialog.show();
     }
 
-    private void updateOrderStatus(Order.OrderDetailsResponse orderDetails, int position) {
+    private void updateOrderStatus(Order.OrderDetails currentOrderDetails, int position) {
 
         Map<String, String> headers = new HashMap<>();
 
-        Call<Order.UpdatedOrder> processOrder = orderApiService
+        Log.d(TAG, "Sending next completion status: " + currentOrderDetails.nextCompletionStatus);
+        Call<OrderUpdateResponse> processOrder = orderApiService
                 .updateOrderStatus(headers,
-                        new Order.OrderUpdate(orderDetails.order.id,
-                                Status.fromString(orderDetails.nextCompletionStatus)),
-                        orderDetails.order.id);
+                        new Order.OrderUpdate(currentOrderDetails.order.id,
+                                Status.fromString(currentOrderDetails.nextCompletionStatus)),
+                        currentOrderDetails.order.id);
 
         progressDialog.show();
-        processOrder.clone().enqueue(new Callback<Order.UpdatedOrder>() {
+        processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
-            public void onResponse(Call<Order.UpdatedOrder> call, Response<Order.UpdatedOrder> response) {
+            public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
                 if (response.isSuccessful()) {
-                    if (section.equals("new")) {
-                        Log.d("order-adapter", "Processed new order");
-                        getOrderItemsForPrint(orderDetails.order);
+                    String oldCompletionStatus = currentOrderDetails.order.completionStatus;
+                    Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
+
+                    int indexOfOrder = orders.indexOf(currentOrderDetails);
+                    if (isOrderNew(oldCompletionStatus) || isOrderCompleted(updatedOrder.order.completionStatus)) {
+                        Log.d("order-adapter", "order completed: " + updatedOrder.order.completionStatus);
+                        if (isOrderNew(oldCompletionStatus)) {
+                            getOrderItemsForPrint(currentOrderDetails.order);
+                        }
+
+                        if (indexOfOrder != -1) {
+                            orders.remove(indexOfOrder);
+                            notifyItemRemoved(indexOfOrder);
+                        }
+                        // TODO: Move order to ongoing tab
+                    } else if (isOrderOngoing(oldCompletionStatus) && indexOfOrder != 1) {
+                        orders.set(indexOfOrder, updatedOrder);
+                        notifyItemChanged(indexOfOrder);
                     }
-                    Order data = response.body().data;
                     Toast.makeText(context, "Status Updated", Toast.LENGTH_SHORT).show();
-                    // TODO:  Update ongoing order with new status rather than removing
-                    orders.remove(position);
-                    notifyDataSetChanged();
                 } else {
                     Log.e(TAG, response.toString());
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
@@ -453,7 +461,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
 
             @Override
-            public void onFailure(Call<Order.UpdatedOrder> call, Throwable t) {
+            public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
                 Log.e(TAG, "onFailure: ", t);
@@ -490,7 +498,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
     }
 
-    private void reAddOrder(int position, Order.OrderDetailsResponse removedOrder) {
+    private void reAddOrder(int position, Order.OrderDetails removedOrder) {
         try {
             orders.add(position, removedOrder);
         } catch (Exception e) {
@@ -500,13 +508,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         notifyItemInserted(position);
     }
 
-    private boolean isOrderNew(Order.OrderDetailsResponse order) {
-        return order.currentCompletionStatus.equals(Status.PAYMENT_CONFIRMED.toString())
-                || order.currentCompletionStatus.equals(Status.RECEIVED_AT_STORE.toString());
+    private boolean isOrderNew(String completionStatus) {
+        return completionStatus.equals(Status.PAYMENT_CONFIRMED.toString())
+                || completionStatus.equals(Status.RECEIVED_AT_STORE.toString());
     }
 
-    private boolean isOrderOngoing(Order.OrderDetailsResponse order) {
-        return !isOrderNew(order) && order.nextCompletionStatus != null;
+    private boolean isOrderOngoing(String completionStatus) {
+        return completionStatus.equals(Status.BEING_PREPARED.toString())
+                || completionStatus.equals(Status.AWAITING_PICKUP.toString())
+                || completionStatus.equals(Status.BEING_DELIVERED.toString());
+    }
+
+    private boolean isOrderCompleted(String completionStatus) {
+        return completionStatus.equals(Status.DELIVERED_TO_CUSTOMER.toString());
     }
 
     private void getRiderDetails(ViewHolder holder, Order order, int tag) {
@@ -517,7 +531,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         riderDetails.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
             @Override
-            public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
+            public void onResponse(Call<OrderDeliveryDetailsResponse> call,
+                                   Response<OrderDeliveryDetailsResponse> response) {
                 if (response.isSuccessful()) {
                     if (tag == 1) {
                         Intent intent = new Intent(context, TrackOrderActivity.class);

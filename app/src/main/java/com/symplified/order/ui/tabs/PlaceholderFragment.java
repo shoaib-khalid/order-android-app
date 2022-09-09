@@ -252,8 +252,8 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
-                    List<Order.OrderDetailsResponse> orders = response.body().data.content;
-                    for (Order.OrderDetailsResponse order : orders) {
+                    List<Order.OrderDetails> orders = response.body().data.content;
+                    for (Order.OrderDetails order : orders) {
                         Log.d("order-activity", "Order id: " + order.order.id + ", Invoice Id: " + order.order.invoiceId);
                     }
                     orderAdapter = new OrderAdapter(orders, section, getActivity());
@@ -286,7 +286,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
-                    List<Order.OrderDetailsResponse> orders = response.body().data.content;
+                    List<Order.OrderDetails> orders = response.body().data.content;
                     orderAdapter = new OrderAdapter(orders, section, getActivity());
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();

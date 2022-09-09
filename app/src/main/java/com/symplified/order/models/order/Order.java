@@ -1,13 +1,10 @@
 package com.symplified.order.models.order;
 
-import androidx.annotation.NonNull;
-
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.Store;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 public class Order implements Serializable {
@@ -188,14 +185,22 @@ public class Order implements Serializable {
     }
 
     public static class OrderDetailsList implements Serializable {
-        public List<OrderDetailsResponse> content;
+        public List<OrderDetails> content;
     }
 
-    public static class OrderDetailsResponse implements Serializable {
+    public static class OrderDetails implements Serializable {
         public Order order;
         public String currentCompletionStatus;
         public String nextCompletionStatus;
         public String nextActionText;
+
+        public OrderDetails(UpdatedOrder updatedOrder) {
+            this.order = updatedOrder;
+
+            this.currentCompletionStatus = updatedOrder.completionStatus;
+            this.nextCompletionStatus = updatedOrder.nextCompletionStatus;
+            this.nextActionText = updatedOrder.nextActionText;
+        }
     }
 
     public static class OrderUpdate{
@@ -206,10 +211,6 @@ public class Order implements Serializable {
             this.orderId = orderId;
             this.status = status;
         }
-    }
-
-    public static class UpdatedOrder extends HttpResponse implements Serializable{
-        public Order data;
     }
 
     public static class OrderByIdResponse extends HttpResponse implements Serializable{

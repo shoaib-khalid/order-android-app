@@ -1,15 +1,11 @@
 package com.symplified.order.services;
 
-import static com.symplified.order.App.CHANNEL_ID;
-
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
@@ -20,11 +16,9 @@ import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback;
 import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.OrdersActivity;
@@ -107,7 +101,7 @@ public class StartupReceiver extends BroadcastReceiver {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
-                    List<Order.OrderDetailsResponse> newOrders = response.body().data.content;
+                    List<Order.OrderDetails> newOrders = response.body().data.content;
                     if (newOrders.size() > 0) {
 
                         Intent toOrdersActivity = new Intent(context, OrdersActivity.class);
