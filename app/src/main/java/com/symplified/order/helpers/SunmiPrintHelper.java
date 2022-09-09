@@ -8,12 +8,9 @@ import com.sunmi.peripheral.printer.InnerPrinterCallback;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.symplified.order.App;
-import com.symplified.order.enums.SunmiPrinterStatus;
 import com.symplified.order.observers.PrinterObserver;
-import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class SunmiPrintHelper {
@@ -32,7 +29,12 @@ public class SunmiPrintHelper {
     }
 
     public boolean isPrinterConnected() {
-        return isPrinterConnected;
+        try {
+            return InnerPrinterManager.getInstance().hasPrinter(printerService);
+        } catch (Exception e) {
+            handleException("Error while checking service ", e);
+        }
+        return false;
     }
 
     public void addObserver(PrinterObserver observer) {
@@ -118,14 +120,7 @@ public class SunmiPrintHelper {
     }
 
     private void updateSunmiPrinterService(SunmiPrinterService service) {
-        boolean hasPrinter = false;
-        try {
-            hasPrinter = InnerPrinterManager.getInstance().hasPrinter(service);
-        } catch (Exception e) {
-            handleException("Error while checking service ", e);
-        }
-        isPrinterConnected = hasPrinter;
-        if (isPrinterConnected) {
+        if (isPrinterConnected()) {
             for (PrinterObserver observer : printerObservers) {
                 observer.onPrinterConnected();
             }

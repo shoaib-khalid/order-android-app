@@ -7,13 +7,6 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 android {
     signingConfigs {
-//        release {
-//            storeFile file('../keys/release.jks')
-//            storePassword 'kalsym@123'
-//            keyPassword 'kalsym@123'
-//            keyAlias 'release_alias'
-//        }
-
     }
 
     compileSdk 31
@@ -21,14 +14,10 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 31
-        versionCode 82
-        versionName "1.6.2"
+        versionCode 86
+        versionName "1.6.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
-//    lintOptions{
-//        checkReleaseBuilds false
-//    }
 
     buildTypes {
         release {

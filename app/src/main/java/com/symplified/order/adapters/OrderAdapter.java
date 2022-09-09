@@ -37,7 +37,6 @@ import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.Status;
-import com.symplified.order.enums.SunmiPrinterStatus;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
