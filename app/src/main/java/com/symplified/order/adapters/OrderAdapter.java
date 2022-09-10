@@ -101,7 +101,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final ImageView riderCallIcon;
 
         private final RecyclerView recyclerView;
-        private final ProgressBar itemsProgressBar;
+        private final ProgressBar orderProgressBar, itemsProgressBar;
         private final TextView itemsErrorTextView;
 
         public ViewHolder(@NonNull View itemView) {
@@ -164,6 +164,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             divider8 = itemView.findViewById(R.id.divider_card8);
             divider9 = itemView.findViewById(R.id.divider_card9);
 
+            orderProgressBar = itemView.findViewById(R.id.order_progress_bar);
             itemsProgressBar = itemView.findViewById(R.id.order_items_progress_bar);
             itemsErrorTextView = itemView.findViewById(R.id.order_items_fail_textview);
         }
@@ -248,7 +249,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.type.setText(order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
             holder.currStatusLayout.setVisibility(View.GONE);
             holder.divider8.setVisibility(View.GONE);
-
         } else if (section.equals("ongoing")) {
             if (orderDetails.nextActionText != null) {
                 holder.ongoingLayout.setVisibility(View.VISIBLE);
@@ -312,8 +312,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         getOrderItemsForView(order, holder);
 
         holder.cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order, holder));
-        holder.acceptButton.setOnClickListener(view -> updateOrderStatus(orderDetails, position));
-        holder.statusButton.setOnClickListener(view -> updateOrderStatus(orderDetails, position));
+        holder.acceptButton.setOnClickListener(view -> updateOrderStatus(orderDetails, holder));
+        holder.statusButton.setOnClickListener(view -> updateOrderStatus(orderDetails, holder));
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
 
@@ -333,7 +333,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
-            public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+            public void onResponse(@NonNull Call<ItemResponse> call, @NonNull Response<ItemResponse> response) {
                 if (response.isSuccessful()) {
                     List<Item> orderItems = response.body().data.content;
                     ItemAdapter itemsAdapter = new ItemAdapter(orderItems, order, context);
@@ -346,7 +346,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
 
             @Override
-            public void onFailure(Call<ItemResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<ItemResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, "onFailureItems: ", t);
                 holder.itemsProgressBar.setVisibility(View.GONE);
                 holder.itemsErrorTextView.setVisibility(View.VISIBLE);
@@ -417,18 +417,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         dialog.show();
     }
 
-    private void updateOrderStatus(Order.OrderDetails currentOrderDetails, int position) {
+    private void updateOrderStatus(Order.OrderDetails currentOrderDetails, ViewHolder holder) {
 
+        startLoading(holder);
         Map<String, String> headers = new HashMap<>();
 
-        Log.d(TAG, "Sending next completion status: " + currentOrderDetails.nextCompletionStatus);
         Call<OrderUpdateResponse> processOrder = orderApiService
                 .updateOrderStatus(headers,
                         new Order.OrderUpdate(currentOrderDetails.order.id,
                                 Status.fromString(currentOrderDetails.nextCompletionStatus)),
                         currentOrderDetails.order.id);
 
-        progressDialog.show();
         processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
             public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
@@ -456,6 +455,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 } else {
                     Log.e(TAG, response.toString());
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    stopLoading(holder, currentOrderDetails.order.completionStatus);
                 }
                 progressDialog.dismiss();
             }
@@ -464,6 +464,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
+                stopLoading(holder, currentOrderDetails.order.completionStatus);
                 Log.e(TAG, "onFailure: ", t);
             }
         });
@@ -666,9 +667,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 .append(formatter.format(order.total));
 
         String toPrint = String.valueOf(text);
-        Log.d("print", toPrint);
 
-        Toast.makeText(context, "Printing receipt", Toast.LENGTH_SHORT).show();
         SunmiPrintHelper.getInstance().printText(toPrint);
         SunmiPrintHelper.getInstance().feedPaper();
     }
@@ -679,5 +678,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         return order.store != null
                 ? order.store.regionCountry.currencySymbol
                 : sharedPreferences.getString("currency", "");
+    }
+
+    private void startLoading(ViewHolder holder) {
+        holder.orderProgressBar.setVisibility(View.VISIBLE);
+        holder.newLayout.setVisibility(View.GONE);
+        holder.ongoingLayout.setVisibility(View.GONE);
+    }
+
+    private void stopLoading(ViewHolder holder, String completionStatus) {
+        holder.orderProgressBar.setVisibility(View.GONE);
+        if (isOrderNew(completionStatus)) {
+            holder.newLayout.setVisibility(View.VISIBLE);
+        } else if (isOrderOngoing(completionStatus)) {
+            holder.ongoingLayout.setVisibility(View.VISIBLE);
+        }
     }
 }

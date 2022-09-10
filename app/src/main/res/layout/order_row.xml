@@ -20,799 +20,829 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingVertical="10dp">
-
-            <TextView
-                android:id="@+id/order_row_name_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                android:text="@string/card_name_value"
-                android:textSize="16sp"
-                android:paddingHorizontal="10dp"
-                android:textStyle="bold" />
-
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/btn_print_order"
-                android:src="@drawable/ic_print"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:padding="5dp"
-                android:background="@drawable/rounted_imagebutton"
-                android:layout_marginEnd="3dp"
-                android:visibility="gone" />
-
-            <RelativeLayout
-                android:id="@+id/date_rel_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                app:layout_constraintTop_toBottomOf="@id/order_row_name_value"
-                app:layout_constraintStart_toStartOf="parent"
-                android:paddingHorizontal="10dp"
-                android:layout_centerVertical="true">
-
-                <TextView
-                    android:id="@+id/order_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/order_placed_date"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/order_date_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toEndOf="@+id/order_date"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:text="@string/order_placed_date_value"
-                    android:textSize="12sp" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/rl_invoice_phone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp"
-                android:paddingHorizontal="10dp"
-                android:gravity="center_vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/date_rel_layout">
-
-                <RelativeLayout
-                    android:id="@+id/invoice_rel_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@+id/total_rel_layout"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true">
-
-                    <TextView
-                        android:id="@+id/order_invoice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:text="@string/tv_invoice_number"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/card_invoice_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@+id/order_invoice"
-                        android:text="@string/tv_invoice_number_value"
-                        android:textSize="12sp" />
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/total_rel_layout"
-                    android:layout_width="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:layout_alignParentEnd="true">
-
-                    <TextView
-                        android:id="@+id/order_total"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        android:text="@string/total"
-                        android:textSize="12sp"/>
-
-                    <TextView
-                        android:id="@+id/order_total_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_toEndOf="@+id/order_total"
-                        android:text="@string/order_amount_value"
-                        android:textSize="12sp"/>
-
-                </RelativeLayout>
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="10dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@id/rl_invoice_phone"
-                />
-
-
-            <RelativeLayout
-                android:id="@+id/rl_address"
-                android:layout_width="match_parent"
-                app:layout_constraintTop_toBottomOf="@id/divider_card"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="5dp"
-                android:gravity="center_vertical"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent">
-
-                <ImageView
-                    android:id="@+id/ic_address"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_navigate" />
-
-                <TextView
-                    android:id="@+id/address_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toEndOf="@+id/ic_address"
-                    android:text="@string/tv_shipment_address_value" />
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card2"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@id/rl_address"
-                />
-
-            <RelativeLayout
-                android:id="@+id/rl_contact"
-                android:layout_width="match_parent"
-                app:layout_constraintTop_toBottomOf="@id/divider_card2"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="5dp"
-                android:gravity="center_vertical"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent">
-
-                <ImageView
-                    android:id="@+id/ic_contact"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp"
-                    android:src="@drawable/ic_contact" />
-
-                <TextView
-                    android:id="@+id/contact_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_toEndOf="@+id/ic_contact"
-                    android:text="@string/card_phone_value"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_call"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:minWidth="100dp"
-                    android:text="@string/call"
-                    android:textColor="@color/sf_primary"
-                    android:textSize="10sp"
-                    app:strokeColor="@color/sf_primary" />
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card3"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_grey"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/rl_contact"
-                />
-
-            <RelativeLayout
-                android:id="@+id/rl_customer_note"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:padding="10dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/divider_card3">
-
-                <TextView
-                    android:id="@+id/customer_note_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/tv_shipment_note"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:id="@+id/customer_note_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/customer_note_label"
-                    android:text="@string/tv_shipment_note_value"
-                    android:textSize="12sp"/>
-
-            </RelativeLayout>
-
-            <LinearLayout
-                android:id="@+id/rl_items_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@+id/rl_customer_note">
-
-                <TextView
-                    android:id="@+id/item_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/header_item"
-                    android:layout_weight="1"/>
-
-                <TextView
-                    android:id="@+id/item_quantity"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:text="@string/header_qty"
-                    android:textAlignment="center"/>
-
-                <TextView
-                    android:id="@+id/item_price"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.5"
-                    android:textAlignment="textEnd"
-                    android:text="@string/header_price"/>
-
-            </LinearLayout>
+            android:layout_height="wrap_content">
 
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_items"
+                android:id="@+id/full_order_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                app:layout_constraintTop_toBottomOf="@+id/rl_items_header"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent">
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/order_items_recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:scrollbars="vertical"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
-
-                <ProgressBar
-                    android:id="@+id/order_items_progress_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent"
-                    android:visibility="visible" />
+                android:paddingVertical="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <TextView
-                    android:id="@+id/order_items_fail_textview"
-                    android:layout_width="match_parent"
+                    android:id="@+id/order_row_name_value"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:paddingHorizontal="10dp"
+                    android:text="@string/card_name_value"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+                <!--            app:layout_constraintTop_toTopOf="parent"-->
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_print_order"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="3dp"
+                    android:background="@drawable/rounted_imagebutton"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_print"
                     android:visibility="gone"
-                    android:textColor="@color/red"
-                    android:text="@string/order_items_fail_text"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintRight_toRightOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <RelativeLayout
-                android:id="@+id/rl_charges"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/cl_items"
-                app:layout_constraintRight_toRightOf="parent"
-                android:background="@color/light_grey"
-                android:orientation="vertical"
-                android:padding="10dp">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <RelativeLayout
-                    android:id="@+id/rl_subtotal"
-                    android:layout_width="match_parent"
+                    android:id="@+id/date_rel_layout"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:paddingHorizontal="10dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/order_row_name_value">
 
                     <TextView
-                        android:id="@+id/subtotal"
+                        android:id="@+id/order_date"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
-                        android:text="@string/sub_total"
-                        android:textStyle="bold" />
+                        android:layout_centerVertical="true"
+                        android:text="@string/order_placed_date"
+                        android:textSize="12sp" />
 
                     <TextView
-                        android:id="@+id/subtotal_value"
+                        android:id="@+id/order_date_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/order_amount_value"/>
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/order_date"
+                        android:ellipsize="end"
+                        android:maxLines="2"
+                        android:text="@string/order_placed_date_value"
+                        android:textSize="12sp" />
 
                 </RelativeLayout>
 
                 <RelativeLayout
-                    android:id="@+id/rl_discount"
+                    android:id="@+id/rl_invoice_phone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/rl_subtotal"
+                    android:layout_marginTop="10dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="5dp">
+                    android:paddingHorizontal="10dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/date_rel_layout">
 
-                    <TextView
-                        android:id="@+id/discount"
+                    <RelativeLayout
+                        android:id="@+id/invoice_rel_layout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
-                        android:text="@string/discount"
-                        android:textStyle="bold" />
+                        android:layout_centerVertical="true"
+                        android:layout_toStartOf="@+id/total_rel_layout">
 
-                    <TextView
-                        android:id="@+id/discount_value"
+                        <TextView
+                            android:id="@+id/order_invoice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/tv_invoice_number"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/card_invoice_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@+id/order_invoice"
+                            android:text="@string/tv_invoice_number_value"
+                            android:textSize="12sp" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/total_rel_layout"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"/>
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="5dp">
 
-                </RelativeLayout>
+                        <TextView
+                            android:id="@+id/order_total"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/total"
+                            android:textSize="12sp" />
 
-                <RelativeLayout
-                    android:id="@+id/rl_service_charges"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/rl_discount"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
+                        <TextView
+                            android:id="@+id/order_total_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@+id/order_total"
+                            android:text="@string/order_amount_value"
+                            android:textSize="12sp" />
 
-                    <TextView
-                        android:id="@+id/service_charges"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/service_charges"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/service_charges_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"/>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/rl_delivery_charges"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/rl_service_charges"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
-
-                    <TextView
-                        android:id="@+id/delivery_by_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/delivery_charges"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/delivery_by_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"/>
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/rl_delivery_discount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/rl_delivery_charges"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="5dp">
-
-                    <TextView
-                        android:id="@+id/billing_delivery_charges_discount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="@string/delivery_charges_discount"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/billing_delivery_charges_discount_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:text="@string/delivery_charges_value"/>
+                    </RelativeLayout>
 
                 </RelativeLayout>
 
                 <View
-                    android:id="@+id/divider_card5"
+                    android:id="@+id/divider_card"
                     android:layout_width="match_parent"
-                    android:layout_height="2dp"
-                    android:layout_below="@+id/rl_delivery_discount"
+                    android:layout_height="1dp"
                     android:layout_marginVertical="10dp"
-                    android:background="@color/dark_grey" />
+                    android:background="@color/light_grey"
+                    app:layout_constraintTop_toBottomOf="@id/rl_invoice_phone" />
+
 
                 <RelativeLayout
-                    android:id="@+id/rl_total_charges"
+                    android:id="@+id/rl_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/divider_card5"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card">
 
-                    <TextView
-                        android:id="@+id/order_total_"
+                    <ImageView
+                        android:id="@+id/ic_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentStart="true"
-                        android:text="Total"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_navigate" />
 
                     <TextView
-                        android:id="@+id/order_total_value_"
+                        android:id="@+id/address_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/ic_address"
+                        android:text="@string/tv_shipment_address_value" />
+
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/divider_card2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_grey"
+                    app:layout_constraintTop_toBottomOf="@id/rl_address" />
+
+                <RelativeLayout
+                    android:id="@+id/rl_contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card2">
+
+                    <ImageView
+                        android:id="@+id/ic_contact"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="10dp"
+                        android:src="@drawable/ic_contact" />
+
+                    <TextView
+                        android:id="@+id/contact_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toEndOf="@+id/ic_contact"
+                        android:text="@string/card_phone_value" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_call"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:text="@string/order_amount_value"
-                        android:textSize="16sp"
+                        android:layout_centerVertical="true"
+                        android:minWidth="100dp"
+                        android:text="@string/call"
+                        android:textColor="@color/sf_primary"
+                        android:textSize="10sp"
+                        app:strokeColor="@color/sf_primary" />
+
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/divider_card3"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_grey"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/rl_contact" />
+
+                <RelativeLayout
+                    android:id="@+id/rl_customer_note"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card3">
+
+                    <TextView
+                        android:id="@+id/customer_note_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/tv_shipment_note"
                         android:textStyle="bold" />
 
-                </RelativeLayout>
-
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card6"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@id/rl_charges" />
-
-            <RelativeLayout
-                android:id="@+id/layout_order_type_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:paddingHorizontal="10dp"
-                android:orientation="horizontal"
-                android:showDividers="middle"
-                app:layout_constraintTop_toBottomOf="@id/divider_card6">
-
-                <LinearLayout
-                    android:id="@+id/layout_order_type"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@id/btn_edit_order">
-
                     <TextView
-                        android:id="@+id/order_type"
+                        android:id="@+id/customer_note_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/order_type"
-                        android:textStyle="bold"
+                        android:layout_below="@id/customer_note_label"
+                        android:text="@string/tv_shipment_note_value"
                         android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/order_type_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/order_type_value"
-                        android:textColor="@color/sf_primary"
-                        android:textStyle="bold"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
-
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_edit_order"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerInParent="true"
-                    android:minWidth="100dp"
-                    android:text="@string/edit_order"
-                    android:visibility="gone"
-                    android:textColor="@color/sf_primary"
-                    android:textSize="10sp"
-                    app:strokeColor="@color/sf_primary" />
-
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card7"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="10dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@id/layout_order_type_row" />
-
-            <RelativeLayout
-                android:id="@+id/layout_order_status_row"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:paddingHorizontal="10dp"
-                android:orientation="horizontal"
-                android:showDividers="middle"
-                app:layout_constraintTop_toBottomOf="@id/divider_card7">
-
-                <LinearLayout
-                    android:id="@+id/layout_order_curr_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@+id/btn_track_order">
-
-                    <TextView
-                        android:id="@+id/order_curr_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/order_status"
-                        android:textStyle="bold"
-                        android:textSize="12sp" />
-
-                    <TextView
-                        android:id="@+id/order_curr_status_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/order_curr_status_value"
-                        android:textColor="@color/sf_primary"
-                        android:textStyle="bold"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
-
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_track_order"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_alignParentEnd="true"
-                    app:strokeColor="@color/sf_primary"
-                    android:minWidth="100dp"
-                    android:visibility="gone"
-                    android:text="@string/track_order"
-                    android:textSize="10sp" />
-
-            </RelativeLayout>
-
-            <View
-                android:id="@+id/divider_card8"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="10dp"
-                android:background="@color/light_grey"
-                app:layout_constraintTop_toBottomOf="@id/layout_order_status_row" />
-
-            <LinearLayout
-                android:id="@+id/layout_new"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:layout_marginTop="10dp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider_card8">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_order_cancel"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="5dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/sf_cancel_button"
-                    android:padding="12dp"
-                    android:text="@string/cancel_order"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_order_accept"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="5dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/sf_accept_button"
-                    android:padding="12dp"
-                    android:text="@string/accept_order"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layout_ongoing"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginTop="10dp"
-                android:paddingHorizontal="10dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                android:visibility="gone"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/divider_card9">
-
-                <TextView
-                    android:id="@+id/update_status"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/order_status"
-                    android:textSize="16sp"
-                    android:layout_weight="1"
-                    android:textAlignment="center"
-                    android:visibility="gone"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_order_status"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_weight="1"
-                    android:padding="12dp"
-                    android:text="@string/pickup_orders"
-                    android:visibility="gone"
-                    android:backgroundTint="@color/sf_primary"/>
-
-                <TextView
-                    android:id="@+id/order_status_value"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/order_status_value"
-                    android:textSize="16sp"
-                    android:visibility="gone"
-                    android:textAlignment="center"
-                    android:layout_weight="1"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <RelativeLayout
-                android:id="@+id/rl_rider_details"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="10dp"
-                android:layout_marginTop="10dp"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@+id/divider_card8">
-
-                <RelativeLayout
-                    android:id="@+id/layout_driver"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:id="@+id/driver_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:minWidth="60dp"
-                        android:textStyle="bold"
-                        android:text="Driver:" />
-
-                    <TextView
-                        android:id="@+id/driver_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toEndOf="@+id/driver_label" />
 
                 </RelativeLayout>
 
-                <RelativeLayout
-                    android:id="@+id/layout_contact"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/rl_items_header"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/layout_driver"
-                    android:layout_marginTop="5dp">
+                    android:background="@color/light_grey"
+                    android:padding="10dp"
+                    app:layout_constraintTop_toBottomOf="@+id/rl_customer_note">
 
                     <TextView
-                        android:id="@+id/driver_contact_label"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/item_name"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:minWidth="60dp"
-                        android:textStyle="bold"
-                        android:text="Contact:" />
+                        android:layout_weight="1"
+                        android:text="@string/header_item" />
 
                     <TextView
-                        android:id="@+id/driver_contact_value"
+                        android:id="@+id/item_quantity"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/header_qty"
+                        android:textAlignment="center" />
+
+                    <TextView
+                        android:id="@+id/item_price"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:text="@string/header_price"
+                        android:textAlignment="textEnd" />
+
+                </LinearLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/cl_items"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rl_items_header">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/order_items_recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="vertical"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <ProgressBar
+                        android:id="@+id/order_items_progress_bar"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_toEndOf="@+id/driver_contact_label" />
+                        android:visibility="visible"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <ImageView
-                        android:id="@+id/address_icon_phone"
-                        android:layout_width="21dp"
-                        android:layout_height="21dp"
-                        android:layout_marginLeft="5dp"
+                    <TextView
+                        android:id="@+id/order_items_fail_textview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/order_items_fail_text"
+                        android:textColor="@color/red"
                         android:visibility="gone"
-                        android:layout_toEndOf="@+id/driver_contact_value"
-                        android:src="@drawable/ic_baseline_phone_24" />
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rl_charges"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/light_grey"
+                    android:orientation="vertical"
+                    android:padding="10dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/cl_items">
+
+                    <RelativeLayout
+                        android:id="@+id/rl_subtotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp">
+
+                        <TextView
+                            android:id="@+id/subtotal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/sub_total"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/subtotal_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/order_amount_value" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_discount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/rl_subtotal"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp">
+
+                        <TextView
+                            android:id="@+id/discount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/discount"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/discount_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/delivery_charges_value" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_service_charges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/rl_discount"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp">
+
+                        <TextView
+                            android:id="@+id/service_charges"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/service_charges"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/service_charges_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/delivery_charges_value" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_delivery_charges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/rl_service_charges"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp">
+
+                        <TextView
+                            android:id="@+id/delivery_by_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/delivery_charges"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/delivery_by_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/delivery_charges_value" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_delivery_discount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/rl_delivery_charges"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp">
+
+                        <TextView
+                            android:id="@+id/billing_delivery_charges_discount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/delivery_charges_discount"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/billing_delivery_charges_discount_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/delivery_charges_value" />
+
+                    </RelativeLayout>
+
+                    <View
+                        android:id="@+id/divider_card5"
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_below="@+id/rl_delivery_discount"
+                        android:layout_marginVertical="10dp"
+                        android:background="@color/dark_grey" />
+
+                    <RelativeLayout
+                        android:id="@+id/rl_total_charges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/divider_card5"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/order_total_"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="Total"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/order_total_value_"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/order_amount_value"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </RelativeLayout>
+
 
                 </RelativeLayout>
 
-            </RelativeLayout>
+                <View
+                    android:id="@+id/divider_card6"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/light_grey"
+                    app:layout_constraintTop_toBottomOf="@id/rl_charges" />
 
-            <View
-                android:id="@+id/divider_card9"
+                <RelativeLayout
+                    android:id="@+id/layout_order_type_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="10dp"
+                    android:showDividers="middle"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card6">
+
+                    <LinearLayout
+                        android:id="@+id/layout_order_type"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@id/btn_edit_order">
+
+                        <TextView
+                            android:id="@+id/order_type"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_type"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/order_type_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_type_value"
+                            android:textColor="@color/sf_primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_edit_order"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerInParent="true"
+                        android:minWidth="100dp"
+                        android:text="@string/edit_order"
+                        android:textColor="@color/sf_primary"
+                        android:textSize="10sp"
+                        android:visibility="gone"
+                        app:strokeColor="@color/sf_primary" />
+
+
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/divider_card7"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/light_grey"
+                    app:layout_constraintTop_toBottomOf="@id/layout_order_type_row" />
+
+                <RelativeLayout
+                    android:id="@+id/layout_order_status_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="10dp"
+                    android:showDividers="middle"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card7">
+
+                    <LinearLayout
+                        android:id="@+id/layout_order_curr_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@+id/btn_track_order">
+
+                        <TextView
+                            android:id="@+id/order_curr_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_status"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/order_curr_status_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/order_curr_status_value"
+                            android:textColor="@color/sf_primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_track_order"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:minWidth="100dp"
+                        android:text="@string/track_order"
+                        android:textSize="10sp"
+                        android:visibility="gone"
+                        app:strokeColor="@color/sf_primary" />
+
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/divider_card8"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/light_grey"
+                    app:layout_constraintTop_toBottomOf="@id/layout_order_status_row" />
+
+                <LinearLayout
+                    android:id="@+id/layout_new"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:paddingHorizontal="10dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card8">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_order_cancel"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="5dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/sf_cancel_button"
+                        android:padding="12dp"
+                        android:text="@string/cancel_order" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_order_accept"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="5dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/sf_accept_button"
+                        android:padding="12dp"
+                        android:text="@string/accept_order" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_ongoing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="10dp"
+                    android:visibility="gone"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/divider_card9">
+
+                    <TextView
+                        android:id="@+id/update_status"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/order_status"
+                        android:textAlignment="center"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_order_status"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_weight="1"
+                        android:backgroundTint="@color/sf_primary"
+                        android:padding="12dp"
+                        android:text="@string/pickup_orders"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/order_status_value"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/order_status_value"
+                        android:textAlignment="center"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rl_rider_details"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:paddingHorizontal="10dp"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@+id/divider_card8">
+
+                    <RelativeLayout
+                        android:id="@+id/layout_driver"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <TextView
+                            android:id="@+id/driver_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:minWidth="60dp"
+                            android:text="Driver:"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/driver_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@+id/driver_label" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/layout_contact"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/layout_driver"
+                        android:layout_marginTop="5dp">
+
+                        <TextView
+                            android:id="@+id/driver_contact_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="10dp"
+                            android:minWidth="60dp"
+                            android:text="Contact:"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/driver_contact_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@+id/driver_contact_label" />
+
+                        <ImageView
+                            android:id="@+id/address_icon_phone"
+                            android:layout_width="21dp"
+                            android:layout_height="21dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_toEndOf="@+id/driver_contact_value"
+                            android:src="@drawable/ic_baseline_phone_24"
+                            android:visibility="gone" />
+
+                    </RelativeLayout>
+
+                </RelativeLayout>
+
+                <View
+                    android:id="@+id/divider_card9"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="10dp"
+                    android:background="@color/light_grey"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toBottomOf="@id/rl_rider_details" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginVertical="10dp"
-                android:background="@color/light_grey"
-                android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@id/rl_rider_details" />
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="5dp"
+                app:layout_constraintTop_toBottomOf="@id/full_order_layout"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
+                <ProgressBar
+                    android:id="@+id/order_progress_bar"
+                    style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
