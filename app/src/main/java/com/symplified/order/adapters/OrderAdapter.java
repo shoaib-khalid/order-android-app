@@ -63,7 +63,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public String section;
     public Context context;
     public final String TAG = OrderAdapter.class.getName();
-    public Dialog progressDialog, dialog;
+    public Dialog dialog;
     public DecimalFormat formatter;
 
     private OrderApi orderApiService;
@@ -73,13 +73,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.orders = orders;
         this.section = section;
         this.context = context;
-
-        progressDialog = new Dialog(context);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
 
         orderApiService = ServiceGenerator.createOrderService();
         deliveryApiService = ServiceGenerator.createDeliveryService();
@@ -457,13 +450,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
                     stopLoading(holder, currentOrderDetails.order.completionStatus);
                 }
-                progressDialog.dismiss();
             }
 
             @Override
             public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
                 stopLoading(holder, currentOrderDetails.order.completionStatus);
                 Log.e(TAG, "onFailure: ", t);
             }
