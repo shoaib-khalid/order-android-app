@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +26,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
 import com.symplified.order.EditOrderActivity;
 import com.symplified.order.R;
@@ -67,9 +64,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public Dialog dialog;
     public DecimalFormat formatter;
 
-    private OrderApi orderApiService;
-    private DeliveryApi deliveryApiService;
-    private OrderMediator orderMediator;
+    private final OrderApi orderApiService;
+    private final DeliveryApi deliveryApiService;
+    private final OrderMediator orderMediator;
 
     public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context, OrderMediator orderMediator) {
         this.orders = orders;
@@ -433,7 +430,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
                     int indexOfOrder = orders.indexOf(currentOrderDetails);
                     if (isOrderNew(oldCompletionStatus) || isOrderCompleted(updatedOrder.order.completionStatus)) {
-                        Log.d("order-adapter", "order completed: " + updatedOrder.order.completionStatus);
                         if (isOrderNew(oldCompletionStatus)) {
                             getOrderItemsForPrint(currentOrderDetails.order);
                         }

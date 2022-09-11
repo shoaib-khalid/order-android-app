@@ -71,7 +71,6 @@ public class PlaceholderFragment extends Fragment
     private Call<OrderDetailsResponse> orderResponse;
     private RecyclerView recyclerView;
     private String section;
-    private Dialog progressDialog;
     private BroadcastReceiver ordersReceiver;
 
     private ProgressBar progressBar;
@@ -92,12 +91,6 @@ public class PlaceholderFragment extends Fragment
         super.onCreate(savedInstanceState);
 
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
-        progressDialog = new Dialog(getContext());
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
 
@@ -249,7 +242,6 @@ public class PlaceholderFragment extends Fragment
     }
 
     public void getOrders() {
-//        progressDialog.show();
         OrderMediator orderMediator = this;
         startLoading();
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
@@ -260,7 +252,6 @@ public class PlaceholderFragment extends Fragment
                     orderAdapter = new OrderAdapter(orders, section, getContext(), orderMediator);
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
                     if (orders.size() > 0) {
                         showOrders();
                     } else {
@@ -276,7 +267,6 @@ public class PlaceholderFragment extends Fragment
 
             @Override
             public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
-                progressDialog.dismiss();
                 stopLoading();
                 showErrorMessage();
                 Log.e("order-activity", "onFailure error getting orders: " + t.getLocalizedMessage());
