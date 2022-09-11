@@ -32,6 +32,9 @@ public interface OrderApi {
     @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE&sortingOrder=ASC")
     Call<OrderDetailsResponse> getNewOrdersByClientId(@Query("clientId") String clientId);
 
+    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE&sortingOrder=ASC")
+    Call<OrderDetailsResponse> getNewOrdersByClientIdAndInvoiceId(@Query("clientId") String clientId, @Query("invoiceId") String invoiceId);
+
     @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED")
 //    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED&sortingOrder=ASC")
     Call<OrderDetailsResponse> getOngoingOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
@@ -50,9 +53,6 @@ public interface OrderApi {
 
     @GET("orders/{orderId}")
     Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path(value = "orderId", encoded = true) String orderId);
-
-    @GET("orders")
-    Call<OrderResponse> getOrderByInvoiceId(@HeaderMap Map<String,String> headers, @Query("invoiceId") String invoiceId);
 
     @PUT("orders/reviseitem/{orderId}")
     Call<HttpResponse> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);

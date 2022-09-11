@@ -1,7 +1,10 @@
 package com.symplified.order.ui.tabs;
 
 import android.content.Context;
+import android.util.Log;
+import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
@@ -9,6 +12,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.symplified.order.R;
+import com.symplified.order.models.order.Order;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
@@ -19,6 +23,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.ongoing_orders, R.string.past_orders};
     private final Context mContext;
+    private PlaceholderFragment newOrderFragment;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -47,6 +52,20 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         }
 
         return fragment;
+    }
+
+    @NonNull
+    @Override
+    public Object instantiateItem(@NonNull ViewGroup container, int position) {
+        Fragment createdFragment = (Fragment) super.instantiateItem(container, position);
+
+        switch (position) {
+            case 0:
+                newOrderFragment = (PlaceholderFragment) createdFragment;
+                break;
+        }
+
+        return createdFragment;
     }
 
     @Nullable

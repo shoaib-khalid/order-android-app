@@ -54,9 +54,6 @@ public class ChooseStoreActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_choose_store);
-        RecyclerView recyclerView = findViewById(R.id.store_recycler);
-        TextView chooseStore = findViewById(R.id.choose_store);
-        TextView noStore = findViewById(R.id.no_store);
 
         progressDialog = new Dialog(this, R.style.Theme_SymplifiedOrderUpdate);
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -68,36 +65,10 @@ public class ChooseStoreActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         sharedPreferences.edit().remove("logoImage").apply();
-//        if (sharedPreferences.getBoolean("isStaging", false))
-//            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
         BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
-        ImageView home = toolbar.findViewById(R.id.app_bar_home);
-
-//        ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
-        final SharedPreferences finalSharedPreferences = sharedPreferences;
-//        logout.setOnClickListener(view -> {
-//            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//            FirebaseMessaging.getInstance().unsubscribeFromTopic(finalSharedPreferences.getString("storeId", null));
-//            finalSharedPreferences.edit().clear().apply();
-//            startActivity(intent);
-//            finish();
-//        });
-
-//        ImageView storeLogo = toolbar.findViewById(R.id.app_bar_logo);
-        Retrofit retrofitLogo = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//        storeLogo.setBackgroundResource(R.drawable.header);
 
-
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .client(new OkHttpClient())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        StoreApi storeApiService = retrofit.create(StoreApi.class);
         storeApiService = ServiceGenerator.createStoreService();
 
         sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
@@ -106,54 +77,5 @@ public class ChooseStoreActivity extends AppCompatActivity {
         if (null == clientId) {
             Log.d("Client-ID", "onCreate: client id is null");
         }
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-    }
-
-    public void setStoreData(Context context, List<Store> stores) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        final SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("timezone", stores.get(0).regionCountry.timezone).apply();
-        editor.putString("storeId", stores.get(0).id).apply();
-
-        Call<ResponseBody> responseLogo = storeApiService.getStoreLogo(headers, sharedPreferences.getString("storeId", "McD"));
-        Intent intent = new Intent(context, OrdersActivity.class);
-
-        responseLogo.clone().enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    Asset.AssetResponse responseBody = new Gson().fromJson(response.body().string(), Asset.AssetResponse.class);
-
-                    if (responseBody.data != null) {
-                        Bitmap bitmap = new DownloadImageTask().execute(responseBody.data.logoUrl).get();
-                        if (bitmap != null) {
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                            String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                            editor.putString("logoImage", encodedImage);
-                            editor.apply();
-                        }
-                    }
-
-                    FirebaseHelper.initializeFirebase(stores.get(0).id, context);
-                    Log.i("TAG", "preferences: " + sharedPreferences.getAll());
-                    startActivity(intent);
-                    finish();
-
-
-                } catch (IOException | ExecutionException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                progressDialog.dismiss();
-            }
-        });
-
-
     }
 }

@@ -34,10 +34,10 @@ import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.helpers.SunmiPrintHelper;
-import com.symplified.order.models.OrderDetailsModel;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.observers.NewOrderObserver;
 import com.symplified.order.observers.PrinterObserver;
 import com.symplified.order.services.AlertService;
 
@@ -55,7 +55,7 @@ import retrofit2.Response;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlaceholderFragment extends Fragment implements PrinterObserver {
+public class PlaceholderFragment extends Fragment implements PrinterObserver, NewOrderObserver {
 
     private static final String ARG_SECTION = "section";
 
@@ -63,12 +63,9 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
     private NewOrdersBinding binding;
     private OrderAdapter orderAdapter;
 
-    private List<OrderDetailsModel> orders;
+    private List<Order.OrderDetails> orders = new ArrayList<>();
 
-    private Map<String, String> headers;
-    private OrderApi orderApiService;
     private Call<OrderDetailsResponse> orderResponse;
-    private String storeId;
     private RecyclerView recyclerView;
     private String section;
     private Dialog progressDialog;
@@ -99,7 +96,6 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
         progressIndicator.setIndeterminate(true);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        storeId = sharedPreferences.getString("storeId", null);
 
         String clientId = sharedPreferences.getString("ownerId", null);
 
@@ -109,8 +105,8 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
         orders = new ArrayList<>();
 
-        headers = new HashMap<>();
-        orderApiService = ServiceGenerator.createOrderService();
+        Map<String, String> headers = new HashMap<>();
+        OrderApi orderApiService = ServiceGenerator.createOrderService();
 
         section = null;
         if (getArguments() != null) {
@@ -167,7 +163,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        updateOrdersEveryFiveMinutes();
+//        updateOrdersEveryFiveMinutes();
 
         progressBar = binding.ordersProgressBar;
         emptyOrdersTextView = binding.emptyOrdersTextView;
@@ -178,6 +174,8 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
         mainLayout.setOnRefreshListener(this::getOrders);
         emptyLayout.setOnRefreshListener(this::getOrders);
 
+        getOrders();
+
         return root;
     }
 
@@ -185,9 +183,10 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
 
-        getOrders();
+//        getActivity().getSupportFragmentManager().beginTransaction().detach(this).attach(this).commit();
+
+//        getOrders();
 
         if (AlertService.isPlaying()) {
             getActivity().stopService(new Intent(getContext(), AlertService.class));
@@ -252,41 +251,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
-                    List<Order.OrderDetails> orders = response.body().data.content;
-                    for (Order.OrderDetails order : orders) {
-                        Log.d("order-activity", "Order id: " + order.order.id + ", Invoice Id: " + order.order.invoiceId);
-                    }
-                    orderAdapter = new OrderAdapter(orders, section, getActivity());
-                    recyclerView.setAdapter(orderAdapter);
-                    orderAdapter.notifyDataSetChanged();
-                    progressDialog.dismiss();
-                    if (orders.size() > 0) {
-                        showOrders();
-                    } else {
-                        showEmptyOrdersMessage();
-                    }
-                } else {
-                    showErrorMessage();
-                    Log.e("order-activity", "onResponse error getting orders: " + response.raw());
-                }
-                stopLoading();
-
-            }
-
-            @Override
-            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
-                progressDialog.dismiss();
-                stopLoading();
-                showErrorMessage();
-                Log.e("order-activity", "onFailure error getting orders: " + t.getLocalizedMessage());
-            }
-        });
-
-        orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
-            @Override
-            public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
-                if (response.isSuccessful()) {
-                    List<Order.OrderDetails> orders = response.body().data.content;
+                    orders = response.body().data.content;
                     orderAdapter = new OrderAdapter(orders, section, getActivity());
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();
@@ -353,6 +318,14 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver {
     public void onPrinterDisconnected() {
         if (orderAdapter != null) {
             orderAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onNewOrderReceived(Order.OrderDetails orderDetails) {
+        if (orderAdapter != null && orders.add(orderDetails)) {
+            orderAdapter.notifyItemInserted(orders.indexOf(orderDetails));
+            showOrders();
         }
     }
 }

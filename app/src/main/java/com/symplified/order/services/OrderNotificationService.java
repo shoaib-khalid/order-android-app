@@ -17,7 +17,6 @@ import androidx.core.app.TaskStackBuilder;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
@@ -27,10 +26,13 @@ import com.symplified.order.apis.StoreApi;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.order.Order;
+import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.observers.NewOrderObserver;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -39,16 +41,16 @@ import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
-    Pattern pattern;
-    Map<String, String> headers;
-    String TAG = "order-notification-service";
+    private Pattern pattern;
+    private Map<String, String> headers;
+    private String TAG = "order-notification-service";
+    private static List<NewOrderObserver> newOrderObservers = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -60,36 +62,23 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     @Override
-    public void onNewToken(@NonNull String s) {
-        Log.d("FIREBASE_SERVICE", "Token refresh : " + s);
-    }
-
-    @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        Log.d(TAG, "onMessageReceived messageId: " + remoteMessage.getMessageId()
-                + ", messageType: " + remoteMessage.getMessageType());
-        Log.d(TAG, "onMessageReceived data: " + remoteMessage.getData());
-
         String messageTitle = remoteMessage.getData().get("title");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        String clientId = sharedPreferences.getString("ownerId", "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
             LoginApi userService = ServiceGenerator.createLoginService();
-            String clientId = sharedPreferences.getString("ownerId", "null");
             String transactionId = remoteMessage.getData().get("body");
-
-            Log.d(TAG, "Heartbeat ownerId: " + clientId + ", transactionId: " + transactionId);
 
             Call<HttpResponse> pingRequest = userService.ping(clientId, transactionId);
             pingRequest.clone().enqueue(new Callback<HttpResponse>() {
                 @Override
                 public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
-                    Log.d(TAG, "Ping request response code: " + response.code());
                 }
 
                 @Override
                 public void onFailure(Call<HttpResponse> call, Throwable t) {
-                    Log.e(TAG, "Ping request error: " + t.getLocalizedMessage());
                 }
             });
         } else {
@@ -113,68 +102,67 @@ public class OrderNotificationService extends FirebaseMessagingService {
             }
 
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
-            Log.d(TAG, "Order Id is " + invoiceId);
             if (currentStoreId != null && invoiceId != null) {
 
                 OrderApi orderApiService = ServiceGenerator.createOrderService();
-                Call<OrderResponse> orderRequest = orderApiService.getOrderByInvoiceId(headers, invoiceId);
+                Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
 
                 String finalCurrentStoreId = currentStoreId;
-                orderRequest.clone().enqueue(new Callback<OrderResponse>() {
+                orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
                     @Override
-                    public void onResponse(Call<OrderResponse> call, Response<OrderResponse> response) {
-                        if (response.isSuccessful()) {
-                            String completionStatus = response.body().data.content.get(0).completionStatus;
-                            if (completionStatus.equals(Status.PAYMENT_CONFIRMED.toString())
-                                    || completionStatus.equals(Status.RECEIVED_AT_STORE.toString())) {
-                                Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
-                                        .setContentIntent(pendingIntent)
-                                        .setSmallIcon(R.mipmap.ic_launcher)
-                                        .setContentTitle(remoteMessage.getData().get("title"))
-                                        .setContentText(remoteMessage.getData().get("body"))
-                                        .setAutoCancel(false)
-                                        .setPriority(NotificationCompat.PRIORITY_MAX)
-                                        .setCategory(NotificationCompat.CATEGORY_ALARM)
-                                        .setColor(Color.CYAN)
-                                        .build();
+                    public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+                        if (response.isSuccessful() && response.body().data.content.size() > 0) {
+                            Order.OrderDetails orderDetails = response.body().data.content.get(0);
+                            for (NewOrderObserver observer : newOrderObservers) {
+                                observer.onNewOrderReceived(orderDetails);
+                            }
+                            Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
+                                    .setContentIntent(pendingIntent)
+                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setContentTitle(remoteMessage.getData().get("title"))
+                                    .setContentText(remoteMessage.getData().get("body"))
+                                    .setAutoCancel(false)
+                                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                                    .setCategory(NotificationCompat.CATEGORY_ALARM)
+                                    .setColor(Color.CYAN)
+                                    .build();
 
-                                notification.flags |= Notification.FLAG_AUTO_CANCEL;
+                            notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-                                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                                notificationManager.notify(new Random().nextInt(), notification);
+                            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                            notificationManager.notify(new Random().nextInt(), notification);
 
-                                StoreApi storeApiService = ServiceGenerator.createStoreService();
-                                Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreByIdNew(headers, finalCurrentStoreId);
+                            StoreApi storeApiService = ServiceGenerator.createStoreService();
+                            Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreByIdNew(headers, finalCurrentStoreId);
 
-                                storeResponse.clone().enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
-                                    @Override
-                                    public void onResponse(Call<StoreResponse.SingleStoreResponse> call, Response<StoreResponse.SingleStoreResponse> response) {
-                                        if (response.isSuccessful()
-                                                && response.body() != null
-                                                && response.body().data != null
-                                                && !AlertService.isPlaying()) {
-                                            Intent intent = new Intent(getApplicationContext(), AlertService.class);
-                                            intent.putExtra(String.valueOf(R.string.store_type),
-                                                    response.body().data.verticalCode);
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                startForegroundService(intent);
-                                            } else {
-                                                startService(intent);
-                                            }
+                            storeResponse.clone().enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
+                                @Override
+                                public void onResponse(Call<StoreResponse.SingleStoreResponse> call, Response<StoreResponse.SingleStoreResponse> response) {
+                                    if (response.isSuccessful()
+                                            && response.body() != null
+                                            && response.body().data != null
+                                            && !AlertService.isPlaying()) {
+                                        Intent intent = new Intent(getApplicationContext(), AlertService.class);
+                                        intent.putExtra(String.valueOf(R.string.store_type),
+                                                response.body().data.verticalCode);
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                            startForegroundService(intent);
+                                        } else {
+                                            startService(intent);
                                         }
                                     }
+                                }
 
-                                    @Override
-                                    public void onFailure(Call<StoreResponse.SingleStoreResponse> call, Throwable t) {
-                                        Log.e(TAG, "onFailure on storeRequest. " + t.getLocalizedMessage());
-                                    }
-                                });
-                            }
+                                @Override
+                                public void onFailure(Call<StoreResponse.SingleStoreResponse> call, Throwable t) {
+                                    Log.e(TAG, "onFailure on storeRequest. " + t.getLocalizedMessage());
+                                }
+                            });
                         }
                     }
 
                     @Override
-                    public void onFailure(Call<OrderResponse> call, Throwable t) {
+                    public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
                     }
                 });
@@ -220,5 +208,13 @@ public class OrderNotificationService extends FirebaseMessagingService {
             }
         }
         return null;
+    }
+
+    public static void setObserver(NewOrderObserver observer) {
+        newOrderObservers.add(observer);
+    }
+
+    public static void removeObserver(NewOrderObserver observer) {
+        newOrderObservers.remove(observer);
     }
 }

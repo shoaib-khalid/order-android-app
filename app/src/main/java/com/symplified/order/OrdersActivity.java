@@ -1,65 +1,49 @@
 package com.symplified.order;
 
-import static com.symplified.order.App.CHANNEL_ID;
-
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
-import android.media.RingtoneManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.NotificationCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 
 public class OrdersActivity extends NavbarActivity {
 
-    private ActivityOrdersBinding binding;
     private Toolbar toolbar;
     private ViewPager mViewPager;
     private DrawerLayout drawerLayout;
+    private SectionsPagerAdapter sectionsPagerAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityOrdersBinding.inflate(getLayoutInflater());
+        com.symplified.order.databinding.ActivityOrdersBinding binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        if(sharedPreferences.getBoolean("isStaging", false))
-//            setTheme(R.style.Theme_SymplifiedOrderUpdate_Test);
+        initToolbar();
 
-        initToolbar(sharedPreferences);
-
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
         viewPager.setOffscreenPageLimit(0);
@@ -71,9 +55,14 @@ public class OrdersActivity extends NavbarActivity {
         stopService(new Intent(this, AlertService.class));
     }
 
-    private void initToolbar(SharedPreferences sharedPreferences) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    private void initToolbar() {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        home.setImageDrawable(getDrawable(R.drawable.ic_baseline_menu_24));
+        home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_menu_24));
         home.setOnClickListener(view -> {
             drawerLayout.openDrawer(GravityCompat.START);
         });

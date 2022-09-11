@@ -11,7 +11,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 
@@ -64,16 +63,11 @@ public class AlertService extends Service {
         if (isAppOnForeground(this) || (storeType != null && !storeType.contains("FnB"))) {
             mediaPlayer.setLooping(false);
             hasRepeatedOnce = false;
-            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-
-                @Override
-                public void onCompletion(MediaPlayer mp) {
-                    Log.d("AlertService mediaplayer", "onCompletion hasRepeatedOnce " + hasRepeatedOnce);
-                    if (!hasRepeatedOnce) {
-                        hasRepeatedOnce = true;
-                        mp.seekTo(0);
-                        mp.start();
-                    }
+            mediaPlayer.setOnCompletionListener(mp -> {
+                if (!hasRepeatedOnce) {
+                    hasRepeatedOnce = true;
+                    mp.seekTo(0);
+                    mp.start();
                 }
             });
         } else {

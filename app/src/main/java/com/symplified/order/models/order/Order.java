@@ -194,6 +194,8 @@ public class Order implements Serializable {
         public String nextCompletionStatus;
         public String nextActionText;
 
+        public OrderDetails() {}
+
         public OrderDetails(UpdatedOrder updatedOrder) {
             this.order = updatedOrder;
 

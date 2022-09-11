@@ -196,7 +196,6 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful()) {
                         LoginData res = response.body().data;
-                        Log.d("interceptor", "Access token received after login: " + res.session.accessToken);
                         SharedPreferences.Editor editor = sharedPreferences.edit();
                         editor.putString("email", res.session.username);
                         editor.putString("accessToken", res.session.accessToken);
@@ -263,7 +262,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.i("TAG", "subscribeStores: " + stores);
 
         for (Store store : stores) {
-            FirebaseHelper.initializeFirebase(store.id, context);
+            FirebaseHelper.initializeFirebase(store.id);
         }
     }
 
