@@ -37,9 +37,11 @@ import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.observers.NewOrderObserver;
+import com.symplified.order.observers.OrderObserver;
+import com.symplified.order.observers.OrderMediator;
 import com.symplified.order.observers.PrinterObserver;
 import com.symplified.order.services.AlertService;
+import com.symplified.order.services.OrderNotificationService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -55,7 +57,8 @@ import retrofit2.Response;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlaceholderFragment extends Fragment implements PrinterObserver, NewOrderObserver {
+public class PlaceholderFragment extends Fragment
+        implements PrinterObserver, OrderObserver, OrderMediator {
 
     private static final String ARG_SECTION = "section";
 
@@ -74,6 +77,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver, Ne
     private ProgressBar progressBar;
     private SwipeRefreshLayout mainLayout, emptyLayout;
     private TextView emptyOrdersTextView;
+    private OrderMediator orderMediator;
 
     public static PlaceholderFragment newInstance(String type) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -124,6 +128,7 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver, Ne
                 }
                 NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancelAll();
+                OrderNotificationService.addObserver(this);
                 break;
             }
             case "ongoing": {
@@ -152,15 +157,14 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver, Ne
     }
 
     @Override
-    public View onCreateView(
-            @NonNull LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container,
+                             Bundle savedInstanceState) {
 
         binding = NewOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         recyclerView = root.findViewById(R.id.order_recycler);
-
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
 //        updateOrdersEveryFiveMinutes();
@@ -246,13 +250,14 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver, Ne
 
     public void getOrders() {
 //        progressDialog.show();
+        OrderMediator orderMediator = this;
         startLoading();
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
                     orders = response.body().data.content;
-                    orderAdapter = new OrderAdapter(orders, section, getActivity());
+                    orderAdapter = new OrderAdapter(orders, section, getContext(), orderMediator);
                     recyclerView.setAdapter(orderAdapter);
                     orderAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
@@ -279,18 +284,18 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver, Ne
         });
     }
 
-    public void startLoading() {
+    private void startLoading() {
         mainLayout.setRefreshing(true);
         emptyLayout.setRefreshing(true);
     }
 
-    public void stopLoading() {
+    private void stopLoading() {
         mainLayout.setRefreshing(false);
         emptyLayout.setRefreshing(false);
         progressBar.setVisibility(View.GONE);
     }
 
-    public void showOrders() {
+    private void showOrders() {
         emptyLayout.setVisibility(View.GONE);
         mainLayout.setVisibility(View.VISIBLE);
     }
@@ -322,10 +327,25 @@ public class PlaceholderFragment extends Fragment implements PrinterObserver, Ne
     }
 
     @Override
-    public void onNewOrderReceived(Order.OrderDetails orderDetails) {
+    public void onOrderReceived(Order.OrderDetails orderDetails) {
         if (orderAdapter != null && orders.add(orderDetails)) {
             orderAdapter.notifyItemInserted(orders.indexOf(orderDetails));
             showOrders();
         }
+    }
+
+    @Override
+    public void addOrderToOngoingTab(Order.OrderDetails orderDetails) {
+        if (orderMediator != null) {
+            orderMediator.addOrderToOngoingTab(orderDetails);
+        }
+    }
+
+    public void setOrderMediator(OrderMediator mediator) {
+        this.orderMediator = mediator;
+    }
+
+    public void addOrder(Order.OrderDetails orderDetails) {
+
     }
 }

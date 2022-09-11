@@ -23,14 +23,12 @@ import com.symplified.order.R;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.StoreApi;
-import com.symplified.order.enums.Status;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
-import com.symplified.order.models.order.OrderResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.observers.NewOrderObserver;
+import com.symplified.order.observers.OrderObserver;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +48,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private Pattern pattern;
     private Map<String, String> headers;
     private String TAG = "order-notification-service";
-    private static List<NewOrderObserver> newOrderObservers = new ArrayList<>();
+    private static List<OrderObserver> newOrderObservers = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -66,6 +64,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String messageTitle = remoteMessage.getData().get("title");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", "null");
+
+        Log.d(TAG, "onMessageReceived title: " + messageTitle + "onMessageReceived: " + remoteMessage.getData().get("body"));
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
             LoginApi userService = ServiceGenerator.createLoginService();
@@ -113,8 +113,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
-                            for (NewOrderObserver observer : newOrderObservers) {
-                                observer.onNewOrderReceived(orderDetails);
+                            for (OrderObserver observer : newOrderObservers) {
+                                observer.onOrderReceived(orderDetails);
                             }
                             Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
                                     .setContentIntent(pendingIntent)
@@ -210,11 +210,11 @@ public class OrderNotificationService extends FirebaseMessagingService {
         return null;
     }
 
-    public static void setObserver(NewOrderObserver observer) {
+    public static void addObserver(OrderObserver observer) {
         newOrderObservers.add(observer);
     }
 
-    public static void removeObserver(NewOrderObserver observer) {
+    public static void removeObserver(OrderObserver observer) {
         newOrderObservers.remove(observer);
     }
 }

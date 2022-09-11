@@ -44,6 +44,7 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.observers.OrderMediator;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -68,11 +69,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private OrderApi orderApiService;
     private DeliveryApi deliveryApiService;
+    private OrderMediator orderMediator;
 
-    public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context) {
+    public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context, OrderMediator orderMediator) {
         this.orders = orders;
         this.section = section;
         this.context = context;
+        this.orderMediator = orderMediator;
 
         orderApiService = ServiceGenerator.createOrderService();
         deliveryApiService = ServiceGenerator.createDeliveryService();
@@ -439,7 +442,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                             orders.remove(indexOfOrder);
                             notifyItemRemoved(indexOfOrder);
                         }
-                        // TODO: Move order to ongoing tab
+                        orderMediator.addOrderToOngoingTab(updatedOrder);
                     } else if (isOrderOngoing(oldCompletionStatus) && indexOfOrder != 1) {
                         orders.set(indexOfOrder, updatedOrder);
                         notifyItemChanged(indexOfOrder);

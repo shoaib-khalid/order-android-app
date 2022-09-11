@@ -13,17 +13,19 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.symplified.order.R;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.observers.OrderMediator;
+import com.symplified.order.observers.OrderObserver;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SectionsPagerAdapter extends FragmentPagerAdapter {
+public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderMediator {
 
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.ongoing_orders, R.string.past_orders};
     private final Context mContext;
-    private PlaceholderFragment newOrderFragment;
+    private OrderObserver ongoingOrderFragment;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -35,8 +37,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
         Fragment fragment = PlaceholderFragment.newInstance("new");
-        switch (position){
-            case 0:{
+        switch (position) {
+            case 0: {
                 fragment = PlaceholderFragment.newInstance("new");
                 break;
             }
@@ -48,7 +50,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
                 fragment = PlaceholderFragment.newInstance("past");
                 break;
             }
-
         }
 
         return fragment;
@@ -61,8 +62,13 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         switch (position) {
             case 0:
-                newOrderFragment = (PlaceholderFragment) createdFragment;
+                PlaceholderFragment newOrderFragment = (PlaceholderFragment) createdFragment;
+                newOrderFragment.setOrderMediator(this);
                 break;
+            case 1:
+                ongoingOrderFragment = (OrderObserver) createdFragment;
+                break;
+
         }
 
         return createdFragment;
@@ -75,7 +81,10 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
     }
 
     @Override
-    public int getCount(){
-        return TAB_TITLES.length;
+    public int getCount() { return TAB_TITLES.length; }
+
+    @Override
+    public void addOrderToOngoingTab(Order.OrderDetails orderDetails) {
+        ongoingOrderFragment.onOrderReceived(orderDetails);
     }
 }
