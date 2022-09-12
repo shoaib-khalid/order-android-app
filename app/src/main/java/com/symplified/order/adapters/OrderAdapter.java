@@ -427,27 +427,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
-            public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
+            public void onResponse(@NonNull Call<OrderUpdateResponse> call, @NonNull Response<OrderUpdateResponse> response) {
                 if (response.isSuccessful()) {
-                    String oldCompletionStatus = currentOrderDetails.order.completionStatus;
                     Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
 
+                    String oldCompletionStatus = currentOrderDetails.order.completionStatus;
+                    String updatedCompletionStatus = currentOrderDetails.order.completionStatus;
                     int indexOfOrder = orders.indexOf(currentOrderDetails);
-                    if (isOrderNew(oldCompletionStatus) || isOrderCompleted(updatedOrder.order.completionStatus)) {
+
+                    String statusUpdateToastText = "Status Updated";
+                    if (isOrderNew(oldCompletionStatus)
+                            || isOrderCompleted(updatedCompletionStatus)) {
+
                         if (isOrderNew(oldCompletionStatus)) {
                             getOrderItemsForPrint(currentOrderDetails.order);
+                            orderMediator.addOrderToOngoingTab(updatedOrder);
+                            statusUpdateToastText = "Order moved to next tab";
                         }
 
                         if (indexOfOrder != -1) {
                             orders.remove(indexOfOrder);
                             notifyItemRemoved(indexOfOrder);
                         }
-                        orderMediator.addOrderToOngoingTab(updatedOrder);
-                    } else if (isOrderOngoing(oldCompletionStatus) && indexOfOrder != 1) {
+                    } else if (isOrderOngoing(oldCompletionStatus)
+                            && indexOfOrder != -1) {
                         orders.set(indexOfOrder, updatedOrder);
                         notifyItemChanged(indexOfOrder);
+                        stopLoading(holder, oldCompletionStatus);
                     }
-                    Toast.makeText(context, "Status Updated", Toast.LENGTH_SHORT).show();
+
+                    Toast.makeText(context, statusUpdateToastText, Toast.LENGTH_SHORT).show();
                 } else {
                     Log.e(TAG, response.toString());
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
@@ -678,12 +687,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.orderProgressBar.setVisibility(View.VISIBLE);
         holder.newLayout.setVisibility(View.GONE);
         holder.ongoingLayout.setVisibility(View.GONE);
+        holder.editButton.setVisibility(View.GONE);
     }
 
     private void stopLoading(ViewHolder holder, String completionStatus) {
         holder.orderProgressBar.setVisibility(View.GONE);
         if (isOrderNew(completionStatus)) {
             holder.newLayout.setVisibility(View.VISIBLE);
+            holder.editButton.setVisibility(View.VISIBLE);
         } else if (isOrderOngoing(completionStatus)) {
             holder.ongoingLayout.setVisibility(View.VISIBLE);
         }
