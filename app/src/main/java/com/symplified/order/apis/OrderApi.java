@@ -35,8 +35,7 @@ public interface OrderApi {
     @GET("orders/search?completionStatus=PAYMENT_CONFIRMED&completionStatus=RECEIVED_AT_STORE&sortingOrder=ASC")
     Call<OrderDetailsResponse> getNewOrdersByClientIdAndInvoiceId(@Query("clientId") String clientId, @Query("invoiceId") String invoiceId);
 
-    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED")
-//    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED&sortingOrder=ASC")
+    @GET("orders/search?completionStatus=BEING_PREPARED&completionStatus=AWAITING_PICKUP&completionStatus=BEING_DELIVERED&sortingOrder=ASC")
     Call<OrderDetailsResponse> getOngoingOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
 
     @GET("orders/search?completionStatus=CANCELED_BY_MERCHANT&completionStatus=DELIVERED_TO_CUSTOMER&completionStatus=CANCELED_BY_CUSTOMER")

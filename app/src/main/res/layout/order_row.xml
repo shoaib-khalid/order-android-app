@@ -413,7 +413,61 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
-                            android:text="@string/delivery_charges_value" />
+                            android:text="@string/monetary_value" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_voucher_discount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/rl_discount"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/voucher_discount_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/voucher_discount_label"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/voucher_discount_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/monetary_value" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rl_store_voucher_discount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/rl_voucher_discount"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingVertical="5dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/store_voucher_discount_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="@string/store_voucher_discount_label"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/store_voucher_discount_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="@string/monetary_value" />
 
                     </RelativeLayout>
 
@@ -421,7 +475,7 @@
                         android:id="@+id/rl_service_charges"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/rl_discount"
+                        android:layout_below="@+id/rl_store_voucher_discount"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
                         android:paddingVertical="5dp">
@@ -439,7 +493,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
-                            android:text="@string/delivery_charges_value" />
+                            android:text="@string/monetary_value" />
 
                     </RelativeLayout>
 
@@ -465,7 +519,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
-                            android:text="@string/delivery_charges_value" />
+                            android:text="@string/monetary_value" />
 
                     </RelativeLayout>
 
@@ -491,7 +545,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
-                            android:text="@string/delivery_charges_value" />
+                            android:text="@string/monetary_value" />
 
                     </RelativeLayout>
 

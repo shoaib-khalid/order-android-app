@@ -80,7 +80,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView name, invoice, date, total, total2, status, phoneNumber, address,
-                subTotal, deliveryCharges, deliveryDiscount, discount, serviceCharges;
+                subTotal, deliveryCharges, deliveryDiscount, discount, voucherDiscount,
+                storeVoucherDiscount, serviceCharges;
         private final MaterialButton editButton, cancelButton, acceptButton, statusButton,
                 trackButton, callButton;
         private final ImageButton printButton;
@@ -88,7 +89,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type,
                 currStatusLabel, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
-        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlServiceCharges,
+        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
+                rlStoreVoucherDiscount, rlServiceCharges,
                 rlDeliveryDiscount, rlCustomerNote, rlRiderDetails;
         private final View divider3, divider7, divider8, divider9;
         private final ImageView riderCallIcon;
@@ -114,12 +116,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             subTotal = itemView.findViewById(R.id.subtotal_value);
             deliveryCharges = itemView.findViewById(R.id.delivery_by_value);
             discount = itemView.findViewById(R.id.discount_value);
+            voucherDiscount = itemView.findViewById(R.id.voucher_discount_value);
+            storeVoucherDiscount = itemView.findViewById(R.id.store_voucher_discount_value);
             deliveryDiscount = itemView.findViewById(R.id.billing_delivery_charges_discount_value);
             serviceCharges = itemView.findViewById(R.id.service_charges_value);
             total2 = itemView.findViewById(R.id.order_total_value_);
             callButton = itemView.findViewById(R.id.btn_call);
             printButton = itemView.findViewById(R.id.btn_print_order);
             rlDiscount = itemView.findViewById(R.id.rl_discount);
+            rlVoucherDiscount = itemView.findViewById(R.id.rl_voucher_discount);
+            rlStoreVoucherDiscount = itemView.findViewById(R.id.rl_store_voucher_discount);
             rlDeliveryDiscount = itemView.findViewById(R.id.rl_delivery_discount);
             rlServiceCharges = itemView.findViewById(R.id.rl_service_charges);
 
@@ -204,6 +210,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.rlDiscount.setVisibility(View.GONE);
         } else {
             holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
+        }
+
+        if (order.voucherDiscount != null && order.voucherDiscount > 0) {
+            holder.voucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
+            holder.rlVoucherDiscount.setVisibility(View.VISIBLE);
+        }
+
+        if (order.storeVoucherDiscount != null && order.storeVoucherDiscount > 0) {
+            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
+            holder.rlStoreVoucherDiscount.setVisibility(View.VISIBLE);
         }
 
         holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + formatter.format(order.deliveryCharges) : currency + " " + "0.00");
@@ -303,9 +319,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
-
         holder.recyclerView.setLayoutManager(linearLayoutManager);
-
         getOrderItemsForView(order, holder);
 
         holder.cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order, holder));

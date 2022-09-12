@@ -30,6 +30,8 @@ public class Order implements Serializable {
     public Double deliveryDiscount;
     public String appliedDiscountDescription;
     public String deliveryDiscountDescription;
+    public Double voucherDiscount;
+    public Double storeVoucherDiscount;
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
     public Customer customer;
