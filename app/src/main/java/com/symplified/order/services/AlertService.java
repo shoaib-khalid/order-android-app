@@ -25,18 +25,14 @@ public class AlertService extends Service {
     private static MediaPlayer mediaPlayer;
     private static boolean hasRepeatedOnce = false;
 
-    @Override
     public void onCreate() {
         super.onCreate();
 
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        if (mediaPlayer != null) {
-            mediaPlayer.setLooping(true);
-        }
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             Notification notification = new Notification.Builder(this, App.ORDERS)
                     .setContentTitle("Symplified")
-                    .setContentText("Waiting for orders")
+                    .setContentText("You have new orders")
                     .setPriority(Notification.PRIORITY_LOW)
                     .build();
             startForeground(1, notification);
@@ -54,10 +50,11 @@ public class AlertService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
-        Bundle extras = intent.getExtras();
         String storeType = "";
-        if (extras != null) {
-            storeType = extras.getString(String.valueOf(R.string.store_type));
+        if (intent != null && intent.getExtras() != null
+                && intent.getExtras().getString(String.valueOf(R.string.store_type)) != null) {
+
+            storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
         }
 
         if (isAppOnForeground(this) || (storeType != null && !storeType.contains("FnB"))) {
@@ -96,11 +93,6 @@ public class AlertService extends Service {
         return false;
     }
 
-    public static void start() {
-        if (null != mediaPlayer)
-            mediaPlayer.start();
-    }
-
     public static void stop() {
         if (null != mediaPlayer) {
             mediaPlayer.stop();
@@ -110,7 +102,7 @@ public class AlertService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mediaPlayer.stop();
+        stop();
     }
 
     private boolean isExternalAudioOutputPluggedIn() {

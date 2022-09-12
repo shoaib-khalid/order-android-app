@@ -13,30 +13,22 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Build;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
-import com.google.gson.Gson;
 import com.symplified.order.App;
 import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.OrderApi;
-import com.symplified.order.apis.StoreApi;
-import com.symplified.order.models.Store.StoreResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Keys;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -72,17 +64,6 @@ public class StartupReceiver extends BroadcastReceiver {
         }
     }
 
-    private void playAlert(Context context) {
-        Intent alertService = new Intent(context, AlertService.class);
-        alertService.putExtra("first", 1);
-        alertService.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(alertService);
-        } else {
-            context.startService(alertService);
-        }
-    }
-
     private static boolean isConnectedToInternet(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
@@ -100,96 +81,54 @@ public class StartupReceiver extends BroadcastReceiver {
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
-                if (response.isSuccessful()) {
-                    List<Order.OrderDetails> newOrders = response.body().data.content;
-                    if (newOrders.size() > 0) {
+                if (response.isSuccessful() && response.body().data.content.size() > 0) {
+                    Intent toOrdersActivity = new Intent(context, OrdersActivity.class);
+                    TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
+                    taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
+                    PendingIntent pendingIntent;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
+                    } else {
+                        pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                    }
 
-                        Intent toOrdersActivity = new Intent(context, OrdersActivity.class);
-                        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
-                        taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-                        PendingIntent pendingIntent;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
+                    Notification notification = new NotificationCompat.Builder(context, App.CHANNEL_ID)
+                            .setContentIntent(pendingIntent)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentTitle("Symplified Merchant")
+                            .setContentText("You have new orders")
+                            .setAutoCancel(false)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
+                            .setCategory(NotificationCompat.CATEGORY_ALARM)
+                            .setColor(Color.CYAN)
+                            .build();
+
+                    notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                    NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    notificationManager.notify(new Random().nextInt(), notification);
+
+                    String verticalCode = "";
+                    Order order = response.body().data.content.get(0).order;
+                    if (order.store != null && order.store.verticalCode != null) {
+                        verticalCode = order.store.verticalCode;
+                    }
+
+                    if (!AlertService.isPlaying()) {
+                        Intent intent = new Intent(context, AlertService.class);
+                        intent.putExtra(String.valueOf(R.string.store_type), verticalCode);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.startForegroundService(intent);
                         } else {
-                            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                            context.startService(intent);
                         }
-
-                        Notification notification = new NotificationCompat.Builder(context, App.CHANNEL_ID)
-                                .setContentIntent(pendingIntent)
-                                .setSmallIcon(R.mipmap.ic_launcher)
-                                .setContentTitle("Symplified")
-                                .setContentText("You have new orders")
-                                .setAutoCancel(false)
-                                .setPriority(NotificationCompat.PRIORITY_MAX)
-                                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                                .setColor(Color.CYAN)
-                                .build();
-
-                        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-                        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                        notificationManager.notify(new Random().nextInt(), notification);
-
-                        String storeId = newOrders.get(0).order.storeId;
-
-                        StoreApi storeApiService = ServiceGenerator.createStoreService();
-                        Call<ResponseBody> storeResponse = storeApiService.getStoreById(new HashMap<>(), storeId);
-
-                        storeResponse.clone().enqueue(new Callback<ResponseBody>() {
-                            @Override
-                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                Log.d("order-notif", "StoreRequest response: " + response);
-                                Log.d("order-notif", "StoreRequest response body: " + response.body());
-
-                                if (response.isSuccessful()) {
-                                    try {
-                                        StoreResponse.SingleStoreResponse responseBody = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
-                                        if (!AlertService.isPlaying()) {
-                                            Intent intent = new Intent(context, AlertService.class);
-                                            intent.putExtra(String.valueOf(R.string.store_type), responseBody.data.verticalCode);
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                context.startForegroundService(intent);
-                                            } else {
-                                                context.startService(intent);
-                                            }
-                                        }
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                Log.e("startup-receiver", "onFailure on storeRequest" + t.getLocalizedMessage());
-                            }
-                        });
                     }
                 }
             }
 
             @Override
             public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
-
             }
         });
     }
-
-    private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
-        @Override
-        public void onAvailable(Network network) {
-            super.onAvailable(network);
-        }
-
-        @Override
-        public void onLost(Network network) {
-            super.onLost(network);
-        }
-
-        @Override
-        public void onCapabilitiesChanged(Network network, NetworkCapabilities networkCapabilities) {
-            super.onCapabilitiesChanged(network, networkCapabilities);
-            final boolean unmetered = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
-        }
-    };
 }

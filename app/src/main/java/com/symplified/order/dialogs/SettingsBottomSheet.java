@@ -1,13 +1,8 @@
 package com.symplified.order.dialogs;
 
-import static android.content.Context.MODE_PRIVATE;
-
 import android.app.AlarmManager;
 import android.app.Dialog;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,33 +19,19 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.timepicker.MaterialTimePicker;
-import com.google.android.material.timepicker.TimeFormat;
-import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.services.StoreBroadcastReceiver;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
@@ -85,13 +66,10 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         View view = inflater.inflate(R.layout.store_status_dialog, container, false);
 
         RadioGroup radioGroup = view.findViewById(R.id.store_status_options);
-        RadioButton normalStatus = view.findViewById(R.id.store_status_normal);
-        RadioButton pausedStatus = view.findViewById(R.id.store_status_paused);
         timePicker = view.findViewById(R.id.status_timePicker);
         Button confirm = view.findViewById(R.id.confirm_status);
         confirm.setOnClickListener(v -> {
             if(timePicker.getVisibility() == View.VISIBLE){
-                AlarmManager alarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
                 calendar.set(Calendar.HOUR_OF_DAY, timePicker.getHour());
@@ -100,9 +78,6 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
                 int minutes = (int) ((calendar.getTimeInMillis()/60000) - (System.currentTimeMillis()/60000));
                 snoozeStore(minutes, true);
-//                Intent job = new Intent(getContext(), StoreBroadcastReceiver.class);
-//                PendingIntent pendingIntent = PendingIntent.getBroadcast(getContext(), 0, job, 0);
-//                alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
                 Toast.makeText(getContext(), "Closed Until "+timePicker.getHour()+":"+timePicker.getMinute(), Toast.LENGTH_SHORT).show();
             }
             else{
@@ -111,16 +86,13 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
             }
             dismiss();
         });
-//        RadioGroup pausedGroup = view.findViewById(R.id.paused_status);
         radioGroup.setOnCheckedChangeListener((radioGroup1, i) -> {
             switch (i) {
                 case R.id.store_status_paused: {
-//                    pausedGroup.setVisibility(View.VISIBLE);
                     timePicker.setVisibility(View.VISIBLE);
                     break;
                 }
                 default: {
-//                    pausedGroup.setVisibility(View.GONE);
                     timePicker.setVisibility(View.GONE);
                     break;
                 }
@@ -133,19 +105,7 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
     private void snoozeStore(int minutes, boolean isClosed) {
 
-//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-//        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL_STAGING);
-//
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .client(new OkHttpClient())
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .build();
-//        StoreApi storeApiService = retrofit.create(StoreApi.class);
-
         Map<String,String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-
         Call<ResponseBody> storeSnoozeCall = storeApiService.updateStoreStatus(headers, storeId, isClosed, minutes);
 
         storeSnoozeCall.clone().enqueue(new Callback<ResponseBody>() {
@@ -169,8 +129,5 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
                 Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
-
-
 }
