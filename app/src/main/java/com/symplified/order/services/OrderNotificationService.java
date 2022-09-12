@@ -83,15 +83,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             });
         } else {
             Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
-            String storeIdList = sharedPreferences.getString("storeIdList", null);
-            List<String> storeIds = Arrays.asList(storeIdList.split(" "));
-            String storeName = remoteMessage.getData().get("storeName");
-            String currentStoreId = null;
-            for (String storeId : storeIds) {
-                if (sharedPreferences.getString(storeId + "-name", null).equals(storeName)) {
-                    currentStoreId = storeId;
-                }
-            }
+
             TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
             taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
             PendingIntent pendingIntent;
@@ -102,20 +94,21 @@ public class OrderNotificationService extends FirebaseMessagingService {
             }
 
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
-            if (currentStoreId != null && invoiceId != null) {
+            if (invoiceId != null) {
 
                 OrderApi orderApiService = ServiceGenerator.createOrderService();
                 Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
 
-                String finalCurrentStoreId = currentStoreId;
                 orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
                     @Override
-                    public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+                    public void onResponse(@NonNull Call<OrderDetailsResponse> call,
+                                           @NonNull Response<OrderDetailsResponse> response) {
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
                             for (OrderObserver observer : newOrderObservers) {
                                 observer.onOrderReceived(orderDetails);
                             }
+
                             Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
                                     .setContentIntent(pendingIntent)
                                     .setSmallIcon(R.mipmap.ic_launcher)
@@ -132,32 +125,16 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                             notificationManager.notify(new Random().nextInt(), notification);
 
-                            StoreApi storeApiService = ServiceGenerator.createStoreService();
-                            Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreByIdNew(headers, finalCurrentStoreId);
-
-                            storeResponse.clone().enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
-                                @Override
-                                public void onResponse(Call<StoreResponse.SingleStoreResponse> call, Response<StoreResponse.SingleStoreResponse> response) {
-                                    if (response.isSuccessful()
-                                            && response.body() != null
-                                            && response.body().data != null
-                                            && !AlertService.isPlaying()) {
-                                        Intent intent = new Intent(getApplicationContext(), AlertService.class);
-                                        intent.putExtra(String.valueOf(R.string.store_type),
-                                                response.body().data.verticalCode);
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                            startForegroundService(intent);
-                                        } else {
-                                            startService(intent);
-                                        }
-                                    }
+                            if (!AlertService.isPlaying()) {
+                                Intent intent = new Intent(getApplicationContext(), AlertService.class);
+                                intent.putExtra(String.valueOf(R.string.store_type),
+                                        orderDetails.order.store.verticalCode);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    startForegroundService(intent);
+                                } else {
+                                    startService(intent);
                                 }
-
-                                @Override
-                                public void onFailure(Call<StoreResponse.SingleStoreResponse> call, Throwable t) {
-                                    Log.e(TAG, "onFailure on storeRequest. " + t.getLocalizedMessage());
-                                }
-                            });
+                            }
                         }
                     }
 
