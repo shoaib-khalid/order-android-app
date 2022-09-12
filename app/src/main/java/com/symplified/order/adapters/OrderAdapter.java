@@ -183,10 +183,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
 
-        TimeZone storeTimeZone = order.store != null
-                ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
-                : TimeZone.getDefault();
-        holder.date.setText(convertUtcTimeToStoreTimezone(order.created, storeTimeZone));
+        if (order.created != null) {
+            TimeZone storeTimeZone = TimeZone.getDefault();
+            if (order.store != null && order.store.regionCountry != null
+                    && order.store.regionCountry.timezone != null) {
+                storeTimeZone = TimeZone.getTimeZone(order.store.regionCountry.timezone);
+            }
+            holder.date.setText(convertUtcTimeToStoreTimezone(order.created, storeTimeZone));
+        }
 
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(currency + " " + formatter.format(order.total));
