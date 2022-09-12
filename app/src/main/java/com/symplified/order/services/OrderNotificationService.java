@@ -46,17 +46,13 @@ import retrofit2.Response;
 public class OrderNotificationService extends FirebaseMessagingService {
 
     private Pattern pattern;
-    private Map<String, String> headers;
     private String TAG = "order-notification-service";
     private static List<OrderObserver> newOrderObservers = new ArrayList<>();
 
     @Override
     public void onCreate() {
         super.onCreate();
-
         pattern = Pattern.compile("\\#(\\S+?)$");
-
-        headers = new HashMap<>();
     }
 
     @Override
@@ -74,11 +70,11 @@ public class OrderNotificationService extends FirebaseMessagingService {
             Call<HttpResponse> pingRequest = userService.ping(clientId, transactionId);
             pingRequest.clone().enqueue(new Callback<HttpResponse>() {
                 @Override
-                public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
+                public void onResponse(@NonNull Call<HttpResponse> call, @NonNull Response<HttpResponse> response) {
                 }
 
                 @Override
-                public void onFailure(Call<HttpResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<HttpResponse> call, @NonNull Throwable t) {
                 }
             });
         } else {
