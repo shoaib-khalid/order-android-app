@@ -220,6 +220,7 @@ public class PlaceholderFragment extends Fragment
     public void onDestroy() {
         super.onDestroy();
         SunmiPrintHelper.getInstance().removeObserver(this);
+        OrderNotificationService.removeObserver(this);
     }
 
     public void updateOrdersEveryFiveMinutes() {

@@ -104,6 +104,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
+
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
                             for (OrderObserver observer : newOrderObservers) {
                                 observer.onOrderReceived(orderDetails);
@@ -145,32 +146,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 });
             }
         }
-    }
-
-    public boolean isServiceRunning() {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (AlertService.class.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isAppOnForeground(Context context, String appPackageName) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
-        if (appProcesses == null) {
-            return false;
-        }
-        final String packageName = appPackageName;
-        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-                    && appProcess.processName.equals(packageName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private String parseInvoiceId(String body) {
