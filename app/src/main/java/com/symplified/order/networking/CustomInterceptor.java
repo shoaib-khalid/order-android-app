@@ -10,7 +10,7 @@ import com.symplified.order.App;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.login.Session;
-import com.symplified.order.utils.Keys;
+import com.symplified.order.utils.Key;
 
 import java.io.IOException;
 
@@ -50,7 +50,7 @@ public class CustomInterceptor implements Interceptor {
 
         Response response = chain.proceed(request);
 
-        if (response.code() == 401 && sharedPrefs.getBoolean(Keys.IS_LOGGED_IN, false)) {
+        if (response.code() == 401 && sharedPrefs.getBoolean(Key.IS_LOGGED_IN, false)) {
             try {
                 String refreshToken = sharedPrefs.getString("refreshToken", "");
                 Call<LoginResponse> refreshRequest = loginService.refreshAccessToken(refreshToken);

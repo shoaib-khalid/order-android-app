@@ -31,7 +31,7 @@ import java.util.List;
 
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
-    public List<Item> items = new ArrayList<>();
+    public List<Item> items;
     public Order order;
     public List<UpdatedItem> updatedItemsList;
     public Context context;

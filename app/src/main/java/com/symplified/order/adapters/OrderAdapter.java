@@ -41,11 +41,12 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.observers.OrderMediator;
+import com.symplified.order.observers.OrderManager;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,13 +67,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private final OrderApi orderApiService;
     private final DeliveryApi deliveryApiService;
-    private final OrderMediator orderMediator;
+    private final OrderManager orderManager;
 
-    public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context, OrderMediator orderMediator) {
+    public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context, OrderManager orderManager) {
         this.orders = orders;
         this.section = section;
         this.context = context;
-        this.orderMediator = orderMediator;
+        this.orderManager = orderManager;
 
         orderApiService = ServiceGenerator.createOrderService();
         deliveryApiService = ServiceGenerator.createDeliveryService();
@@ -218,7 +219,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         if (order.storeVoucherDiscount != null && order.storeVoucherDiscount > 0) {
-            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
+            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.storeVoucherDiscount));
             holder.rlStoreVoucherDiscount.setVisibility(View.VISIBLE);
         }
 
@@ -240,7 +241,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
         holder.printButton.setOnClickListener(view -> {
             ItemAdapter adapter = (ItemAdapter) holder.recyclerView.getAdapter();
-            List<Item> items = adapter.getItems();
+            List<Item> items = adapter != null ? adapter.getItems() : new ArrayList<>();
             printReceipt(order, items);
         });
 
@@ -455,7 +456,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
                         if (isOrderNew(oldCompletionStatus)) {
                             getOrderItemsForPrint(currentOrderDetails.order);
-                            orderMediator.addOrderToOngoingTab(updatedOrder);
+                            orderManager.addOrderToOngoingTab(updatedOrder);
                             statusUpdateToastText = "Order moved to next tab";
                         }
 
@@ -505,9 +506,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             imageView.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_warning_24));
             dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
                 dialog.dismiss();
-                Intent intent = new Intent(context, EditOrderActivity.class);
-                intent.putExtra("order", order);
-                context.startActivity(intent);
+//                Intent intent = new Intent(context, EditOrderActivity.class);
+//                intent.putExtra("order", order);
+//                context.startActivity(intent);
+                orderManager.editOrder(order);
             });
             dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
                 dialog.dismiss();

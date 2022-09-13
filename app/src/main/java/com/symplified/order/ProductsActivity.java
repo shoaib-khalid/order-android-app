@@ -111,23 +111,13 @@ public class ProductsActivity extends NavbarActivity {
 
     private void getProductsList() {
         startLoading();
+        products.clear();
 
         Map<String, String> headers = new HashMap<>();
-//
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        ProductApi api = retrofit.create(ProductApi.class);
 
         for (String storeId: storeIdList.split(" ")) {
 
             Call<ProductListResponse> responseCall = productApiService.getProducts(headers, storeId);
-
-//            progressDialog.show();
 
             responseCall.clone().enqueue(new Callback<ProductListResponse>() {
                 @Override

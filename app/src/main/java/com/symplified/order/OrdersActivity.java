@@ -18,6 +18,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.symplified.order.databinding.ActivityOrdersBinding;
+import com.symplified.order.models.order.Order;
+import com.symplified.order.observers.OrderManager;
+import com.symplified.order.observers.OrderObserver;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 
@@ -26,7 +29,6 @@ public class OrdersActivity extends NavbarActivity {
     private Toolbar toolbar;
     private ViewPager mViewPager;
     private DrawerLayout drawerLayout;
-    private SectionsPagerAdapter sectionsPagerAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
@@ -43,7 +45,7 @@ public class OrdersActivity extends NavbarActivity {
 
         initToolbar();
 
-        sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
         viewPager.setOffscreenPageLimit(0);
@@ -70,15 +72,6 @@ public class OrdersActivity extends NavbarActivity {
         title.setText("Your Orders");
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(0).setChecked(true);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK) {
-            this.finishActivity(4);
-            this.finish();
-        }
     }
 
     @Override

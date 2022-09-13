@@ -1,7 +1,6 @@
 package com.symplified.order.ui.tabs;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -13,19 +12,21 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.symplified.order.R;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.observers.OrderMediator;
+import com.symplified.order.observers.OrderManager;
 import com.symplified.order.observers.OrderObserver;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderMediator {
+public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderManager, OrderObserver {
 
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.ongoing_orders, R.string.past_orders};
     private final Context mContext;
+    private PlaceholderFragment newOrderFragment;
     private OrderObserver ongoingOrderFragment;
+    private OrderManager orderManager;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
         super(fm);
@@ -62,8 +63,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
 
         switch (position) {
             case 0:
-                PlaceholderFragment newOrderFragment = (PlaceholderFragment) createdFragment;
-                newOrderFragment.setOrderMediator(this);
+                newOrderFragment = (PlaceholderFragment) createdFragment;
+                newOrderFragment.setOrderManager(this);
                 break;
             case 1:
                 ongoingOrderFragment = (OrderObserver) createdFragment;
@@ -86,5 +87,25 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     @Override
     public void addOrderToOngoingTab(Order.OrderDetails orderDetails) {
         ongoingOrderFragment.onOrderReceived(orderDetails);
+    }
+
+    @Override
+    public void editOrder(Order order) {
+
+    }
+
+    @Override
+    public void onOrderReceived(Order.OrderDetails orderDetails) {
+
+    }
+
+    @Override
+    public void onOrderEdited(String invoiceId) {
+
+    }
+
+    @Override
+    public void setOrderManager(OrderManager orderManager) {
+
     }
 }

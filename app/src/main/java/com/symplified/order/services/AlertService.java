@@ -52,7 +52,7 @@ public class AlertService extends Service {
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
         String storeType = "";
         if (intent != null && intent.getExtras() != null
-                && intent.getExtras().getString(String.valueOf(R.string.store_type)) != null) {
+                && intent.hasExtra(String.valueOf(R.string.store_type))) {
 
             storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
         }

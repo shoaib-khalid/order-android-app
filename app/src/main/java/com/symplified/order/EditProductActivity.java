@@ -193,7 +193,6 @@ public class EditProductActivity extends NavbarActivity {
             return;
         }
 
-        Map<String, String> headers = new HashMap<>();
         try {
             product.name = productName.getEditText().getText().toString();
 

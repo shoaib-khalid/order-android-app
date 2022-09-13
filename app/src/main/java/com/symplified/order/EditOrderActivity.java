@@ -1,5 +1,6 @@
 package com.symplified.order;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,7 +29,9 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.Key;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -48,10 +52,9 @@ public class EditOrderActivity extends NavbarActivity {
     private RecyclerView recyclerView;
     private List<Item> items;
     private EditItemAdapter adapter;
-    private String BASE_URL;
     private Dialog progressDialog;
     private Order order = null;
-    private Button update, negative, positive;
+    private Button update;
     private DecimalFormat formatter;
 
     Map<String, String> headers;
@@ -61,8 +64,6 @@ public class EditOrderActivity extends NavbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-
-        BASE_URL = sharedPreferences.getString("base_url", null);
 
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -109,7 +110,6 @@ public class EditOrderActivity extends NavbarActivity {
     }
 
     private void initViews() {
-
         recyclerView = findViewById(R.id.edit_order_recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         update = findViewById(R.id.update_btn);
@@ -156,7 +156,7 @@ public class EditOrderActivity extends NavbarActivity {
             Log.d("edit-order", item.id + " " + item.quantity);
         }
 
-        if(adapter.updatedItemsList.size() == 0) {
+        if (adapter.updatedItemsList.size() == 0) {
             Toast.makeText(this, "No changes to update", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -184,9 +184,7 @@ public class EditOrderActivity extends NavbarActivity {
                     Log.i("updatedItemListTAG", "onResponse: " + call.request());
                     progressDialog.dismiss();
                     if (response.isSuccessful()) {
-                        getOrderById(order.id);
-//                        Toast.makeText(getApplicationContext(), "Order Updated Successfully", Toast.LENGTH_SHORT).show();
-//                        finish();
+                        getOrderByInvoiceId(order.invoiceId);
                     } else {
                         progressDialog.dismiss();
                         Log.e(TAG, "onResponse: " + response);
@@ -214,17 +212,26 @@ public class EditOrderActivity extends NavbarActivity {
         dialog.show();
     }
 
-    public void getOrderById(String id) {
+    public void getOrderByInvoiceId(String invoiceId) {
+        SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        String clientId = sharedPreferences.getString("ownerId", "");
 
-        Call<Order.OrderByIdResponse> orderByIdResponseCall = orderApiService.getOrderById(headers, id);
-
-        orderByIdResponseCall.clone().enqueue(new Callback<Order.OrderByIdResponse>() {
+        Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
+        orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
-            public void onResponse(Call<Order.OrderByIdResponse> call, Response<Order.OrderByIdResponse> response) {
-                if (response.isSuccessful()) {
-                    Order order = response.body().data;
-                    progressDialog.dismiss();
-                    showInformationDialog(order);
+            public void onResponse(@NonNull Call<OrderDetailsResponse> call,
+                                   @NonNull Response<OrderDetailsResponse> response) {
+
+                if (response.isSuccessful() && response.body().data.content.size() > 0) {
+                    Order.OrderDetails updatedOrderDetails = response.body().data.content.get(0);
+                    setActivityResult(updatedOrderDetails);
+
+                    if (updatedOrderDetails.order.orderRefund.size() > 0) {
+                        showInformationDialog(updatedOrderDetails.order.orderRefund.get(0).refundAmount);
+                    } else {
+                        progressDialog.dismiss();
+                        closeActivityWithSuccessMessage();
+                    }
                 } else {
                     progressDialog.dismiss();
                     closeActivityWithSuccessMessage();
@@ -232,35 +239,40 @@ public class EditOrderActivity extends NavbarActivity {
             }
 
             @Override
-            public void onFailure(Call<Order.OrderByIdResponse> call, Throwable t) {
+            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                 progressDialog.dismiss();
+                Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
                 closeActivityWithSuccessMessage();
             }
         });
-
     }
 
-    public void showInformationDialog(Order order) {
-        if (order != null && order.orderRefund.size() > 0) {
-            Dialog dialog = new Dialog(this);
-            dialog.setContentView(R.layout.custom_alert_dialog);
-            dialog.setCancelable(false);
-            ImageView imageView = dialog.findViewById(R.id.alert_icon);
-            TextView title = dialog.findViewById(R.id.alert_title);
-            TextView message = dialog.findViewById(R.id.alert_message);
-            dialog.findViewById(R.id.btn_neutral).setVisibility(View.VISIBLE);
-            title.setText(R.string.order_updated);
-            String messageText = getResources().getString(R.string.order_updated_message) + formatter.format(order.orderRefund.get(0).refundAmount);
-            message.setText(messageText);
-            imageView.setImageDrawable(getDrawable(R.drawable.ic_success));
-            dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
-                dialog.dismiss();
-                closeActivityWithSuccessMessage();
-            });
-            dialog.show();
-        } else {
+    public void showInformationDialog(Double refundAmount) {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.custom_alert_dialog);
+        dialog.setCancelable(false);
+
+        ImageView imageView = dialog.findViewById(R.id.alert_icon);
+        TextView title = dialog.findViewById(R.id.alert_title);
+        TextView message = dialog.findViewById(R.id.alert_message);
+
+        dialog.findViewById(R.id.btn_neutral).setVisibility(View.VISIBLE);
+        title.setText(R.string.order_updated);
+        String messageText = getResources().getString(R.string.order_updated_message) + formatter.format(refundAmount);
+        message.setText(messageText);
+        imageView.setImageDrawable(getDrawable(R.drawable.ic_success));
+        dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
+            dialog.dismiss();
             closeActivityWithSuccessMessage();
-        }
+        });
+        progressDialog.dismiss();
+        dialog.show();
+    }
+
+    private void setActivityResult(Order.OrderDetails updatedOrderDetails) {
+        Intent resultIntent = new Intent();
+        resultIntent.putExtra(Key.ORDER_DETAILS, updatedOrderDetails);
+        setResult(Activity.RESULT_OK, resultIntent);
     }
 
     private void closeActivityWithSuccessMessage() {
