@@ -248,25 +248,6 @@ public class PlaceholderFragment extends Fragment
         OrderNotificationService.removeObserver(this);
     }
 
-    public void updateOrdersEveryFiveMinutes() {
-        AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
-        Intent fetchOrdersIntent = new Intent("com.symplified.order.GET_ORDERS");
-        PendingIntent pendingIntent;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_IMMUTABLE);
-        } else {
-            pendingIntent = PendingIntent.getBroadcast(getActivity(), 999, fetchOrdersIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-//        getActivity().sendBroadcast(fetchOrdersIntent);
-        alarmManager.setRepeating(
-                AlarmManager.RTC,
-                System.currentTimeMillis(),
-                5 * 60 * 1000,
-                pendingIntent
-        );
-
-    }
-
     private void getOrders() {
         OrderManager orderManager = this;
         startLoading();
@@ -362,12 +343,6 @@ public class PlaceholderFragment extends Fragment
         Intent intent = new Intent(getActivity(), EditOrderActivity.class);
         intent.putExtra("order", order);
         editOrderActivityResultLauncher.launch(intent);
-//        context.startActivity(intent);
-    }
-
-    @Override
-    public void onOrderEdited(String invoiceId) {
-
     }
 
     @Override

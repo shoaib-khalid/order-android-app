@@ -19,7 +19,7 @@ import com.symplified.order.observers.OrderObserver;
  * A [FragmentPagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/pages.
  */
-public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderManager, OrderObserver {
+public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderManager {
 
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.ongoing_orders, R.string.past_orders};
@@ -91,21 +91,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
 
     @Override
     public void editOrder(Order order) {
-
-    }
-
-    @Override
-    public void onOrderReceived(Order.OrderDetails orderDetails) {
-
-    }
-
-    @Override
-    public void onOrderEdited(String invoiceId) {
-
-    }
-
-    @Override
-    public void setOrderManager(OrderManager orderManager) {
 
     }
 }

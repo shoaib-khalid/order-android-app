@@ -231,7 +231,7 @@ public class EditProductActivity extends NavbarActivity {
     public void setStatus() {
         statusList.add("Active");
         statusList.add("Inactive");
-        statusList.add("Out of Stock");
+//        statusList.add("Out of Stock");
         String status = product.status;
         switch (status) {
             case "ACTIVE":
@@ -240,9 +240,9 @@ public class EditProductActivity extends NavbarActivity {
             case "INACTIVE":
                 statusTextView.setText(statusList.get(1), false);
                 break;
-            case "OUTOFSTOCK":
-                statusTextView.setText(statusList.get(2), false);
-                break;
+//            case "OUTOFSTOCK":
+//                statusTextView.setText(statusList.get(2), false);
+//                break;
         }
         statusAdapter.notifyDataSetChanged();
     }
