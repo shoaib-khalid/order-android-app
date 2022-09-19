@@ -1,14 +1,13 @@
 package com.symplified.order.services;
 
-import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,19 +21,20 @@ import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.enums.DineInOption;
+import com.symplified.order.enums.ServiceType;
+import com.symplified.order.enums.Status;
+import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.HttpResponse;
-import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
+import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.observers.OrderObserver;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -78,17 +78,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 }
             });
         } else {
-            Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
-
-            TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-            taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-            PendingIntent pendingIntent;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
-            } else {
-                pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            }
-
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
 
@@ -100,44 +89,63 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
-
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
-                            for (OrderObserver observer : newOrderObservers) {
-                                observer.onOrderReceived(orderDetails);
+
+                            if (ServiceType.DINEIN.toString().equals(orderDetails.order.serviceType)
+                                    && DineInOption.SENDTOTABLE.toString().equals(orderDetails.order.dineInOption)
+                                    && SunmiPrintHelper.getInstance().isPrinterConnected()) {
+
+                                orderApiService.updateOrderStatus(
+                                        new Order.OrderUpdate(orderDetails.order.id, Status.DELIVERED_TO_CUSTOMER),
+                                        orderDetails.order.id).clone()
+                                        .enqueue(new Callback<OrderUpdateResponse>() {
+                                    @Override
+                                    public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
+                                        if (response.isSuccessful()) {
+                                            orderApiService.getItemsForOrder(orderDetails.order.id).clone()
+                                                    .enqueue(new Callback<ItemResponse>() {
+                                                        @Override
+                                                        public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+                                                            if (response.isSuccessful()) {
+                                                                try {
+                                                                    SunmiPrintHelper.getInstance()
+                                                                            .printReceipt(orderDetails.order,
+                                                                                    response.body().data.content);
+                                                                } catch (RemoteException e) {
+                                                                    notifyAboutNewOrder(remoteMessage, orderDetails);
+                                                                }
+                                                            } else {
+                                                                notifyAboutNewOrder(remoteMessage, orderDetails);
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onFailure(Call<ItemResponse> call, Throwable t) {
+                                                            notifyAboutNewOrder(remoteMessage, orderDetails);
+                                                        }
+                                                    });
+                                        } else {
+                                            notifyAboutNewOrder(remoteMessage, orderDetails);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
+                                        notifyAboutNewOrder(remoteMessage, orderDetails);
+                                    }
+                                });
+                            } else {
+                                notifyAboutNewOrder(remoteMessage, orderDetails);
                             }
-
-                            Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
-                                    .setContentIntent(pendingIntent)
-                                    .setSmallIcon(R.mipmap.ic_launcher)
-                                    .setContentTitle(remoteMessage.getData().get("title"))
-                                    .setContentText(remoteMessage.getData().get("body"))
-                                    .setAutoCancel(false)
-                                    .setPriority(NotificationCompat.PRIORITY_MAX)
-                                    .setCategory(NotificationCompat.CATEGORY_ALARM)
-                                    .setColor(Color.CYAN)
-                                    .build();
-
-                            notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-                            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                            notificationManager.notify(new Random().nextInt(), notification);
-
-                            if (!AlertService.isPlaying()) {
-                                Intent intent = new Intent(getApplicationContext(), AlertService.class);
-                                intent.putExtra(String.valueOf(R.string.store_type),
-                                        orderDetails.order.store.verticalCode);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    startForegroundService(intent);
-                                } else {
-                                    startService(intent);
-                                }
-                            }
+                        } else {
+                            notifyAboutNewOrder(remoteMessage, null);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
+                        notifyAboutNewOrder(remoteMessage, null);
                     }
                 });
             }
@@ -156,6 +164,53 @@ public class OrderNotificationService extends FirebaseMessagingService {
             }
         }
         return null;
+    }
+
+    private void notifyAboutNewOrder(RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
+        if (orderDetails != null) {
+            for (OrderObserver observer : newOrderObservers) {
+                observer.onOrderReceived(orderDetails);
+            }
+        }
+
+        Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
+
+        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
+        taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
+
+        PendingIntent pendingIntent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(remoteMessage.getData().get("title"))
+                .setContentText(remoteMessage.getData().get("body"))
+                .setAutoCancel(false)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setColor(Color.CYAN)
+                .build();
+
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(new Random().nextInt(), notification);
+
+        if (!AlertService.isPlaying()) {
+            Intent intent = new Intent(getApplicationContext(), AlertService.class);
+            intent.putExtra(String.valueOf(R.string.store_type),
+                    orderDetails != null ? orderDetails.order.store.verticalCode : "");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
+        }
     }
 
     public static void addObserver(OrderObserver observer) {

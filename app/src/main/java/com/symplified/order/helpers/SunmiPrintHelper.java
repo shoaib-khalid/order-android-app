@@ -1,6 +1,7 @@
 package com.symplified.order.helpers;
 
 import android.content.Context;
+import android.os.RemoteException;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -8,8 +9,14 @@ import com.sunmi.peripheral.printer.InnerPrinterCallback;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.symplified.order.App;
+import com.symplified.order.enums.ServiceType;
+import com.symplified.order.models.item.Item;
+import com.symplified.order.models.item.SubItem;
+import com.symplified.order.models.order.Order;
 import com.symplified.order.observers.PrinterObserver;
+import com.symplified.order.utils.Utility;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,17 +89,6 @@ public class SunmiPrintHelper {
         }
     }
 
-    public void printText(String content) {
-        if (printerService != null) {
-            try {
-                printerService.printText(content, null);
-            } catch (Exception e) {
-                handleException("Error occurred when printing", e);
-                Toast.makeText(App.getAppContext(), "Error occurred while printing. Please try again", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     public void feedPaper() {
         if (printerService != null) {
             try {
@@ -135,5 +131,75 @@ public class SunmiPrintHelper {
 
         Log.e(TAG, errorMessage);
         ex.printStackTrace();
+    }
+
+    public void printReceipt(Order order, List<Item> items) throws RemoteException {
+
+        if (!SunmiPrintHelper.getInstance().isPrinterConnected()) {
+            return;
+        }
+
+        String currency = Utility.getCurrencySymbol(order);
+        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+
+        String divider = "\n-------------------------------";
+        StringBuilder text = new StringBuilder();
+
+        text.append(divider);
+        text.append("\n\tDeliverin.MY Order Chit");
+
+        text.append(divider);
+        text.append("\nOrder Id: ").append(order.invoiceId);
+        text.append("\nOrder Type: ");
+        text.append(ServiceType.DINEIN.toString().equals(order.serviceType)
+                ? "Dine In"
+                : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
+        text.append("\nCustomer contact no.: \n").append(order.orderShipmentDetail.phoneNumber);
+        text.append(divider).append("\n");
+
+        for (Item item : items) {
+            text.append("\n").append(item.productName);
+            if (item.productVariant != null && !item.productVariant.equals("")) {
+                text.append("\n").append(item.productVariant);
+            }
+
+            for (SubItem subItem : item.orderSubItem) {
+                text.append("\n").append(subItem.productName);
+            }
+
+            if (item.specialInstruction != null && !item.specialInstruction.equals("")) {
+                text.append("\nInstructions: ").append(item.specialInstruction);
+            }
+            text.append("\nQuantity: ").append(item.quantity);
+            text.append("\nTotal Price: ")
+                    .append(currency)
+                    .append(" ")
+                    .append(formatter.format(item.price))
+                    .append("\n");
+        }
+
+        text.append(divider);
+        text.append("\nSub-total           ");
+        text.append(currency).append(" ").append(formatter.format(order.subTotal));
+        text.append("\nService Charges     ");
+        text.append(currency).append(" ");
+        text.append(order.storeServiceCharges != null
+                ? formatter.format(order.storeServiceCharges)
+                : "0.00");
+        text.append("\nDelivery Charges    ");
+        text.append(currency).append(" ");
+        text.append(order.deliveryCharges != null
+                ? formatter.format(order.deliveryCharges)
+                : "0.00");
+        text.append(divider);
+
+        text.append("\nTotal               ")
+                .append(currency).append(" ")
+                .append(formatter.format(order.total));
+
+        if (printerService != null) {
+            printerService.printText(String.valueOf(text), null);
+        }
+        helper.feedPaper();
     }
 }

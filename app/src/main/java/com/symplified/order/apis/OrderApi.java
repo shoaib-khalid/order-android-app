@@ -42,10 +42,10 @@ public interface OrderApi {
     Call<OrderDetailsResponse> getSentOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId, @Query("from") String from, @Query("to") String to);
 
     @GET("orders/{orderId}/items")
-    Call<ItemResponse> getItemsForOrder(@Path("orderId") String storeId);
+    Call<ItemResponse> getItemsForOrder(@Path("orderId") String orderId);
 
     @PUT("orders/{orderId}/completion-status-updates")
-    Call<OrderUpdateResponse> updateOrderStatus(@HeaderMap Map<String, String> headers, @Body Order.OrderUpdate body, @Path("orderId") String orderId);
+    Call<OrderUpdateResponse> updateOrderStatus(@Body Order.OrderUpdate body, @Path("orderId") String orderId);
 
     @GET("orders/details/{orderId}")
     Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
