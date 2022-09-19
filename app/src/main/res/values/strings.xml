@@ -95,6 +95,7 @@
     <string name="order_type_value">Delivery</string>
     <string name="order_curr_status_value">Preparing</string>
     <string name="store_type">Store Type</string>
+    <string name="service_type">Service Type</string>
     <string name="product_name">Red &amp; Hot Pizza</string>
     <string name="product_status">Active</string>
     <string name="edit">Edit</string>

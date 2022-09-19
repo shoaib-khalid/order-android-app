@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
+import com.symplified.order.enums.ServiceType;
 
 import java.util.List;
 
@@ -50,14 +51,21 @@ public class AlertService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring);
-        String storeType = "";
+        String storeType = "", serviceType = "";
         if (intent != null && intent.getExtras() != null
                 && intent.hasExtra(String.valueOf(R.string.store_type))) {
 
-            storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
+            if (intent.hasExtra(String.valueOf(R.string.store_type))) {
+                storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
+            }
+            if (intent.hasExtra(String.valueOf(R.string.service_type))) {
+                serviceType = intent.getExtras().getString(String.valueOf(R.string.service_type));
+            }
         }
 
-        if (isAppOnForeground(this) || (storeType != null && !storeType.contains("FnB"))) {
+        if (isAppOnForeground(this)
+                || storeType.contains("FnB")
+                || serviceType.contains(ServiceType.DINEIN.toString())) {
             mediaPlayer.setLooping(false);
             hasRepeatedOnce = false;
             mediaPlayer.setOnCompletionListener(mp -> {

@@ -100,52 +100,54 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                         orderDetails.order.id).clone()
                                         .enqueue(new Callback<OrderUpdateResponse>() {
                                     @Override
-                                    public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
+                                    public void onResponse(@NonNull Call<OrderUpdateResponse> call,
+                                                           @NonNull Response<OrderUpdateResponse> response) {
                                         if (response.isSuccessful()) {
                                             orderApiService.getItemsForOrder(orderDetails.order.id).clone()
                                                     .enqueue(new Callback<ItemResponse>() {
                                                         @Override
-                                                        public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+                                                        public void onResponse(@NonNull Call<ItemResponse> call,
+                                                                               @NonNull Response<ItemResponse> response) {
                                                             if (response.isSuccessful()) {
                                                                 try {
-                                                                    SunmiPrintHelper.getInstance()
-                                                                            .printReceipt(orderDetails.order,
-                                                                                    response.body().data.content);
+                                                                    SunmiPrintHelper.getInstance().printReceipt(orderDetails.order, response.body().data.content);
+                                                                    alertUser(remoteMessage, orderDetails);
                                                                 } catch (RemoteException e) {
-                                                                    notifyAboutNewOrder(remoteMessage, orderDetails);
+                                                                    addNewOrderAndAlertUser(remoteMessage, orderDetails);
                                                                 }
                                                             } else {
-                                                                notifyAboutNewOrder(remoteMessage, orderDetails);
+                                                                addNewOrderAndAlertUser(remoteMessage, orderDetails);
                                                             }
                                                         }
 
                                                         @Override
-                                                        public void onFailure(Call<ItemResponse> call, Throwable t) {
-                                                            notifyAboutNewOrder(remoteMessage, orderDetails);
+                                                        public void onFailure(@NonNull Call<ItemResponse> call,
+                                                                              @NonNull Throwable t) {
+                                                            addNewOrderAndAlertUser(remoteMessage, orderDetails);
                                                         }
                                                     });
                                         } else {
-                                            notifyAboutNewOrder(remoteMessage, orderDetails);
+                                            addNewOrderAndAlertUser(remoteMessage, orderDetails);
                                         }
                                     }
 
                                     @Override
                                     public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
-                                        notifyAboutNewOrder(remoteMessage, orderDetails);
+                                        addNewOrderAndAlertUser(remoteMessage, orderDetails);
                                     }
                                 });
                             } else {
-                                notifyAboutNewOrder(remoteMessage, orderDetails);
+                                addNewOrderAndAlertUser(remoteMessage, orderDetails);
                             }
                         } else {
-                            notifyAboutNewOrder(remoteMessage, null);
+                            addNewOrderAndAlertUser(remoteMessage, null);
                         }
                     }
 
                     @Override
                     public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
-                        notifyAboutNewOrder(remoteMessage, null);
+                        addNewOrderAndAlertUser(remoteMessage, null);
                     }
                 });
             }
@@ -166,13 +168,17 @@ public class OrderNotificationService extends FirebaseMessagingService {
         return null;
     }
 
-    private void notifyAboutNewOrder(RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
+    private void addNewOrderAndAlertUser(RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
         if (orderDetails != null) {
             for (OrderObserver observer : newOrderObservers) {
                 observer.onOrderReceived(orderDetails);
             }
         }
 
+        alertUser(remoteMessage, orderDetails);
+    }
+
+    private void alertUser(RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
 
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
@@ -205,6 +211,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
             Intent intent = new Intent(getApplicationContext(), AlertService.class);
             intent.putExtra(String.valueOf(R.string.store_type),
                     orderDetails != null ? orderDetails.order.store.verticalCode : "");
+            intent.putExtra(String.valueOf(R.string.service_type),
+                    orderDetails != null ? orderDetails.order.serviceType : "");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent);
             } else {
