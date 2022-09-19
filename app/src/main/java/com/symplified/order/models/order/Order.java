@@ -32,6 +32,9 @@ public class Order implements Serializable {
     public String deliveryDiscountDescription;
     public Double voucherDiscount;
     public Double storeVoucherDiscount;
+    public String serviceType;
+    public String dineInOption;
+    public String dineInPack;
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
     public Customer customer;
@@ -64,6 +67,11 @@ public class Order implements Serializable {
                 ", deliveryDiscount=" + deliveryDiscount +
                 ", appliedDiscountDescription='" + appliedDiscountDescription + '\'' +
                 ", deliveryDiscountDescription='" + deliveryDiscountDescription + '\'' +
+                ",  voucherDiscount='" + voucherDiscount + '\'' +
+                ",  storeVoucherDiscount='" + storeVoucherDiscount + '\'' +
+                ",  serviceType='" + serviceType + '\'' +
+                ",  dineInOption='" + dineInOption + '\'' +
+                ",  dineInPack='" + dineInPack + '\'' +
                 ", orderShipmentDetail=" + orderShipmentDetail +
                 ", orderPaymentDetail=" + orderPaymentDetail +
                 ", customer=" + customer +
@@ -89,7 +97,7 @@ public class Order implements Serializable {
         }
     }
 
-    public static class OrderShipmentDetail implements Serializable{
+    public static class OrderShipmentDetail implements Serializable {
         public String receiverName;
         public String phoneNumber;
         public String address;
@@ -131,7 +139,7 @@ public class Order implements Serializable {
     }
 
 
-    public static class OrderPaymentDetail implements Serializable{
+    public static class OrderPaymentDetail implements Serializable {
         public String accountName;
         public String gatewayId;
         public String couponId;
@@ -141,7 +149,7 @@ public class Order implements Serializable {
         public Double deliveryQuotationAmount;
     }
 
-    public static class Customer implements Serializable{
+    public static class Customer implements Serializable {
         public String id;
 
         public String name;
@@ -152,7 +160,7 @@ public class Order implements Serializable {
         public String updated;
     }
 
-    public static class OrderRefund implements Serializable{
+    public static class OrderRefund implements Serializable {
         private String id;
 
         public String orderId;
@@ -182,7 +190,7 @@ public class Order implements Serializable {
         }
     }
 
-    public static class OrderList implements Serializable{
+    public static class OrderList implements Serializable {
         public List<Order> content;
     }
 
@@ -196,7 +204,8 @@ public class Order implements Serializable {
         public String nextCompletionStatus;
         public String nextActionText;
 
-        public OrderDetails() {}
+        public OrderDetails() {
+        }
 
         public OrderDetails(UpdatedOrder updatedOrder) {
             this.order = updatedOrder;
@@ -207,17 +216,17 @@ public class Order implements Serializable {
         }
     }
 
-    public static class OrderUpdate{
+    public static class OrderUpdate {
         public String orderId;
         public Status status;
 
-        public OrderUpdate(String orderId, Status status){
+        public OrderUpdate(String orderId, Status status) {
             this.orderId = orderId;
             this.status = status;
         }
     }
 
-    public static class OrderByIdResponse extends HttpResponse implements Serializable{
+    public static class OrderByIdResponse extends HttpResponse implements Serializable {
         public Order data;
     }
 }

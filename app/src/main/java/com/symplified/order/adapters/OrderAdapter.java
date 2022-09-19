@@ -27,7 +27,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.symplified.order.App;
-import com.symplified.order.EditOrderActivity;
 import com.symplified.order.R;
 import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
@@ -61,7 +60,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     public List<Order.OrderDetails> orders;
     public String section;
     public Context context;
-    public final String TAG = OrderAdapter.class.getName();
+    public final String TAG = "order-adapter";
     public Dialog dialog;
     public DecimalFormat formatter;
 
@@ -87,7 +86,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 trackButton, callButton;
         private final ImageButton printButton;
         private final CardView cardView;
-        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, type,
+        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, orderType,
                 currStatusLabel, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
         private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
@@ -109,7 +108,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             total = itemView.findViewById(R.id.order_total_value);
             status = itemView.findViewById(R.id.order_status_value);
             typeLabel = itemView.findViewById(R.id.order_type);
-            type = itemView.findViewById(R.id.order_type_value);
+            orderType = itemView.findViewById(R.id.order_type_value);
             customerNotes = itemView.findViewById(R.id.customer_note_value);
 
             phoneNumber = itemView.findViewById(R.id.contact_value);
@@ -245,7 +244,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             printReceipt(order, items);
         });
 
-        if (order.customerNotes != null && !order.customerNotes.equals("")) {
+        if ("DINEIN".equals(order.serviceType) && "TAKEAWAY".equals(order.dineInPack)) {
+            order.customerNotes = "TAKEAWAY";
+        }
+        holder.orderType.setText("DINEIN".equals(order.serviceType) ? "Dine In"
+                : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
+
+        if (order.customerNotes != null && !"".equals(order.customerNotes)) {
             holder.rlCustomerNote.setVisibility(View.VISIBLE);
             holder.divider3.setVisibility(View.VISIBLE);
             holder.customerNotes.setText(order.customerNotes);
@@ -260,7 +265,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.editButton.setVisibility(View.VISIBLE);
             holder.newLayout.setVisibility(View.VISIBLE);
             holder.acceptButton.setText(orderDetails.nextActionText);
-            holder.type.setText(order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
             holder.currStatusLayout.setVisibility(View.GONE);
             holder.divider8.setVisibility(View.GONE);
         } else if (section.equals("ongoing")) {
@@ -270,12 +274,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 holder.statusLabel.setText("Update Status: ");
                 holder.statusButton.setText(orderDetails.nextActionText);
                 holder.statusButton.setVisibility(View.VISIBLE);
-            }
-
-            if (order.orderShipmentDetail.storePickup) {
-                holder.type.setText("Self-Pickup");
-            } else {
-                holder.type.setText("Delivery");
             }
 
             switch (orderStatus) {
@@ -443,12 +441,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
             public void onResponse(@NonNull Call<OrderUpdateResponse> call, @NonNull Response<OrderUpdateResponse> response) {
+                int indexOfOrder = orders.indexOf(currentOrderDetails);
                 if (response.isSuccessful()) {
                     Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
 
                     String oldCompletionStatus = currentOrderDetails.order.completionStatus;
                     String updatedCompletionStatus = currentOrderDetails.order.completionStatus;
-                    int indexOfOrder = orders.indexOf(currentOrderDetails);
 
                     String statusUpdateToastText = "Status Updated";
                     if (isOrderNew(oldCompletionStatus)
@@ -472,8 +470,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     }
 
                     Toast.makeText(context, statusUpdateToastText, Toast.LENGTH_SHORT).show();
+                } else if (response.code() == 406) {
+                    Toast.makeText(context, "Error: Order already processed.", Toast.LENGTH_SHORT).show();
+                    orders.remove(indexOfOrder);
+                    notifyItemRemoved(indexOfOrder);
                 } else {
-                    Log.e(TAG, response.toString());
+                    Log.e(TAG, response.raw().toString());
+                    Log.e(TAG, "Error body: " + response.errorBody());
                     Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
                     stopLoading(holder, currentOrderDetails.order.completionStatus);
                 }
