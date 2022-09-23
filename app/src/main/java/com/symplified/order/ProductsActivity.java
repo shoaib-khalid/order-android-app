@@ -42,16 +42,11 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProductsActivity extends NavbarActivity {
     private Toolbar toolbar;
-    private RecyclerView recyclerView;
     List<Product> products = new ArrayList<>();
     ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
     private String storeIdList;
-    private String BASE_URL;
-    private Dialog progressDialog;
-    private ActivityProductsBinding binding;
     private DrawerLayout drawerLayout;
-    private TextView addNew;
     private SwipeRefreshLayout refreshLayout;
     private ProgressBar progressBar;
     private ProductApi productApiService;
@@ -60,7 +55,7 @@ public class ProductsActivity extends NavbarActivity {
     protected void onCreate(Bundle savedInstanceStatus) {
         super.onCreate(savedInstanceStatus);
 
-        binding = ActivityProductsBinding.inflate(getLayoutInflater());
+        ActivityProductsBinding binding = ActivityProductsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -71,7 +66,7 @@ public class ProductsActivity extends NavbarActivity {
 
         initToolbar(sharedPreferences);
 
-        recyclerView = findViewById(R.id.products_recyclerview);
+        RecyclerView recyclerView = findViewById(R.id.products_recyclerview);
 
         productAdapter = new ProductAdapter(this, products);
         recyclerView.setAdapter(productAdapter);
@@ -79,18 +74,10 @@ public class ProductsActivity extends NavbarActivity {
 
         sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         storeIdList = sharedPreferences.getString("storeIdList", null);
-        BASE_URL = sharedPreferences.getString("base_url", null);
-
-        progressDialog = new Dialog(this);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
 
         progressBar = findViewById(R.id.product_progress_bar);
         refreshLayout = findViewById(R.id.layout_products_refresh);
-        refreshLayout.setOnRefreshListener(() -> getProductsList());
+        refreshLayout.setOnRefreshListener(this::getProductsList);
 
         productApiService = ServiceGenerator.createProductService();
 
@@ -113,11 +100,9 @@ public class ProductsActivity extends NavbarActivity {
         startLoading();
         products.clear();
 
-        Map<String, String> headers = new HashMap<>();
-
         for (String storeId: storeIdList.split(" ")) {
 
-            Call<ProductListResponse> responseCall = productApiService.getProducts(headers, storeId);
+            Call<ProductListResponse> responseCall = productApiService.getProducts(storeId);
 
             responseCall.clone().enqueue(new Callback<ProductListResponse>() {
                 @Override
@@ -125,8 +110,6 @@ public class ProductsActivity extends NavbarActivity {
                     if (response.isSuccessful()) {
                         products.addAll(response.body().data.content);
                         productAdapter.notifyDataSetChanged();
-                        progressDialog.dismiss();
-
                     } else {
                         Toast.makeText(ProductsActivity.this, "An Error Occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
                     }
@@ -137,7 +120,6 @@ public class ProductsActivity extends NavbarActivity {
                 public void onFailure(Call<ProductListResponse> call, Throwable t) {
                     Log.e(TAG, "onFailure: ", t);
                     Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
-                    progressDialog.dismiss();
                     stopLoading();
                 }
             });

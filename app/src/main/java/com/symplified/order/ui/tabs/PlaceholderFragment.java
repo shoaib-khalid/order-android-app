@@ -98,7 +98,6 @@ public class PlaceholderFragment extends Fragment
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-
         String clientId = sharedPreferences.getString("ownerId", null);
 
         if (clientId == null) {
@@ -107,7 +106,6 @@ public class PlaceholderFragment extends Fragment
 
         orders = new ArrayList<>();
 
-        Map<String, String> headers = new HashMap<>();
         OrderApi orderApiService = ServiceGenerator.createOrderService();
 
         section = null;
@@ -131,7 +129,7 @@ public class PlaceholderFragment extends Fragment
             }
             case "ongoing": {
                 pageViewModel.setIndex(1);
-                orderResponse = orderApiService.getOngoingOrdersByClientId(headers, clientId);
+                orderResponse = orderApiService.getOngoingOrdersByClientId(clientId);
                 break;
             }
             case "past": {
@@ -139,7 +137,7 @@ public class PlaceholderFragment extends Fragment
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                 Date current = new Date();
                 String formatDate = formatter.format(current);
-                orderResponse = orderApiService.getSentOrdersByClientId(headers, clientId, formatDate, formatDate);
+                orderResponse = orderApiService.getSentOrdersByClientId(clientId, formatDate, formatDate);
                 break;
             }
         }

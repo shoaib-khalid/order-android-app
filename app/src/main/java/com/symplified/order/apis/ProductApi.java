@@ -23,40 +23,11 @@ import retrofit2.http.Query;
 
 public interface ProductApi {
 
-    @GET("stores/{storeId}/products?status=ACTIVE,INACTIVE,OUTOFSTOCK")
-    Call<ProductListResponse> getProducts(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId);
-
-    @GET("stores/{storeId}/products/{productId}")
-    Call<ResponseBody> getProductById(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId);
-
-    @POST("stores/{storeId}/products")
-    Call<ResponseBody> postProduct(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Body Product product);
-
-    @POST("stores/{storeId}/products/{productId}/inventory")
-    Call<ResponseBody> postProductInventory(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Body Product.ProductInventory productInventory);
-
-    @POST("stores/{storeId}/products/{productId}/assets")
-    Call<ResponseBody> postProductAsset(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Part MultipartBody.Part file, @Body Product.ProductAsset productAsset);
-
-    @PUT("stores/{storeId}/products/{productId}")
-    Call<ResponseBody> updateProduct(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Body Product product);
+    @GET("stores/{storeId}/products?status=ACTIVE,INACTIVE,OUTOFSTOCK&pageSize=1000000")
+    Call<ProductListResponse> getProducts(@Path("storeId") String storeId);
 
     @PUT("stores/{storeId}/products/{productId}")
     Call<ResponseBody> updateProduct(@Path("storeId") String storeId, @Path("productId") String productId, @Body ProductEditRequest body);
-
-    @PUT("stores/{storeId}/products/{productId}/inventory/{inventoryId}")
-    Call<ResponseBody> updateProductInventory(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Path("inventoryId") String inventoryId, @Body Product.ProductInventory productInventory);
-
-    @Multipart
-    @PUT("stores/{storeId}/products/{productId}/assets/{assetId}")
-    Call<ResponseBody> updateProductAsset(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Path("assetId") String assetId, @Part("file") MultipartBody.Part file);
-
-    @DELETE("stores/{storeId}/products/{productId}")
-    Call<ResponseBody> deleteProduct(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId);
-
-    @Multipart
-    @PUT("stores/{storeId}/products/{productId}/assets?isThumbnail=true")
-    Call<ResponseBody> updateThumbnail(@HeaderMap Map<String, String> headers, @Path("storeId") String storeId, @Path("productId") String productId, @Part MultipartBody.Part body);
 
     @GET("stores/{storeId}/products/{productId}/assets")
     Call<StoreProductAsset.StoreProductAssetListResponse> getStoreProductAssets(
