@@ -154,8 +154,17 @@ public class SunmiPrintHelper {
         text.append(ServiceType.DINEIN.toString().equals(order.serviceType)
                 ? "Dine In"
                 : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
-        text.append("\nCustomer contact no.: \n").append(order.orderShipmentDetail.phoneNumber);
-        text.append(divider).append("\n");
+
+        if (order.orderShipmentDetail.phoneNumber != null
+                && !"".equals(order.orderShipmentDetail.phoneNumber)) {
+            text.append("\nCustomer contact no.: \n").append(order.orderShipmentDetail.phoneNumber);
+        }
+
+        if (order.customerNotes != null && !"".equals(order.customerNotes)) {
+            text.append("\nCustomer notes: \n").append(order.customerNotes);
+        }
+
+        text.append("\n").append(divider).append("\n");
 
         for (Item item : items) {
             text.append("\n").append(item.productName);

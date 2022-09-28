@@ -95,8 +95,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 currStatusLabel, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
         private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
-                rlStoreVoucherDiscount, rlServiceCharges,
-                rlDeliveryDiscount, rlCustomerNote, rlRiderDetails;
+                rlStoreVoucherDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote,
+                rlRiderDetails, rlAddress, rlContact;
         private final View divider3, divider7, divider8, divider9;
         private final ImageView riderCallIcon;
 
@@ -133,6 +133,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             rlStoreVoucherDiscount = itemView.findViewById(R.id.rl_store_voucher_discount);
             rlDeliveryDiscount = itemView.findViewById(R.id.rl_delivery_discount);
             rlServiceCharges = itemView.findViewById(R.id.rl_service_charges);
+            rlAddress = itemView.findViewById(R.id.rl_address);
+            rlContact = itemView.findViewById(R.id.rl_contact);
 
             riderName = itemView.findViewById(R.id.driver_value);
             riderContact = itemView.findViewById(R.id.driver_contact_value);
@@ -206,9 +208,30 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(currency + " " + formatter.format(order.total));
 
-        holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
-        String fullAddress = order.orderShipmentDetail.address + ", " + order.orderShipmentDetail.city + ", " + order.orderShipmentDetail.state + " " + order.orderShipmentDetail.zipcode;
-        holder.address.setText(fullAddress);
+        StringBuilder fullAddress = new StringBuilder();
+        if (order.orderShipmentDetail.address != null && !"".equals(order.orderShipmentDetail.address)) {
+            fullAddress.append(order.orderShipmentDetail.address).append(", ");
+        }
+        if (order.orderShipmentDetail.city != null && !"".equals(order.orderShipmentDetail.city)) {
+            fullAddress.append(order.orderShipmentDetail.city).append(", ");
+        }
+        if (order.orderShipmentDetail.state != null && !"".equals(order.orderShipmentDetail.state)) {
+            fullAddress.append(order.orderShipmentDetail.state).append(", ");
+        }
+        if (order.orderShipmentDetail.zipcode != null && !"".equals(order.orderShipmentDetail.zipcode)) {
+            fullAddress.append(order.orderShipmentDetail.zipcode);
+        }
+
+        if (fullAddress.length() > 0) {
+            holder.address.setText(String.valueOf(fullAddress));
+            holder.rlAddress.setVisibility(View.VISIBLE);
+        }
+
+        if (order.orderShipmentDetail.phoneNumber != null) {
+            holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
+            holder.rlContact.setVisibility(View.VISIBLE);
+        }
+
         holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
 
         if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
@@ -253,9 +276,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 && DineInPack.TAKEAWAY.toString().equals(order.dineInPack)) {
             order.customerNotes = "TAKEAWAY";
         }
+        
         holder.orderType.setText(ServiceType.DINEIN.toString().equals(order.serviceType)
                 ? "Dine In"
-                : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
+                : order.orderShipmentDetail.storePickup ? "Store Pickup" : "Delivery");
 
         if (order.customerNotes != null && !"".equals(order.customerNotes)) {
             holder.rlCustomerNote.setVisibility(View.VISIBLE);

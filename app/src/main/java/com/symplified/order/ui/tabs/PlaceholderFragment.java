@@ -47,11 +47,14 @@ import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.utils.Key;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -135,9 +138,12 @@ public class PlaceholderFragment extends Fragment
             case "past": {
                 pageViewModel.setIndex(2);
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                Date current = new Date();
-                String formatDate = formatter.format(current);
-                orderResponse = orderApiService.getSentOrdersByClientId(clientId, formatDate, formatDate);
+
+                String currentDate = android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O
+                ? LocalDate.now(TimeZone.getDefault().toZoneId()).toString()
+                : formatter.format(new Date());
+
+                orderResponse = orderApiService.getSentOrdersByClientId(clientId, currentDate, currentDate);
                 break;
             }
         }

@@ -80,7 +80,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
-
                 OrderApi orderApiService = ServiceGenerator.createOrderService();
                 Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
 
@@ -140,7 +139,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                 addNewOrderAndAlertUser(remoteMessage, orderDetails);
                             }
                         } else {
-                            addNewOrderAndAlertUser(remoteMessage, null);
+                            alertUser(remoteMessage, null);
                         }
                     }
 

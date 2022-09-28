@@ -1,5 +1,6 @@
 package com.symplified.order.models.order;
 
+import com.symplified.order.enums.ServiceType;
 import com.symplified.order.enums.Status;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.Store;
