@@ -436,7 +436,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
                     if (response.isSuccessful()) {
                         Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
-                    } else {
+                    } else if (response.code() != 406) {
                         Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
                         reAddOrder(holder.getAdapterPosition(), removedOrder);
                     }
