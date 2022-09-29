@@ -19,6 +19,7 @@ import com.symplified.order.utils.Utility;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SunmiPrintHelper {
     private static final String TAG = "sunmi-print-helper";
@@ -160,8 +161,17 @@ public class SunmiPrintHelper {
             text.append("\nCustomer contact no.: \n").append(order.orderShipmentDetail.phoneNumber);
         }
 
-        if (order.customerNotes != null && !"".equals(order.customerNotes)) {
-            text.append("\nCustomer notes: \n").append(order.customerNotes);
+        String customerNotes = order.customerNotes != null ? order.customerNotes : "";
+        switch (customerNotes.toUpperCase()) {
+            case "TAKEAWAY":
+                customerNotes = "TAKE AWAY";
+                break;
+            case "SELFCOLLECT":
+                customerNotes = "SELF COLLECT";
+                break;
+        }
+        if (!"".equals(customerNotes)) {
+            text.append("\nCustomer notes: \n").append(customerNotes);
         }
 
         text.append("\n").append(divider).append("\n");

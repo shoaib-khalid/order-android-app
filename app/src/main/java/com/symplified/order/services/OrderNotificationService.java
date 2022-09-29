@@ -67,8 +67,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", "null");
 
-        Log.d(TAG, "onMessageReceived title: " + messageTitle + "onMessageReceived: " + remoteMessage.getData().get("body"));
-
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
             LoginApi userService = ServiceGenerator.createLoginService();
             String transactionId = remoteMessage.getData().get("body");
@@ -93,22 +91,16 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     @Override
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
+
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
 
                             if (ServiceType.DINEIN.toString().equals(orderDetails.order.serviceType)
-                                    && DineInOption.SENDTOTABLE.toString().equals(orderDetails.order.dineInOption)
                                     && SunmiPrintHelper.getInstance().isPrinterConnected()) {
-
-                                printAndProcessNewOrder(orderApiService, remoteMessage, orderDetails);
+                                print(orderApiService, remoteMessage, orderDetails);
                             } else {
                                 addNewOrderToView(orderDetails);
-                                if (ServiceType.DINEIN.toString().equals(orderDetails.order.serviceType)) {
-                                    notifyUser(remoteMessage.getData().get("title"),
-                                            remoteMessage.getData().get("body"));
-                                } else {
-                                    alert(remoteMessage, orderDetails.order.store.verticalCode);
-                                }
+                                alert(remoteMessage, orderDetails.order);
                             }
                         } else {
                             alert(remoteMessage, null);
@@ -151,10 +143,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
      * Shows notification for order and plays a custom track on loop
      *
      * @param remoteMessage Message received from firebase used for notification
-     * @param storeType Used by AlertService to determine looping frequency
+     * @param order Values used by AlertService to determine looping frequency
      *
      */
-    private void alert(RemoteMessage remoteMessage, String storeType) {
+    private void alert(RemoteMessage remoteMessage, Order order) {
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
 
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
@@ -182,7 +174,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
         if (!AlertService.isPlaying()) {
             Intent intent = new Intent(getApplicationContext(), AlertService.class);
-            intent.putExtra(String.valueOf(R.string.store_type), storeType != null ? storeType : "");
+            intent.putExtra(String.valueOf(R.string.store_type),
+                    order != null && order.store.verticalCode != null ? order.store.verticalCode : "");
+            intent.putExtra(String.valueOf(R.string.service_type),
+                    order != null && order.serviceType != null ? order.serviceType : "");
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent);
@@ -222,7 +217,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         notificationManager.notify(new Random().nextInt(), notification);
     }
 
-    private void printAndProcessNewOrder(OrderApi orderApiService, RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
+    private void print(OrderApi orderApiService, RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
 
         orderApiService.getItemsForOrder(orderDetails.order.id)
                 .clone()
@@ -230,24 +225,26 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     @Override
                     public void onResponse(@NonNull Call<ItemResponse> call,
                                            @NonNull Response<ItemResponse> response) {
-                        notifyUser(remoteMessage.getData().get("title"), remoteMessage.getData().get("body"));
                         if (response.isSuccessful()) {
                             try {
                                 SunmiPrintHelper.getInstance()
                                         .printReceipt(orderDetails.order, response.body().data.content);
-                                processNewOrderFully(orderApiService, orderDetails);
+                                if (DineInOption.SENDTOTABLE.toString().equals(orderDetails.order.dineInOption)) {
+                                    processNewOrderFully(orderApiService, orderDetails);
+                                }
                             } catch (RemoteException e) {
                                 addNewOrderToView(orderDetails);
                             }
                         } else {
                             addNewOrderToView(orderDetails);
                         }
+                        alert(remoteMessage, orderDetails.order);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<ItemResponse> call,
                                           @NonNull Throwable t) {
-                        notifyUser(remoteMessage.getData().get("title"), remoteMessage.getData().get("body"));
+                        alert(remoteMessage, orderDetails.order);
                         addNewOrderToView(orderDetails);
                     }
                 });

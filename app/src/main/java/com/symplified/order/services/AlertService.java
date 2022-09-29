@@ -50,15 +50,24 @@ public class AlertService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        mediaPlayer = MediaPlayer.create(this, R.raw.ring);
-        String storeType = "";
-        if (intent != null && intent.getExtras() != null
-                && intent.hasExtra(String.valueOf(R.string.store_type))) {
-            storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
+        String storeType = "", serviceType = "";
+        if (intent != null && intent.getExtras() != null) {
+            if (intent.hasExtra(String.valueOf(R.string.store_type))) {
+                storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
+            }
+
+            if (intent.hasExtra(String.valueOf(R.string.service_type))) {
+                serviceType = intent.getExtras().getString(String.valueOf(R.string.service_type));
+            }
         }
 
+        mediaPlayer = MediaPlayer.create(this,
+                serviceType.equals(ServiceType.DINEIN.toString())
+                        ? R.raw.dine_in : R.raw.ring);
+
         if (isAppOnForeground(this)
-                || storeType.contains("FnB")) {
+                || !storeType.contains("FnB")
+                || serviceType.contains(ServiceType.DINEIN.toString())) {
             mediaPlayer.setLooping(false);
             hasRepeatedOnce = false;
             mediaPlayer.setOnCompletionListener(mp -> {

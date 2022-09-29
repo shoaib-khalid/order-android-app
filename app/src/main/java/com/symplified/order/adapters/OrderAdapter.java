@@ -271,20 +271,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             List<Item> items = adapter != null ? adapter.getItems() : new ArrayList<>();
             printReceipt(order, items);
         });
-
-        if (ServiceType.DINEIN.toString().equals(order.serviceType)
-                && DineInPack.TAKEAWAY.toString().equals(order.dineInPack)) {
-            order.customerNotes = "TAKEAWAY";
-        }
         
         holder.orderType.setText(ServiceType.DINEIN.toString().equals(order.serviceType)
                 ? "Dine In"
                 : order.orderShipmentDetail.storePickup ? "Store Pickup" : "Delivery");
 
-        if (order.customerNotes != null && !"".equals(order.customerNotes)) {
+        order.customerNotes = order.customerNotes != null ? order.customerNotes : "";
+        if (ServiceType.DINEIN.toString().equals(order.serviceType)
+                && DineInPack.TAKEAWAY.toString().equals(order.dineInPack)) {
+            order.customerNotes = "TAKE AWAY";
+        }
+        if (!"".equals(order.customerNotes)) {
+            holder.customerNotes.setText(order.customerNotes);
             holder.rlCustomerNote.setVisibility(View.VISIBLE);
             holder.divider3.setVisibility(View.VISIBLE);
-            holder.customerNotes.setText(order.customerNotes);
         }
 
         String orderStatus = order.completionStatus;
