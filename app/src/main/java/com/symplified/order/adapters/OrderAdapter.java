@@ -277,10 +277,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 : order.orderShipmentDetail.storePickup ? "Store Pickup" : "Delivery");
 
         order.customerNotes = order.customerNotes != null ? order.customerNotes : "";
-        if (ServiceType.DINEIN.toString().equals(order.serviceType)
-                && DineInPack.TAKEAWAY.toString().equals(order.dineInPack)) {
-            order.customerNotes = "TAKE AWAY";
+
+        switch (order.customerNotes.toUpperCase()) {
+            case "TAKEAWAY":
+                order.customerNotes = "Take Away";
+                break;
+            case "SELFCOLLECT":
+                order.customerNotes = "Self Collect";
+                break;
         }
+
         if (!"".equals(order.customerNotes)) {
             holder.customerNotes.setText(order.customerNotes);
             holder.rlCustomerNote.setVisibility(View.VISIBLE);
@@ -294,10 +300,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
             }
             holder.editButton.setVisibility(View.VISIBLE);
-            holder.newLayout.setVisibility(View.VISIBLE);
             holder.acceptButton.setText(orderDetails.nextActionText);
+            holder.cancelButton.setVisibility(ServiceType.DINEIN.toString().equals(order.serviceType) ? View.GONE : View.VISIBLE);
             holder.currStatusLayout.setVisibility(View.GONE);
             holder.divider8.setVisibility(View.GONE);
+            holder.newLayout.setVisibility(View.VISIBLE);
         } else if (section.equals("ongoing")) {
             if (orderDetails.nextActionText != null) {
                 holder.ongoingLayout.setVisibility(View.VISIBLE);
