@@ -1,9 +1,7 @@
 package com.symplified.order.ui.tabs;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,8 +16,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -47,13 +43,10 @@ import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.utils.Key;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 import retrofit2.Call;
@@ -127,7 +120,7 @@ public class PlaceholderFragment extends Fragment
                 }
                 NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
                 notificationManager.cancelAll();
-                OrderNotificationService.addObserver(this);
+                OrderNotificationService.addNewOrderObserver(this);
                 break;
             }
             case "ongoing": {
@@ -144,6 +137,7 @@ public class PlaceholderFragment extends Fragment
                 : formatter.format(new Date());
 
                 orderResponse = orderApiService.getSentOrdersByClientId(clientId, currentDate, currentDate);
+                OrderNotificationService.addPastOrderObserver(this);
                 break;
             }
         }
@@ -249,7 +243,8 @@ public class PlaceholderFragment extends Fragment
     public void onDestroy() {
         super.onDestroy();
         SunmiPrintHelper.getInstance().removeObserver(this);
-        OrderNotificationService.removeObserver(this);
+        OrderNotificationService.removeNewOrderObserver(this);
+        OrderNotificationService.removePastOrderObserver(this);
     }
 
     private void getOrders() {
@@ -339,6 +334,13 @@ public class PlaceholderFragment extends Fragment
     public void addOrderToOngoingTab(Order.OrderDetails orderDetails) {
         if (orderManager != null) {
             orderManager.addOrderToOngoingTab(orderDetails);
+        }
+    }
+
+    @Override
+    public void addOrderToHistoryTab(Order.OrderDetails orderDetails) {
+        if (orderManager != null) {
+            orderManager.addOrderToHistoryTab(orderDetails);
         }
     }
 

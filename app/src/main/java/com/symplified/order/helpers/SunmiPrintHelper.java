@@ -20,6 +20,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class SunmiPrintHelper {
     private static final String TAG = "sunmi-print-helper";
@@ -147,10 +148,19 @@ public class SunmiPrintHelper {
         StringBuilder text = new StringBuilder();
 
         text.append(divider);
-        text.append("\n\tDeliverin.MY Order Chit");
+        text.append("\n\t");
+        text.append(order.store != null ? order.store.name : "Deliverin.MY Order Chit");
 
         text.append(divider);
         text.append("\nOrder Id: ").append(order.invoiceId);
+
+        if (order.created != null) {
+            TimeZone storeTimeZone = order.store != null && order.store.regionCountry != null && order.store.regionCountry.timezone != null
+                    ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
+                    : TimeZone.getDefault();
+            text.append("\n").append(Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
+        }
+
         text.append("\nOrder Type: ");
         text.append(ServiceType.DINEIN.toString().equals(order.serviceType)
                 ? "Dine In"
@@ -164,10 +174,10 @@ public class SunmiPrintHelper {
         String customerNotes = order.customerNotes != null ? order.customerNotes : "";
         switch (customerNotes.toUpperCase()) {
             case "TAKEAWAY":
-                customerNotes = "TAKE AWAY";
+                customerNotes = "Take Away";
                 break;
             case "SELFCOLLECT":
-                customerNotes = "SELF COLLECT";
+                customerNotes = "Self Collect";
                 break;
         }
         if (!"".equals(customerNotes)) {
@@ -177,7 +187,7 @@ public class SunmiPrintHelper {
         text.append("\n").append(divider).append("\n");
 
         for (Item item : items) {
-            text.append("\n").append(item.productName);
+            text.append("\n").append(item.quantity).append(" x ").append(item.productName);
             if (item.productVariant != null && !item.productVariant.equals("")) {
                 text.append("\n").append(item.productVariant);
             }
@@ -186,10 +196,10 @@ public class SunmiPrintHelper {
                 text.append("\n").append(subItem.productName);
             }
 
-            if (item.specialInstruction != null && !item.specialInstruction.equals("")) {
+            if (item.specialInstruction != null && !"".equals(item.specialInstruction)) {
                 text.append("\nInstructions: ").append(item.specialInstruction);
             }
-            text.append("\nQuantity: ").append(item.quantity);
+
             text.append("\nTotal Price: ")
                     .append(currency)
                     .append(" ")
@@ -205,11 +215,14 @@ public class SunmiPrintHelper {
         text.append(order.storeServiceCharges != null
                 ? formatter.format(order.storeServiceCharges)
                 : "0.00");
-        text.append("\nDelivery Charges    ");
-        text.append(currency).append(" ");
-        text.append(order.deliveryCharges != null
-                ? formatter.format(order.deliveryCharges)
-                : "0.00");
+        if (!ServiceType.DINEIN.toString().equals(order.serviceType)) {
+            text.append("\nDelivery Charges    ");
+            text.append(currency).append(" ");
+            text.append(order.deliveryCharges != null
+                    ? formatter.format(order.deliveryCharges)
+                    : "0.00");
+        }
+
         text.append(divider);
 
         text.append("\nTotal               ")

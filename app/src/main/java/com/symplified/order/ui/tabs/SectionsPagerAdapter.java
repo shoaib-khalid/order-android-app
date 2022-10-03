@@ -24,8 +24,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.ongoing_orders, R.string.past_orders};
     private final Context mContext;
-    private PlaceholderFragment newOrderFragment;
-    private OrderObserver ongoingOrderFragment;
+    private PlaceholderFragment newOrderFragment, ongoingOrderFragment;
+    private OrderObserver historyOrderFragment;
     private OrderManager orderManager;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm) {
@@ -67,9 +67,12 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
                 newOrderFragment.setOrderManager(this);
                 break;
             case 1:
-                ongoingOrderFragment = (OrderObserver) createdFragment;
+                ongoingOrderFragment = (PlaceholderFragment) createdFragment;
+                ongoingOrderFragment.setOrderManager(this);
                 break;
-
+            case 2:
+                historyOrderFragment = (OrderObserver) createdFragment;
+                break;
         }
 
         return createdFragment;
@@ -87,6 +90,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     @Override
     public void addOrderToOngoingTab(Order.OrderDetails orderDetails) {
         ongoingOrderFragment.onOrderReceived(orderDetails);
+    }
+
+    @Override
+    public void addOrderToHistoryTab(Order.OrderDetails orderDetails) {
+        historyOrderFragment.onOrderReceived(orderDetails);
     }
 
     @Override

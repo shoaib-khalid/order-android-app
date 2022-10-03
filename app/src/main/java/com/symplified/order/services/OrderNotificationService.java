@@ -49,6 +49,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private Pattern pattern;
     private final String TAG = "order-notification-service";
     private static List<OrderObserver> newOrderObservers = new ArrayList<>();
+    private static List<OrderObserver> pastOrderObservers = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -96,8 +97,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
 
                             if (ServiceType.DINEIN.toString().equals(orderDetails.order.serviceType)
+                                    && DineInOption.SENDTOTABLE.toString().equals(orderDetails.order.dineInOption)
                                     && SunmiPrintHelper.getInstance().isPrinterConnected()) {
-                                print(orderApiService, remoteMessage, orderDetails);
+                                printAndFullyProcessOrder(orderApiService, remoteMessage, orderDetails);
                             } else {
                                 addNewOrderToView(orderDetails);
                                 alert(remoteMessage, orderDetails.order);
@@ -134,6 +136,14 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private void addNewOrderToView(Order.OrderDetails orderDetails) {
         if (orderDetails != null) {
             for (OrderObserver observer : newOrderObservers) {
+                observer.onOrderReceived(orderDetails);
+            }
+        }
+    }
+
+    private void addPastOrderToView(Order.OrderDetails orderDetails) {
+        if (orderDetails != null) {
+            for (OrderObserver observer : pastOrderObservers) {
                 observer.onOrderReceived(orderDetails);
             }
         }
@@ -217,7 +227,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         notificationManager.notify(new Random().nextInt(), notification);
     }
 
-    private void print(OrderApi orderApiService, RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
+    private void printAndFullyProcessOrder(OrderApi orderApiService, RemoteMessage remoteMessage, Order.OrderDetails orderDetails) {
 
         orderApiService.getItemsForOrder(orderDetails.order.id)
                 .clone()
@@ -229,9 +239,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             try {
                                 SunmiPrintHelper.getInstance()
                                         .printReceipt(orderDetails.order, response.body().data.content);
-                                if (DineInOption.SENDTOTABLE.toString().equals(orderDetails.order.dineInOption)) {
-                                    processNewOrderFully(orderApiService, orderDetails);
-                                }
+                                processNewOrderFully(orderApiService, orderDetails);
                             } catch (RemoteException e) {
                                 addNewOrderToView(orderDetails);
                             }
@@ -251,14 +259,17 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     private void processNewOrderFully(OrderApi orderApiService, Order.OrderDetails orderDetails) {
-        orderApiService.updateOrderStatus(new Order.OrderUpdate(orderDetails.order.id, Status.DELIVERED_TO_CUSTOMER),
+        orderApiService.updateOrderStatus(new Order.OrderUpdate(orderDetails.order.id,
+                                Status.DELIVERED_TO_CUSTOMER),
                         orderDetails.order.id)
                 .clone()
                 .enqueue(new Callback<OrderUpdateResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<OrderUpdateResponse> call,
                                            @NonNull Response<OrderUpdateResponse> response) {
-                        if (!response.isSuccessful()) {
+                        if (response.isSuccessful()) {
+                            addPastOrderToView(new Order.OrderDetails(response.body().data));
+                        } else {
                             addNewOrderToView(orderDetails);
                         }
                     }
@@ -271,9 +282,16 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 });
     }
 
-    public static void addObserver(OrderObserver observer) {
+    public static void addNewOrderObserver(OrderObserver observer) {
         newOrderObservers.add(observer);
     }
+    public static void removeNewOrderObserver(OrderObserver observer) { newOrderObservers.remove(observer); }
 
-    public static void removeObserver(OrderObserver observer) { newOrderObservers.remove(observer); }
+    public static void addPastOrderObserver(OrderObserver observer) {
+        pastOrderObservers.add(observer);
+    }
+
+    public static void removePastOrderObserver(OrderObserver observer) {
+        pastOrderObservers.remove(observer);
+    }
 }

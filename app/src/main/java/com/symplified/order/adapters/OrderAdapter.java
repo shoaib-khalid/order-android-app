@@ -3,7 +3,6 @@ package com.symplified.order.adapters;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
@@ -22,24 +21,21 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
-import com.symplified.order.enums.DineInOption;
-import com.symplified.order.enums.DineInPack;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.enums.Status;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
-import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
@@ -48,8 +44,6 @@ import com.symplified.order.observers.OrderManager;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,11 +91,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
                 rlStoreVoucherDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote,
                 rlRiderDetails, rlAddress, rlContact;
+        private final ConstraintLayout clOrderProgressBar;
         private final View divider3, divider7, divider8, divider9;
         private final ImageView riderCallIcon;
 
         private final RecyclerView recyclerView;
-        private final ProgressBar orderProgressBar, itemsProgressBar;
+        private final ProgressBar itemsProgressBar;
         private final TextView itemsErrorTextView;
 
         public ViewHolder(@NonNull View itemView) {
@@ -164,13 +159,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
             rlCustomerNote = itemView.findViewById(R.id.rl_customer_note);
             rlRiderDetails = itemView.findViewById(R.id.rl_rider_details);
+            clOrderProgressBar = itemView.findViewById(R.id.order_progress_bar_layout);
 
             divider3 = itemView.findViewById(R.id.divider_card3);
             divider7 = itemView.findViewById(R.id.divider_card7);
             divider8 = itemView.findViewById(R.id.divider_card8);
             divider9 = itemView.findViewById(R.id.divider_card9);
 
-            orderProgressBar = itemView.findViewById(R.id.order_progress_bar);
             itemsProgressBar = itemView.findViewById(R.id.order_items_progress_bar);
             itemsErrorTextView = itemView.findViewById(R.id.order_items_fail_textview);
         }
@@ -197,12 +192,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.name.setText(order.orderShipmentDetail.receiverName);
 
         if (order.created != null) {
-            TimeZone storeTimeZone = TimeZone.getDefault();
-            if (order.store != null && order.store.regionCountry != null
-                    && order.store.regionCountry.timezone != null) {
-                storeTimeZone = TimeZone.getTimeZone(order.store.regionCountry.timezone);
-            }
-            holder.date.setText(convertUtcTimeToStoreTimezone(order.created, storeTimeZone));
+            TimeZone storeTimeZone = order.store != null && order.store.regionCountry != null && order.store.regionCountry.timezone != null
+                    ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
+                    : TimeZone.getDefault();
+            holder.date.setText(Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
         }
 
         holder.invoice.setText(order.invoiceId);
@@ -469,48 +462,46 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         startLoading(holder);
 
-        Status nextCompletionStatus =
-                ServiceType.DINEIN.toString().equals(currentOrderDetails.order.serviceType)
-                        && DineInOption.SENDTOTABLE.toString().equals(currentOrderDetails.order.dineInOption)
-                        ? Status.DELIVERED_TO_CUSTOMER
-                        : Status.fromString(currentOrderDetails.nextCompletionStatus);
-
         Call<OrderUpdateResponse> processOrder = orderApiService
-                .updateOrderStatus(new Order.OrderUpdate(currentOrderDetails.order.id, nextCompletionStatus),
+                .updateOrderStatus(new Order.OrderUpdate(currentOrderDetails.order.id,
+                                Status.fromString(currentOrderDetails.nextCompletionStatus)),
                         currentOrderDetails.order.id);
 
         processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
-            public void onResponse(@NonNull Call<OrderUpdateResponse> call, @NonNull Response<OrderUpdateResponse> response) {
+            public void onResponse(@NonNull Call<OrderUpdateResponse> call,
+                                   @NonNull Response<OrderUpdateResponse> response) {
                 int indexOfOrder = orders.indexOf(currentOrderDetails);
                 if (response.isSuccessful()) {
                     Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
 
-                    String oldCompletionStatus = currentOrderDetails.order.completionStatus;
-                    String updatedCompletionStatus = currentOrderDetails.order.completionStatus;
-
                     String statusUpdateToastText = "Status Updated";
-                    if (isOrderNew(oldCompletionStatus)
-                            || isOrderCompleted(updatedCompletionStatus)) {
+                    if (isOrderOngoing(updatedOrder.currentCompletionStatus)) {
+                        if (isOrderOngoing(currentOrderDetails.currentCompletionStatus)
+                                && indexOfOrder != -1) {
+                            orders.set(indexOfOrder, updatedOrder);
+                            notifyItemChanged(indexOfOrder);
+                            stopLoading(holder, updatedOrder.currentCompletionStatus);
+                        } else {
+                            orderManager.addOrderToOngoingTab(updatedOrder);
+                            statusUpdateToastText = "Order moved to ongoing tab";
+                        }
+                    }
 
-                        if (isOrderNew(oldCompletionStatus)) {
-                            getOrderItemsForPrint(currentOrderDetails.order);
+                    if (isOrderNew(currentOrderDetails.currentCompletionStatus)
+                            || isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                        if (isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                            orderManager.addOrderToHistoryTab(updatedOrder);
+                            statusUpdateToastText = "Order moved to history tab";
                         }
 
                         if (indexOfOrder != -1) {
                             orders.remove(indexOfOrder);
                             notifyItemRemoved(indexOfOrder);
                         }
-                    }
 
-                    if (isOrderOngoing(updatedCompletionStatus)) {
-                        if (isOrderOngoing(oldCompletionStatus) && indexOfOrder != -1) {
-                            orders.set(indexOfOrder, updatedOrder);
-                            notifyItemChanged(indexOfOrder);
-                            stopLoading(holder, oldCompletionStatus);
-                        } else {
-                            orderManager.addOrderToOngoingTab(updatedOrder);
-                            statusUpdateToastText = "Order moved to next tab";
+                        if (isOrderNew(currentOrderDetails.currentCompletionStatus)) {
+                            getOrderItemsForPrint(currentOrderDetails.order);
                         }
                     }
 
@@ -651,35 +642,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
     }
 
-    private String convertUtcTimeToStoreTimezone(String dateTime, TimeZone localTimeZone) {
-        TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
-
-        SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateParser.setTimeZone(utcTimeZone);
-
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy hh:mm aa");
-        dateFormatter.setTimeZone(localTimeZone);
-
-        try {
-            dateTime = dateFormatter.format(dateParser.parse(dateTime));
-        } catch (ParseException e) {
-            Log.e("datetime", "Failed to parse date. " + e.getLocalizedMessage());
-        } catch (NullPointerException e) {
-            Log.e("datetime", "Parsed date was null. " + e.getLocalizedMessage());
-        }
-
-        return dateTime;
-    }
-
     private void startLoading(ViewHolder holder) {
-        holder.orderProgressBar.setVisibility(View.VISIBLE);
+        holder.clOrderProgressBar.setVisibility(View.VISIBLE);
         holder.newLayout.setVisibility(View.GONE);
         holder.ongoingLayout.setVisibility(View.GONE);
         holder.editButton.setVisibility(View.GONE);
     }
 
     private void stopLoading(ViewHolder holder, String completionStatus) {
-        holder.orderProgressBar.setVisibility(View.GONE);
+        holder.clOrderProgressBar.setVisibility(View.GONE);
         if (isOrderNew(completionStatus)) {
             holder.newLayout.setVisibility(View.VISIBLE);
             holder.editButton.setVisibility(View.VISIBLE);
