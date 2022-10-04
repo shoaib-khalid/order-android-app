@@ -2,27 +2,18 @@ package com.symplified.order.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.symplified.order.App;
+import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.models.order.Order;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.TimeZone;
 
 public class Utility {
@@ -82,5 +73,20 @@ public class Utility {
         }
 
         return dateTime;
+    }
+
+    public static boolean isOrderNew(OrderStatus completionStatus) {
+        return completionStatus == OrderStatus.PAYMENT_CONFIRMED
+                || completionStatus == OrderStatus.RECEIVED_AT_STORE;
+    }
+
+    public static boolean isOrderOngoing(OrderStatus completionStatus) {
+        return completionStatus == OrderStatus.BEING_PREPARED
+                || completionStatus == OrderStatus.AWAITING_PICKUP
+                || completionStatus == OrderStatus.BEING_DELIVERED;
+    }
+
+    public static boolean isOrderCompleted(OrderStatus completionStatus) {
+        return completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER;
     }
 }

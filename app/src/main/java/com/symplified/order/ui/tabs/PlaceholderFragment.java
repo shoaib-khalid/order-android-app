@@ -126,6 +126,7 @@ public class PlaceholderFragment extends Fragment
             case "ongoing": {
                 pageViewModel.setIndex(1);
                 orderResponse = orderApiService.getOngoingOrdersByClientId(clientId);
+                OrderNotificationService.addOngoingOrderObserver(this);
                 break;
             }
             case "past": {
@@ -244,6 +245,7 @@ public class PlaceholderFragment extends Fragment
         super.onDestroy();
         SunmiPrintHelper.getInstance().removeObserver(this);
         OrderNotificationService.removeNewOrderObserver(this);
+        OrderNotificationService.removeOngoingOrderObserver(this);
         OrderNotificationService.removePastOrderObserver(this);
     }
 

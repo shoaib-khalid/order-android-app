@@ -1,7 +1,9 @@
 package com.symplified.order.models.order;
 
+import com.symplified.order.enums.DineInOption;
+import com.symplified.order.enums.DineInPack;
+import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
-import com.symplified.order.enums.Status;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.Store.Store;
 
@@ -14,7 +16,7 @@ public class Order implements Serializable {
     public Double deliveryCharges;
     public Double subTotal;
     public Double total;
-    public String completionStatus;
+    public OrderStatus completionStatus;
     public String paymentStatus;
     public String customerNotes;
     public String privateAdminNotes;
@@ -33,9 +35,9 @@ public class Order implements Serializable {
     public String deliveryDiscountDescription;
     public Double voucherDiscount;
     public Double storeVoucherDiscount;
-    public String serviceType;
-    public String dineInOption;
-    public String dineInPack;
+    public ServiceType serviceType;
+    public DineInOption dineInOption;
+    public DineInPack dineInPack;
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
     public Customer customer;
@@ -70,9 +72,9 @@ public class Order implements Serializable {
                 ", deliveryDiscountDescription='" + deliveryDiscountDescription + '\'' +
                 ",  voucherDiscount='" + voucherDiscount + '\'' +
                 ",  storeVoucherDiscount='" + storeVoucherDiscount + '\'' +
-                ",  serviceType='" + serviceType + '\'' +
-                ",  dineInOption='" + dineInOption + '\'' +
-                ",  dineInPack='" + dineInPack + '\'' +
+                ",  serviceType='" + (serviceType != null ? serviceType : "null") + '\'' +
+                ",  dineInOption='" + (dineInOption != null ? dineInOption : "null") + '\'' +
+                ",  dineInPack='" + (dineInPack != null ? dineInPack : "null") + '\'' +
                 ", orderShipmentDetail=" + orderShipmentDetail +
                 ", orderPaymentDetail=" + orderPaymentDetail +
                 ", customer=" + customer +
@@ -201,8 +203,8 @@ public class Order implements Serializable {
 
     public static class OrderDetails implements Serializable {
         public Order order;
-        public String currentCompletionStatus;
-        public String nextCompletionStatus;
+        public OrderStatus currentCompletionStatus;
+        public OrderStatus nextCompletionStatus;
         public String nextActionText;
 
         public OrderDetails() {
@@ -219,9 +221,9 @@ public class Order implements Serializable {
 
     public static class OrderUpdate {
         public String orderId;
-        public Status status;
+        public OrderStatus status;
 
-        public OrderUpdate(String orderId, Status status) {
+        public OrderUpdate(String orderId, OrderStatus status) {
             this.orderId = orderId;
             this.status = status;
         }

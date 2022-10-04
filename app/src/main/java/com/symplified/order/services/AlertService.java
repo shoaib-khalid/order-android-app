@@ -62,7 +62,7 @@ public class AlertService extends Service {
         }
 
         mediaPlayer = MediaPlayer.create(this,
-                serviceType.equals(ServiceType.DINEIN.toString())
+                serviceType.contains(ServiceType.DINEIN.toString())
                         ? R.raw.dine_in : R.raw.ring);
 
         if (isAppOnForeground(this)
@@ -83,7 +83,7 @@ public class AlertService extends Service {
 
         AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 
-        if (!isExternalAudioOutputPluggedIn()) {
+        if (!isExternalAudioOutputPluggedIn() && !serviceType.contains(ServiceType.DINEIN.toString())) {
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
                     audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
                     AudioManager.FLAG_PLAY_SOUND);

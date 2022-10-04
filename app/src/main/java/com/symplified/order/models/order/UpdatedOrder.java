@@ -1,6 +1,8 @@
 package com.symplified.order.models.order;
 
+import com.symplified.order.enums.OrderStatus;
+
 public class UpdatedOrder extends Order {
-    String nextCompletionStatus;
+    OrderStatus nextCompletionStatus;
     String nextActionText;
 }

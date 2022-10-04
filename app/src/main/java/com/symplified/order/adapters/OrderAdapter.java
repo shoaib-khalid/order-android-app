@@ -32,7 +32,7 @@ import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.ServiceType;
-import com.symplified.order.enums.Status;
+import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemResponse;
@@ -265,7 +265,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             printReceipt(order, items);
         });
         
-        holder.orderType.setText(ServiceType.DINEIN.toString().equals(order.serviceType)
+        holder.orderType.setText(order.serviceType == ServiceType.DINEIN
                 ? "Dine In"
                 : order.orderShipmentDetail.storePickup ? "Store Pickup" : "Delivery");
 
@@ -286,7 +286,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.divider3.setVisibility(View.VISIBLE);
         }
 
-        String orderStatus = order.completionStatus;
         if (section.equals("new")) {
             if (order.isRevised) {
                 holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
@@ -294,7 +293,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
             holder.editButton.setVisibility(View.VISIBLE);
             holder.acceptButton.setText(orderDetails.nextActionText);
-            holder.cancelButton.setVisibility(ServiceType.DINEIN.toString().equals(order.serviceType) ? View.GONE : View.VISIBLE);
+            holder.cancelButton.setVisibility(order.serviceType == ServiceType.DINEIN ? View.GONE : View.VISIBLE);
             holder.currStatusLayout.setVisibility(View.GONE);
             holder.divider8.setVisibility(View.GONE);
             holder.newLayout.setVisibility(View.VISIBLE);
@@ -307,19 +306,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 holder.statusButton.setVisibility(View.VISIBLE);
             }
 
-            switch (orderStatus) {
-                case "BEING_PREPARED":
+            switch (order.completionStatus) {
+                case BEING_PREPARED:
                     holder.currStatus.setText("Preparing");
                     holder.trackButton.setVisibility(View.GONE);
                     break;
-                case "AWAITING_PICKUP":
+                case AWAITING_PICKUP:
                     holder.currStatus.setText("Awaiting Pickup");
                     if (!order.orderShipmentDetail.storePickup
                             && order.orderShipmentDetail.deliveryPeriodDetails != null) {
                         holder.trackButton.setVisibility(View.VISIBLE);
                     }
                     break;
-                case "BEING_DELIVERED":
+                case BEING_DELIVERED:
                     holder.currStatus.setText("Out for Delivery");
                     if (!order.orderShipmentDetail.storePickup
                             && order.orderShipmentDetail.deliveryPeriodDetails != null) {
@@ -333,10 +332,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.currStatusLayout.setVisibility(View.GONE);
             holder.status.setVisibility(View.VISIBLE);
             holder.statusLabel.setVisibility(View.VISIBLE);
-            if (orderStatus.equals("DELIVERED_TO_CUSTOMER")) {
+            if (order.completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER) {
                 holder.status.setText("Order Delivered");
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_accept_button));
-            } else if (orderStatus.equals("CANCELED_BY_MERCHANT") || orderStatus.equals("CANCELED_BY_CUSTOMER")) {
+            } else if (order.completionStatus == OrderStatus.CANCELED_BY_MERCHANT
+                    || order.completionStatus == OrderStatus.CANCELED_BY_CUSTOMER) {
                 holder.status.setText("Order Cancelled");
                 holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
             }
@@ -430,7 +430,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             notifyItemRangeChanged(holder.getAdapterPosition(), orders.size());
 
             Call<OrderUpdateResponse> processOrder = orderApiService
-                    .updateOrderStatus(new Order.OrderUpdate(order.id, Status.CANCELED_BY_MERCHANT), order.id);
+                    .updateOrderStatus(new Order.OrderUpdate(order.id, OrderStatus.CANCELED_BY_MERCHANT), order.id);
             processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
                 @Override
                 public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
@@ -464,7 +464,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         Call<OrderUpdateResponse> processOrder = orderApiService
                 .updateOrderStatus(new Order.OrderUpdate(currentOrderDetails.order.id,
-                                Status.fromString(currentOrderDetails.nextCompletionStatus)),
+                                currentOrderDetails.nextCompletionStatus),
                         currentOrderDetails.order.id);
 
         processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
@@ -476,8 +476,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
 
                     String statusUpdateToastText = "Status Updated";
-                    if (isOrderOngoing(updatedOrder.currentCompletionStatus)) {
-                        if (isOrderOngoing(currentOrderDetails.currentCompletionStatus)
+                    if (Utility.isOrderOngoing(updatedOrder.currentCompletionStatus)) {
+                        if (Utility.isOrderOngoing(currentOrderDetails.currentCompletionStatus)
                                 && indexOfOrder != -1) {
                             orders.set(indexOfOrder, updatedOrder);
                             notifyItemChanged(indexOfOrder);
@@ -488,9 +488,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         }
                     }
 
-                    if (isOrderNew(currentOrderDetails.currentCompletionStatus)
-                            || isOrderCompleted(updatedOrder.currentCompletionStatus)) {
-                        if (isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                    if (Utility.isOrderNew(currentOrderDetails.currentCompletionStatus)
+                            || Utility.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                        if (Utility.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
                             orderManager.addOrderToHistoryTab(updatedOrder);
                             statusUpdateToastText = "Order moved to history tab";
                         }
@@ -500,7 +500,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                             notifyItemRemoved(indexOfOrder);
                         }
 
-                        if (isOrderNew(currentOrderDetails.currentCompletionStatus)) {
+                        if (Utility.isOrderNew(currentOrderDetails.currentCompletionStatus)) {
                             getOrderItemsForPrint(currentOrderDetails.order);
                         }
                     }
@@ -565,21 +565,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             position = orders.size() - 1;
         }
         notifyItemInserted(position);
-    }
-
-    private boolean isOrderNew(String completionStatus) {
-        return completionStatus.equals(Status.PAYMENT_CONFIRMED.toString())
-                || completionStatus.equals(Status.RECEIVED_AT_STORE.toString());
-    }
-
-    private boolean isOrderOngoing(String completionStatus) {
-        return completionStatus.equals(Status.BEING_PREPARED.toString())
-                || completionStatus.equals(Status.AWAITING_PICKUP.toString())
-                || completionStatus.equals(Status.BEING_DELIVERED.toString());
-    }
-
-    private boolean isOrderCompleted(String completionStatus) {
-        return completionStatus.equals(Status.DELIVERED_TO_CUSTOMER.toString());
     }
 
     private void getRiderDetails(ViewHolder holder, Order order, int tag) {
@@ -649,12 +634,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.editButton.setVisibility(View.GONE);
     }
 
-    private void stopLoading(ViewHolder holder, String completionStatus) {
+    private void stopLoading(ViewHolder holder, OrderStatus completionStatus) {
         holder.clOrderProgressBar.setVisibility(View.GONE);
-        if (isOrderNew(completionStatus)) {
+        if (Utility.isOrderNew(completionStatus)) {
             holder.newLayout.setVisibility(View.VISIBLE);
             holder.editButton.setVisibility(View.VISIBLE);
-        } else if (isOrderOngoing(completionStatus)) {
+        } else if (Utility.isOrderOngoing(completionStatus)) {
             holder.ongoingLayout.setVisibility(View.VISIBLE);
         }
     }

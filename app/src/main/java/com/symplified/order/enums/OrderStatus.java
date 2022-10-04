@@ -2,7 +2,7 @@ package com.symplified.order.enums;
 
 import com.symplified.order.utils.Utility;
 
-public enum Status {
+public enum OrderStatus {
     BEING_DELIVERED,
     BEING_PREPARED,
     CANCELED_BY_CUSTOMER,
@@ -17,7 +17,7 @@ public enum Status {
     AWAITING_PICKUP,
     FAILED;
 
-    public static Status fromString(String name) {
-        return Utility.getEnumFromString(Status.class, name);
+    public static OrderStatus fromString(String name) {
+        return Utility.getEnumFromString(OrderStatus.class, name);
     }
 }
