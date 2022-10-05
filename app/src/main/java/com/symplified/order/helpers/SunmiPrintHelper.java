@@ -3,13 +3,11 @@ package com.symplified.order.helpers;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.sunmi.peripheral.printer.InnerPrinterCallback;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.sunmi.peripheral.printer.WoyouConsts;
-import com.symplified.order.App;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.SubItem;
@@ -20,7 +18,6 @@ import com.symplified.order.utils.Utility;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 
 public class SunmiPrintHelper {
@@ -147,10 +144,11 @@ public class SunmiPrintHelper {
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
         String divider = "\n----------------------------";
+        String divider2 = "\n****************************";
         StringBuilder text = new StringBuilder();
 
-        text.append(divider)
-                .append("\n\t")
+
+        text.append("\n\t")
                 .append(order.store != null ? order.store.name : "Deliverin.MY Order Chit")
                 .append("\t");
 
@@ -231,7 +229,9 @@ public class SunmiPrintHelper {
 
         text.append("\nTotal               ")
                 .append(currency).append(" ")
-                .append(formatter.format(order.total));
+                .append(formatter.format(order.total))
+                .append(divider2)
+                .append("\n");
 
         if (printerService != null) {
             printerService.printTextWithFont(String.valueOf(text), null, 26, null);
