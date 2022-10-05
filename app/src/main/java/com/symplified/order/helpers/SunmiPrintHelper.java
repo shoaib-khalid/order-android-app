@@ -146,12 +146,13 @@ public class SunmiPrintHelper {
         String currency = Utility.getCurrencySymbol(order);
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
-        String divider = "\n-------------------------------";
+        String divider = "\n----------------------------";
         StringBuilder text = new StringBuilder();
 
-        text.append(divider);
-        text.append("\n\t");
-        text.append(order.store != null ? order.store.name : "Deliverin.MY Order Chit");
+        text.append(divider)
+                .append("\n\t")
+                .append(order.store != null ? order.store.name : "Deliverin.MY Order Chit")
+                .append("\t");
 
         text.append(divider);
         text.append("\nOrder Id: ").append(order.invoiceId);
