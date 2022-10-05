@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
@@ -19,9 +20,20 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.symplified.easydukan.App;
 import com.symplified.easydukan.OrdersActivity;
 import com.symplified.easydukan.R;
+import com.symplified.easydukan.apis.LoginApi;
+import com.symplified.easydukan.models.HttpResponse;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
@@ -34,39 +46,72 @@ public class OrderNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
 
-        Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
-        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-        taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-        PendingIntent pendingIntent ;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
-        }else{
-            pendingIntent= taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
+        String messageTitle = remoteMessage.getData().get("title");
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        String clientId = sharedPreferences.getString("ownerId", null);
 
-        Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(remoteMessage.getData().get("title"))
-                .setContentText(remoteMessage.getData().get("body"))
-                .setAutoCancel(false)
-                .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
-                .setColor(Color.CYAN)
-                .build();
+        if (clientId != null
+                && "heartbeat".equalsIgnoreCase(messageTitle)) {
 
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+            String baseUrl = sharedPreferences.getString("base_url", App.BASE_URL);
+            Retrofit retrofit = new Retrofit.Builder()
+                    .client(new OkHttpClient())
+                    .baseUrl(baseUrl+App.USER_SERVICE_URL)
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(new Random().nextInt(), notification);
+            LoginApi userService = retrofit.create(LoginApi.class);
 
-        // && !isAppOnForeground(getApplicationContext(), getPackageName())
-        if(!AlertService.isPlaying())
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(new Intent(this, AlertService.class));
-            }else
-                startService(new Intent(this, AlertService.class));
+            String transactionId = remoteMessage.getData().get("body");
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer Bearer accessToken");
+
+            Call<HttpResponse> pingRequest = userService.ping(headers, clientId, transactionId);
+            pingRequest.clone().enqueue(new Callback<HttpResponse>() {
+                @Override
+                public void onResponse(@NonNull Call<HttpResponse> call, @NonNull Response<HttpResponse> response) {
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<HttpResponse> call, @NonNull Throwable t) {
+                }
+            });
+        } else {
+            Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
+            TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
+            taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
+            PendingIntent pendingIntent;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE);
+            } else {
+                pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+
+            Notification notification = new NotificationCompat.Builder(this, App.CHANNEL_ID)
+                    .setContentIntent(pendingIntent)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(remoteMessage.getData().get("title"))
+                    .setContentText(remoteMessage.getData().get("body"))
+                    .setAutoCancel(false)
+                    .setPriority(NotificationCompat.PRIORITY_MAX)
+                    .setCategory(NotificationCompat.CATEGORY_ALARM)
+                    .setColor(Color.CYAN)
+                    .build();
+
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            notificationManager.notify(new Random().nextInt(), notification);
+
+            // && !isAppOnForeground(getApplicationContext(), getPackageName())
+            if (!AlertService.isPlaying()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(new Intent(this, AlertService.class));
+                } else {
+                    startService(new Intent(this, AlertService.class));
+                }
+            }
         }
 
     }
