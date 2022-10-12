@@ -45,7 +45,7 @@ public class App extends Application {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         //initialize the notification manager to receive and display notifications.
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,"EasyDukan", NotificationManager.IMPORTANCE_HIGH
             );

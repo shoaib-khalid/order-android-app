@@ -1,9 +1,5 @@
 package com.symplified.easydukan;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -18,7 +14,12 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
@@ -43,6 +44,8 @@ import com.symplified.easydukan.models.login.LoginData;
 import com.symplified.easydukan.models.login.LoginRequest;
 import com.symplified.easydukan.models.login.LoginResponse;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -66,7 +69,7 @@ public class LoginActivity extends AppCompatActivity{
     private ImageView header;
     private Dialog progressDialog;
     private FirebaseRemoteConfig mRemoteConfig;
-    private String testUser,testPass;
+    private final String testUser = "qa_user", testPass = "qa@kalsym";
     private String BASE_URL;
     private List<Store> stores;
 
@@ -84,9 +87,7 @@ public class LoginActivity extends AppCompatActivity{
         initViews();
 
         login.setOnClickListener(view -> {
-
             onLoginButtonClick();
-
         });
 
     }
@@ -108,6 +109,8 @@ public class LoginActivity extends AppCompatActivity{
         password = findViewById(R.id.tv_password);
         header = findViewById(R.id.iv_header);
 
+        TextView appVersionText = findViewById(R.id.app_version_text);
+        appVersionText.setText("Build " + BuildConfig.VERSION_NAME);
     }
 
     /**
@@ -126,25 +129,24 @@ public class LoginActivity extends AppCompatActivity{
         mRemoteConfig.activate();
 
         stores = new ArrayList<>();
-        BASE_URL = mRemoteConfig.getString("base_url");
+//        BASE_URL = mRemoteConfig.getString("base_url");
 
-        if(BASE_URL.equals("")){
+//        if(BASE_URL.equals("")){
             BASE_URL = App.BASE_URL;
-        }
+//        }
 
         Log.i("TAG", "BASE_URL : "+ BASE_URL.length());
 
-        testUser = mRemoteConfig.getString("test_user");
-        testPass = mRemoteConfig.getString("test_pass");
+//        testUser = mRemoteConfig.getString("test_user");
+//        testPass = mRemoteConfig.getString("test_pass");
 
-        if(testUser.equals("") || testPass.equals(""))
-        {
-            testUser = "qa_user";
-            testPass = "qa@kalsym";
-        }
+//        if(testUser.equals("") || testPass.equals(""))
+//        {
+//            testUser = "qa_user";
+//            testPass = "qa@kalsym";
+//        }
 
         Log.i("TAG", "test credentials  : user : "+ testUser+" : password : "+testPass );
-
     }
 
 
@@ -152,13 +154,17 @@ public class LoginActivity extends AppCompatActivity{
      * onClick method for Login Button
      */
     private void onLoginButtonClick() {
-        if(email.getEditText().getText().toString().equals(testUser) && password.getEditText().getText().toString().equals(testPass))
+        if (testUser.equals(email.getEditText().getText().toString())
+                && testPass.equals(password.getEditText().getText().toString()))
         {
             BASE_URL = App.BASE_URL_STAGING;
             sharedPreferences.edit().putBoolean("isStaging", true).apply();
             sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-            Log.e("TAG", "BASE_URL : "+ BASE_URL, new Error() );
             Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
+            email.getEditText().setText("");
+            password.getEditText().setText("");
+            email.getEditText().requestFocus();
+            return;
         }
         progressDialog.show();
 
@@ -172,15 +178,15 @@ public class LoginActivity extends AppCompatActivity{
         LoginApi loginApiService = retrofit.create(LoginApi.class);
 
         Call<LoginResponse> loginResponse = loginApiService.login("application/json",
-                new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
+                new LoginRequest(email.getEditText().getText().toString(),
+                        password.getEditText().getText().toString()));
 
         loginResponse.clone().enqueue(new Callback<LoginResponse>() {
 
             String loginMessage = "";
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-
-
+                int toastLength = Toast.LENGTH_SHORT;
                 if(response.isSuccessful())
                 {
                     LoginData res = response.body().data;
@@ -197,6 +203,12 @@ public class LoginActivity extends AppCompatActivity{
                         editor.putInt("isLoggedIn", 1);
                         editor.putInt("versionCode", BuildConfig.VERSION_CODE);
                         editor.apply();
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    FirebaseHelper.initializeFirebase(store.id, context);
+//                }
+//            }).start();
                         sharedPreferences.edit().putString("base_url", BASE_URL).apply();
                         getStoresAndRegister(sharedPreferences);
                         Log.i("getAllStore", "onResponse: " + stores );
@@ -214,23 +226,33 @@ public class LoginActivity extends AppCompatActivity{
                     }, 0);
                 }
                 else {
+                    toastLength = Toast.LENGTH_LONG;
+                    loginMessage = "URL " + response.raw().request().url() + " returned error " + response.code() + ". ";
+                    if (response.message().length() > 0) {
+                        loginMessage += response.message() + ". ";
+                    }
                     Log.d("TAG", "Login response : Not successful");
                     progressDialog.dismiss();
-                    loginMessage = "Unsuccessful, Please try again";
-                    email.getEditText().setText("");
-                    password.getEditText().setText("");
-                    email.getEditText().requestFocus();
+
+                    try {
+                        JSONObject errorObj = new JSONObject(response.errorBody().string());
+                        String errorMessage = errorObj.getString("error");
+                        if (errorMessage.length() > 0) {
+                            loginMessage += " Error message: " + errorMessage + ". ";
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    loginMessage += "Please try again.";
                 }
 
-                if(!(BASE_URL.contains(".it") && loginMessage.contains("success"))){
-                    Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getApplicationContext(), loginMessage, toastLength).show();
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
-                Toast.makeText(getApplicationContext(), "Check your internet connection !", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error: " + t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 progressDialog.dismiss();
             }
 
@@ -272,12 +294,6 @@ public class LoginActivity extends AppCompatActivity{
 
         for(Store store : stores)
         {
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    FirebaseHelper.initializeFirebase(store.id, context);
-//                }
-//            }).start();
             FirebaseHelper.initializeFirebase(store.id, context);
         }
 
