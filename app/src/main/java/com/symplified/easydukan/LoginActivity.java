@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -62,7 +63,7 @@ public class LoginActivity extends AppCompatActivity{
 
     private static final int UPDATE_REQUEST_CODE = 112;
     private static final String TAG = LoginActivity.class.getName();
-    private Button login;
+    private Button login, productionModeButton;
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
@@ -86,10 +87,9 @@ public class LoginActivity extends AppCompatActivity{
         setContentView(R.layout.activity_login);
         initViews();
 
-        login.setOnClickListener(view -> {
-            onLoginButtonClick();
-        });
+        login.setOnClickListener(view -> onLoginButtonClick());
 
+        productionModeButton.setOnClickListener(view -> switchToProductionMode());
     }
 
 
@@ -105,6 +105,7 @@ public class LoginActivity extends AppCompatActivity{
         progressIndicator.setIndeterminate(true);
 
         login = findViewById(R.id.btn_login);
+        productionModeButton = findViewById(R.id.btn_production);
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
         header = findViewById(R.id.iv_header);
@@ -157,10 +158,7 @@ public class LoginActivity extends AppCompatActivity{
         if (testUser.equals(email.getEditText().getText().toString())
                 && testPass.equals(password.getEditText().getText().toString()))
         {
-            BASE_URL = App.BASE_URL_STAGING;
-            sharedPreferences.edit().putBoolean("isStaging", true).apply();
-            sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-            Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
+            switchToStagingMode();
             email.getEditText().setText("");
             password.getEditText().setText("");
             email.getEditText().requestFocus();
@@ -439,5 +437,21 @@ public class LoginActivity extends AppCompatActivity{
     protected void onResume() {
         super.onResume();
         callInAppUpdate();
+    }
+
+    private void switchToStagingMode() {
+        BASE_URL = App.BASE_URL_STAGING;
+        sharedPreferences.edit().putBoolean("isStaging", true).apply();
+        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+        productionModeButton.setVisibility(View.VISIBLE);
+        Toast.makeText(getApplicationContext(), "Switched to staging mode", Toast.LENGTH_SHORT).show();
+    }
+
+    private void switchToProductionMode() {
+        BASE_URL = App.BASE_URL;
+        sharedPreferences.edit().putBoolean("isStaging", false).apply();
+        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+        productionModeButton.setVisibility(View.GONE);
+        Toast.makeText(getApplicationContext(), "Switched to production mode", Toast.LENGTH_SHORT).show();
     }
 }
