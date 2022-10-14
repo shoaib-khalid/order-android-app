@@ -19,6 +19,8 @@ import java.util.concurrent.Executors;
  */
 public class App extends Application {
 
+    private static Context context;
+
     public static String BASE_URL = "https://api.symplified.biz/";
     public static String BASE_URL_STAGING = "https://api.symplified.it/";
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
@@ -41,6 +43,7 @@ public class App extends Application {
     public void onCreate(){
         super.onCreate();
 
+        context = getApplicationContext();
         //restrict devices from forcing the dark mode on the app
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
@@ -60,4 +63,6 @@ public class App extends Application {
             notificationManager.createNotificationChannel(orders);
         }
     }
+
+    public static Context getAppContext() { return context; }
 }

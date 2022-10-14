@@ -2,10 +2,15 @@ package com.symplified.easydukan.utils;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Environment;
 import android.util.Base64;
 import android.widget.ImageView;
 
+import com.symplified.easydukan.App;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 
 public class Utility {
 
@@ -40,4 +45,14 @@ public class Utility {
         return s.replace("_", " ");
     }
 
+    public static void logToFile(String text) {
+        File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
+                "log.txt");
+
+        try {
+            FileWriter fr = new FileWriter(file, false);
+            fr.write(text);
+            fr.close();
+        } catch (Exception e) {}
+    }
 }
