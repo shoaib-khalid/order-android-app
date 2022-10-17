@@ -21,9 +21,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.android.volley.Request;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -46,12 +43,9 @@ import com.symplified.easydukan.models.Store.StoreResponse;
 import com.symplified.easydukan.models.login.LoginData;
 import com.symplified.easydukan.models.login.LoginRequest;
 import com.symplified.easydukan.models.login.LoginResponse;
-import com.symplified.easydukan.utils.Utility;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,6 +72,7 @@ public class LoginActivity extends AppCompatActivity{
     private final String testUser = "qa_user", testPass = "qa@kalsym";
     private String BASE_URL;
     private List<Store> stores;
+    private TextView stagingModeIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +109,7 @@ public class LoginActivity extends AppCompatActivity{
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
         header = findViewById(R.id.iv_header);
+        stagingModeIndicator = findViewById(R.id.staging_mode_text);
 
         TextView appVersionText = findViewById(R.id.app_version_text);
         appVersionText.setText("Build " + BuildConfig.VERSION_NAME);
@@ -171,76 +167,10 @@ public class LoginActivity extends AppCompatActivity{
         }
         progressDialog.show();
 
-//        sendVolleyLoginRequest();
-        sendRetrofitLoginRequest();
+        sendLoginRequest();
     }
 
-    private void sendVolleyLoginRequest() {
-        JSONObject loginRequestBody = new JSONObject();
-        try {
-            loginRequestBody.put("username", email.getEditText().getText().toString());
-            loginRequestBody.put("password", password.getEditText().getText().toString());
-        } catch (JSONException e) {
-            // TODO: Remove
-            Toast.makeText(this, "Failed to put username or password in request body", Toast.LENGTH_SHORT).show();
-        }
-
-        JsonObjectRequest loginRequest = new JsonObjectRequest(
-                Request.Method.POST,
-                BASE_URL + App.USER_SERVICE_URL + "authenticate",
-                loginRequestBody,
-                response -> {
-                    progressDialog.dismiss();
-                    Utility.logToFile(response.toString());
-
-                    try {
-                        if (response.getInt("status") == 202) {
-                            String loginMessage = "Logged In Successfully !";
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            if (!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0) {
-                                JSONObject session = response.getJSONObject("data").getJSONObject("session");
-                                editor.putString("email", session.getString("username"));
-                                editor.putString("accessToken", session.getString("accessToken"));
-                                editor.putString("refreshToken", session.getString("refreshToken"));
-                                editor.putString("ownerId", session.getString("ownerId"));
-                                editor.putString("expiry", session.getString("expiry"));
-                                editor.putInt("isLoggedIn", 1);
-                                editor.putInt("versionCode", BuildConfig.VERSION_CODE);
-                                editor.apply();
-                                sharedPreferences.edit().putString("base_url", BASE_URL).apply();
-                                getStoresAndRegister(sharedPreferences);
-                                Log.i("getAllStore", "onResponse: " + stores);
-                            }
-
-                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                                Toast.makeText(getApplicationContext(), loginMessage, Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                                startActivity(intent);
-                            }, 0);
-                        } else {
-                            String errorMessage = response.getInt("status") + " error. "
-                                    + response.getString("message") + ". Please try again.";
-                            Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {}
-
-                },
-                error -> {
-                    progressDialog.dismiss();
-                    String errorResponse = "Error";
-                    if(error.networkResponse.data != null) {
-                        errorResponse = new String(error.networkResponse.data, StandardCharsets.UTF_8);
-                        Utility.logToFile(errorResponse);
-                    }
-
-                    Toast.makeText(this, errorResponse, Toast.LENGTH_SHORT).show();
-                }
-        );
-
-        Volley.newRequestQueue(this).add(loginRequest);
-    }
-
-    private void sendRetrofitLoginRequest() {
+    private void sendLoginRequest() {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(new OkHttpClient())
                 .baseUrl(BASE_URL+App.USER_SERVICE_URL)
@@ -255,15 +185,16 @@ public class LoginActivity extends AppCompatActivity{
 
         loginResponse.clone().enqueue(new Callback<LoginResponse>() {
 
-            String loginMessage = "";
+            String loginMessage = "An error occurred. Please try again.";
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call, @NonNull Response<LoginResponse> response) {
                 int toastLength = Toast.LENGTH_SHORT;
                 if(response.isSuccessful())
                 {
+                    loginMessage = "Logged In Successfully !";
+
                     LoginData res = response.body().data;
                     Log.d("TAG", "Login Response : "+ response.body().data.toString());
-                    loginMessage = "Logged In Successfully !";
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     if(!sharedPreferences.contains("isLoggedIn") || sharedPreferences.getInt("isLoggedIn", -1) == 0)
                     {
@@ -286,25 +217,8 @@ public class LoginActivity extends AppCompatActivity{
                         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
                         startActivity(intent);
                     }, 0);
-                }
-                else {
-                    toastLength = Toast.LENGTH_LONG;
-                    loginMessage = "URL " + response.raw().request().url() + " returned error " + response.code() + ". ";
-                    if (response.message().length() > 0) {
-                        loginMessage += response.message() + ". ";
-                    }
-                    progressDialog.dismiss();
-
-                    try {
-                        JSONObject errorObj = new JSONObject(response.errorBody().string());
-                        String errorMessage = errorObj.getString("error");
-                        if (errorMessage.length() > 0) {
-                            loginMessage += " Error message: " + errorMessage + ". ";
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    loginMessage += "Please try again.";
+                } else if (response.code() == 401) {
+                    loginMessage = "Username or password is incorrect. Please try again";
                 }
 
                 Toast.makeText(getApplicationContext(), loginMessage, toastLength).show();
@@ -507,6 +421,7 @@ public class LoginActivity extends AppCompatActivity{
         sharedPreferences.edit().putBoolean("isStaging", true).apply();
         sharedPreferences.edit().putString("base_url", BASE_URL).apply();
         productionModeButton.setVisibility(View.VISIBLE);
+        stagingModeIndicator.setVisibility(View.VISIBLE);
         Toast.makeText(getApplicationContext(), "Switched to staging mode", Toast.LENGTH_SHORT).show();
     }
 
@@ -515,6 +430,7 @@ public class LoginActivity extends AppCompatActivity{
         sharedPreferences.edit().putBoolean("isStaging", false).apply();
         sharedPreferences.edit().putString("base_url", BASE_URL).apply();
         productionModeButton.setVisibility(View.GONE);
+        stagingModeIndicator.setVisibility(View.GONE);
         Toast.makeText(getApplicationContext(), "Switched to production mode", Toast.LENGTH_SHORT).show();
     }
 }
