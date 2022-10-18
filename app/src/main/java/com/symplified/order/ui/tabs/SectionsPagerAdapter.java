@@ -89,12 +89,16 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
 
     @Override
     public void addOrderToOngoingTab(Order.OrderDetails orderDetails) {
-        ongoingOrderFragment.onOrderReceived(orderDetails);
+        if (ongoingOrderFragment != null) {
+            ongoingOrderFragment.onOrderReceived(orderDetails);
+        }
     }
 
     @Override
     public void addOrderToHistoryTab(Order.OrderDetails orderDetails) {
-        historyOrderFragment.onOrderReceived(orderDetails);
+        if (historyOrderFragment != null) {
+            historyOrderFragment.onOrderReceived(orderDetails);
+        }
     }
 
     @Override

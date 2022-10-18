@@ -2,7 +2,6 @@ package com.symplified.order.networking;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.symplified.order.App;
 import com.symplified.order.apis.CategoryApi;
@@ -25,7 +24,7 @@ public class ServiceGenerator {
         return createRetrofitInstance(App.DELIVERY_SERVICE_URL).create(DeliveryApi.class);
     }
 
-    public static LoginApi createLoginService() {
+    public static LoginApi createUserService() {
         return createRetrofitInstance(App.USER_SERVICE_URL).create(LoginApi.class);
     }
 

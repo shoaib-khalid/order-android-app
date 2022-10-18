@@ -1,7 +1,6 @@
 package com.symplified.order.apis;
 
-import com.symplified.order.models.HttpResponse;
-import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.store.StoreResponse;
 
 import java.util.Map;
 

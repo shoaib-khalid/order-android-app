@@ -39,8 +39,8 @@ import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.handlers.LogoHandler;
-import com.symplified.order.models.Store.Store;
-import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.store.Store;
+import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
@@ -184,9 +184,10 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             startLoading();
 
-            LoginApi loginApiService = ServiceGenerator.createLoginService();
-            Call<LoginResponse> loginResponse = loginApiService.login("application/json",
-                    new LoginRequest(email.getEditText().getText().toString(), password.getEditText().getText().toString()));
+            LoginApi loginApiService = ServiceGenerator.createUserService();
+            Call<LoginResponse> loginResponse = loginApiService
+                    .login(new LoginRequest(email.getEditText().getText().toString(),
+                            password.getEditText().getText().toString()));
 
             loginResponse.clone().enqueue(new Callback<LoginResponse>() {
                 @Override
@@ -394,7 +395,7 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Update Started !", Toast.LENGTH_SHORT).show();
         } else if (resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
             Log.d(TAG, "onActivityResult: " + "Update flow failed! Result code: " + resultCode);
-            Toast.makeText(this, "Failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
         }
     }
 

@@ -20,8 +20,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
-import com.symplified.order.models.Store.Store;
-import com.symplified.order.models.Store.StoreResponse;
+import com.symplified.order.models.store.Store;
+import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.DownloadImageTask;
 

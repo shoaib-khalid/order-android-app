@@ -1,6 +1,7 @@
 package com.symplified.order.apis;
 
 import com.symplified.order.models.HttpResponse;
+import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
@@ -22,8 +23,9 @@ import retrofit2.http.Path;
 
 public interface LoginApi {
 
+    @Headers("Content-Type: application/json")
     @POST("authenticate")
-    Call<LoginResponse> login(@Header("Content-Type") String contentType, @Body LoginRequest loginRequest);
+    Call<LoginResponse> login(@Body LoginRequest loginRequest);
 
     @Headers("Content-Type: application/plain")
     @POST("session/refresh")
@@ -32,4 +34,8 @@ public interface LoginApi {
     @PUT("{clientId}/pingresponse/{transactionId}")
     Call<HttpResponse> ping(@Path("clientId") String clientId,
                             @Path("transactionId") String transactionId);
+
+    @Headers("Content-Type: application/json")
+    @POST("logerror")
+    Call<HttpResponse> logError(@Body ErrorRequest errorRequest);
 }

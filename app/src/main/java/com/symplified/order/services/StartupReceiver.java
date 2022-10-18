@@ -42,12 +42,10 @@ public class StartupReceiver extends BroadcastReceiver {
                 Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(intent.getAction()))
                 && sharedPrefs.getBoolean(Key.IS_LOGGED_IN, false)) {
             if (isConnectedToInternet(context)) {
-                Toast.makeText(context, "Connected to network", Toast.LENGTH_SHORT).show();
                 checkForNewOrders(context);
             } else {
-                Toast.makeText(context, "No network detected. Registering network callback", Toast.LENGTH_SHORT).show();
                 ConnectivityManager connMan =
-                        (ConnectivityManager) context.getSystemService(ConnectivityManager.class);
+                        context.getSystemService(ConnectivityManager.class);
                 NetworkRequest networkRequest = new NetworkRequest.Builder()
                         .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                         .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -70,8 +68,6 @@ public class StartupReceiver extends BroadcastReceiver {
     }
 
     private static void checkForNewOrders(Context context) {
-        Toast.makeText(context, "Checking for new orders", Toast.LENGTH_LONG).show();
-
         SharedPreferences sharedPrefs = context
                 .getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String clientId = sharedPrefs.getString("ownerId", "");

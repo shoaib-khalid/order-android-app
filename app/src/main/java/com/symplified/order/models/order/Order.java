@@ -5,7 +5,7 @@ import com.symplified.order.enums.DineInPack;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.models.HttpResponse;
-import com.symplified.order.models.Store.Store;
+import com.symplified.order.models.store.Store;
 
 import java.io.Serializable;
 import java.util.List;

@@ -1,45 +1,19 @@
 package com.symplified.order;
 
 import android.app.Dialog;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
-import com.symplified.order.firebase.FirebaseHelper;
-import com.symplified.order.models.Store.Store;
-import com.symplified.order.models.Store.StoreResponse;
-import com.symplified.order.models.asset.Asset;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.services.DownloadImageTask;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 //not used anymore
 public class ChooseStoreActivity extends AppCompatActivity {

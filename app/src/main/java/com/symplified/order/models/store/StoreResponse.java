@@ -1,4 +1,4 @@
-package com.symplified.order.models.Store;
+package com.symplified.order.models.store;
 
 import com.symplified.order.models.HttpResponse;
 

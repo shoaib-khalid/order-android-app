@@ -22,11 +22,13 @@ import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
+import com.symplified.order.callbacks.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.HttpResponse;
+import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.item.ItemResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
@@ -71,19 +73,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = sharedPreferences.getString("ownerId", "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
-            LoginApi userService = ServiceGenerator.createLoginService();
+            LoginApi userService = ServiceGenerator.createUserService();
             String transactionId = remoteMessage.getData().get("body");
 
-            Call<HttpResponse> pingRequest = userService.ping(clientId, transactionId);
-            pingRequest.clone().enqueue(new Callback<HttpResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<HttpResponse> call, @NonNull Response<HttpResponse> response) {
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<HttpResponse> call, @NonNull Throwable t) {
-                }
-            });
+            userService.ping(clientId, transactionId).clone().enqueue(new EmptyCallback());
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
@@ -104,20 +97,114 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             } else {
                                 addOrderToView(newOrderObservers, orderDetails);
                                 alert(remoteMessage, orderDetails.order);
+
+                                if (orderDetails.order.serviceType == ServiceType.DINEIN) {
+                                    sendErrorToServer("Dine-In order " + invoiceId
+                                            + " cannot be printed and auto-processed because a printer was not detected");
+                                }
                             }
                         } else {
                             alert(remoteMessage, null);
+                            sendErrorToServer("Error " + response.code() + " received when querying order "
+                                    + invoiceId + " after receiving Firebase notification.");
                         }
                     }
 
                     @Override
-                    public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
+                    public void onFailure(@NonNull Call<OrderDetailsResponse> call,
+                                          @NonNull Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
                         alert(remoteMessage, null);
                     }
                 });
             }
         }
+    }
+
+    private void printAndProcessOrder(OrderApi orderApiService,
+                                      RemoteMessage remoteMessage,
+                                      Order.OrderDetails orderDetails) {
+
+        orderApiService.getItemsForOrder(orderDetails.order.id)
+                .clone()
+                .enqueue(new Callback<ItemResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ItemResponse> call,
+                                           @NonNull Response<ItemResponse> response) {
+                        if (response.isSuccessful()) {
+                            try {
+                                SunmiPrintHelper.getInstance()
+                                        .printReceipt(orderDetails.order, response.body().data.content);
+                                processNewOrder(orderApiService, orderDetails);
+                            } catch (RemoteException e) {
+                                addOrderToView(newOrderObservers, orderDetails);
+
+                                String errorMessage = "Error occurred while printing Dine-in order "
+                                        + orderDetails.order.id + " after receiving notification. " +
+                                        "Cannot proceed with auto-process of order.";
+                                sendErrorToServer(errorMessage);
+                            }
+                        } else {
+                            addOrderToView(newOrderObservers, orderDetails);
+
+                            String errorMessage = "Error " + response.code() + " received while retrieving items for " +
+                                    "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
+                                    "Cannot proceed with printing and auto-process of order.";
+                            sendErrorToServer(errorMessage);
+                        }
+                        alert(remoteMessage, orderDetails.order);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ItemResponse> call,
+                                          @NonNull Throwable t) {
+                        alert(remoteMessage, orderDetails.order);
+                        addOrderToView(newOrderObservers, orderDetails);
+                    }
+                });
+    }
+
+    private void processNewOrder(OrderApi orderApiService, Order.OrderDetails orderDetails) {
+        OrderStatus nextCompletionStatus
+                = orderDetails.order.dineInOption == DineInOption.SENDTOTABLE
+                ? OrderStatus.DELIVERED_TO_CUSTOMER
+                : orderDetails.nextCompletionStatus;
+
+        orderApiService.updateOrderStatus(new Order.OrderUpdate(orderDetails.order.id, nextCompletionStatus),
+                        orderDetails.order.id)
+                .clone()
+                .enqueue(new Callback<OrderUpdateResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<OrderUpdateResponse> call,
+                                           @NonNull Response<OrderUpdateResponse> response) {
+                        if (response.isSuccessful()) {
+                            Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
+                            if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
+                                addOrderToView(pastOrderObservers, updatedOrderDetails);
+                            } else if (Utility.isOrderOngoing(orderDetails.currentCompletionStatus)) {
+                                addOrderToView(ongoingOrderObservers, updatedOrderDetails);
+                            }
+                        } else {
+                            addOrderToView(newOrderObservers, orderDetails);
+                            sendErrorToServer("Failed to auto-process order " + orderDetails.order.id);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<OrderUpdateResponse> call,
+                                          @NonNull Throwable t) {
+                        addOrderToView(newOrderObservers, orderDetails);
+                    }
+                });
+    }
+
+    private void sendErrorToServer(String errorMessage) {
+        String clientId = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE)
+                .getString("ownerId", "");
+
+        LoginApi userService = ServiceGenerator.createUserService();
+        userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
+                .clone().enqueue(new EmptyCallback());
     }
 
     private String parseInvoiceId(String body) {
@@ -218,72 +305,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         notificationManager.notify(new Random().nextInt(), notification);
-    }
-
-    private void printAndProcessOrder(OrderApi orderApiService,
-                                      RemoteMessage remoteMessage,
-                                      Order.OrderDetails orderDetails) {
-
-        orderApiService.getItemsForOrder(orderDetails.order.id)
-                .clone()
-                .enqueue(new Callback<ItemResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ItemResponse> call,
-                                           @NonNull Response<ItemResponse> response) {
-                        if (response.isSuccessful()) {
-                            try {
-                                SunmiPrintHelper.getInstance()
-                                        .printReceipt(orderDetails.order, response.body().data.content);
-                                processNewOrder(orderApiService, orderDetails);
-                            } catch (RemoteException e) {
-                                addOrderToView(newOrderObservers, orderDetails);
-                            }
-                        } else {
-                            addOrderToView(newOrderObservers, orderDetails);
-                        }
-                        alert(remoteMessage, orderDetails.order);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ItemResponse> call,
-                                          @NonNull Throwable t) {
-                        alert(remoteMessage, orderDetails.order);
-                        addOrderToView(newOrderObservers, orderDetails);
-                    }
-                });
-    }
-
-    private void processNewOrder(OrderApi orderApiService, Order.OrderDetails orderDetails) {
-        OrderStatus nextCompletionStatus
-                = orderDetails.order.dineInOption == DineInOption.SENDTOTABLE
-                ? OrderStatus.DELIVERED_TO_CUSTOMER
-                : orderDetails.nextCompletionStatus;
-
-        orderApiService.updateOrderStatus(new Order.OrderUpdate(orderDetails.order.id, nextCompletionStatus),
-                        orderDetails.order.id)
-                .clone()
-                .enqueue(new Callback<OrderUpdateResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<OrderUpdateResponse> call,
-                                           @NonNull Response<OrderUpdateResponse> response) {
-                        if (response.isSuccessful()) {
-                            Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
-                            if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
-                                addOrderToView(pastOrderObservers, updatedOrderDetails);
-                            } else if (Utility.isOrderOngoing(orderDetails.currentCompletionStatus)) {
-                                addOrderToView(ongoingOrderObservers, updatedOrderDetails);
-                            }
-                        } else {
-                            addOrderToView(newOrderObservers, orderDetails);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<OrderUpdateResponse> call,
-                                          @NonNull Throwable t) {
-                        addOrderToView(newOrderObservers, orderDetails);
-                    }
-                });
     }
 
     public static void addNewOrderObserver(OrderObserver observer) { newOrderObservers.add(observer); }
