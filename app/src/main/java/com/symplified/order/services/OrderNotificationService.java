@@ -24,12 +24,11 @@ import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.callbacks.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
-import com.symplified.order.enums.ServiceType;
 import com.symplified.order.enums.OrderStatus;
+import com.symplified.order.enums.ServiceType;
 import com.symplified.order.helpers.SunmiPrintHelper;
-import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.error.ErrorRequest;
-import com.symplified.order.models.item.ItemResponse;
+import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
@@ -51,9 +50,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private Pattern pattern;
     private final String TAG = "order-notification-service";
-    private static List<OrderObserver> newOrderObservers = new ArrayList<>();
-    private static List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
-    private static List<OrderObserver> pastOrderObservers = new ArrayList<>();
+    private static final List<OrderObserver> newOrderObservers = new ArrayList<>();
+    private static final List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
+    private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -91,12 +90,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
 
+                            alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
                                     && SunmiPrintHelper.getInstance().isPrinterConnected()) {
                                 printAndProcessOrder(orderApiService, remoteMessage, orderDetails);
                             } else {
                                 addOrderToView(newOrderObservers, orderDetails);
-                                alert(remoteMessage, orderDetails.order);
 
                                 if (orderDetails.order.serviceType == ServiceType.DINEIN) {
                                     sendErrorToServer("Dine-In order " + invoiceId
@@ -114,6 +113,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onFailure(@NonNull Call<OrderDetailsResponse> call,
                                           @NonNull Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
+                        sendErrorToServer("Failed to query order "
+                                + invoiceId + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
                         alert(remoteMessage, null);
                     }
                 });
@@ -127,10 +128,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
         orderApiService.getItemsForOrder(orderDetails.order.id)
                 .clone()
-                .enqueue(new Callback<ItemResponse>() {
+                .enqueue(new Callback<ItemsResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<ItemResponse> call,
-                                           @NonNull Response<ItemResponse> response) {
+                    public void onResponse(@NonNull Call<ItemsResponse> call,
+                                           @NonNull Response<ItemsResponse> response) {
                         if (response.isSuccessful()) {
                             try {
                                 SunmiPrintHelper.getInstance()
@@ -152,14 +153,17 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                     "Cannot proceed with printing and auto-process of order.";
                             sendErrorToServer(errorMessage);
                         }
-                        alert(remoteMessage, orderDetails.order);
                     }
 
                     @Override
-                    public void onFailure(@NonNull Call<ItemResponse> call,
+                    public void onFailure(@NonNull Call<ItemsResponse> call,
                                           @NonNull Throwable t) {
-                        alert(remoteMessage, orderDetails.order);
                         addOrderToView(newOrderObservers, orderDetails);
+                        String errorMessage = "Failed to retrieve items for " +
+                                "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
+                                "Cannot proceed with printing and auto-process of order. Error: " +
+                                t.getLocalizedMessage();
+                        sendErrorToServer(errorMessage);
                     }
                 });
     }

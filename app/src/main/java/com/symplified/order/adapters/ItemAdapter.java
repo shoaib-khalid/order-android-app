@@ -2,16 +2,13 @@ package com.symplified.order.adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,8 +18,6 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
-
-import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

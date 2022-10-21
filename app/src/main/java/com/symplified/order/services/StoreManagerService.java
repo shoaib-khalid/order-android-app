@@ -2,9 +2,7 @@ package com.symplified.order.services;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
-import android.os.PersistableBundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;

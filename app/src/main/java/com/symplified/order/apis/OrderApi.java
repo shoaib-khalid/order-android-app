@@ -1,7 +1,7 @@
 package com.symplified.order.apis;
 
 import com.symplified.order.models.HttpResponse;
-import com.symplified.order.models.item.ItemResponse;
+import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
@@ -34,7 +34,7 @@ public interface OrderApi {
     Call<OrderDetailsResponse> getSentOrdersByClientId (@Query("clientId") String clientId, @Query("from") String from, @Query("to") String to);
 
     @GET("orders/{orderId}/items")
-    Call<ItemResponse> getItemsForOrder(@Path("orderId") String orderId);
+    Call<ItemsResponse> getItemsForOrder(@Path("orderId") String orderId);
 
     @PUT("orders/{orderId}/completion-status-updates")
     Call<OrderUpdateResponse> updateOrderStatus(@Body Order.OrderUpdate body, @Path("orderId") String orderId);

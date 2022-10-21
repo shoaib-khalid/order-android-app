@@ -26,7 +26,7 @@ import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.ActivityEditOrderBinding;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.item.Item;
-import com.symplified.order.models.item.ItemResponse;
+import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
@@ -116,13 +116,13 @@ public class EditOrderActivity extends NavbarActivity {
     }
 
     private void getOrderItems(Order order) {
-        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
+        Call<ItemsResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
 
         progressDialog.show();
 
-        itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
+        itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
             @Override
-            public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+            public void onResponse(Call<ItemsResponse> call, Response<ItemsResponse> response) {
                 if (response.isSuccessful()) {
                     items = response.body().data.content;
                     adapter = new EditItemAdapter(items, getApplicationContext(), order);
@@ -139,7 +139,7 @@ public class EditOrderActivity extends NavbarActivity {
             }
 
             @Override
-            public void onFailure(Call<ItemResponse> call, Throwable t) {
+            public void onFailure(Call<ItemsResponse> call, Throwable t) {
                 Toast.makeText(getApplicationContext(), "Failed to retrieve items. " + R.string.no_internet, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onFailureItems: ", t);
                 finish();

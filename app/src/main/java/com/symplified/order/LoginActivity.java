@@ -1,9 +1,5 @@
 package com.symplified.order;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +16,10 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
@@ -39,11 +39,11 @@ import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.handlers.LogoHandler;
-import com.symplified.order.models.store.Store;
-import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
+import com.symplified.order.models.store.Store;
+import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Key;
 
@@ -331,8 +331,7 @@ public class LoginActivity extends AppCompatActivity {
         callInAppUpdate();
         //check if user session already exists, for persistent login
         if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
-                && sharedPreferences.contains("storeIdList")
-                && sharedPreferences.getInt("versionCode", 0) == BuildConfig.VERSION_CODE) {
+                && sharedPreferences.contains("storeIdList")) {
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();

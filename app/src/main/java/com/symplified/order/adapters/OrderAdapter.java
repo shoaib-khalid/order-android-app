@@ -31,11 +31,11 @@ import com.symplified.order.R;
 import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
-import com.symplified.order.enums.ServiceType;
 import com.symplified.order.enums.OrderStatus;
+import com.symplified.order.enums.ServiceType;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.item.Item;
-import com.symplified.order.models.item.ItemResponse;
+import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
@@ -370,11 +370,11 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void getOrderItemsForView(Order order, ViewHolder holder) {
 
-        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
+        Call<ItemsResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
 
-        itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
+        itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
             @Override
-            public void onResponse(@NonNull Call<ItemResponse> call, @NonNull Response<ItemResponse> response) {
+            public void onResponse(@NonNull Call<ItemsResponse> call, @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful()) {
                     List<Item> orderItems = response.body().data.content;
                     ItemAdapter itemsAdapter = new ItemAdapter(orderItems, order, context);
@@ -387,7 +387,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
 
             @Override
-            public void onFailure(@NonNull Call<ItemResponse> call, @NonNull Throwable t) {
+            public void onFailure(@NonNull Call<ItemsResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, "onFailureItems: ", t);
                 holder.itemsProgressBar.setVisibility(View.GONE);
                 holder.itemsErrorTextView.setVisibility(View.VISIBLE);
@@ -396,18 +396,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     private void getOrderItemsForPrint(Order order) {
-        Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
+        Call<ItemsResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
 
-        itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
+        itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
             @Override
-            public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
+            public void onResponse(Call<ItemsResponse> call, Response<ItemsResponse> response) {
                 if (response.isSuccessful()) {
                     printReceipt(order, response.body().data.content);
                 }
             }
 
             @Override
-            public void onFailure(Call<ItemResponse> call, Throwable t) {
+            public void onFailure(Call<ItemsResponse> call, Throwable t) {
                 Log.e(TAG, "onFailureItems: ", t);
             }
         });

@@ -1,10 +1,7 @@
 package com.symplified.order;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.databinding.ActivityProductsBinding;
@@ -29,16 +25,11 @@ import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ProductsActivity extends NavbarActivity {
     private Toolbar toolbar;

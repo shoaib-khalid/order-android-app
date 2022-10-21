@@ -1,19 +1,14 @@
 package com.symplified.order.adapters;
 
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.chip.Chip;
 import com.symplified.order.R;
-import com.symplified.order.models.item.Item;
-import com.symplified.order.models.item.SubItem;
 
 import java.util.List;
 

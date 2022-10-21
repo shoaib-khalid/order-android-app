@@ -2,8 +2,6 @@ package com.symplified.order.models.item;
 
 import com.symplified.order.models.HttpResponse;
 
-import java.util.List;
-
-public class ItemResponse extends HttpResponse {
+public class ItemsResponse extends HttpResponse {
     public Item.ItemList data;
 }

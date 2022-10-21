@@ -8,7 +8,6 @@ import com.sunmi.peripheral.printer.InnerPrinterCallback;
 import com.sunmi.peripheral.printer.InnerPrinterManager;
 import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.sunmi.peripheral.printer.WoyouConsts;
-import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.SubItem;

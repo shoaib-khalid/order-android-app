@@ -1,13 +1,11 @@
 package com.symplified.order;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
@@ -18,9 +16,6 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.symplified.order.databinding.ActivityOrdersBinding;
-import com.symplified.order.models.order.Order;
-import com.symplified.order.observers.OrderManager;
-import com.symplified.order.observers.OrderObserver;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 
