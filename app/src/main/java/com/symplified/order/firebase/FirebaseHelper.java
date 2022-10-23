@@ -36,18 +36,14 @@ public class FirebaseHelper {
             if (!task.isComplete()) {
                 String message = "Unable to subscribe to Firebase notifications for store " + storeId;
 
+                // TODO: Send error messages to backend
             }
         }).addOnFailureListener(e -> {
             String message = "Failed to subscribe to store " + storeId + ". Error: " + e.getLocalizedMessage();
 
-            Toast.makeText(App.getAppContext(), message, Toast.LENGTH_SHORT).show();
-            notifyUser(message);
-            Log.d("firebase-helper", message);
         }).addOnCanceledListener(() -> {
             String message = "Subscription to store " + storeId + " cancelled.";
 
-            Toast.makeText(App.getAppContext(), message, Toast.LENGTH_SHORT).show();
-            notifyUser(message);
         });
     }
 

@@ -10,6 +10,7 @@ import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.sunmi.peripheral.printer.WoyouConsts;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.models.item.Item;
+import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.observers.PrinterObserver;
@@ -192,12 +193,17 @@ public class SunmiPrintHelper {
         for (Item item : items) {
             itemText.append("\n").append(item.quantity).append(" x ").append(item.productName);
             String spacing = Integer.toString(item.quantity).replaceAll("\\d", " ") + " * ";
+
             if (item.productVariant != null && !item.productVariant.equals("")) {
                 itemText.append("\n").append(spacing).append(item.productVariant);
             }
 
             for (SubItem subItem : item.orderSubItem) {
                 itemText.append("\n").append(spacing).append(subItem.productName);
+            }
+
+            for (ItemAddOn itemAddOn : item.orderItemAddOn) {
+                itemText.append("\n").append(spacing).append(itemAddOn.productAddOn.addOnTemplateItem.name);
             }
 
             if (item.specialInstruction != null && !"".equals(item.specialInstruction)) {

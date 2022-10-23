@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.models.item.Item;
+import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
@@ -54,8 +55,9 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             qty = view.findViewById(R.id.header_qty);
             price = view.findViewById(R.id.header_price);
             specialInstructions = view.findViewById(R.id.header_instruction_value);
-            subItemsRecyclerView = (RecyclerView) view.findViewById(R.id.subItemRecyclerView);
-            subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(), RecyclerView.VERTICAL, false));
+            subItemsRecyclerView = view.findViewById(R.id.subItemRecyclerView);
+            subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(),
+                    RecyclerView.VERTICAL, false));
             subItemLayout = view.findViewById(R.id.subItems);
             layoutSpecialInstructions = view.findViewById(R.id.rl_special_instructions);
         }
@@ -85,21 +87,29 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             for (SubItem subItem: items.get(position).orderSubItem) {
                 subItems.add(subItem.productName);
             }
-            adapter.items = subItems;
-            holder.subItemsRecyclerView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-            holder.subItemLayout.setVisibility(View.VISIBLE);
 
-        }
-        if (items.get(position).productVariant != null) {
-            List<String> subItems = new ArrayList<>();
-            SubItemsAdapter adapter = new SubItemsAdapter();
-            subItems = Arrays.asList(items.get(position).productVariant.split(","));
+            if (items.get(position).productVariant != null) {
+                subItems.addAll(Arrays.asList(items.get(position).productVariant.split(",")));
+            }
+
+            for (ItemAddOn itemAddOn : items.get(position).orderItemAddOn) {
+                subItems.add(itemAddOn.productAddOn.addOnTemplateItem.name);
+            }
+
             adapter.items = subItems;
             holder.subItemsRecyclerView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
             holder.subItemLayout.setVisibility(View.VISIBLE);
         }
+//        if (items.get(position).productVariant != null) {
+//            List<String> subItems = new ArrayList<>();
+//            SubItemsAdapter adapter = new SubItemsAdapter();
+//            subItems = Arrays.asList(items.get(position).productVariant.split(","));
+//            adapter.items = subItems;
+//            holder.subItemsRecyclerView.setAdapter(adapter);
+//            adapter.notifyDataSetChanged();
+//            holder.subItemLayout.setVisibility(View.VISIBLE);
+//        }
 
         holder.qty.setText(Integer.toString(items.get(position).quantity));
         holder.price.setText(currency+ " " + formatter.format(items.get(position).price));
