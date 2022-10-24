@@ -17,21 +17,23 @@ import com.symplified.order.services.DownloadImageTask;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class LogoHandler implements Runnable{
+public class LogoHandler implements Runnable {
     String[] stores;
     Context context;
     Handler handler;
     String clientId;
     StoreApi storeApiService;
 
-    public LogoHandler(String[] storeIdList, Context context, Handler handler, String clientId){
+    public LogoHandler(String[] storeIdList, Context context, Handler handler, String clientId) {
         this.stores = storeIdList;
         this.context = context;
         this.handler = handler;
@@ -42,69 +44,38 @@ public class LogoHandler implements Runnable{
     @Override
     public void run() {
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        Retrofit retrofitLogo = new Retrofit.Builder()
-//                .client(new OkHttpClient())
-//                .baseUrl(sharedPreferences.getString("base_url", App.BASE_URL) + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//        StoreApi storeApiSerivice = retrofitLogo.create(StoreApi.class);
+        Call<Asset.AssetListResponse> getAllLogosCall = storeApiService.getAllAssets(clientId);
 
-        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-
-
-        Call<ResponseBody> getAllLogosCall = storeApiService.getAllAssets(headers, clientId);
-
-        getAllLogosCall.clone().enqueue(new Callback<ResponseBody>() {
+        getAllLogosCall.clone().enqueue(new Callback<Asset.AssetListResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if(response.isSuccessful()){
-
-                    try {
-                        Asset.AssetListResponse assets = new Gson().fromJson(response.body().string(), Asset.AssetListResponse.class);
-
-                        if (assets.data != null) {
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try{
-                                        for(Asset asset : assets.data){
-
-                                            Bitmap bitmap = new DownloadImageTask().execute(asset.logoUrl).get();
-                                            if (bitmap != null) {
-                                                Log.i("TAG", "bitmapLogo: " + bitmap);
-                                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-                                                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-                                                editor.putString("logoImage-"+asset.storeId, encodedImage);
-                                                editor.apply();
-                                            }
-
-                                        }
-                                    }catch (Exception e){
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }).start();
+            public void onResponse(Call<Asset.AssetListResponse> call, Response<Asset.AssetListResponse> response) {
+                Log.d("getAllLogos", "getAllLogos onResponse: " + response.raw());
+                if (response.isSuccessful()) {
+                    new Thread(() -> {
+                        for (Asset asset : response.body().data) {
+                            try {
+                                Bitmap bitmap = new DownloadImageTask().execute(asset.logoUrl).get();
+                                Log.i("getAllLogos", "bitmapLogo: " + bitmap);
+                                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+                                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
+                                context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE)
+                                        .edit()
+                                        .putString("logoImage-" + asset.storeId, encodedImage)
+                                        .apply();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-
-                    } catch (IOException e
-//                            | InterruptedException | ExecutionException e
-                    ) {
-                        e.printStackTrace();
-                    }
-
+                    }).start();
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<Asset.AssetListResponse> call, Throwable t) {
 
             }
         });
-        sharedPreferences.edit().putInt("hasLogos", 1).apply();
     }
 
 }

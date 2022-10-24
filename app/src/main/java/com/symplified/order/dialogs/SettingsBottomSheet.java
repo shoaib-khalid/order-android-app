@@ -2,6 +2,7 @@ package com.symplified.order.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +20,16 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
+import com.symplified.order.models.HttpResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
+import java.time.Instant;
+import java.time.LocalTime;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -94,21 +98,28 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
                     break;
                 }
             }
-
         });
+
+        // Set timepicker default to PM
+        Calendar now = Calendar.getInstance();
+        if (now.get(Calendar.AM_PM) == Calendar.AM) {
+            now.set(Calendar.AM_PM, Calendar.PM);
+            timePicker.setHour(now.get(Calendar.HOUR_OF_DAY));
+        }
 
         return view;
     }
 
     private void snoozeStore(int minutes, boolean isClosed) {
 
-        Map<String,String> headers = new HashMap<>();
-        Call<ResponseBody> storeSnoozeCall = storeApiService.updateStoreStatus(headers, storeId, isClosed, minutes);
+        Call<HttpResponse> storeSnoozeCall = storeApiService.updateStoreStatus(storeId, isClosed, minutes);
 
-        storeSnoozeCall.clone().enqueue(new Callback<ResponseBody>() {
+        storeSnoozeCall.clone().enqueue(new Callback<HttpResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.i(TAG, "onResponse: "+call.request().toString());
+            public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
+                Log.i(TAG, "onResponse: " + response.raw());
+                Log.i(TAG, "Response body: " + response.body().status + ", " + response.body().message);
+
                 if(response.isSuccessful()){
                     if(!isClosed){
                         Log.i(TAG, "onResponse: "+ response.raw());
@@ -122,7 +133,7 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<HttpResponse> call, Throwable t) {
                 Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
             }
         });

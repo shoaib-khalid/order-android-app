@@ -285,13 +285,10 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void getStoresAndRegister(SharedPreferences sharedPreferences) {
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer accessToken");
-
         String clientId = sharedPreferences.getString("ownerId", null);
 
         StoreApi storeApiService = ServiceGenerator.createStoreService();
-        Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
+        Call<StoreResponse> storeResponse = storeApiService.getStores(clientId);
 //        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
 

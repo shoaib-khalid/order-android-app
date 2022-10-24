@@ -84,61 +84,40 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         appVersion = navigationView.findViewById(R.id.nav_app_version);
         appVersion.setText("Symplified 2022 | version " + version);
 
+        Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreById(storeId);
 
-        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer accessToken");
-
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-//                .baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        StoreApi storeApi = retrofit.create(StoreApi.class);
-
-        Call<ResponseBody> storeResponse = storeApiService.getStoreById(headers, storeId);
-
-        storeResponse.enqueue(new Callback<ResponseBody>() {
+        storeResponse.enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                if (response.isSuccessful()) {
-                    try {
-                        StoreResponse.SingleStoreResponse responseBody
-                                = new Gson().fromJson(response.body().string(), StoreResponse.SingleStoreResponse.class);
-                        if (responseBody != null) {
-                            for (Store.StoreAsset asset : responseBody.data.storeAssets) {
-                                if (asset.assetType.equals("LogoUrl")) {
-                                    try {
-                                        Bitmap bitmap = new DownloadImageTask().execute(asset.assetUrl).get();
-                                        if (bitmap != null) {
-                                            storeLogo.setImageBitmap(bitmap);
-                                        }
-
-                                    } catch (ExecutionException e) {
-                                        e.printStackTrace();
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
+            public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                   @NonNull Response<StoreResponse.SingleStoreResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    for (Store.StoreAsset asset : response.body().data.storeAssets) {
+                        if (asset.assetType.equals("LogoUrl")) {
+                            try {
+                                Bitmap bitmap = new DownloadImageTask().execute(asset.assetUrl).get();
+                                storeLogo.setImageBitmap(bitmap);
+                            } catch (ExecutionException | InterruptedException e) {
+                                e.printStackTrace();
                             }
-                            storeName.setText(responseBody.data.name);
-                            storeEmail.setText(responseBody.data.email);
                         }
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     }
+                    storeName.setText(response.body().data.name);
+                    storeEmail.setText(response.body().data.email);
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                  @NonNull Throwable t) {
             }
         });
 
         TextView logout = navigationView.findViewById(R.id.nav_logout);
 
 
-        if (sharedPreferences.getBoolean("isStaging", false))
+        if (sharedPreferences.getBoolean("isStaging", false)) {
             logout.setVisibility(View.VISIBLE);
+        }
 
         logout.setOnClickListener(view -> {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
@@ -157,41 +136,38 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
             finish();
         });
 
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        navigationView.setNavigationItemSelectedListener(item -> {
 
-                drawerLayout.closeDrawer(GravityCompat.START);
-                int id = item.getItemId();
-                Intent intent;
-                switch (id) {
-                    case R.id.nav_orders:
-                        if (!item.isChecked()) {
-                            intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                    case R.id.nav_products:
-                        if (!item.isChecked()) {
-                            intent = new Intent(getApplicationContext(), ProductsActivity.class);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                    case R.id.nav_stores:
-                        if (!item.isChecked()) {
-                            intent = new Intent(getApplicationContext(), SettingsActivity.class);
-                            startActivity(intent);
-                        } else {
-                            Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                }
-                return false;
+            drawerLayout.closeDrawer(GravityCompat.START);
+            int id = item.getItemId();
+            Intent intent;
+            switch (id) {
+                case R.id.nav_orders:
+                    if (!item.isChecked()) {
+                        intent = new Intent(getApplicationContext(), OrdersActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.nav_products:
+                    if (!item.isChecked()) {
+                        intent = new Intent(getApplicationContext(), ProductsActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case R.id.nav_stores:
+                    if (!item.isChecked()) {
+                        intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
             }
+            return false;
         });
     }
 

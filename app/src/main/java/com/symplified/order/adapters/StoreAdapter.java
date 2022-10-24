@@ -19,22 +19,16 @@ import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
+import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.networking.ServiceGenerator;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -47,7 +41,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     private SharedPreferences sharedPreferences;
     private StoreApi storeApiService;
 
-    public StoreAdapter(List<Store> items, Context context, Dialog progressDialog, SharedPreferences sharedPreferences){
+    public StoreAdapter(List<Store> items, Context context, Dialog progressDialog, SharedPreferences sharedPreferences) {
         this.items = items;
         this.context = context;
         this.progressDialog = progressDialog;
@@ -81,7 +75,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     @Override
     public StoreAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View listItem= layoutInflater.inflate(R.layout.store_list_item, parent, false);
+        View listItem = layoutInflater.inflate(R.layout.store_list_item, parent, false);
         return new StoreAdapter.ViewHolder(listItem);
     }
 
@@ -97,7 +91,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
         holder.itemView.setOnClickListener(view -> {
             BottomSheetDialogFragment bottomSheetDialogFragment = new SettingsBottomSheet(storeId, holder.status, StoreAdapter.this);
-            bottomSheetDialogFragment.show(((FragmentActivity) context).getSupportFragmentManager(),"bottomSheetDialog");
+            bottomSheetDialogFragment.show(((FragmentActivity) context).getSupportFragmentManager(), "bottomSheetDialog");
         });
     }
 
@@ -107,50 +101,47 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         return items.size();
     }
 
-    public boolean isEmpty(){return items.isEmpty();}
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
 
-    public void getStoreStatus(String storeId, ViewHolder holder){
+    public void getStoreStatus(String storeId, ViewHolder holder) {
 
-        Map<String, String> headers = new HashMap<>();
-
-        Call<ResponseBody> getStoreStatusCall = storeApiService.getStoreStatus(headers, storeId);
-        getStoreStatusCall.clone().enqueue(new Callback<ResponseBody>() {
+        Call<StoreStatusResponse> getStoreStatusCall = storeApiService.getStoreStatusById(storeId);
+        getStoreStatusCall.clone().enqueue(new Callback<StoreStatusResponse>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                Log.d(TAG, "onResponse: "+response.raw());
-                if(response.isSuccessful()){
-                    try {
-                        JSONObject responseJson = new JSONObject(response.body().string().toString());
-                        if(responseJson.getJSONObject("data").getBoolean("isSnooze")){
-                            setStoreStatus(responseJson, holder.status);
-                        }
-                        else
-                            holder.status.setText("Open");
-                    } catch (JSONException | IOException e) {
-                        e.printStackTrace();
+            public void onResponse(Call<StoreStatusResponse> call, Response<StoreStatusResponse> response) {
+                Log.d(TAG, "onResponse: " + response.raw());
+                if (response.isSuccessful()) {
+                    StoreStatusResponse.StoreStatus storeStatus = response.body().data;
+                    Log.d(TAG, "Response body: " + response.body().data.toString());
+                    if (storeStatus.isSnooze) {
+                        setStoreStatus(storeStatus.snoozeEndTime, holder.status);
+                    } else {
+                        holder.status.setText("Open");
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<StoreStatusResponse> call, Throwable t) {
                 Log.e(TAG, "onFailure: ", t);
             }
         });
 
     }
 
-    public void setStoreStatus(JSONObject responseJson, TextView status) {
+    public void setStoreStatus(String closedUntil, TextView status) {
         SimpleDateFormat dtf = new SimpleDateFormat("hh:mm a");
         Calendar calendar = new GregorianCalendar();
-        String closedUntil = null;
+        String closedText = "Closed";
         try {
-            closedUntil = responseJson.getJSONObject("data").getString("snoozeEndTime");
             calendar.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(closedUntil));
-        } catch (JSONException | ParseException e) {
+            closedText += " Until: " + dtf.format(calendar.getTime());
+        } catch (ParseException e) {
             e.printStackTrace();
         }
-        status.setText("Closed Until : "+ dtf.format(calendar.getTime()));
+        status.setText(closedText);
     }
 
 }

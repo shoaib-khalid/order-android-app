@@ -83,19 +83,9 @@ public class StoreSelectionFragment extends Fragment {
     private void getStores(SharedPreferences sharedPreferences) {
         startLoading();
 
-        Map<String, String> headers = new HashMap<>();
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-//
-//        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create()).build();
-//
-//        StoreApi storeApiService = retrofit.create(StoreApi.class);
         String clientId = sharedPreferences.getString("ownerId", null);
 
-//        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-//        progressDialog.show();
+        Call<StoreResponse> storeResponse = storeApiService.getStores(clientId);
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
