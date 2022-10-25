@@ -1,7 +1,10 @@
 package com.symplified.order.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,7 +61,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
             specialInstructions = view.findViewById(R.id.header_instruction_value);
             subItemsRecyclerView = view.findViewById(R.id.subItemRecyclerView);
             subItemsRecyclerView.setLayoutManager(new LinearLayoutManager(subItemsRecyclerView.getContext(),
-                    RecyclerView.VERTICAL, false));
+                    RecyclerView.HORIZONTAL, false));
             subItemLayout = view.findViewById(R.id.subItems);
             layoutSpecialInstructions = view.findViewById(R.id.rl_special_instructions);
         }
@@ -74,49 +78,39 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+        Item orderItem = items.get(position);
+
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
         formatter = new DecimalFormat("#,###0.00");
-        holder.name.setText(items.get(position).productName);
+        holder.name.setText(orderItem.productName);
 
-        if(items.get(position).orderSubItem != null && items.get(position).orderSubItem.size() > 0){
-
-            List<String> subItems = new ArrayList<>();
-            SubItemsAdapter adapter = new SubItemsAdapter();
-            for (SubItem subItem: items.get(position).orderSubItem) {
-                subItems.add(subItem.productName);
-            }
-
-            if (items.get(position).productVariant != null) {
-                subItems.addAll(Arrays.asList(items.get(position).productVariant.split(",")));
-            }
-
-            for (ItemAddOn itemAddOn : items.get(position).orderItemAddOn) {
-                subItems.add(itemAddOn.productAddOn.addOnTemplateItem.name);
-            }
-
-            adapter.items = subItems;
-            holder.subItemsRecyclerView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-            holder.subItemLayout.setVisibility(View.VISIBLE);
+        List<String> subItems = new ArrayList<>();
+        SubItemsAdapter adapter = new SubItemsAdapter();
+        for (SubItem subItem: orderItem.orderSubItem) {
+            subItems.add(subItem.productName);
         }
-//        if (items.get(position).productVariant != null) {
-//            List<String> subItems = new ArrayList<>();
-//            SubItemsAdapter adapter = new SubItemsAdapter();
-//            subItems = Arrays.asList(items.get(position).productVariant.split(","));
-//            adapter.items = subItems;
-//            holder.subItemsRecyclerView.setAdapter(adapter);
-//            adapter.notifyDataSetChanged();
-//            holder.subItemLayout.setVisibility(View.VISIBLE);
-//        }
 
-        holder.qty.setText(Integer.toString(items.get(position).quantity));
-        holder.price.setText(currency+ " " + formatter.format(items.get(position).price));
+        if (orderItem.productVariant != null) {
+            subItems.addAll(Arrays.asList(orderItem.productVariant.split(",")));
+        }
 
-        if (items.get(position).specialInstruction != null && !items.get(position).specialInstruction.equals("")) {
+        for (ItemAddOn itemAddOn : orderItem.orderItemAddOn) {
+            subItems.add(itemAddOn.productAddOn.addOnTemplateItem.name);
+        }
+
+        adapter.items = subItems;
+        holder.subItemsRecyclerView.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        holder.subItemLayout.setVisibility(View.VISIBLE);
+
+        holder.qty.setText(Integer.toString(orderItem.quantity));
+        holder.price.setText(currency+ " " + formatter.format(orderItem.price));
+
+        if (orderItem.specialInstruction != null && !orderItem.specialInstruction.equals("")) {
             holder.layoutSpecialInstructions.setVisibility(View.VISIBLE);
-            holder.specialInstructions.setText(items.get(position).specialInstruction);
+            holder.specialInstructions.setText(orderItem.specialInstruction);
         }
 
     }
