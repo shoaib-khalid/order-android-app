@@ -1,26 +1,24 @@
 package com.symplified.order.adapters;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
-import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.models.store.Store;
+import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.text.ParseException;
@@ -34,39 +32,39 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
-    private static final String TAG = "StoreAdapter";
     public List<Store> items;
     public Context context;
-    private Dialog progressDialog;
-    private SharedPreferences sharedPreferences;
-    private StoreApi storeApiService;
 
-    public StoreAdapter(List<Store> items, Context context, Dialog progressDialog, SharedPreferences sharedPreferences) {
+    private StoreApi storeApiService;
+    private static final String TAG = "StoreAdapter";
+
+    public StoreAdapter(List<Store> items, Context context) {
         this.items = items;
         this.context = context;
-        this.progressDialog = progressDialog;
-        this.sharedPreferences = sharedPreferences;
 
-        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
-
-//        Retrofit retrofitLogo = new Retrofit.Builder()
-//                .client(new OkHttpClient())
-//                .baseUrl(BASE_URL+App.PRODUCT_SERVICE_URL)
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        storeApiService = retrofitLogo.create(StoreApi.class);
         storeApiService = ServiceGenerator.createStoreService();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView name;
         private final TextView status;
+        private final ProgressBar progressBar;
+        private boolean isLoading;
 
         public ViewHolder(View view) {
             super(view);
-            name = (TextView) view.findViewById(R.id.store_name);
-            status = (TextView) view.findViewById(R.id.store_status);
+            isLoading = false;
+            name = view.findViewById(R.id.store_name);
+            status = view.findViewById(R.id.store_status);
+            progressBar = view.findViewById(R.id.progress_bar);
+        }
+
+        public boolean isLoading() {
+            return isLoading;
+        }
+
+        public void setIsLoading(boolean isLoading) {
+            this.isLoading = isLoading;
         }
     }
 
@@ -81,17 +79,18 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
         String storeId = items.get(holder.getAdapterPosition()).id;
         getStoreStatus(storeId, holder);
 
         holder.name.setText(items.get(position).name);
 
         holder.itemView.setOnClickListener(view -> {
-            BottomSheetDialogFragment bottomSheetDialogFragment = new SettingsBottomSheet(storeId, holder.status, StoreAdapter.this);
-            bottomSheetDialogFragment.show(((FragmentActivity) context).getSupportFragmentManager(), "bottomSheetDialog");
+            if (!holder.isLoading()) {
+                BottomSheetDialogFragment bottomSheetDialogFragment
+                        = new SettingsBottomSheet(storeId, holder.status, position, holder, StoreAdapter.this);
+                bottomSheetDialogFragment.show(((FragmentActivity) context)
+                        .getSupportFragmentManager(), "bottomSheetDialog");
+            }
         });
     }
 
@@ -106,26 +105,30 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     public void getStoreStatus(String storeId, ViewHolder holder) {
+        startLoading(holder);
+        holder.status.setText("");
 
         Call<StoreStatusResponse> getStoreStatusCall = storeApiService.getStoreStatusById(storeId);
         getStoreStatusCall.clone().enqueue(new Callback<StoreStatusResponse>() {
             @Override
-            public void onResponse(Call<StoreStatusResponse> call, Response<StoreStatusResponse> response) {
-                Log.d(TAG, "onResponse: " + response.raw());
+            public void onResponse(@NonNull Call<StoreStatusResponse> call, @NonNull Response<StoreStatusResponse> response) {
                 if (response.isSuccessful()) {
                     StoreStatusResponse.StoreStatus storeStatus = response.body().data;
-                    Log.d(TAG, "Response body: " + response.body().data.toString());
                     if (storeStatus.isSnooze) {
                         setStoreStatus(storeStatus.snoozeEndTime, holder.status);
                     } else {
                         holder.status.setText("Open");
                     }
+                } else {
+                    holder.status.setText("Failed to get store status");
                 }
+                stopLoading(holder);
             }
 
             @Override
-            public void onFailure(Call<StoreStatusResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: ", t);
+            public void onFailure(@NonNull Call<StoreStatusResponse> call, @NonNull Throwable t) {
+                holder.status.setText("Failed to get store status");
+                stopLoading(holder);
             }
         });
 
@@ -144,4 +147,15 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         status.setText(closedText);
     }
 
+    public void startLoading(ViewHolder holder) {
+        holder.progressBar.setVisibility(View.VISIBLE);
+        holder.status.setVisibility(View.GONE);
+        holder.setIsLoading(true);
+    }
+
+    public void stopLoading(ViewHolder holder) {
+        holder.progressBar.setVisibility(View.GONE);
+        holder.status.setVisibility(View.VISIBLE);
+        holder.setIsLoading(false);
+    }
 }

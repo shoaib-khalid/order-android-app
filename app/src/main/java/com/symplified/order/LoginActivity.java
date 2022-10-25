@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -38,7 +37,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.firebase.FirebaseHelper;
-import com.symplified.order.handlers.LogoHandler;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
@@ -48,9 +46,7 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Key;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -265,20 +261,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * method to download and store Store logos Asynchronously to sharedPreferences to avoid frequent downloads.
-     *
-     * @param stores
-     * @param context
-     * @param clientId
-     */
-    public void downloadAndSaveLogos(String[] stores, Context context, String clientId) {
-        LogoHandler logoHandler = new LogoHandler(stores, context, new Handler(), clientId);
-        Thread thread = new Thread(logoHandler);
-        thread.setName("Logo Fetcher Thread");
-        thread.start();
-    }
-
-    /**
      * method to make the api call to get all the stores of user from backend
      *
      * @param sharedPreferences
@@ -298,12 +280,6 @@ public class LoginActivity extends AppCompatActivity {
                     stores = response.body().data.content;
                     subscribeStores(stores, getApplicationContext());
                     setStoreDataAndProceed(getApplicationContext(), stores, sharedPreferences);
-
-                    String storeIds = sharedPreferences.getString("storeIdList", null);
-                    if (storeIds != null) {
-                        String[] storeIdList = storeIds.split(" ");
-                        downloadAndSaveLogos(storeIdList, getApplicationContext(), clientId);
-                    }
                 } else {
                     handleError(response.raw());
                 }

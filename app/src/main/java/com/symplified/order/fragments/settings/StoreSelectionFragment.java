@@ -2,10 +2,6 @@ package com.symplified.order.fragments.settings;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import android.app.Dialog;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,22 +10,19 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -40,10 +33,7 @@ public class StoreSelectionFragment extends Fragment {
     private RecyclerView recyclerView ;
     private TextView chooseStore;
     private TextView noStore;
-    private SharedPreferences sharedPreferences;
-    private String BASE_URL;
-    private Dialog progressDialog;
-    private CircularProgressIndicator progressIndicator;
+    private String clientId;
     private StoreAdapter storeAdapter;
     private ConstraintLayout progressBarLayout;
     private RelativeLayout storesLayout;
@@ -65,33 +55,22 @@ public class StoreSelectionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+        clientId = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE)
+                .getString("ownerId", null);
 
-        progressDialog = new Dialog(getActivity(), R.style.Theme_SymplifiedOrderUpdate);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
-        if(sharedPreferences.getBoolean("isStaging", false))
-        {
-            progressIndicator.setIndicatorColor(getContext().getResources().getColor(R.color.sf_b_800, getContext().getTheme()));
-        }
         storeApiService = ServiceGenerator.createStoreService();
     }
 
-    private void getStores(SharedPreferences sharedPreferences) {
+    private void getStores() {
         startLoading();
-
-        String clientId = sharedPreferences.getString("ownerId", null);
 
         Call<StoreResponse> storeResponse = storeApiService.getStores(clientId);
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
-            public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
-                if(response.isSuccessful()){
-                    progressDialog.dismiss();
-                    storeAdapter = new StoreAdapter(response.body().data.content, getContext(), progressDialog, sharedPreferences);
+            public void onResponse(@NonNull Call<StoreResponse> call, @NonNull Response<StoreResponse> response) {
+                if(response.isSuccessful() && response.body() != null){
+                    storeAdapter = new StoreAdapter(response.body().data.content,
+                            getContext());
                     recyclerView.setAdapter(storeAdapter);
                     storeAdapter.notifyDataSetChanged();
                     stopLoading();
@@ -99,7 +78,7 @@ public class StoreSelectionFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<StoreResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<StoreResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, "onFailure: ", t);
                 stopLoading();
             }
@@ -119,23 +98,11 @@ public class StoreSelectionFragment extends Fragment {
         progressBarLayout = view.findViewById(R.id.layout_store_progress);
         storesLayout = view.findViewById(R.id.layout_stores);
         refreshLayout = view.findViewById(R.id.layout_store_refresh);
-        refreshLayout.setOnRefreshListener(() -> getStores(sharedPreferences));
+        refreshLayout.setOnRefreshListener(() -> getStores());
 
-        getStores(sharedPreferences);
+        getStores();
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getStores(sharedPreferences);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        getStores(sharedPreferences);
     }
 
     private void startLoading() {

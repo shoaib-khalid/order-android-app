@@ -2,7 +2,6 @@ package com.symplified.order.dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,12 +22,7 @@ import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.networking.ServiceGenerator;
 
-import java.time.Instant;
-import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,9 +33,11 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
     private String storeId;
     private TextView status;
     private final String TAG = SettingsBottomSheet.class.getName();
+    int storePosition;
     TimePicker timePicker;
     StoreAdapter storeAdapter;
     StoreApi storeApiService;
+    StoreAdapter.ViewHolder viewHolder;
     public SettingsBottomSheet (){
         super();
     }
@@ -52,10 +48,12 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         return super.onCreateDialog(savedInstanceState);
     }
 
-    public SettingsBottomSheet(String storeId, TextView status, StoreAdapter storeAdapter){
+    public SettingsBottomSheet(String storeId, TextView status, int position, StoreAdapter.ViewHolder holder, StoreAdapter storeAdapter){
         super();
         this.storeId = storeId;
         this.status = status;
+        this.storePosition = position;
+        this.viewHolder = holder;
         this.storeAdapter = storeAdapter;
 
         storeApiService = ServiceGenerator.createStoreService();
@@ -70,6 +68,8 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
         timePicker = view.findViewById(R.id.status_timePicker);
         Button confirm = view.findViewById(R.id.confirm_status);
         confirm.setOnClickListener(v -> {
+            storeAdapter.startLoading(viewHolder);
+
             if(timePicker.getVisibility() == View.VISIBLE){
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(System.currentTimeMillis());
@@ -79,11 +79,9 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
                 int minutes = (int) ((calendar.getTimeInMillis()/60000) - (System.currentTimeMillis()/60000));
                 snoozeStore(minutes, true);
-                Toast.makeText(getContext(), "Closed Until "+timePicker.getHour()+":"+timePicker.getMinute(), Toast.LENGTH_SHORT).show();
             }
             else{
                 snoozeStore(0, false);
-                Toast.makeText(getContext(), "Store Opened", Toast.LENGTH_SHORT).show();
             }
             dismiss();
         });
@@ -100,13 +98,6 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
             }
         });
 
-        // Set timepicker default to PM
-        Calendar now = Calendar.getInstance();
-        if (now.get(Calendar.AM_PM) == Calendar.AM) {
-            now.set(Calendar.AM_PM, Calendar.PM);
-            timePicker.setHour(now.get(Calendar.HOUR_OF_DAY));
-        }
-
         return view;
     }
 
@@ -116,25 +107,20 @@ public class SettingsBottomSheet extends BottomSheetDialogFragment {
 
         storeSnoozeCall.clone().enqueue(new Callback<HttpResponse>() {
             @Override
-            public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
-                Log.i(TAG, "onResponse: " + response.raw());
-                Log.i(TAG, "Response body: " + response.body().status + ", " + response.body().message);
-
+            public void onResponse(@NonNull Call<HttpResponse> call, @NonNull Response<HttpResponse> response) {
                 if(response.isSuccessful()){
-                    if(!isClosed){
-                        Log.i(TAG, "onResponse: "+ response.raw());
-                        status.setText("Open");
-                    }
-                    if(minutes > 0){
-                        Toast.makeText(status.getContext(), "Closed for "+minutes+" minutes", Toast.LENGTH_SHORT).show();
-                    }
-                    storeAdapter.notifyDataSetChanged();
+//                    storeAdapter.notifyItemChanged(storePosition);
+                    storeAdapter.getStoreStatus(storeId, viewHolder);
+                } else {
+                    storeAdapter.stopLoading(viewHolder);
+                    Toast.makeText(getContext(), "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<HttpResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed", Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Call<HttpResponse> call, @NonNull Throwable t) {
+                storeAdapter.stopLoading(viewHolder);
+                Toast.makeText(getContext(), "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
     }

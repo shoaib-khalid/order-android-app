@@ -47,9 +47,9 @@
         <activity
             android:name=".ProductsActivity"
             android:exported="true" />
-        <activity
-            android:name=".ChooseStoreActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".ChooseStoreActivity"-->
+<!--            android:exported="true" />-->
         <activity
             android:name=".OrdersActivity"
             android:exported="true"

@@ -1,7 +1,6 @@
 package com.symplified.order;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,7 +21,6 @@ public class SettingsActivity extends NavbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -32,13 +30,16 @@ public class SettingsActivity extends NavbarActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initToolbar(sharedPreferences);
+        initToolbar();
 
-        getSupportFragmentManager().beginTransaction().add(R.id.settings_frame_layout, new StoreSelectionFragment()).commit();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(R.id.settings_frame_layout, new StoreSelectionFragment())
+                .commit();
 
     }
 
-    private void initToolbar(SharedPreferences sharedPreferences) {
+    private void initToolbar() {
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(1).setChecked(true);

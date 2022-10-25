@@ -2,8 +2,8 @@ package com.symplified.order.apis;
 
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.asset.Asset;
-import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.models.store.StoreResponse;
+import com.symplified.order.models.store.StoreStatusResponse;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;

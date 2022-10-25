@@ -2,7 +2,6 @@ package com.symplified.order;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,21 +15,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.gson.Gson;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.services.DownloadImageTask;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -93,12 +85,13 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                 if (response.isSuccessful() && response.body() != null) {
                     for (Store.StoreAsset asset : response.body().data.storeAssets) {
                         if (asset.assetType.equals("LogoUrl")) {
-                            try {
-                                Bitmap bitmap = new DownloadImageTask().execute(asset.assetUrl).get();
-                                storeLogo.setImageBitmap(bitmap);
-                            } catch (ExecutionException | InterruptedException e) {
-                                e.printStackTrace();
-                            }
+                            Glide.with(getApplicationContext()).load(asset.assetUrl).into(storeLogo);
+//                            try {
+//                                Bitmap bitmap = new DownloadImageTask().execute(asset.assetUrl).get();
+//                                storeLogo.setImageBitmap(bitmap);
+//                            } catch (ExecutionException | InterruptedException e) {
+//                                e.printStackTrace();
+//                            }
                         }
                     }
                     storeName.setText(response.body().data.name);
