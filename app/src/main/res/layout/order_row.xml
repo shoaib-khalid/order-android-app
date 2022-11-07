@@ -47,7 +47,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="3dp"
-                    android:background="@drawable/rounted_imagebutton"
+                    android:background="@drawable/rounded_image_button"
                     android:padding="5dp"
                     android:src="@drawable/ic_print"
                     android:visibility="gone"
