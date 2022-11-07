@@ -199,4 +199,6 @@ public class Order implements Serializable {
         public Order data;
     }
 
+    public class OrderDetailsList {
+    }
 }

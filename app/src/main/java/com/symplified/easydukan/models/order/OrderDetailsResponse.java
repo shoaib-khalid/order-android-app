@@ -1,6 +1,7 @@
-package com.symplified.order.models.order;
+package com.symplified.easydukan.models.order;
 
-import com.symplified.order.models.HttpResponse;
+import com.symplified.easydukan.models.HttpResponse;
+import com.symplified.easydukan.models.order.Order;
 
 public class OrderDetailsResponse extends HttpResponse {
 

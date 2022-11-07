@@ -1,6 +1,7 @@
-package com.symplified.order.models.item;
+package com.symplified.easydukan.models.item;
 
-import com.symplified.order.models.HttpResponse;
+
+import com.symplified.easydukan.models.HttpResponse;
 
 public class ItemsResponse extends HttpResponse {
     public Item.ItemList data;

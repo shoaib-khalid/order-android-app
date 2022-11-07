@@ -11,15 +11,20 @@ import android.os.Build;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.symplified.easydukan.handlers.GenericPrintHelper;
+import com.symplified.easydukan.interfaces.Printer;
+import com.symplified.easydukan.interfaces.PrinterObserver;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
  * Application file to have properties used throughout the lifecycle of app.
  */
-public class App extends Application {
+public class App extends Application implements PrinterObserver {
 
     private static Context context;
+    private static Printer connectedPrinter;
 
     public static String BASE_URL = "https://api.symplified.biz/";
     public static String BASE_URL_STAGING = "https://api.symplified.it/";
@@ -27,21 +32,17 @@ public class App extends Application {
     public static final String PRODUCT_SERVICE_URL = "product-service/v1/";
     public static final String ORDER_SERVICE_URL = "order-service/v1/";
     public static final String DELIVERY_SERVICE_URL = "delivery-service/v1/";
-    public static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static final String SESSION_DETAILS_TITLE = "session";
     public static final String CHANNEL_ID = "EASYDUKAN_ID";
     public static final String ORDERS = "ORDERS";
-    public static final Uri SOUND = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-    public static Ringtone ringtone;
-    public static Ringtone play(Context context){
-        ringtone = RingtoneManager.getRingtone(context, SOUND);
-        return ringtone;
-    }
 
     @Override
     public void onCreate(){
         super.onCreate();
+
+        GenericPrintHelper.getInstance().addObserver(this);
+        GenericPrintHelper.getInstance().initPrinterService(this);
 
         context = getApplicationContext();
         //restrict devices from forcing the dark mode on the app
@@ -65,4 +66,13 @@ public class App extends Application {
     }
 
     public static Context getAppContext() { return context; }
+
+    @Override
+    public void onPrinterConnected(Printer printer) {
+        connectedPrinter = printer;
+    }
+
+    public static Printer getPrinter() {
+        return connectedPrinter;
+    }
 }

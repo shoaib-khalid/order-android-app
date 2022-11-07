@@ -511,7 +511,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
         storeLogo = findViewById(R.id.storeLogoDetails);
-        print.setVisibility(View.GONE);
+//        print.setVisibility(View.GONE);
         process = findViewById(R.id.btn_process);
         process.setVisibility(View.GONE);
         deliveryProvider = findViewById(R.id.delivery_by_value);
