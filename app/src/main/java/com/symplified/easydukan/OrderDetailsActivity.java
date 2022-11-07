@@ -41,6 +41,7 @@ import com.symplified.easydukan.adapters.ItemsAdapter;
 import com.symplified.easydukan.apis.DeliveryApi;
 import com.symplified.easydukan.apis.OrderApi;
 import com.symplified.easydukan.enums.Status;
+import com.symplified.easydukan.models.item.Item;
 import com.symplified.easydukan.models.item.ItemResponse;
 import com.symplified.easydukan.models.order.Order;
 import com.symplified.easydukan.models.order.OrderDeliveryDetailsResponse;
@@ -51,10 +52,12 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -84,6 +87,8 @@ public class OrderDetailsActivity extends AppCompatActivity {
     private String nextStatus;
     private boolean hasDeliveryDetails;
     private boolean isEdited;
+    private Order order;
+    private List<Item> items = new ArrayList<>();
     private ItemsAdapter itemsAdapter;
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -114,7 +119,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         //get details of selected order from previous activity
         Bundle data = getIntent().getExtras();
-        Order order = (Order) data.getSerializable("selectedOrder");
+        order = (Order) data.getSerializable("selectedOrder");
 
         itemsAdapter.order = order;
 
@@ -218,30 +223,22 @@ public class OrderDetailsActivity extends AppCompatActivity {
 
         Call<ItemResponse> itemResponseCall = orderApiService.getItemsForOrder(headers, order.id);
 
-//        ItemsAdapter itemsAdapter = new ItemsAdapter();
-//        itemsAdapter.editable = false;
         progressDialog.show();
         itemResponseCall.clone().enqueue(new Callback<ItemResponse>() {
             @Override
             public void onResponse(Call<ItemResponse> call, Response<ItemResponse> response) {
 
-                if(response.isSuccessful())
-                {
-                    Log.e("TAG", "onResponse: "+order.id, new Error() );
-                    if(order.isRevised){
+                if (response.isSuccessful()) {
+                    if (order.isRevised) {
                         headerOrginalQty.setVisibility(View.VISIBLE);
-//                        editOrder.setVisibility(View.VISIBLE);
-//                        editOrder.setEnabled(false);
-//                        editOrder.setClickable(false);
                     }
-//                    editOrder.setVisibility(View.VISIBLE);
-                    itemsAdapter.setItems(response.body().data.content);
+                    items = response.body().data.content;
+                    itemsAdapter.setItems(items);
                     recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
                     progressDialog.dismiss();
+                    Log.i("get-orders", "Order items set");
                 }
-
-
             }
 
             @Override
@@ -254,7 +251,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
     }
 
     private void editOrderItem(Order order) {
-        if(isEdited){
+        if (isEdited) {
             if(!order.isRevised){
                 new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                         .setTitle("Update Order")
@@ -266,8 +263,7 @@ public class OrderDetailsActivity extends AppCompatActivity {
                             editOrder.setEnabled(false);
                         }).show();
             }
-        }
-        else{
+        } else {
             new MaterialAlertDialogBuilder(this, R.style.MaterialAlertDialog__Center)
                     .setTitle("Edit Order")
                     .setMessage("You are about to change a confirmed order.\nYou can only perform this once.\nAny extra money will be refunded to customer.")
@@ -402,35 +398,21 @@ public class OrderDetailsActivity extends AppCompatActivity {
             startActivity(callDriver);
         });
 
-//        && deliveryDetails != null
         if((section.equals("sent") || section.equals("pickup")) && hasDeliveryDetails ){
             setDriverDeliveryDetails(order, sharedPreferences);
-//            deliveryDetailsView.setVisibility(View.VISIBLE);
-//            deliveryDetailsDivider.setVisibility(View.VISIBLE);
-//            deliveryProvider.setText(deliveryDetails.provider.name);
-//            driverName.setText(deliveryDetails.name);
-//            driverContactNumber.setText(deliveryDetails.phoneNumber);
-//            String link = "<a color=\"#1DA1F2\" href=\""+deliveryDetails.trackingUrl+"\">Click Here</a>";
-//            new SpannableString(link).setSpan(
-//                    new BackgroundColorSpan( getColor(R.color.twitter_blue)), 0, link.length(),
-//                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-//            trackingLink.setText(Html.fromHtml(link), TextView.BufferType.SPANNABLE);
-//            trackingLink.setMovementMethod(LinkMovementMethod.getInstance());
-//            Spannable spannableTrackingLink = (Spannable) trackingLink.getText();
-//            spannableTrackingLink.setSpan(new ForegroundColorSpan(getColor(R.color.twitter_blue)),0,spannableTrackingLink.length(),0);
         }
 
-        if(order.orderShipmentDetail.storePickup)
+        if(order.orderShipmentDetail.storePickup) {
             pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
-        else
+        } else {
             pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
+        }
 
         recyclerView = findViewById(R.id.order_items);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(mDividerItemDecoration);
-
     }
 
     private void initAppBar(SharedPreferences sharedPreferences, Order order, String storeIdList) {
@@ -440,32 +422,19 @@ public class OrderDetailsActivity extends AppCompatActivity {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         ImageView logout = toolbar.findViewById(R.id.app_bar_logout);
 
-        if(storeIdList.split(" ").length > 0)
-        {
-            if(encodedImage != null)
-            {
+        if (storeIdList.split(" ").length > 0) {
+            if(encodedImage != null) {
                 Utility.decodeAndSetImage(storeLogo, encodedImage);
-            }
-            else{
+            } else {
                 storeLogo.setVisibility(View.GONE);
                 storeLogoText.setVisibility(View.VISIBLE);
                 storeLogoText.setText(sharedPreferences.getString(order.storeId+"-name", null));
             }
-        }
-        else{
+        } else {
             storeLogo.setVisibility(View.GONE);
             storeLogoText.setVisibility(View.GONE);
         }
         home.setOnClickListener(view -> {
-            /*
-            setResult(RESULT_OK, new Intent().putExtra("finish", 1));
-            Intent intent = new Intent(getApplicationContext(), ChooseStore.class);
-            FirebaseMessaging.getInstance().unsubscribeFromTopic(sharedPreferences.getString("storeId", null));
-            sharedPreferences.edit().remove("storeId").apply();
-//                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            */
             finish();
         });
         logout.setOnClickListener(view -> {
@@ -511,7 +480,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
         process = findViewById(R.id.btn_process);
         print = findViewById(R.id.btn_print);
         storeLogo = findViewById(R.id.storeLogoDetails);
-//        print.setVisibility(View.GONE);
         process = findViewById(R.id.btn_process);
         process.setVisibility(View.GONE);
         deliveryProvider = findViewById(R.id.delivery_by_value);
@@ -535,7 +503,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
         isEdited = false;
         itemsAdapter = new ItemsAdapter();
         itemsAdapter.editable = false;
@@ -549,6 +516,11 @@ public class OrderDetailsActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
         progressIndicator = progressDialog.findViewById(R.id.progress);
         progressIndicator.setIndeterminate(true);
+
+        if (App.isPrinterConnected()) {
+            print.setVisibility(View.VISIBLE);
+        }
+        print.setOnClickListener(view -> printReceipt());
     }
 
     private void setDriverDeliveryDetails(Order order, SharedPreferences sharedPreferences) {
@@ -604,8 +576,6 @@ public class OrderDetailsActivity extends AppCompatActivity {
                 progressDialog.dismiss();
             }
         });
-
-
     }
 
     public void onCancelOrderButtonClick(Order order){
@@ -653,4 +623,11 @@ public class OrderDetailsActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void printReceipt() {
+        try {
+            App.getPrinter().printReceipt(order, items);
+        } catch (Exception e) {
+            Toast.makeText(this, "Failed to print receipt", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

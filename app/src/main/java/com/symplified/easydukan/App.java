@@ -72,6 +72,9 @@ public class App extends Application implements PrinterObserver {
         connectedPrinter = printer;
     }
 
+    public static boolean isPrinterConnected() {
+        return connectedPrinter != null && connectedPrinter.isPrinterConnected();
+    }
     public static Printer getPrinter() {
         return connectedPrinter;
     }

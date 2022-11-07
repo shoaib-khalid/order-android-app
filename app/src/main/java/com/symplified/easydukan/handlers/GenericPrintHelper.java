@@ -168,19 +168,19 @@ public class GenericPrintHelper implements Printer {
         }
 
         suffix.append(divider)
-                .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
-                .append("\nService Charges     ").append(currency).append(" ")
+                .append("\nSub-total     ").append(currency).append(" ").append(formatter.format(order.subTotal))
+                .append("\nSvc Chg       ").append(currency).append(" ")
                 .append(order.storeServiceCharges != null
                         ? formatter.format(order.storeServiceCharges)
                         : " 0.00");
 
-        suffix.append("\nDelivery Charges    ").append(currency).append(" ")
+        suffix.append("\nDel. Chg      ").append(currency).append(" ")
                 .append(order.deliveryCharges != null
                         ? formatter.format(order.deliveryCharges)
                         : " 0.00");
 
         suffix.append(divider)
-                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.total))
+                .append("\nTotal         ").append(currency).append(" ").append(formatter.format(order.total))
                 .append(divider2)
                 .append("\n");
 

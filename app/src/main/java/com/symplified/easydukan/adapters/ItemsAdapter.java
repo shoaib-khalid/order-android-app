@@ -118,12 +118,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
-//        sharedPreferences = holder.item.getContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-//        context = holder.item.getContext();
-
         holder.item.setText(items.get(position).productName);
-
 
         if(items.get(position).orderSubItem != null && items.get(position).orderSubItem.size() > 0){
             SubItemsAdapter adapter = new SubItemsAdapter();
@@ -166,18 +161,12 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                     new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                            UpdatedItem updatedItem = new UpdatedItem(
-//                                    items.get(holder.getAdapterPosition()).id,
-//                                    items.get(holder.getAdapterPosition()).itemCode,
-//                                    (Integer) adapterView.getSelectedItem()
-//                            );
                             updatedItem.id = items.get(holder.getAdapterPosition()).id;
                             updatedItem.itemCode = items.get(holder.getAdapterPosition()).itemCode;
                             updatedItem.quantity = (Integer) adapterView.getSelectedItem();
 
                             if(!updatedItemsList.contains(updatedItem) && (Integer) adapterView.getSelectedItem() != items.get(holder.getAdapterPosition()).quantity){
                                 updatedItemsList.add(updatedItem);
-//                                Toast.makeText(view.getContext(), "updated Item length : " + updatedItemsList.size(), Toast.LENGTH_SHORT).show();
                             }
                             Log.i("TAG", "onItemSelected: " + updatedItemsList);
                         }
@@ -188,15 +177,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                         }
                     }
             );
-
-//                updatedItemsList.add(
-//                        new UpdatedItem(
-//                                items.get(holder.getAdapterPosition()).id,
-//                                items.get(holder.getAdapterPosition()).itemCode,
-//                                (Integer)  holder.spinner.getSelectedItem()
-//                        )
-//                );
-
 
             holder.spinner.setVisibility(View.VISIBLE);
             holder.orignalQty.setVisibility(View.VISIBLE);
