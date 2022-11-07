@@ -2,6 +2,7 @@ package com.symplified.easydukan.models.order;
 
 import com.symplified.easydukan.enums.Status;
 import com.symplified.easydukan.models.HttpResponse;
+import com.symplified.easydukan.models.Store.Store;
 
 import java.io.Serializable;
 import java.util.List;
@@ -35,6 +36,7 @@ public class Order implements Serializable {
     public Customer customer;
     public List<OrderRefund> orderRefund;
     public boolean isRevised;
+    public Store store;
 
     @Override
     public String toString() {
