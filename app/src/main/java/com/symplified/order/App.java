@@ -8,17 +8,19 @@ import android.os.Build;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.symplified.order.helpers.GenericPrintHelper;
 import com.symplified.order.helpers.SunmiPrintHelper;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.symplified.order.interfaces.Printer;
+import com.symplified.order.interfaces.PrinterObserver;
 
 /**
  * Application file to have properties used throughout the lifecycle of app.
  */
-public class App extends Application {
+public class App extends Application implements PrinterObserver {
 
     private static Context context;
+    private static Printer connectedPrinter;
+
     public static final String DEV_TAG = "dev-logging";
 
     public static String BASE_URL = "https://api.symplified.biz/";
@@ -27,7 +29,6 @@ public class App extends Application {
     public static final String PRODUCT_SERVICE_URL = "product-service/v1/";
     public static final String ORDER_SERVICE_URL = "order-service/v1/";
     public static final String DELIVERY_SERVICE_URL = "delivery-service/v1/";
-    public static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public static final String SESSION_DETAILS_TITLE = "session";
     public static final String CHANNEL_ID = "CHANNEL_ID";
@@ -57,10 +58,24 @@ public class App extends Application {
         }
 
         App.context = getApplicationContext();
-        SunmiPrintHelper.getInstance().initSunmiPrinterService(this);
+
+        SunmiPrintHelper.getInstance().addObserver(this);
+        SunmiPrintHelper.getInstance().initPrinterService(this);
+
+        GenericPrintHelper.getInstance().addObserver(this);
+        GenericPrintHelper.getInstance().initPrinterService(this);
     }
 
     public static Context getAppContext() {
         return App.context;
+    }
+
+    public static Printer getPrinter() {
+        return connectedPrinter;
+    }
+
+    @Override
+    public void onPrinterConnected(Printer printer) {
+        connectedPrinter = printer;
     }
 }

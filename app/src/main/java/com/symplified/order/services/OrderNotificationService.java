@@ -26,14 +26,13 @@ import com.symplified.order.callbacks.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
-import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.observers.OrderObserver;
+import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                    && SunmiPrintHelper.getInstance().isPrinterConnected()) {
+                                    && App.getPrinter().isPrinterConnected()) {
                                 printAndProcessOrder(orderApiService, remoteMessage, orderDetails);
                             } else {
                                 addOrderToView(newOrderObservers, orderDetails);
@@ -134,10 +133,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                            @NonNull Response<ItemsResponse> response) {
                         if (response.isSuccessful()) {
                             try {
-                                SunmiPrintHelper.getInstance()
+                                App.getPrinter()
                                         .printReceipt(orderDetails.order, response.body().data.content);
                                 processNewOrder(orderApiService, orderDetails);
-                            } catch (RemoteException e) {
+                            } catch (Exception e) {
                                 addOrderToView(newOrderObservers, orderDetails);
 
                                 String errorMessage = "Error occurred while printing Dine-in order "

@@ -32,12 +32,13 @@ import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.helpers.SunmiPrintHelper;
+import com.symplified.order.interfaces.Printer;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.observers.OrderManager;
-import com.symplified.order.observers.OrderObserver;
-import com.symplified.order.observers.PrinterObserver;
+import com.symplified.order.interfaces.OrderManager;
+import com.symplified.order.interfaces.OrderObserver;
+import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.utils.Key;
@@ -150,7 +151,7 @@ public class PlaceholderFragment extends Fragment
             }
         };
 
-        SunmiPrintHelper.getInstance().addObserver(this);
+        App.getPrinter().addObserver(this);
 
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -243,7 +244,7 @@ public class PlaceholderFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        SunmiPrintHelper.getInstance().removeObserver(this);
+        App.getPrinter().removeObserver(this);
         OrderNotificationService.removeNewOrderObserver(this);
         OrderNotificationService.removeOngoingOrderObserver(this);
         OrderNotificationService.removePastOrderObserver(this);
@@ -311,14 +312,7 @@ public class PlaceholderFragment extends Fragment
     }
 
     @Override
-    public void onPrinterConnected() {
-        if (orderAdapter != null) {
-            orderAdapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    public void onPrinterDisconnected() {
+    public void onPrinterConnected(Printer printer) {
         if (orderAdapter != null) {
             orderAdapter.notifyDataSetChanged();
         }

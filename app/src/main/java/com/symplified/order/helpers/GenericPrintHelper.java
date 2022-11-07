@@ -1,20 +1,22 @@
 package com.symplified.order.helpers;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.sunmi.peripheral.printer.InnerPrinterCallback;
-import com.sunmi.peripheral.printer.InnerPrinterManager;
-import com.sunmi.peripheral.printer.SunmiPrinterService;
-import com.sunmi.peripheral.printer.WoyouConsts;
+import com.iposprinter.iposprinterservice.*;
+
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.Printer;
+import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
@@ -22,120 +24,75 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
-public class SunmiPrintHelper implements Printer {
+public class GenericPrintHelper implements Printer {
 
-    private static final String TAG = "sunmi-print-helper";
-    private SunmiPrinterService printerService;
-    private static final SunmiPrintHelper helper = new SunmiPrintHelper();
+    private static final String TAG = "generic-print-helper";
+    private IPosPrinterService mIPosPrinterService;
+    private static final GenericPrintHelper helper = new GenericPrintHelper();
     private boolean isPrinterConnected;
     private final List<PrinterObserver> printerObservers = new ArrayList<>();
+    private final IPosPrinterCallback emptyCallback = new IPosPrinterCallback.Stub() {
 
-    private SunmiPrintHelper() {
+        @Override
+        public void onRunResult(final boolean isSuccess) throws RemoteException {
+            Log.i(TAG,"result: " + isSuccess + "\n");
+        }
+
+        @Override
+        public void onReturnString(final String value) throws RemoteException {
+            Log.i(TAG,"result: " + value + "\n");
+        }
+    };
+
+    private GenericPrintHelper() {
         this.isPrinterConnected = false;
     }
 
-    public static SunmiPrintHelper getInstance() {
+    public static GenericPrintHelper getInstance() {
         return helper;
     }
 
+    public void initPrinterService(Context context) {
+        Intent intent = new Intent();
+        intent.setPackage("com.iposprinter.iposprinterservice");
+        intent.setAction("com.iposprinter.iposprinterservice.IPosPrintService");
+
+        context.bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                mIPosPrinterService = IPosPrinterService.Stub.asInterface(service);
+
+                isPrinterConnected = true;
+                for (PrinterObserver observer : printerObservers) {
+                    observer.onPrinterConnected(helper);
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                mIPosPrinterService = null;
+                isPrinterConnected = false;
+            }
+        }, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
     public boolean isPrinterConnected() {
         return isPrinterConnected;
     }
 
+    @Override
     public void addObserver(PrinterObserver observer) {
         printerObservers.add(observer);
     }
 
+    @Override
     public void removeObserver(PrinterObserver observer) {
         printerObservers.remove(observer);
     }
 
-    private final InnerPrinterCallback innerPrinterCallback = new InnerPrinterCallback() {
-        @Override
-        protected void onConnected(SunmiPrinterService service) {
-            printerService = service;
-
-            enableBoldFont();
-            updateSunmiPrinterService(service);
-        }
-
-        @Override
-        protected void onDisconnected() {
-            printerService = null;
-            isPrinterConnected = false;
-        }
-    };
-
-    public void initPrinterService(Context context) {
-        try {
-            boolean isServiceBound = InnerPrinterManager.getInstance()
-                    .bindService(context, innerPrinterCallback);
-            if (!isServiceBound) {
-                isPrinterConnected = false;
-            }
-        } catch (Exception e) {
-            handleException("Error while initSunmiPrinterService", e);
-        }
-    }
-
-    public void deInitSunmiPrinterService(Context context) {
-        try {
-            if (printerService != null) {
-                InnerPrinterManager.getInstance().unBindService(context, innerPrinterCallback);
-                printerService = null;
-                isPrinterConnected = false;
-            }
-        } catch (Exception e) {
-            handleException("Error occurred while deInitSunmiPrinterService", e);
-        }
-    }
-
-    private void feedPaper() {
-        if (printerService != null) {
-            try {
-                printerService.autoOutPaper(null);
-            } catch (Exception e) {
-                handleException("Error while calling autoOutPaper. Printing 3 lines instead", e);
-                print3Lines();
-            }
-        }
-    }
-
-    private void print3Lines() {
-        if (printerService != null) {
-            try {
-                printerService.lineWrap(3, null);
-            } catch (Exception e) {
-                handleException("Error while printing 3 lines", e);
-            }
-        }
-    }
-
-    private void updateSunmiPrinterService(SunmiPrinterService service) {
-        boolean hasPrinter = false;
-        try {
-            hasPrinter = InnerPrinterManager.getInstance().hasPrinter(service);
-        } catch (Exception e) {
-            handleException("Error while checking service ", e);
-        }
-
-        isPrinterConnected = hasPrinter;
-        if (isPrinterConnected) {
-            for (PrinterObserver observer : printerObservers) {
-                observer.onPrinterConnected(helper);
-            }
-        }
-    }
-
-    private static void handleException(String preamble, Exception ex) {
-        String errorMessage = preamble + ": " + ex.getLocalizedMessage();
-
-        Log.e(TAG, errorMessage);
-        ex.printStackTrace();
-    }
-
+    @Override
     public void printReceipt(Order order, List<Item> items) throws Exception {
-
         if (!isPrinterConnected()) {
             return;
         }
@@ -143,8 +100,8 @@ public class SunmiPrintHelper implements Printer {
         String currency = Utility.getCurrencySymbol(order);
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
-        String divider = "\n----------------------------";
-        String divider2 = "\n****************************";
+        String divider = "\n------------------------";
+        String divider2 = "\n************************";
         StringBuilder prefix = new StringBuilder();
         StringBuilder suffix = new StringBuilder();
         StringBuilder itemText = new StringBuilder();
@@ -235,27 +192,12 @@ public class SunmiPrintHelper implements Printer {
                 .append(divider2)
                 .append("\n");
 
-        if (printerService != null) {
-            printerService.printTextWithFont(title, null, 34, null);
-            printerService.printTextWithFont(String.valueOf(prefix), null, 26, null);
-            printerService.printTextWithFont(String.valueOf(itemText), null, 30, null);
-            printerService.printTextWithFont(String.valueOf(suffix), null, 26, null);
-        }
-
-        helper.feedPaper();
-    }
-
-    private void enableBoldFont() {
-        try {
-            printerService.setPrinterStyle(WoyouConsts.ENABLE_BOLD, WoyouConsts.ENABLE);
-        } catch (RemoteException e) {
-            byte[] result = new byte[3];
-            result[0] = 0x1B;
-            result[1] = 69;
-            result[2] = 0xF;
-            try {
-                printerService.sendRAWData(result, null);
-            } catch (RemoteException ignored) {}
+        if (mIPosPrinterService != null) {
+            mIPosPrinterService.printSpecifiedTypeText(title, "ST", 48, emptyCallback);
+            mIPosPrinterService.printSpecifiedTypeText(String.valueOf(prefix), "ST", 32, emptyCallback);
+            mIPosPrinterService.printSpecifiedTypeText(String.valueOf(itemText), "ST", 32, emptyCallback);
+            mIPosPrinterService.printSpecifiedTypeText(String.valueOf(suffix), "ST", 32, emptyCallback);
+            mIPosPrinterService.printerPerformPrint(150,  emptyCallback);
         }
     }
 }

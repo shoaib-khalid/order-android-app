@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
@@ -40,7 +41,7 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.observers.OrderManager;
+import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
@@ -358,7 +359,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
 
-        if (SunmiPrintHelper.getInstance().isPrinterConnected()) {
+        if (App.getPrinter().isPrinterConnected()) {
             holder.printButton.setVisibility(View.VISIBLE);
         }
     }
@@ -646,8 +647,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> items) {
         try {
-            SunmiPrintHelper.getInstance().printReceipt(order, items);
-        } catch (RemoteException e) {
+            App.getPrinter().printReceipt(order, items);
+        } catch (Exception e) {
+            Log.e("order-adapter", "Failed to print order. " + e.getLocalizedMessage());
+            e.printStackTrace();
             Toast.makeText(context, "Failed to print order.", Toast.LENGTH_SHORT).show();
         }
     }

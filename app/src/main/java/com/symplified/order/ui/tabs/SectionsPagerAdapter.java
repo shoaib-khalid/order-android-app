@@ -12,8 +12,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.symplified.order.R;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.observers.OrderManager;
-import com.symplified.order.observers.OrderObserver;
+import com.symplified.order.interfaces.OrderManager;
+import com.symplified.order.interfaces.OrderObserver;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to

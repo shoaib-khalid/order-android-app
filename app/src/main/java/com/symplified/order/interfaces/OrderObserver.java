@@ -1,4 +1,4 @@
-package com.symplified.order.observers;
+package com.symplified.order.interfaces;
 
 import com.symplified.order.models.order.Order;
 
