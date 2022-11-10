@@ -1,8 +1,11 @@
 package com.symplified.easydukan.apis;
 
-import com.symplified.easydukan.models.item.ItemResponse;
+import com.symplified.easydukan.models.HttpResponse;
+import com.symplified.easydukan.models.item.ItemsResponse;
 import com.symplified.easydukan.models.item.UpdatedItem;
 import com.symplified.easydukan.models.order.Order;
+import com.symplified.easydukan.models.order.OrderDetailsResponse;
+import com.symplified.easydukan.models.order.OrderUpdateResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -18,47 +21,30 @@ import retrofit2.http.Query;
 
 public interface OrderApi {
 
-////    https://api.symplified.it/order-service/v1/orders
-//    @GET("orders?receiverName=&phoneNumber=&completionStatus=PAYMENT_CONFIRMED&pageSize=10&")
-//    Call<ResponseBody> getNewOrders(@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
+    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED,RECEIVED_AT_STORE&sortingOrder=ASC&pageSize=1000000")
+    Call<OrderDetailsResponse> getNewOrdersByClientId(@Query("clientId") String clientId);
 
+    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED,RECEIVED_AT_STORE&sortingOrder=ASC&pageSize=1000000")
+    Call<OrderDetailsResponse> getNewOrdersByClientIdAndInvoiceId(@Query("clientId") String clientId, @Query("invoiceId") String invoiceId);
 
-    @GET("orders?receiverName=&phoneNumber=&completionStatus=PAYMENT_CONFIRMED&pageSize=10&")
-    Call<ResponseBody> getNewOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
+    @GET("orders/search?completionStatus=BEING_PREPARED,AWAITING_PICKUP,BEING_DELIVERED&sortingOrder=ASC&pageSize=1000000")
+    Call<OrderDetailsResponse> getOngoingOrdersByClientId (@Query("clientId") String clientId);
 
-
-
-    @GET("orders?receiverName=&phoneNumber=&completionStatus=AWAITING_PICKUP&pageSize=10&")
-    Call<ResponseBody> getPickupOrdersByClientId(@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
-//
-//    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_PREPARED&pageSize=10&")
-//    Call<ResponseBody> getProcessedOrders (@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
-
-    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_PREPARED&pageSize=10&")
-    Call<ResponseBody> getProcessedOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
-
-//
-//    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_DELIVERED&pageSize=10&")
-//    Call<ResponseBody> getSentOrders (@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
-
-
-    @GET("orders?receiverName=&phoneNumber=&completionStatus=BEING_DELIVERED&pageSize=10&")
-    Call<ResponseBody> getSentOrdersByClientId (@HeaderMap Map<String, String> headers, @Query("clientId") String clientId);
-
+    @GET("orders/search?completionStatus=CANCELED_BY_MERCHANT,DELIVERED_TO_CUSTOMER,CANCELED_BY_CUSTOMER")
+    Call<OrderDetailsResponse> getSentOrdersByClientId (@Query("clientId") String clientId, @Query("from") String from, @Query("to") String to);
 
     @GET("orders/{orderId}/items")
-    Call<ItemResponse> getItemsForOrder(@HeaderMap Map<String,String> headers , @Path("orderId") String storeId);
+    Call<ItemsResponse> getItemsForOrder(@Path("orderId") String orderId);
 
     @PUT("orders/{orderId}/completion-status-updates")
-    Call<ResponseBody> updateOrderStatus(@HeaderMap Map<String, String> headers, @Body Order.OrderUpdate body, @Path("orderId") String orderId);
+    Call<OrderUpdateResponse> updateOrderStatus(@Body Order.OrderUpdate body, @Path("orderId") String orderId);
 
     @GET("orders/details/{orderId}")
     Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
 
     @GET("orders/{orderId}")
-    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
+    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path(value = "orderId", encoded = true) String orderId);
 
     @PUT("orders/reviseitem/{orderId}")
-    Call<ResponseBody> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
-
+    Call<HttpResponse> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
 }

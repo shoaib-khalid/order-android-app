@@ -1,19 +1,14 @@
 package com.symplified.easydukan.models.item;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Item{
-    public String SKU;
-    public String discountCalculationType;
-    public Double discountCalculationValue;
-    public String discountId;
-    public String discountLabel;
     public String id;
     public String itemCode;
-    public Double normalPrice;
     public String orderId;
-    public List<SubItem> orderSubItem;
-    public Integer originalQuantity;
+    public List<SubItem> orderSubItem = new ArrayList<>();
+    public List<ItemAddOn> orderItemAddOn = new ArrayList<>();
     public Double price;
     public String productId;
     public String productName;
@@ -22,9 +17,9 @@ public class Item{
     public Integer quantity;
     public String specialInstruction;
     public String status;
-    public Double weight;
+    public Integer newQuantity;
 
     public static class ItemList {
-        public List<Item> content;
+        public List<Item> content = new ArrayList<>();
     }
 }

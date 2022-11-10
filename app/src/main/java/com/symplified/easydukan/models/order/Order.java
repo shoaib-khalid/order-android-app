@@ -1,6 +1,9 @@
 package com.symplified.easydukan.models.order;
 
-import com.symplified.easydukan.enums.Status;
+import com.symplified.easydukan.enums.DineInOption;
+import com.symplified.easydukan.enums.DineInPack;
+import com.symplified.easydukan.enums.OrderStatus;
+import com.symplified.easydukan.enums.ServiceType;
 import com.symplified.easydukan.models.HttpResponse;
 import com.symplified.easydukan.models.Store.Store;
 
@@ -13,7 +16,7 @@ public class Order implements Serializable {
     public Double deliveryCharges;
     public Double subTotal;
     public Double total;
-    public String completionStatus;
+    public OrderStatus completionStatus;
     public String paymentStatus;
     public String customerNotes;
     public String privateAdminNotes;
@@ -30,9 +33,13 @@ public class Order implements Serializable {
     public Double deliveryDiscount;
     public String appliedDiscountDescription;
     public String deliveryDiscountDescription;
+    public Double voucherDiscount;
+    public Double storeVoucherDiscount;
+    public ServiceType serviceType;
+    public DineInOption dineInOption;
+    public DineInPack dineInPack;
     public OrderShipmentDetail orderShipmentDetail;
     public OrderPaymentDetail orderPaymentDetail;
-//    private Store store;
     public Customer customer;
     public List<OrderRefund> orderRefund;
     public boolean isRevised;
@@ -63,6 +70,11 @@ public class Order implements Serializable {
                 ", deliveryDiscount=" + deliveryDiscount +
                 ", appliedDiscountDescription='" + appliedDiscountDescription + '\'' +
                 ", deliveryDiscountDescription='" + deliveryDiscountDescription + '\'' +
+                ",  voucherDiscount='" + voucherDiscount + '\'' +
+                ",  storeVoucherDiscount='" + storeVoucherDiscount + '\'' +
+                ",  serviceType='" + (serviceType != null ? serviceType : "null") + '\'' +
+                ",  dineInOption='" + (dineInOption != null ? dineInOption : "null") + '\'' +
+                ",  dineInPack='" + (dineInPack != null ? dineInPack : "null") + '\'' +
                 ", orderShipmentDetail=" + orderShipmentDetail +
                 ", orderPaymentDetail=" + orderPaymentDetail +
                 ", customer=" + customer +
@@ -88,7 +100,7 @@ public class Order implements Serializable {
         }
     }
 
-    public static class OrderShipmentDetail implements Serializable{
+    public static class OrderShipmentDetail implements Serializable {
         public String receiverName;
         public String phoneNumber;
         public String address;
@@ -105,9 +117,32 @@ public class Order implements Serializable {
         public String customerTrackingUrl;
         public String trackingNumber;
         public DeliveryPeriod deliveryPeriodDetails;
+
+        @Override
+        public String toString() {
+            return "OrderShipmentDetail{" +
+                    "receiverName='" + receiverName + '\'' +
+                    ", phoneNumber='" + phoneNumber + '\'' +
+                    ", address='" + address + '\'' +
+                    ", city='" + city + '\'' +
+                    ", zipcode='" + zipcode + '\'' +
+                    ", email='" + email + '\'' +
+                    ", deliveryProviderId=" + deliveryProviderId +
+                    ", state='" + state + '\'' +
+                    ", country='" + country + '\'' +
+                    ", trackingUrl='" + trackingUrl + '\'' +
+                    ", orderId='" + orderId + '\'' +
+                    ", storePickup=" + storePickup +
+                    ", merchantTrackingUrl='" + merchantTrackingUrl + '\'' +
+                    ", customerTrackingUrl='" + customerTrackingUrl + '\'' +
+                    ", trackingNumber='" + trackingNumber + '\'' +
+                    ", deliveryPeriodDetails=" + deliveryPeriodDetails +
+                    '}';
+        }
     }
 
-    public static class OrderPaymentDetail implements Serializable{
+
+    public static class OrderPaymentDetail implements Serializable {
         public String accountName;
         public String gatewayId;
         public String couponId;
@@ -117,7 +152,7 @@ public class Order implements Serializable {
         public Double deliveryQuotationAmount;
     }
 
-    public static class Customer implements Serializable{
+    public static class Customer implements Serializable {
         public String id;
 
         public String name;
@@ -128,7 +163,7 @@ public class Order implements Serializable {
         public String updated;
     }
 
-    public static class OrderRefund implements Serializable{
+    public static class OrderRefund implements Serializable {
         private String id;
 
         public String orderId;
@@ -158,47 +193,43 @@ public class Order implements Serializable {
         }
     }
 
-    public static class OrderList implements Serializable{
+    public static class OrderList implements Serializable {
         public List<Order> content;
     }
 
-    public static class OrderUpdate{
-        public String orderId;
-        public Status status;
+    public static class OrderDetailsList implements Serializable {
+        public List<OrderDetails> content;
+    }
 
-        public OrderUpdate(String orderId, Status status){
+    public static class OrderDetails implements Serializable {
+        public Order order;
+        public OrderStatus currentCompletionStatus;
+        public OrderStatus nextCompletionStatus;
+        public String nextActionText;
+
+        public OrderDetails() {
+        }
+
+        public OrderDetails(UpdatedOrder updatedOrder) {
+            this.order = updatedOrder;
+
+            this.currentCompletionStatus = updatedOrder.completionStatus;
+            this.nextCompletionStatus = updatedOrder.nextCompletionStatus;
+            this.nextActionText = updatedOrder.nextActionText;
+        }
+    }
+
+    public static class OrderUpdate {
+        public String orderId;
+        public OrderStatus status;
+
+        public OrderUpdate(String orderId, OrderStatus status) {
             this.orderId = orderId;
             this.status = status;
         }
     }
 
-    public static class UpdatedOrder extends HttpResponse implements Serializable{
-
+    public static class OrderByIdResponse extends HttpResponse implements Serializable {
         public Order data;
-
-    }
-
-    public static class OrderStatusDetailsResponse extends HttpResponse implements Serializable{
-        public Order order;
-        public String currentCompletionStatus;
-        public String nextCompletionStatus;
-        public String nextActionText;
-
-        @Override
-        public String toString() {
-            return "OrderStatusDetailsResponse{" +
-                    "order=" + order +
-                    ", currentCompletionStatus='" + currentCompletionStatus + '\'' +
-                    ", nextCompletionStatus='" + nextCompletionStatus + '\'' +
-                    ", nextActionText='" + nextActionText + '\'' +
-                    '}';
-        }
-    }
-
-    public static class OrderByIdResponse extends HttpResponse implements Serializable{
-        public Order data;
-    }
-
-    public class OrderDetailsList {
     }
 }

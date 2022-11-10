@@ -13,7 +13,7 @@ public class Asset {
     public static class AssetResponse extends HttpResponse implements Serializable {
         public Asset data;
     }
-    public static class AllAssetResponse extends  HttpResponse implements Serializable {
+    public static class AssetListResponse extends HttpResponse implements Serializable {
         public List<Asset> data;
     }
 }

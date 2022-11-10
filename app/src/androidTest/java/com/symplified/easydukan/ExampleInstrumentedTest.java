@@ -2,6 +2,8 @@ package com.symplified.easydukan;
 
 import static org.junit.Assert.assertEquals;
 
+import static org.junit.Assert.assertEquals;
+
 import android.content.Context;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;

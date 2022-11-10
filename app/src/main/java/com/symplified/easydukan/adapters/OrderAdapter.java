@@ -1,317 +1,655 @@
 package com.symplified.easydukan.adapters;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.button.MaterialButton;
 import com.symplified.easydukan.App;
-import com.symplified.easydukan.OrderDetailsActivity;
 import com.symplified.easydukan.R;
+import com.symplified.easydukan.TrackOrderActivity;
 import com.symplified.easydukan.apis.DeliveryApi;
+import com.symplified.easydukan.apis.OrderApi;
+import com.symplified.easydukan.enums.OrderStatus;
+import com.symplified.easydukan.enums.ServiceType;
+import com.symplified.easydukan.interfaces.OrderManager;
+import com.symplified.easydukan.models.item.Item;
+import com.symplified.easydukan.models.item.ItemsResponse;
 import com.symplified.easydukan.models.order.Order;
 import com.symplified.easydukan.models.order.OrderDeliveryDetailsResponse;
-import com.symplified.easydukan.services.AlertService;
+import com.symplified.easydukan.models.order.OrderUpdateResponse;
+import com.symplified.easydukan.networking.ServiceGenerator;
 import com.symplified.easydukan.utils.Utility;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
-//    public List<OrderDetailsModel> items;
 
-    public List<Order> orders;
+    public List<Order.OrderDetails> orders;
     public String section;
-    public boolean isPickup;
     public Context context;
-    private final String TAG = OrderAdapter.class.getName();
-//    private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
-    private Dialog progressDialog;
-//    private boolean hasDeliveryDetails;
-    private Map<String, Boolean> hasDeliveryDetailsMap;
+    public final String TAG = "order-adapter";
+    public Dialog dialog;
+    public DecimalFormat formatter;
 
-    public OrderAdapter(List<Order> orders, String section, Context context){
-//        List<OrderDetailsModel> items,
-//        this.items = items;
+    private final OrderApi orderApiService;
+    private final DeliveryApi deliveryApiService;
+    private final OrderManager orderManager;
+
+    public OrderAdapter(List<Order.OrderDetails> orders, String section, Context context, OrderManager orderManager) {
         this.orders = orders;
         this.section = section;
         this.context = context;
+        this.orderManager = orderManager;
 
-        hasDeliveryDetailsMap = new HashMap<>();
-        progressDialog = new Dialog((Activity) context);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
+        orderApiService = ServiceGenerator.createOrderService();
+        deliveryApiService = ServiceGenerator.createDeliveryService();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView name,phone, amount,invoice;
-        private final ImageView pickup;
-        private final Button process;
-        private final ImageView storeLogo;
-        private final TextView storeLogoText;
-        private final ConstraintLayout driverDetails;
-        private final View driverDetailsDivider;
-        private final TextView driverName;
-        private final TextView driverPhoneNumber;
-        private final MaterialCardView cardLayout;
-        private final TextView driverNameLable, driverPhoneLable, nameLable,phoneLable, invoiceLable, amountLable, pickupLable;
+        private final TextView name, invoice, date, total, total2, status, phoneNumber, address,
+                subTotal, deliveryCharges, deliveryDiscount, discount, voucherDiscount,
+                storeVoucherDiscount, serviceCharges;
+        private final MaterialButton editButton, cancelButton, acceptButton, statusButton,
+                trackButton, callButton;
+        private final ImageButton printButton;
+        private final CardView cardView;
+        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, orderType,
+                currStatusLabel, currStatus, customerNotes, riderName, riderContact;
+        private final LinearLayout newLayout, ongoingLayout;
+        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
+                rlStoreVoucherDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote,
+                rlRiderDetails, rlAddress, rlContact;
+        private final ConstraintLayout clOrderProgressBar;
+        private final View divider3, divider7, divider8, divider9;
+        private final ImageView riderCallIcon;
 
-        public ViewHolder(View view) {
-            super(view);
-            // Define click listener for the ViewHolder's View
+        private final RecyclerView recyclerView;
+        private final ProgressBar itemsProgressBar;
+        private final TextView itemsErrorTextView;
 
-            name = (TextView) view.findViewById(R.id.order_row_name_value);
-            phone = (TextView) view.findViewById(R.id.order_row_phone_value);
-            amount = (TextView) view.findViewById(R.id.order_amount_value);
-            invoice = (TextView) view.findViewById(R.id.card_invoice_value);
-            storeLogo = (ImageView) view.findViewById(R.id.storeLogoOrder);
-            pickup = view.findViewById(R.id.order_pickup_icon);
-            process = view.findViewById(R.id.card_btn_process);
-            storeLogoText = (TextView) view.findViewById(R.id.storeLogoOrderText);
-            driverDetails = view.findViewById(R.id.driver_info_card);
-            driverDetailsDivider = view.findViewById(R.id.divider_card2);
-            driverName = view.findViewById(R.id.driver_value_card);
-            driverPhoneNumber = view.findViewById(R.id.driver_contact_value_card);
-            cardLayout = view.findViewById(R.id.order_card_parent);
-            driverNameLable = view.findViewById(R.id.driver_label_card);
-            driverPhoneLable = view.findViewById(R.id.driver_contact_label_card);
-            nameLable = view.findViewById(R.id.order_row_name);
-            phoneLable = view.findViewById(R.id.order_row_phone);
-            invoiceLable = view.findViewById(R.id.card_invoice);
-            amountLable = view.findViewById(R.id.order_amount);
-            pickupLable = view.findViewById(R.id.order_pickup);
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            name = itemView.findViewById(R.id.order_row_name_value);
+            invoice = itemView.findViewById(R.id.card_invoice_value);
+            date = itemView.findViewById(R.id.order_date_value);
+            total = itemView.findViewById(R.id.order_total_value);
+            status = itemView.findViewById(R.id.order_status_value);
+            typeLabel = itemView.findViewById(R.id.order_type);
+            orderType = itemView.findViewById(R.id.order_type_value);
+            customerNotes = itemView.findViewById(R.id.customer_note_value);
+
+            phoneNumber = itemView.findViewById(R.id.contact_value);
+            address = itemView.findViewById(R.id.address_value);
+            subTotal = itemView.findViewById(R.id.subtotal_value);
+            deliveryCharges = itemView.findViewById(R.id.delivery_by_value);
+            discount = itemView.findViewById(R.id.discount_value);
+            voucherDiscount = itemView.findViewById(R.id.voucher_discount_value);
+            storeVoucherDiscount = itemView.findViewById(R.id.store_voucher_discount_value);
+            deliveryDiscount = itemView.findViewById(R.id.billing_delivery_charges_discount_value);
+            serviceCharges = itemView.findViewById(R.id.service_charges_value);
+            total2 = itemView.findViewById(R.id.order_total_value_);
+            callButton = itemView.findViewById(R.id.btn_call);
+            printButton = itemView.findViewById(R.id.btn_print_order);
+            rlDiscount = itemView.findViewById(R.id.rl_discount);
+            rlVoucherDiscount = itemView.findViewById(R.id.rl_voucher_discount);
+            rlStoreVoucherDiscount = itemView.findViewById(R.id.rl_store_voucher_discount);
+            rlDeliveryDiscount = itemView.findViewById(R.id.rl_delivery_discount);
+            rlServiceCharges = itemView.findViewById(R.id.rl_service_charges);
+            rlAddress = itemView.findViewById(R.id.rl_address);
+            rlContact = itemView.findViewById(R.id.rl_contact);
+
+            riderName = itemView.findViewById(R.id.driver_value);
+            riderContact = itemView.findViewById(R.id.driver_contact_value);
+
+            riderCallIcon = itemView.findViewById(R.id.address_icon_phone);
+
+            currStatusLabel = itemView.findViewById(R.id.order_curr_status);
+            currStatus = itemView.findViewById(R.id.order_curr_status_value);
+            recyclerView = itemView.findViewById(R.id.order_items_recycler);
+
+            editButton = itemView.findViewById(R.id.btn_edit_order);
+            cancelButton = itemView.findViewById(R.id.btn_order_cancel);
+            acceptButton = itemView.findViewById(R.id.btn_order_accept);
+            statusButton = itemView.findViewById(R.id.btn_order_status);
+            trackButton = itemView.findViewById(R.id.btn_track_order);
+
+            cardView = itemView.findViewById(R.id.order_card_parent);
+
+            invoiceLabel = itemView.findViewById(R.id.order_invoice);
+            dateLabel = itemView.findViewById(R.id.order_date);
+            totalLabel = itemView.findViewById(R.id.order_total);
+            statusLabel = itemView.findViewById(R.id.update_status);
+
+            typeLayout = itemView.findViewById(R.id.layout_order_type_row);
+            currStatusLayout = itemView.findViewById(R.id.layout_order_status_row);
+            newLayout = itemView.findViewById(R.id.layout_new);
+            ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
+            rlCustomerNote = itemView.findViewById(R.id.rl_customer_note);
+            rlRiderDetails = itemView.findViewById(R.id.rl_rider_details);
+            clOrderProgressBar = itemView.findViewById(R.id.order_progress_bar_layout);
+
+            divider3 = itemView.findViewById(R.id.divider_card3);
+            divider7 = itemView.findViewById(R.id.divider_card7);
+            divider8 = itemView.findViewById(R.id.divider_card8);
+            divider9 = itemView.findViewById(R.id.divider_card9);
+
+            itemsProgressBar = itemView.findViewById(R.id.order_items_progress_bar);
+            itemsErrorTextView = itemView.findViewById(R.id.order_items_fail_textview);
         }
-
-        public void changeTextColorWhite(){
-
-            name.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            phone.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            amount.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            invoice.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            storeLogoText.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            driverName.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            driverPhoneNumber.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            driverNameLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            driverPhoneLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            nameLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            phoneLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            invoiceLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            amountLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            pickupLable.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.white));
-            pickup.setImageTintList(ContextCompat.getColorStateList(itemView.getContext(), R.color.white));
-
-        }
-
-
     }
-
 
     @NonNull
     @Override
     public OrderAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View listItem= layoutInflater.inflate(R.layout.order_row, parent, false);
-//        Log.e("TAG", "onCreateViewHolder: size = "+getItemCount(),new Error() );
-//        listItem.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent intent = new Intent (parent.getContext(), OrderDetails.class);
-//                view.getContext().startActivity(intent);
-//            }
-//        });
+        View listItem = layoutInflater.inflate(R.layout.order_row, parent, false);
         return new OrderAdapter.ViewHolder(listItem);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull OrderAdapter.ViewHolder holder, int position) {
 
-//        holder.name.setText(items.get(position).name);
-//        holder.phone.setText(items.get(position).phone);
-//        holder.qty.setText(items.get(position).quantity);
-//        holder.amount.setText(items.get(position).amount);
-//        holder.invoice.setText(items.get(position).invoice);
+        Order.OrderDetails orderDetails = orders.get(position);
+        Order order = orderDetails.order;
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        String storeIdList = sharedPreferences.getString("storeIdList", null);
-//        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData deliveryDetails;
+        formatter = Utility.getMonetaryAmountFormat();
 
-            String encodedStoreLogo = sharedPreferences.getString("logoImage-"+orders.get(holder.getAdapterPosition()).storeId, null);
+        String currency = Utility.getCurrencySymbol(order);
 
-            if(storeIdList != null && storeIdList.split(" ").length > 0)
-            {
+        holder.name.setText(order.orderShipmentDetail.receiverName);
 
-                if(sharedPreferences.contains("logoImage-"+orders.get(holder.getAdapterPosition()).storeId)
-                        && encodedStoreLogo != null)
-                {
-                    Utility.decodeAndSetImage(holder.storeLogo, encodedStoreLogo);
-                }
-                else{
-                    holder.storeLogo.setVisibility(View.GONE);
-                    holder.storeLogoText.setVisibility(View.VISIBLE);
-                    String storeName = sharedPreferences.getString(orders.get(holder.getAdapterPosition()).storeId+"-name", null);
-                    holder.storeLogoText.setText(storeName);
-                }
-
-            }
-
-//        Log.e("TAG", "onBindViewHolder: "+ sharedPreferences.getString(orders.get(holder.getAdapterPosition()).storeId+"-name", null), new Error());
-
-
-        holder.name.setText(orders.get(position).orderShipmentDetail.receiverName);
-        holder.phone.setText(orders.get(position).orderShipmentDetail.phoneNumber);
-        holder.amount.setText(Double.toString(orders.get(position).total));
-        holder.invoice.setText(orders.get(position).invoiceId);
-        if(section.equals("sent") || section.equals("pickup")){
-            setDriverDeliveryDetails(orders.get(position), sharedPreferences, holder);
+        if (order.created != null) {
+            TimeZone storeTimeZone = order.store != null && order.store.regionCountry != null && order.store.regionCountry.timezone != null
+                    ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
+                    : TimeZone.getDefault();
+            holder.date.setText(Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
         }
 
+        holder.invoice.setText(order.invoiceId);
+        holder.total.setText(currency + " " + formatter.format(order.total));
 
-        if(!orders.get(position).orderShipmentDetail.storePickup) {
-            holder.pickup.setBackgroundResource(R.drawable.ic_highlight_off_black_24dp);
-            isPickup = false;
+        StringBuilder fullAddress = new StringBuilder();
+        if (order.orderShipmentDetail.address != null && !"".equals(order.orderShipmentDetail.address)) {
+            fullAddress.append(order.orderShipmentDetail.address).append(", ");
         }
-        else {
-            holder.pickup.setBackgroundResource(R.drawable.ic_check_circle_black_24dp);
-            isPickup = true;
+        if (order.orderShipmentDetail.city != null && !"".equals(order.orderShipmentDetail.city)) {
+            fullAddress.append(order.orderShipmentDetail.city).append(", ");
+        }
+        if (order.orderShipmentDetail.state != null && !"".equals(order.orderShipmentDetail.state)) {
+            fullAddress.append(order.orderShipmentDetail.state).append(", ");
+        }
+        if (order.orderShipmentDetail.zipcode != null && !"".equals(order.orderShipmentDetail.zipcode)) {
+            fullAddress.append(order.orderShipmentDetail.zipcode);
         }
 
-        holder.process.setText("Details");
+        if (fullAddress.length() > 0) {
+            holder.address.setText(String.valueOf(fullAddress));
+            holder.rlAddress.setVisibility(View.VISIBLE);
+        }
 
-        holder.process.setOnClickListener(view -> {
-            Intent intent = new Intent (holder.itemView.getContext(), OrderDetailsActivity.class);
-            intent.putExtra("selectedOrder",orders.get(position));
-            intent.putExtra("section", section);
-            intent.putExtra("pickup", isPickup);
-            intent.putExtra("hasDeliveryDetails", hasDeliveryDetailsMap.get(orders.get(position).id));
-//                intent.putExtra("deliveryDetails", deliveryDetails);
-            context.stopService(new Intent(context, AlertService.class));
-            ((Activity) context).startActivityForResult(intent, 4);
-//                ((Activity)view.getContext()).finish();
+        if (order.orderShipmentDetail.phoneNumber != null) {
+            holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
+            holder.rlContact.setVisibility(View.VISIBLE);
+        }
+
+        holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
+
+        if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
+            holder.rlDiscount.setVisibility(View.GONE);
+        } else {
+            holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
+        }
+
+        if (order.voucherDiscount != null && order.voucherDiscount > 0) {
+            holder.voucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
+            holder.rlVoucherDiscount.setVisibility(View.VISIBLE);
+        }
+
+        if (order.storeVoucherDiscount != null && order.storeVoucherDiscount > 0) {
+            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.storeVoucherDiscount));
+            holder.rlStoreVoucherDiscount.setVisibility(View.VISIBLE);
+        }
+
+        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + formatter.format(order.deliveryCharges) : currency + " " + "0.00");
+        holder.total2.setText(currency + " " + formatter.format(order.total));
+
+        if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
+            holder.rlDeliveryDiscount.setVisibility(View.GONE);
+        } else {
+            holder.deliveryDiscount.setText("- " + currency + " " + formatter.format(order.deliveryDiscount));
+        }
+
+        if (order.storeServiceCharges == null || order.storeServiceCharges == 0.00) {
+            holder.rlServiceCharges.setVisibility(View.GONE);
+        } else {
+            holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
+        }
+
+        holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
+        holder.printButton.setOnClickListener(view -> {
+            ItemAdapter adapter = (ItemAdapter) holder.recyclerView.getAdapter();
+            List<Item> items = adapter != null ? adapter.getItems() : new ArrayList<>();
+            printReceipt(order, items);
         });
+        
+        holder.orderType.setText(order.serviceType == ServiceType.DINEIN
+                ? "Dine In"
+                : order.orderShipmentDetail.storePickup ? "Store Pickup" : "Delivery");
 
-    }
+        order.customerNotes = order.customerNotes != null ? order.customerNotes : "";
 
-    private void setDriverDeliveryDetails(Order order, SharedPreferences sharedPreferences, ViewHolder holder) {
+        switch (order.customerNotes.toUpperCase()) {
+            case "TAKEAWAY":
+                order.customerNotes = "Take Away";
+                break;
+            case "SELFCOLLECT":
+                order.customerNotes = "Self Collect";
+                break;
+        }
 
-        String BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+        if (!"".equals(order.customerNotes)) {
+            holder.customerNotes.setText(order.customerNotes);
+            holder.rlCustomerNote.setVisibility(View.VISIBLE);
+            holder.divider3.setVisibility(View.VISIBLE);
+        }
 
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(BASE_URL+App.DELIVERY_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        DeliveryApi deliveryApiService = retrofit.create(DeliveryApi.class);
-
-        //12dc5195-5f03-42fd-94f0-f147dc4ced55
-        Call<OrderDeliveryDetailsResponse> deliveryDetailsResponseCall = deliveryApiService.getOrderDeliveryDetailsById(headers, order.id);
-
-        progressDialog.show();
-
-        deliveryDetailsResponseCall.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
-            @Override
-            public void onResponse(Call<OrderDeliveryDetailsResponse> call, Response<OrderDeliveryDetailsResponse> response) {
-                if(response.isSuccessful()){
-                    if(section.equals("pickup")){
-                        Log.e(TAG, "onResponse: onPickupTab" );
-                        Log.e(TAG, "onResponse: order-id = "+order.id );
-                    }
-                    Log.i(TAG, "onResponse123: "+ response.body().toString());
-                    OrderDeliveryDetailsResponse.OrderDeliveryDetailsData data = response.body().data;
-
-                    if(data.riderStatus != null && data.riderStatus.equals("CANCELED")){
-                        holder.cardLayout.setCardBackgroundColor(ContextCompat.getColor(context, R.color.red));
-                        holder.changeTextColorWhite();
-                    }
-
-                    holder.driverDetails.setVisibility(View.VISIBLE);
-                    holder.driverDetailsDivider.setVisibility(View.VISIBLE);
-
-                    if(data.name != null && data.phoneNumber != null){
-
-                        Log.i(TAG, "onResponse123: " + order.invoiceId + " id : "+order.id);
-                        String name = response.body().data.name ;
-                        if(name != null && name.split(" ").length > 1){
-                            name = name.trim().split(" ")[0] + " ...";
-                        }
-                        holder.driverName.setText(name);
-                        holder.driverPhoneNumber.setText(response.body().data.phoneNumber);
-//                        hasDeliveryDetails = true;
-                        hasDeliveryDetailsMap.put(order.id, true);
-
-//                        OrderDeliveryDetailsResponse.Provider provider = new OrderDeliveryDetailsResponse.Provider(response.body().data.provider.id,
-//                                response.body().data.provider.name, response.body().data.provider.providerImage);
-//
-//                        deliveryDetails = new OrderDeliveryDetailsResponse
-//                                .OrderDeliveryDetailsData(response.body().data.name,
-//                                response.body().data.phoneNumber, response.body().data.plateNumber,
-//                                response.body().data.trackingUrl, response.body().data.orderNumber,
-//                                provider);
-                    }
-                    else {
-                        Log.e(TAG, "Response Unsuccessful" + " onResponse: "+response.body());
-                        if(data.riderStatus != null && data.riderStatus.equals("CANCELED")){
-                            holder.driverPhoneLable.setVisibility(View.GONE);
-                            holder.driverNameLable.setVisibility(View.GONE);
-                            holder.driverName.setText("Status : Problem with delivery. No driver available !");
-                        }
-                        else{
-                            holder.driverDetails.setVisibility(View.GONE);
-                            holder.driverDetailsDivider.setVisibility(View.GONE);
-                        }
-//                        hasDeliveryDetails = false;
-                        hasDeliveryDetailsMap.put(order.id, false);
-                    }
-
-                }
-                progressDialog.dismiss();
+        if (section.equals("new")) {
+            if (order.isRevised) {
+                holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
+                holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
+            }
+            holder.editButton.setVisibility(View.VISIBLE);
+            holder.acceptButton.setText(orderDetails.nextActionText);
+            holder.cancelButton.setVisibility(order.serviceType == ServiceType.DINEIN ? View.GONE : View.VISIBLE);
+            holder.currStatusLayout.setVisibility(View.GONE);
+            holder.divider8.setVisibility(View.GONE);
+            holder.newLayout.setVisibility(View.VISIBLE);
+        } else if (section.equals("ongoing")) {
+            if (orderDetails.nextActionText != null) {
+                holder.ongoingLayout.setVisibility(View.VISIBLE);
+                holder.statusLabel.setVisibility(View.VISIBLE);
+                holder.statusLabel.setText("Update Status: ");
+                holder.statusButton.setText(orderDetails.nextActionText);
+                holder.statusButton.setVisibility(View.VISIBLE);
             }
 
-            @Override
-            public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
-                Log.e(TAG, "onFailure: ",t );
-                progressDialog.dismiss();
+            switch (order.completionStatus) {
+                case BEING_PREPARED:
+                    holder.currStatus.setText("Preparing");
+                    holder.trackButton.setVisibility(View.GONE);
+                    break;
+                case AWAITING_PICKUP:
+                    holder.currStatus.setText("Awaiting Pickup");
+                    if (!order.orderShipmentDetail.storePickup
+                            && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                        holder.trackButton.setVisibility(View.VISIBLE);
+                    }
+                    break;
+                case BEING_DELIVERED:
+                    holder.currStatus.setText("Out for Delivery");
+                    if (!order.orderShipmentDetail.storePickup
+                            && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                        holder.trackButton.setVisibility(View.VISIBLE);
+                    }
+                    break;
             }
-        });
+        } else if (section.equals("past")) {
+            holder.ongoingLayout.setVisibility(View.VISIBLE);
+            holder.typeLayout.setVisibility(View.GONE);
+            holder.currStatusLayout.setVisibility(View.GONE);
+            holder.status.setVisibility(View.VISIBLE);
+            holder.statusLabel.setVisibility(View.VISIBLE);
+            if (order.completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER) {
+                holder.status.setText("Order Delivered");
+                holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_accept_button));
+            } else if (order.completionStatus == OrderStatus.CANCELED_BY_MERCHANT
+                    || order.completionStatus == OrderStatus.CANCELED_BY_CUSTOMER) {
+                holder.status.setText("Order Cancelled");
+                holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
+            }
+            holder.divider7.setVisibility(View.GONE);
+            holder.divider8.setVisibility(View.GONE);
 
+            if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                getRiderDetails(holder, order, 2);
+            }
+        }
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
+        holder.recyclerView.setLayoutManager(linearLayoutManager);
+        getOrderItemsForView(order, holder);
+
+        holder.cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order, holder));
+        holder.acceptButton.setOnClickListener(view -> updateOrderStatus(orderDetails, holder));
+        holder.statusButton.setOnClickListener(view -> updateOrderStatus(orderDetails, holder));
+        holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
+        holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
+
+        if (App.getPrinter().isPrinterConnected()) {
+            holder.printButton.setVisibility(View.VISIBLE);
+        }
     }
-
 
     @Override
     public int getItemCount() {
         return orders.size();
     }
-}
 
+    private void getOrderItemsForView(Order order, ViewHolder holder) {
+
+        Call<ItemsResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
+
+        itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ItemsResponse> call, @NonNull Response<ItemsResponse> response) {
+                if (response.isSuccessful()) {
+                    List<Item> orderItems = response.body().data.content;
+                    ItemAdapter itemsAdapter = new ItemAdapter(orderItems, order, context);
+                    holder.recyclerView.setAdapter(itemsAdapter);
+                    itemsAdapter.notifyDataSetChanged();
+                } else {
+                    holder.itemsErrorTextView.setVisibility(View.VISIBLE);
+                }
+                holder.itemsProgressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ItemsResponse> call, @NonNull Throwable t) {
+                Log.e(TAG, "onFailureItems: ", t);
+                holder.itemsProgressBar.setVisibility(View.GONE);
+                holder.itemsErrorTextView.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+
+    private void getOrderItemsForPrint(Order order) {
+        Call<ItemsResponse> itemResponseCall = orderApiService.getItemsForOrder(order.id);
+
+        itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
+            @Override
+            public void onResponse(Call<ItemsResponse> call, Response<ItemsResponse> response) {
+                if (response.isSuccessful()) {
+                    printReceipt(order, response.body().data.content);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ItemsResponse> call, Throwable t) {
+                Log.e(TAG, "onFailureItems: ", t);
+            }
+        });
+    }
+
+    public void onCancelOrderButtonClick(Order order, ViewHolder holder) {
+
+        Map<String, String> headers = new HashMap<>();
+
+        dialog = new Dialog(context);
+        dialog.setContentView(R.layout.custom_alert_dialog);
+        dialog.setCancelable(false);
+        dialog.findViewById(R.id.btn_positive).setVisibility(View.VISIBLE);
+        dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
+        dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
+            dialog.dismiss();
+
+            Order.OrderDetails removedOrder = orders.remove(holder.getAdapterPosition());
+            notifyItemRemoved(holder.getAdapterPosition());
+            notifyItemRangeChanged(holder.getAdapterPosition(), orders.size());
+
+            Call<OrderUpdateResponse> processOrder = orderApiService
+                    .updateOrderStatus(new Order.OrderUpdate(order.id, OrderStatus.CANCELED_BY_MERCHANT), order.id);
+            processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
+                @Override
+                public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
+                    if (response.isSuccessful()) {
+                        Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
+                    } else if (response.code() != 406) {
+                        Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                        reAddOrder(holder.getAdapterPosition(), removedOrder);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
+                    Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ", t);
+
+                    reAddOrder(holder.getAdapterPosition(), removedOrder);
+                }
+            });
+        });
+        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
+    private void updateOrderStatus(Order.OrderDetails currentOrderDetails, ViewHolder holder) {
+
+        startLoading(holder);
+
+        Call<OrderUpdateResponse> processOrder = orderApiService
+                .updateOrderStatus(new Order.OrderUpdate(currentOrderDetails.order.id,
+                                currentOrderDetails.nextCompletionStatus),
+                        currentOrderDetails.order.id);
+
+        processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<OrderUpdateResponse> call,
+                                   @NonNull Response<OrderUpdateResponse> response) {
+                int indexOfOrder = orders.indexOf(currentOrderDetails);
+                if (response.isSuccessful()) {
+                    Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
+
+                    String statusUpdateToastText = "Status Updated";
+                    if (Utility.isOrderOngoing(updatedOrder.currentCompletionStatus)) {
+                        if (Utility.isOrderOngoing(currentOrderDetails.currentCompletionStatus)
+                                && indexOfOrder != -1) {
+                            orders.set(indexOfOrder, updatedOrder);
+                            notifyItemChanged(indexOfOrder);
+                            stopLoading(holder, updatedOrder.currentCompletionStatus);
+                        } else {
+                            orderManager.addOrderToOngoingTab(updatedOrder);
+                            statusUpdateToastText = "Order moved to ongoing tab";
+                        }
+                    }
+
+                    if (Utility.isOrderNew(currentOrderDetails.currentCompletionStatus)
+                            || Utility.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                        if (Utility.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                            orderManager.addOrderToHistoryTab(updatedOrder);
+                            statusUpdateToastText = "Order moved to history tab";
+                        }
+
+                        if (indexOfOrder != -1) {
+                            orders.remove(indexOfOrder);
+                            notifyItemRemoved(indexOfOrder);
+                        }
+
+                        if (Utility.isOrderNew(currentOrderDetails.currentCompletionStatus)) {
+                            getOrderItemsForPrint(currentOrderDetails.order);
+                        }
+                    }
+
+                    Toast.makeText(context, statusUpdateToastText, Toast.LENGTH_SHORT).show();
+                } else if (response.code() == 406) {
+                    Toast.makeText(context, "Error: Order already processed.", Toast.LENGTH_SHORT).show();
+                    orders.remove(indexOfOrder);
+                    notifyItemRemoved(indexOfOrder);
+                } else {
+                    Log.e(TAG, response.raw().toString());
+                    Log.e(TAG, "Error body: " + response.errorBody());
+                    Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    stopLoading(holder, currentOrderDetails.order.completionStatus);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
+                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
+                stopLoading(holder, currentOrderDetails.order.completionStatus);
+                Log.e(TAG, "onFailure: ", t);
+            }
+        });
+
+    }
+
+    private void onEditButtonClicked(Order order) {
+        if (order.isRevised) {
+            Toast.makeText(context, "Order already updated.", Toast.LENGTH_SHORT).show();
+        } else {
+            dialog = new Dialog(context);
+            dialog.setContentView(R.layout.custom_alert_dialog);
+            dialog.setCancelable(false);
+            ImageView imageView = dialog.findViewById(R.id.alert_icon);
+            TextView title = dialog.findViewById(R.id.alert_title);
+            TextView message = dialog.findViewById(R.id.alert_message);
+            dialog.findViewById(R.id.btn_positive).setVisibility(View.VISIBLE);
+            dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
+            title.setText(R.string.edit_order);
+            message.setText(R.string.edit_order_warning);
+            imageView.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_warning_24));
+            dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
+                dialog.dismiss();
+//                Intent intent = new Intent(context, EditOrderActivity.class);
+//                intent.putExtra("order", order);
+//                context.startActivity(intent);
+                orderManager.editOrder(order);
+            });
+            dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
+                dialog.dismiss();
+            });
+            dialog.show();
+        }
+    }
+
+    private void reAddOrder(int position, Order.OrderDetails removedOrder) {
+        try {
+            orders.add(position, removedOrder);
+        } catch (Exception e) {
+            orders.add(removedOrder);
+            position = orders.size() - 1;
+        }
+        notifyItemInserted(position);
+    }
+
+    private void getRiderDetails(ViewHolder holder, Order order, int tag) {
+
+        Map<String, String> headers = new HashMap<>();
+
+        Call<OrderDeliveryDetailsResponse> riderDetails = deliveryApiService.getOrderDeliveryDetailsById(headers, order.id);
+
+        riderDetails.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<OrderDeliveryDetailsResponse> call,
+                                   @NonNull Response<OrderDeliveryDetailsResponse> response) {
+                if (response.isSuccessful()) {
+                    if (tag == 1) {
+                        Intent intent = new Intent(context, TrackOrderActivity.class);
+                        intent.putExtra("riderDetails", response.body().data);
+                        context.startActivity(intent);
+                    } else if (tag == 2) {
+                        OrderDeliveryDetailsResponse.OrderDeliveryDetailsData data = response.body().data;
+                        if (data.name != null || data.phoneNumber != null) {
+                            holder.rlRiderDetails.setVisibility(View.VISIBLE);
+                            holder.divider9.setVisibility(View.VISIBLE);
+                            if (data.name != null)
+                                holder.riderName.setText(data.name);
+                            if (data.phoneNumber != null) {
+                                holder.riderContact.setText(data.phoneNumber);
+                                holder.riderCallIcon.setVisibility(View.VISIBLE);
+                                holder.riderCallIcon.setOnClickListener(view -> startCallActivity(data.phoneNumber));
+                            }
+                        } else {
+                            holder.rlRiderDetails.setVisibility(View.GONE);
+                            holder.divider9.setVisibility(View.GONE);
+                        }
+                    }
+                } else {
+                    if (tag == 1)
+                        Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "ERROR: " + response.toString());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<OrderDeliveryDetailsResponse> call, @NonNull Throwable t) {
+                Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void startCallActivity(String phoneNumber) {
+        try {
+            if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+                Intent callDriver = new Intent(Intent.ACTION_DIAL);
+                callDriver.setData(Uri.parse("tel:" + phoneNumber));
+                context.startActivity(callDriver);
+            } else {
+                Toast.makeText(context, R.string.call_error_message, Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(context, R.string.call_error_message, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void startLoading(ViewHolder holder) {
+        holder.clOrderProgressBar.setVisibility(View.VISIBLE);
+        holder.newLayout.setVisibility(View.GONE);
+        holder.ongoingLayout.setVisibility(View.GONE);
+        holder.editButton.setVisibility(View.GONE);
+    }
+
+    private void stopLoading(ViewHolder holder, OrderStatus completionStatus) {
+        holder.clOrderProgressBar.setVisibility(View.GONE);
+        if (Utility.isOrderNew(completionStatus)) {
+            holder.newLayout.setVisibility(View.VISIBLE);
+            holder.editButton.setVisibility(View.VISIBLE);
+        } else if (Utility.isOrderOngoing(completionStatus)) {
+            holder.ongoingLayout.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void printReceipt(Order order, List<Item> items) {
+        try {
+            App.getPrinter().printReceipt(order, items);
+        } catch (Exception e) {
+            Log.e("order-adapter", "Failed to print order. " + e.getLocalizedMessage());
+            e.printStackTrace();
+            Toast.makeText(context, "Failed to print order.", Toast.LENGTH_SHORT).show();
+        }
+    }
+}

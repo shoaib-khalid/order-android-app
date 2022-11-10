@@ -4,19 +4,14 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
-import com.symplified.easydukan.handlers.GenericPrintHelper;
+import com.symplified.easydukan.helpers.GenericPrintHelper;
+import com.symplified.easydukan.helpers.SunmiPrintHelper;
 import com.symplified.easydukan.interfaces.Printer;
 import com.symplified.easydukan.interfaces.PrinterObserver;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Application file to have properties used throughout the lifecycle of app.
@@ -25,6 +20,7 @@ public class App extends Application implements PrinterObserver {
 
     private static Context context;
     private static Printer connectedPrinter;
+    public static final String DEV_TAG = "dev-logging";
 
     public static String BASE_URL = "https://api.symplified.biz/";
     public static String BASE_URL_STAGING = "https://api.symplified.it/";
@@ -40,9 +36,6 @@ public class App extends Application implements PrinterObserver {
     @Override
     public void onCreate(){
         super.onCreate();
-
-        GenericPrintHelper.getInstance().addObserver(this);
-        GenericPrintHelper.getInstance().initPrinterService(this);
 
         context = getApplicationContext();
         //restrict devices from forcing the dark mode on the app
@@ -63,9 +56,20 @@ public class App extends Application implements PrinterObserver {
             notificationManager.createNotificationChannel(channel);
             notificationManager.createNotificationChannel(orders);
         }
+
+        App.context = getApplicationContext();
+
+        SunmiPrintHelper.getInstance().addObserver(this);
+        SunmiPrintHelper.getInstance().initPrinterService(this);
+
+        GenericPrintHelper.getInstance().addObserver(this);
+        GenericPrintHelper.getInstance().initPrinterService(this);
     }
 
-    public static Context getAppContext() { return context; }
+
+    public static Printer getPrinter() {
+        return connectedPrinter;
+    }
 
     @Override
     public void onPrinterConnected(Printer printer) {
@@ -75,7 +79,6 @@ public class App extends Application implements PrinterObserver {
     public static boolean isPrinterConnected() {
         return connectedPrinter != null && connectedPrinter.isPrinterConnected();
     }
-    public static Printer getPrinter() {
-        return connectedPrinter;
-    }
+
+    public static Context getAppContext() { return context; }
 }

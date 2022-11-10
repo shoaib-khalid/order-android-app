@@ -2,17 +2,13 @@ package com.symplified.easydukan.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.util.Base64;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.symplified.easydukan.App;
+import com.symplified.easydukan.enums.OrderStatus;
 import com.symplified.easydukan.models.order.Order;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.text.DecimalFormat;
@@ -25,46 +21,28 @@ public class Utility {
     private static final SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa");
 
-    public static String encodeTobase64(Bitmap image) {
-        Bitmap bitmap_image = image;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap_image.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
-
-        return imageEncoded;
-    }
-
-    public static void decodeAndSetImage(ImageView imageView, String encodedImage){
-        byte[] imageAsBytes = Base64.decode(encodedImage.getBytes(), Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
-//        Log.e("TAG", "decodeAndSetImage: ", new Error());
-        imageView.setImageBitmap(bitmap);
-    }
-
     public static <T extends Enum<T>> T getEnumFromString(Class<T> c, String string) {
-        if( c != null && string != null ) {
+        if (c != null && string != null) {
             try {
                 return Enum.valueOf(c, string.trim().toUpperCase());
-            } catch(IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
             }
         }
         return null;
     }
 
-    public static String removeUnderscores(String s){
-        return s.replace("_", " ");
-    }
-
     public static void logToFile(String text) {
-        File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS),
-                "log.txt");
+        File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
+        Log.d("print", "File path: " + file.getAbsolutePath());
 
         try {
-            FileWriter fr = new FileWriter(file, false);
+            FileWriter fr = new FileWriter(file, true);
             fr.write(text);
             fr.close();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            String errorText = "Failed to write to file. " + e.getLocalizedMessage();
+            Log.e("print", errorText);
+        }
     }
 
     public static String getCurrencySymbol(Order order) {
@@ -95,5 +73,20 @@ public class Utility {
         }
 
         return dateTime;
+    }
+
+    public static boolean isOrderNew(OrderStatus completionStatus) {
+        return completionStatus == OrderStatus.PAYMENT_CONFIRMED
+                || completionStatus == OrderStatus.RECEIVED_AT_STORE;
+    }
+
+    public static boolean isOrderOngoing(OrderStatus completionStatus) {
+        return completionStatus == OrderStatus.BEING_PREPARED
+                || completionStatus == OrderStatus.AWAITING_PICKUP
+                || completionStatus == OrderStatus.BEING_DELIVERED;
+    }
+
+    public static boolean isOrderCompleted(OrderStatus completionStatus) {
+        return completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER;
     }
 }

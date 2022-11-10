@@ -6,12 +6,15 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
-<!--    <uses-permission android:name="android.permission.CALL_PHONE" />-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
         tools:ignore="ProtectedPermissions" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <application
         android:name="com.symplified.easydukan.App"
@@ -21,27 +24,36 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
+        <activity
+            android:name=".TrackOrderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditOrderActivity"
+            android:exported="false" />
 
-        <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
-
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@mipmap/ic_launcher" />
 
         <activity
-            android:name="com.symplified.easydukan.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name="com.symplified.easydukan.ChooseStoreActivity"
+            android:name=".NavbarActivity"
             android:exported="true" />
         <activity
-            android:name="com.symplified.easydukan.OrdersActivity"
+            android:name=".SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProductActivity"
+            android:exported="true" />
+        <activity
+            android:name=".ProductsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".OrdersActivity"
             android:exported="true"
             android:label="@string/title_activity_orders"
             android:theme="@style/Theme.SymplifiedOrderUpdate.NoActionBar" />
         <activity
-            android:name="com.symplified.easydukan.OrderDetailsActivity"
-            android:exported="true" />
-        <activity
-            android:name="com.symplified.easydukan.LoginActivity"
+            android:name="LoginActivity"
             android:exported="true"
             android:noHistory="true">
             <intent-filter>
@@ -52,24 +64,22 @@
         </activity>
 
         <service
-            android:name="com.symplified.easydukan.services.StoreManagerService"
+            android:name=".services.StoreManagerService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <receiver android:name="com.symplified.easydukan.services.StoreBroadcastReceiver" />
-
         <service
-            android:name="com.symplified.easydukan.services.OrderNotificationService"
+            android:name=".services.OrderNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <service
-            android:name="com.symplified.easydukan.services.AlertService"
+            android:name=".services.AlertService"
             android:enabled="true" />
 
         <receiver
-            android:name="com.symplified.easydukan.services.StartupReceiver"
+            android:name=".services.StartupReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -80,7 +90,6 @@
                 <category android:name="android.intent.category.HOME" />
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>

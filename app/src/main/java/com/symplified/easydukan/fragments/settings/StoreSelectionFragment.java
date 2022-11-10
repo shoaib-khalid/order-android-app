@@ -2,53 +2,48 @@ package com.symplified.easydukan.fragments.settings;
 
 import static android.content.Context.MODE_PRIVATE;
 
-import android.app.Dialog;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.easydukan.App;
 import com.symplified.easydukan.R;
 import com.symplified.easydukan.adapters.StoreAdapter;
 import com.symplified.easydukan.apis.StoreApi;
 import com.symplified.easydukan.models.Store.StoreResponse;
+import com.symplified.easydukan.networking.ServiceGenerator;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class StoreSelectionFragment extends Fragment {
 
     private RecyclerView recyclerView ;
     private TextView chooseStore;
     private TextView noStore;
-    private SharedPreferences sharedPreferences;
-    private String BASE_URL;
-    private Dialog progressDialog;
-    private CircularProgressIndicator progressIndicator;
+    private String clientId;
     private StoreAdapter storeAdapter;
+    private ConstraintLayout progressBarLayout;
+    private RelativeLayout storesLayout;
+    private SwipeRefreshLayout refreshLayout;
     private final String TAG = StoreSelectionFragment.class.getName();
+    private StoreApi storeApiService;
+
     public StoreSelectionFragment() {
         // Required empty public constructor
     }
-
 
     public static StoreSelectionFragment newInstance() {
         StoreSelectionFragment fragment = new StoreSelectionFragment();
@@ -60,63 +55,39 @@ public class StoreSelectionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
+        clientId = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE)
+                .getString("ownerId", null);
 
-        progressDialog = new Dialog(getActivity(), R.style.Theme_SymplifiedOrderUpdate);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
-        if(sharedPreferences.getBoolean("isStaging", false))
-        {
-            progressIndicator.setIndicatorColor(getContext().getResources().getColor(R.color.sf_b_800, getContext().getTheme()));
-        }
-
-        getStores(sharedPreferences);
-
-        if (getArguments() != null) {
-
-        }
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
-    private void getStores(SharedPreferences sharedPreferences) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Authorization", "Bearer Bearer accessToken");
+    private void getStores() {
+        startLoading();
 
-        Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient()).baseUrl(BASE_URL + App.PRODUCT_SERVICE_URL)
-                .addConverterFactory(GsonConverterFactory.create()).build();
-
-        StoreApi storeApiService = retrofit.create(StoreApi.class);
-        String clientId = sharedPreferences.getString("ownerId", null);
-
-        if (null == clientId) {
-            Log.d("Client-ID", "onCreate: client id is null");
-        }
-        headers.put("Authorization", "Bearer Bearer accessToken");
-
-        Call<StoreResponse> storeResponse = storeApiService.getStores(headers, clientId);
-        progressDialog.show();
+        Call<StoreResponse> storeResponse = storeApiService.getStores(clientId);
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
             @Override
-            public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
-                if(response.isSuccessful()){
-                    progressDialog.dismiss();
-                    storeAdapter = new StoreAdapter(response.body().data.content, getContext(), progressDialog, sharedPreferences);
+            public void onResponse(@NonNull Call<StoreResponse> call, @NonNull Response<StoreResponse> response) {
+                if(response.isSuccessful() && response.body() != null){
+                    storeAdapter = new StoreAdapter(response.body().data.content,
+                            getContext());
                     recyclerView.setAdapter(storeAdapter);
                     storeAdapter.notifyDataSetChanged();
+                    stopLoading();
                 }
             }
 
             @Override
-            public void onFailure(Call<StoreResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<StoreResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, "onFailure: ", t);
+                stopLoading();
             }
         });
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater,
+                             ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_store_selection, container, false);
@@ -125,18 +96,25 @@ public class StoreSelectionFragment extends Fragment {
         chooseStore = view.findViewById(R.id.choose_store);
         noStore = view.findViewById(R.id.no_store);
 
+        progressBarLayout = view.findViewById(R.id.layout_store_progress);
+        storesLayout = view.findViewById(R.id.layout_stores);
+        refreshLayout = view.findViewById(R.id.layout_store_refresh);
+        refreshLayout.setOnRefreshListener(() -> getStores());
+
+        getStores();
+
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        getStores(sharedPreferences);
+    private void startLoading() {
+        refreshLayout.setRefreshing(true);
+        storesLayout.setVisibility(View.GONE);
+        progressBarLayout.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        getStores(sharedPreferences);
+    private void stopLoading() {
+        refreshLayout.setRefreshing(false);
+        progressBarLayout.setVisibility(View.GONE);
+        storesLayout.setVisibility(View.VISIBLE);
     }
 }

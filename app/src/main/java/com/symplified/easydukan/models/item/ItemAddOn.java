@@ -1,4 +1,4 @@
-package com.symplified.order.models.item;
+package com.symplified.easydukan.models.item;
 
 import java.io.Serializable;
 
