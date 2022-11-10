@@ -8,7 +8,6 @@ public class FirebaseHelper {
      * Also subscribes to storeId topic
      *
      * @param storeId storeId
-     * @return returns false if any error, otherwise returns true
      */
     public static void initializeFirebase(String storeId) {
         FirebaseMessaging.getInstance().getToken();
