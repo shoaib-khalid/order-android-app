@@ -4,6 +4,7 @@ import com.symplified.easydukan.models.HttpResponse;
 import com.symplified.easydukan.models.error.ErrorRequest;
 import com.symplified.easydukan.models.login.LoginRequest;
 import com.symplified.easydukan.models.login.LoginResponse;
+import com.symplified.easydukan.models.ping.PingRequest;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -23,8 +24,11 @@ public interface LoginApi {
     Call<LoginResponse> refreshAccessToken(@Body String refreshToken);
 
     @PUT("{clientId}/pingresponse/{transactionId}")
-    Call<HttpResponse> ping(@Path("clientId") String clientId,
-                            @Path("transactionId") String transactionId);
+    Call<HttpResponse> ping(
+            @Path("clientId") String clientId,
+            @Path("transactionId") String transactionId,
+            @Body PingRequest pingRequest
+    );
 
     @Headers("Content-Type: application/json")
     @POST("logerror")

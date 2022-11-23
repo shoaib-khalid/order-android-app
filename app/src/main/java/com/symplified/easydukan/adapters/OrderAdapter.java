@@ -357,7 +357,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
 
-        if (App.getPrinter().isPrinterConnected()) {
+        if (App.isPrinterConnected()) {
             holder.printButton.setVisibility(View.VISIBLE);
         }
     }

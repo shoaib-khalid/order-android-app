@@ -31,6 +31,7 @@ import com.symplified.easydukan.models.item.ItemsResponse;
 import com.symplified.easydukan.models.order.Order;
 import com.symplified.easydukan.models.order.OrderDetailsResponse;
 import com.symplified.easydukan.models.order.OrderUpdateResponse;
+import com.symplified.easydukan.models.ping.PingRequest;
 import com.symplified.easydukan.networking.ServiceGenerator;
 import com.symplified.easydukan.utils.Utility;
 
@@ -74,7 +75,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
             LoginApi userService = ServiceGenerator.createUserService();
             String transactionId = remoteMessage.getData().get("body");
 
-            userService.ping(clientId, transactionId).clone().enqueue(new EmptyCallback());
+            String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
+            userService.ping(clientId, transactionId, new PingRequest(deviceModel))
+                    .clone().enqueue(new EmptyCallback());
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
@@ -91,7 +94,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                    && App.getPrinter().isPrinterConnected()) {
+                                    && App.isPrinterConnected()) {
                                 printAndProcessOrder(orderApiService, remoteMessage, orderDetails);
                             } else {
                                 addOrderToView(newOrderObservers, orderDetails);

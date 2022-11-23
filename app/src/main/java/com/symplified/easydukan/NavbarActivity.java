@@ -22,6 +22,7 @@ import com.symplified.easydukan.apis.StoreApi;
 import com.symplified.easydukan.models.Store.Store;
 import com.symplified.easydukan.models.Store.StoreResponse;
 import com.symplified.easydukan.networking.ServiceGenerator;
+import com.symplified.easydukan.utils.Key;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,13 +30,12 @@ import retrofit2.Response;
 
 public class NavbarActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private String storeId, BASE_URL;
+    private String storeId;
     private DrawerLayout drawerLayout;
     private ImageView storeLogo;
     private TextView storeName, storeEmail, appVersion;
     private String version;
     private NavigationView navigationView;
-    private static SharedPreferences sharedPreferences;
     private StoreApi storeApiService;
     public FrameLayout frameLayout;
 
@@ -53,10 +53,9 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
         version = BuildConfig.VERSION_NAME;
 
-        sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         storeId = sharedPreferences.getString("storeId", null);
-        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
         navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -98,7 +97,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         TextView logout = navigationView.findViewById(R.id.nav_logout);
 
 
-        if (sharedPreferences.getBoolean("isStaging", false)) {
+        if (sharedPreferences.getBoolean(Key.IS_STAGING, false)) {
             logout.setVisibility(View.VISIBLE);
         }
 
@@ -110,9 +109,9 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
             }
-            boolean isStaging = sharedPreferences.getBoolean("isStaging", false);
+            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
             sharedPreferences.edit().clear().apply();
-            sharedPreferences.edit().putBoolean("isStaging", isStaging).apply();
+            sharedPreferences.edit().putBoolean(Key.IS_STAGING, isStaging).apply();
 
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);

@@ -25,6 +25,7 @@ import com.symplified.easydukan.models.item.Item;
 import com.symplified.easydukan.models.item.UpdatedItem;
 import com.symplified.easydukan.models.order.Order;
 import com.symplified.easydukan.networking.ServiceGenerator;
+import com.symplified.easydukan.utils.Key;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -102,8 +103,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
-        String BASE_URL = sharedPreferences.getString("base_url", null);
-        String storeId = sharedPreferences.getString("storeId", null);
 
         formatter = new DecimalFormat("#,###0.00");
 
@@ -117,7 +116,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         }
 
         if (holder.itemImage.getDrawable() == null) {
-            getProductImageFromAssets(items.get(position), BASE_URL, storeId, holder);
+            getProductImageFromAssets(items.get(position), holder);
         }
 
         UpdatedItem updatedItem = new UpdatedItem();
@@ -166,7 +165,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         return items.size();
     }
 
-    private void getProductImageFromAssets(Item item, String BASE_URL, String storeId, ViewHolder holder) {
+    private void getProductImageFromAssets(Item item, ViewHolder holder) {
         ProductApi productApiService = ServiceGenerator.createProductService();
         productApiService.getStoreProductAssets(order.storeId, item.productId)
                 .clone().enqueue(new Callback<StoreProductAsset.StoreProductAssetListResponse>() {

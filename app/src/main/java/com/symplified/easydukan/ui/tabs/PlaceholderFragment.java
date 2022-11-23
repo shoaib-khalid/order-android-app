@@ -150,7 +150,9 @@ public class PlaceholderFragment extends Fragment
             }
         };
 
-        App.getPrinter().addObserver(this);
+        if (App.isPrinterConnected()) {
+            App.getPrinter().addObserver(this);
+        }
 
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -243,7 +245,9 @@ public class PlaceholderFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        App.getPrinter().removeObserver(this);
+        if (App.isPrinterConnected()) {
+            App.getPrinter().removeObserver(this);
+        }
         OrderNotificationService.removeNewOrderObserver(this);
         OrderNotificationService.removeOngoingOrderObserver(this);
         OrderNotificationService.removePastOrderObserver(this);
@@ -263,7 +267,7 @@ public class PlaceholderFragment extends Fragment
                     if (orders.size() > 0) {
                         showOrders();
                     } else {
-//                        showEmptyOrdersMessage();
+                        showEmptyOrdersMessage();
                     }
                 } else {
                     showErrorMessage();

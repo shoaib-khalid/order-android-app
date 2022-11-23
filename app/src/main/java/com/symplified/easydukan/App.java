@@ -4,6 +4,7 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -22,8 +23,10 @@ public class App extends Application implements PrinterObserver {
     private static Printer connectedPrinter;
     public static final String DEV_TAG = "dev-logging";
 
-    public static String BASE_URL = "https://api.symplified.biz/";
-    public static String BASE_URL_STAGING = "https://api.symplified.it/";
+    public static final String BASE_URL_PRODUCTION = "https://api.symplified.biz/";
+    public static final String BASE_URL_STAGING = "https://api.symplified.it/";
+    public static final String BASE_URL_DELIVERIN = "https://api.deliverin.pk/";
+
     public static final String USER_SERVICE_URL = "user-service/v1/clients/";
     public static final String PRODUCT_SERVICE_URL = "product-service/v1/";
     public static final String ORDER_SERVICE_URL = "order-service/v1/";
@@ -65,7 +68,6 @@ public class App extends Application implements PrinterObserver {
         GenericPrintHelper.getInstance().addObserver(this);
         GenericPrintHelper.getInstance().initPrinterService(this);
     }
-
 
     public static Printer getPrinter() {
         return connectedPrinter;
