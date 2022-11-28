@@ -33,8 +33,6 @@ public class Utility {
 
     public static void logToFile(String text) {
         File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
-        Log.d("print", "File path: " + file.getAbsolutePath());
-
         try {
             FileWriter fr = new FileWriter(file, true);
             fr.write(text);

@@ -16,6 +16,7 @@ import androidx.core.app.TaskStackBuilder;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
 import com.symplified.easydukan.App;
 import com.symplified.easydukan.OrdersActivity;
 import com.symplified.easydukan.R;
@@ -35,6 +36,7 @@ import com.symplified.easydukan.models.ping.PingRequest;
 import com.symplified.easydukan.networking.ServiceGenerator;
 import com.symplified.easydukan.utils.Utility;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -50,6 +52,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private Pattern pattern;
     private final String TAG = "order-notification-service";
+    private final String PRINT_TAG = "print-helper";
     private static final List<OrderObserver> newOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
@@ -91,7 +94,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
-
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
                                     && App.isPrinterConnected()) {
@@ -185,6 +187,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                            @NonNull Response<OrderUpdateResponse> response) {
                         if (response.isSuccessful()) {
                             Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
+
                             if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
                                 addOrderToView(pastOrderObservers, updatedOrderDetails);
                             } else if (Utility.isOrderOngoing(orderDetails.currentCompletionStatus)) {

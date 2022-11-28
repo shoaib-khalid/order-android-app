@@ -157,12 +157,7 @@ public class PlaceholderFragment extends Fragment
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    Log.d("activity-result", "Activity result called");
-
                     if (result.getResultCode() == Activity.RESULT_OK && orderAdapter != null) {
-
-                        Log.d("activity-result", "Activity result ok");
-
                         Intent data = result.getData();
                         Order.OrderDetails updatedOrderDetails
                                 = (Order.OrderDetails) data.getSerializableExtra(Key.ORDER_DETAILS);
@@ -271,17 +266,14 @@ public class PlaceholderFragment extends Fragment
                     }
                 } else {
                     showErrorMessage();
-                    Log.e("order-activity", "onResponse error getting orders: " + response.raw());
                 }
                 stopLoading();
-
             }
 
             @Override
             public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                 stopLoading();
                 showErrorMessage();
-                Log.e("order-activity", "onFailure error getting orders: " + t.getLocalizedMessage());
             }
         });
     }

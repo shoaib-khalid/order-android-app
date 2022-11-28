@@ -149,12 +149,7 @@ public class EditOrderActivity extends NavbarActivity {
     }
 
     public void updateOrderItems() {
-        Log.d("edit-order", order.id);
         List<UpdatedItem> updatedItems = adapter.getUpdatedItems();
-        Log.d("edit-order", "Updated Items");
-        for (UpdatedItem item : updatedItems) {
-            Log.d("edit-order", item.id + " " + item.quantity);
-        }
 
         if (adapter.updatedItemsList.size() == 0) {
             Toast.makeText(this, "No changes to update", Toast.LENGTH_SHORT).show();

@@ -131,7 +131,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
         holder.decrement.setOnClickListener(view -> {
             Item item = items.get(holder.getAdapterPosition());
-            Log.d("edit-item", "itemPosition: " + holder.getAdapterPosition());
             if (item.newQuantity > 0) {
                 item.newQuantity--;
                 item.price = item.productPrice * item.newQuantity;
@@ -142,7 +141,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.increment.setOnClickListener(view -> {
             Item item = items.get(holder.getAdapterPosition());
 
-            Log.d("edit-item", "itemPosition: " + holder.getAdapterPosition());
             if (item.newQuantity < item.quantity) {
                 item.newQuantity++;
                 item.price = item.productPrice * item.newQuantity;

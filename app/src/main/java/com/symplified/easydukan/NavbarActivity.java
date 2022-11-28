@@ -41,7 +41,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
     @Override
     public void setContentView(View view) {
-        Log.d("navbar", "setContentView");
         drawerLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_navbar, null);
 
         frameLayout = drawerLayout.findViewById(R.id.navbar_framelayout);

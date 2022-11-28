@@ -64,10 +64,6 @@
         </activity>
 
         <service
-            android:name=".services.StoreManagerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
             android:name=".services.OrderNotificationService"
             android:exported="false">
             <intent-filter>

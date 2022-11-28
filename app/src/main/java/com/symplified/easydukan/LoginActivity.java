@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final int UPDATE_REQUEST_CODE = 112;
     private static final String TAG = LoginActivity.class.getName();
-    private Button login, btnSwitchToProduction;
+    private Button btnSwitchToProduction;
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
@@ -116,8 +116,9 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void initViews() {
 
-        login = findViewById(R.id.btn_login);
+        Button login = findViewById(R.id.btn_login);
         login.setOnClickListener(view -> onLoginButtonClick());
+
         btnSwitchToProduction = findViewById(R.id.btn_production);
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
@@ -354,7 +355,6 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == UPDATE_REQUEST_CODE && resultCode == RESULT_OK) {
             Toast.makeText(this, "Update Started !", Toast.LENGTH_SHORT).show();
         } else if (resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
-            Log.d(TAG, "onActivityResult: " + "Update flow failed! Result code: " + resultCode);
             Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
         }
     }
