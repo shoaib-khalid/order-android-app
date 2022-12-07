@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.symplified.easydukan">
+    package="com.symplified.order">
 
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <application
-        android:name="com.symplified.easydukan.App"
+        android:name="com.symplified.order.App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,10 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
-            android:name=".TrackOrderActivity"
+            android:name="com.symplified.order.TrackOrderActivity"
             android:exported="false" />
         <activity
-            android:name=".EditOrderActivity"
+            android:name="com.symplified.order.EditOrderActivity"
             android:exported="false" />
 
         <meta-data
@@ -36,24 +36,24 @@
             android:resource="@mipmap/ic_launcher" />
 
         <activity
-            android:name=".NavbarActivity"
+            android:name="com.symplified.order.NavbarActivity"
             android:exported="true" />
         <activity
-            android:name=".SettingsActivity"
+            android:name="com.symplified.order.SettingsActivity"
             android:exported="false" />
         <activity
-            android:name=".EditProductActivity"
+            android:name="com.symplified.order.EditProductActivity"
             android:exported="true" />
         <activity
-            android:name=".ProductsActivity"
+            android:name="com.symplified.order.ProductsActivity"
             android:exported="true" />
         <activity
-            android:name=".OrdersActivity"
+            android:name="com.symplified.order.OrdersActivity"
             android:exported="true"
             android:label="@string/title_activity_orders"
             android:theme="@style/Theme.SymplifiedOrderUpdate.NoActionBar" />
         <activity
-            android:name="LoginActivity"
+            android:name="com.symplified.order.LoginActivity"
             android:exported="true"
             android:noHistory="true">
             <intent-filter>
@@ -64,18 +64,18 @@
         </activity>
 
         <service
-            android:name=".services.OrderNotificationService"
+            android:name="com.symplified.order.services.OrderNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <service
-            android:name=".services.AlertService"
+            android:name="com.symplified.order.services.AlertService"
             android:enabled="true" />
 
         <receiver
-            android:name=".services.StartupReceiver"
+            android:name="com.symplified.order.services.StartupReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
