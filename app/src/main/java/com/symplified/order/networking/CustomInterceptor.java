@@ -31,7 +31,7 @@ public class CustomInterceptor implements Interceptor {
     public CustomInterceptor() {
         sharedPrefs = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
 
-        String baseURL = sharedPrefs.getString("base_url", App.BASE_URL);
+        String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(baseURL + App.USER_SERVICE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())

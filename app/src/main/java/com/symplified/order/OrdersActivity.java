@@ -30,7 +30,7 @@ public class OrdersActivity extends NavbarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        com.symplified.order.databinding.ActivityOrdersBinding binding = ActivityOrdersBinding.inflate(getLayoutInflater());
+        ActivityOrdersBinding binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         drawerLayout = findViewById(R.id.drawer_layout);

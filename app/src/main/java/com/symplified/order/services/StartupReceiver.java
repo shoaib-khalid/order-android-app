@@ -14,6 +14,7 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
@@ -75,7 +76,8 @@ public class StartupReceiver extends BroadcastReceiver {
         Call<OrderDetailsResponse> orderResponse = orderApiService.getNewOrdersByClientId(clientId);
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
-            public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+            public void onResponse(@NonNull Call<OrderDetailsResponse> call,
+                                   @NonNull Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful() && response.body().data.content.size() > 0) {
                     Intent toOrdersActivity = new Intent(context, OrdersActivity.class);
                     TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(context);
@@ -122,7 +124,8 @@ public class StartupReceiver extends BroadcastReceiver {
             }
 
             @Override
-            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OrderDetailsResponse> call,
+                                  @NonNull Throwable t) {
             }
         });
     }

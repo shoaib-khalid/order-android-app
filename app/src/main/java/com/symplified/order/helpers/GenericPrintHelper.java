@@ -8,8 +8,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.iposprinter.iposprinterservice.*;
-
+import com.iposprinter.iposprinterservice.IPosPrinterCallback;
+import com.iposprinter.iposprinterservice.IPosPrinterService;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.Printer;
 import com.symplified.order.interfaces.PrinterObserver;
@@ -52,6 +52,7 @@ public class GenericPrintHelper implements Printer {
         return helper;
     }
 
+    @Override
     public void initPrinterService(Context context) {
         Intent intent = new Intent();
         intent.setPackage("com.iposprinter.iposprinterservice");
@@ -174,21 +175,19 @@ public class GenericPrintHelper implements Printer {
         }
 
         suffix.append(divider)
-                .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
-                .append("\nService Charges     ").append(currency).append(" ")
+                .append("\nSub-total     ").append(currency).append(" ").append(formatter.format(order.subTotal))
+                .append("\nSvc Chg       ").append(currency).append(" ")
                 .append(order.storeServiceCharges != null
                         ? formatter.format(order.storeServiceCharges)
                         : " 0.00");
 
-        if (order.serviceType != ServiceType.DINEIN) {
-            suffix.append("\nDelivery Charges    ").append(currency).append(" ")
-                    .append(order.deliveryCharges != null
-                            ? formatter.format(order.deliveryCharges)
-                            : " 0.00");
-        }
+        suffix.append("\nDel. Chg      ").append(currency).append(" ")
+                .append(order.deliveryCharges != null
+                        ? formatter.format(order.deliveryCharges)
+                        : " 0.00");
 
         suffix.append(divider)
-                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.total))
+                .append("\nTotal         ").append(currency).append(" ").append(formatter.format(order.total))
                 .append(divider2)
                 .append("\n");
 

@@ -19,7 +19,6 @@ import com.symplified.order.enums.ServiceType;
 
 import java.util.List;
 
-
 public class AlertService extends Service {
 
     private static MediaPlayer mediaPlayer;

@@ -26,13 +26,14 @@ import com.symplified.order.callbacks.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
+import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
+import com.symplified.order.models.ping.PingRequest;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private Pattern pattern;
     private final String TAG = "order-notification-service";
+    private final String PRINT_TAG = "print-helper";
     private static final List<OrderObserver> newOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
@@ -74,7 +76,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
             LoginApi userService = ServiceGenerator.createUserService();
             String transactionId = remoteMessage.getData().get("body");
 
-            userService.ping(clientId, transactionId).clone().enqueue(new EmptyCallback());
+            String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
+            userService.ping(clientId, transactionId, new PingRequest(deviceModel))
+                    .clone().enqueue(new EmptyCallback());
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
@@ -88,10 +92,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
                         if (response.isSuccessful() && response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
-
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                    && App.getPrinter().isPrinterConnected()) {
+                                    && App.isPrinterConnected()) {
                                 printAndProcessOrder(orderApiService, remoteMessage, orderDetails);
                             } else {
                                 addOrderToView(newOrderObservers, orderDetails);

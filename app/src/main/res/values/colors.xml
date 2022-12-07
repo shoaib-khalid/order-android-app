@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="sf_300">#ff9e22</color>
-    <color name="sf_400">#ffaf49</color>
-    <color name="sf_500">#f9aa33</color>
-    <color name="sf_b_800">#232f34</color>
-    <color name="sf_b_700">#344955</color>
+    <color name="sf_300">#1A73BA</color>
+    <color name="sf_400">#004889</color>
+    <color name="sf_500">#5ea1ed</color>
+    <color name="sf_b_800">#3f4d65</color>
+    <color name="sf_b_700">#15253B</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="light_grey">#efefef</color>

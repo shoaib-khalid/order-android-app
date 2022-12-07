@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,14 +30,13 @@ import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
-import com.symplified.order.helpers.SunmiPrintHelper;
+import com.symplified.order.interfaces.OrderManager;
+import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.interfaces.Printer;
+import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.interfaces.OrderManager;
-import com.symplified.order.interfaces.OrderObserver;
-import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.utils.Key;
@@ -151,17 +149,14 @@ public class PlaceholderFragment extends Fragment
             }
         };
 
-        App.getPrinter().addObserver(this);
+        if (App.isPrinterConnected()) {
+            App.getPrinter().addObserver(this);
+        }
 
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    Log.d("activity-result", "Activity result called");
-
                     if (result.getResultCode() == Activity.RESULT_OK && orderAdapter != null) {
-
-                        Log.d("activity-result", "Activity result ok");
-
                         Intent data = result.getData();
                         Order.OrderDetails updatedOrderDetails
                                 = (Order.OrderDetails) data.getSerializableExtra(Key.ORDER_DETAILS);
@@ -244,7 +239,9 @@ public class PlaceholderFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        App.getPrinter().removeObserver(this);
+        if (App.isPrinterConnected()) {
+            App.getPrinter().removeObserver(this);
+        }
         OrderNotificationService.removeNewOrderObserver(this);
         OrderNotificationService.removeOngoingOrderObserver(this);
         OrderNotificationService.removePastOrderObserver(this);
@@ -268,17 +265,14 @@ public class PlaceholderFragment extends Fragment
                     }
                 } else {
                     showErrorMessage();
-                    Log.e("order-activity", "onResponse error getting orders: " + response.raw());
                 }
                 stopLoading();
-
             }
 
             @Override
             public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
                 stopLoading();
                 showErrorMessage();
-                Log.e("order-activity", "onFailure error getting orders: " + t.getLocalizedMessage());
             }
         });
     }

@@ -1,9 +1,9 @@
 package com.symplified.order.adapters;
 
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,8 +101,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
-        String BASE_URL = sharedPreferences.getString("base_url", null);
-        String storeId = sharedPreferences.getString("storeId", null);
 
         formatter = new DecimalFormat("#,###0.00");
 
@@ -116,7 +114,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         }
 
         if (holder.itemImage.getDrawable() == null) {
-            getProductImageFromAssets(items.get(position), BASE_URL, storeId, holder);
+            getProductImageFromAssets(items.get(position), holder);
         }
 
         UpdatedItem updatedItem = new UpdatedItem();
@@ -131,7 +129,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
         holder.decrement.setOnClickListener(view -> {
             Item item = items.get(holder.getAdapterPosition());
-            Log.d("edit-item", "itemPosition: " + holder.getAdapterPosition());
             if (item.newQuantity > 0) {
                 item.newQuantity--;
                 item.price = item.productPrice * item.newQuantity;
@@ -142,7 +139,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         holder.increment.setOnClickListener(view -> {
             Item item = items.get(holder.getAdapterPosition());
 
-            Log.d("edit-item", "itemPosition: " + holder.getAdapterPosition());
             if (item.newQuantity < item.quantity) {
                 item.newQuantity++;
                 item.price = item.productPrice * item.newQuantity;
@@ -165,17 +161,13 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
         return items.size();
     }
 
-    private void getProductImageFromAssets(Item item, String BASE_URL, String storeId, ViewHolder holder) {
-        Log.d("edit-item", "Item code: " + item.itemCode);
-        Log.d("edit-item", "Item productId: " + item.productId);
-        Log.d("edit-item", "Order storeId: " + order.storeId);
-
+    private void getProductImageFromAssets(Item item, ViewHolder holder) {
         ProductApi productApiService = ServiceGenerator.createProductService();
         productApiService.getStoreProductAssets(order.storeId, item.productId)
                 .clone().enqueue(new Callback<StoreProductAsset.StoreProductAssetListResponse>() {
                     @Override
-                    public void onResponse(Call<StoreProductAsset.StoreProductAssetListResponse> call,
-                                           Response<StoreProductAsset.StoreProductAssetListResponse> response) {
+                    public void onResponse(@NonNull Call<StoreProductAsset.StoreProductAssetListResponse> call,
+                                           @NonNull Response<StoreProductAsset.StoreProductAssetListResponse> response) {
                         if (response.isSuccessful()) {
                             boolean foundAsset = false;
                             List<StoreProductAsset> assets = response.body().data;
@@ -195,7 +187,8 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
                     }
 
                     @Override
-                    public void onFailure(Call<StoreProductAsset.StoreProductAssetListResponse> call, Throwable t) {
+                    public void onFailure(@NonNull Call<StoreProductAsset.StoreProductAssetListResponse> call,
+                                          @NonNull Throwable t) {
                         Toast.makeText(context, "Failed to load item image", Toast.LENGTH_SHORT).show();
                     }
                 });

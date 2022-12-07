@@ -79,24 +79,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             context.startActivity(intent);
         });
 
-//        if (products.get(position).thumbnailUrl != null)
             Glide.with(context).load(products.get(position).thumbnailUrl).into(holder.productImage);
 
-//        try {
-//            Bitmap bitmap = new DownloadImageTask().execute(products.get(position).thumbnailUrl).get();
-//            if (bitmap != null) {
-//                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                String encodedImage = Base64.encodeToString(byteArrayOutputStream.toByteArray(), Base64.DEFAULT);
-//                if (encodedImage != null) {
-//                    Utility.decodeAndSetImage(holder.productImage, encodedImage);
-//                }
-//            }
-//        } catch (ExecutionException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 
     @Override

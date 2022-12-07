@@ -26,18 +26,6 @@
             android:onClick="ClickMenu"
             android:src="@drawable/ic_baseline_menu_24" />
 
-<!--        <ImageView-->
-<!--            android:id="@+id/app_bar_products"-->
-<!--            android:layout_width="50dp"-->
-<!--            android:layout_height="42dp"-->
-<!--            android:layout_centerVertical="true"-->
-<!--            android:layout_marginHorizontal="30dp"-->
-<!--            android:layout_marginStart="-188dp"-->
-<!--            android:layout_marginEnd="236dp"-->
-<!--            android:layout_toStartOf="@+id/app_bar_logout"-->
-<!--            android:layout_toEndOf="@id/app_bar_logo"-->
-<!--            android:src="@drawable/productsimg" />-->
-
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/app_bar_title"
             android:layout_width="wrap_content"
@@ -48,29 +36,6 @@
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-<!--        <ImageView-->
-<!--            android:id="@+id/app_bar_settings"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="30dp"-->
-<!--            android:layout_centerVertical="true"-->
-<!--            android:layout_marginHorizontal="20dp"-->
-<!--            android:layout_toStartOf="@+id/app_bar_logout"-->
-<!--            android:layout_toEndOf="@id/app_bar_logo"-->
-<!--            android:src="@drawable/ic_settings_white_24dp" />-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/app_bar_logout"-->
-<!--            android:layout_width="40dp"-->
-<!--            android:layout_height="30dp"-->
-<!--            android:layout_alignParentEnd="true"-->
-<!--            android:layout_centerVertical="true"-->
-<!--            android:layout_marginEnd="10dp"-->
-<!--            android:src="@drawable/ic_logout_black_24dp" />-->
-
-
     </RelativeLayout>
 
 </com.google.android.material.appbar.MaterialToolbar>
-
-    <!--    </com.google.android.material.appbar.AppBarLayout>-->

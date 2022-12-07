@@ -10,6 +10,7 @@ import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.apis.StoreApi;
+import com.symplified.order.utils.Key;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -47,10 +48,7 @@ public class ServiceGenerator {
 
         SharedPreferences sharedPrefs = App.getAppContext()
                 .getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        String baseURL =
-                sharedPrefs.getBoolean("isStaging", false)
-                        ? App.BASE_URL_STAGING
-                        : sharedPrefs.getString("base_url", App.BASE_URL);
+        String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
 
         return new Retrofit.Builder()
                 .client(httpClient)

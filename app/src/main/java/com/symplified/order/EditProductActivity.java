@@ -1,17 +1,12 @@
 package com.symplified.order;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -50,12 +45,9 @@ public class EditProductActivity extends NavbarActivity {
     private AutoCompleteTextView statusTextView;
     private final int REQ_CODE = 100;
 
-    private String BASE_URL;
     private String storeId;
-    private SharedPreferences sharedPreferences;
 
     private List<String> statusList;
-    private String accesToken;
     private ArrayAdapter<String> statusAdapter;
 
     private static Dialog progressDialog;
@@ -66,16 +58,12 @@ public class EditProductActivity extends NavbarActivity {
 
     private ProductApi productApiService;
 
-    @SuppressLint("WrongThread")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        BASE_URL = sharedPreferences.getString("base_url", null);
-        accesToken = sharedPreferences.getString("accessToken", null);
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         progressDialog.setContentView(R.layout.progress_dialog);
@@ -105,21 +93,18 @@ public class EditProductActivity extends NavbarActivity {
             updateProduct();
         });
 
-        statusTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                String selected = adapterView.getItemAtPosition(i).toString();
-                switch (selected) {
-                    case "Active":
-                        product.status = "ACTIVE";
-                        break;
-                    case "Inactive":
-                        product.status = "INACTIVE";
-                        break;
-                    case "Out of Stock":
-                        product.status = "OUTOFSTOCK";
-                        break;
-                }
+        statusTextView.setOnItemClickListener((adapterView, view, i, l) -> {
+            String selected = adapterView.getItemAtPosition(i).toString();
+            switch (selected) {
+                case "Active":
+                    product.status = "ACTIVE";
+                    break;
+                case "Inactive":
+                    product.status = "INACTIVE";
+                    break;
+                case "Out of Stock":
+                    product.status = "OUTOFSTOCK";
+                    break;
             }
         });
 
@@ -150,10 +135,8 @@ public class EditProductActivity extends NavbarActivity {
 
 
     public void updateProduct() {
-
-        if (productName.getEditText().getText().equals("") ||
-                productDescription.getEditText().getText().equals("")
-        ) {
+        if (productName.getEditText().getText().equals("")
+                || productDescription.getEditText().getText().equals("")) {
             Toast.makeText(this, "Please Fill all Fields", Toast.LENGTH_SHORT).show();
             return;
         }

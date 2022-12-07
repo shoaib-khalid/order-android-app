@@ -10,6 +10,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -97,7 +98,8 @@ public class ProductsActivity extends NavbarActivity {
 
             responseCall.clone().enqueue(new Callback<ProductListResponse>() {
                 @Override
-                public void onResponse(Call<ProductListResponse> call, Response<ProductListResponse> response) {
+                public void onResponse(@NonNull Call<ProductListResponse> call,
+                                       @NonNull Response<ProductListResponse> response) {
                     if (response.isSuccessful()) {
                         products.addAll(response.body().data.content);
                         productAdapter.notifyDataSetChanged();
@@ -108,7 +110,8 @@ public class ProductsActivity extends NavbarActivity {
                 }
 
                 @Override
-                public void onFailure(Call<ProductListResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<ProductListResponse> call,
+                                      @NonNull Throwable t) {
                     Log.e(TAG, "onFailure: ", t);
                     Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     stopLoading();

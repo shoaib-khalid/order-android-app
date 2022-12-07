@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,14 +33,13 @@ import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
-import com.symplified.order.helpers.SunmiPrintHelper;
+import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
@@ -359,7 +357,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
 
-        if (App.getPrinter().isPrinterConnected()) {
+        if (App.isPrinterConnected()) {
             holder.printButton.setVisibility(View.VISIBLE);
         }
     }
@@ -576,8 +574,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         riderDetails.clone().enqueue(new Callback<OrderDeliveryDetailsResponse>() {
             @Override
-            public void onResponse(Call<OrderDeliveryDetailsResponse> call,
-                                   Response<OrderDeliveryDetailsResponse> response) {
+            public void onResponse(@NonNull Call<OrderDeliveryDetailsResponse> call,
+                                   @NonNull Response<OrderDeliveryDetailsResponse> response) {
                 if (response.isSuccessful()) {
                     if (tag == 1) {
                         Intent intent = new Intent(context, TrackOrderActivity.class);
@@ -608,7 +606,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
 
             @Override
-            public void onFailure(Call<OrderDeliveryDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OrderDeliveryDetailsResponse> call, @NonNull Throwable t) {
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
             }
         });

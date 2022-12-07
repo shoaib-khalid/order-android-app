@@ -2,7 +2,6 @@ package com.symplified.order;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -22,6 +21,7 @@ import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.Key;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,19 +29,17 @@ import retrofit2.Response;
 
 public class NavbarActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private String storeId, BASE_URL;
+    private String storeId;
     private DrawerLayout drawerLayout;
     private ImageView storeLogo;
     private TextView storeName, storeEmail, appVersion;
     private String version;
     private NavigationView navigationView;
-    private static SharedPreferences sharedPreferences;
     private StoreApi storeApiService;
     public FrameLayout frameLayout;
 
     @Override
     public void setContentView(View view) {
-        Log.d("navbar", "setContentView");
         drawerLayout = (DrawerLayout) getLayoutInflater().inflate(R.layout.activity_navbar, null);
 
         frameLayout = drawerLayout.findViewById(R.id.navbar_framelayout);
@@ -53,13 +51,9 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
         version = BuildConfig.VERSION_NAME;
 
-        sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         storeId = sharedPreferences.getString("storeId", null);
-
-        Log.d("imran-debug-navbar", "StoreId: " + storeId);
-
-        BASE_URL = sharedPreferences.getString("base_url", App.BASE_URL);
 
         navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -86,12 +80,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                     for (Store.StoreAsset asset : response.body().data.storeAssets) {
                         if (asset.assetType.equals("LogoUrl")) {
                             Glide.with(getApplicationContext()).load(asset.assetUrl).into(storeLogo);
-//                            try {
-//                                Bitmap bitmap = new DownloadImageTask().execute(asset.assetUrl).get();
-//                                storeLogo.setImageBitmap(bitmap);
-//                            } catch (ExecutionException | InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
                         }
                     }
                     storeName.setText(response.body().data.name);
@@ -101,14 +89,13 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
             @Override
             public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
-                                  @NonNull Throwable t) {
-            }
+                                  @NonNull Throwable t) { }
         });
 
         TextView logout = navigationView.findViewById(R.id.nav_logout);
 
 
-        if (sharedPreferences.getBoolean("isStaging", false)) {
+        if (sharedPreferences.getBoolean(Key.IS_STAGING, false)) {
             logout.setVisibility(View.VISIBLE);
         }
 
@@ -120,9 +107,9 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
             }
-            boolean isStaging = sharedPreferences.getBoolean("isStaging", false);
+            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
             sharedPreferences.edit().clear().apply();
-            sharedPreferences.edit().putBoolean("isStaging", isStaging).apply();
+            sharedPreferences.edit().putBoolean(Key.IS_STAGING, isStaging).apply();
 
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);

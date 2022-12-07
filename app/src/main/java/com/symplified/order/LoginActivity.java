@@ -1,17 +1,13 @@
 package com.symplified.order;
 
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -56,15 +51,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final int UPDATE_REQUEST_CODE = 112;
     private static final String TAG = LoginActivity.class.getName();
-    private Button login, btnSwitchToProduction;
+    private Button btnSwitchToProduction;
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
-    private ImageView header;
-    private Dialog progressDialog;
-    private FirebaseRemoteConfig mRemoteConfig;
     private String testUser, testPass;
-    private String BASE_URL;
+    private final String deliverinUser = "pak_user", deliverinPass = "pak@123";
     private List<Store> stores;
     private TextView welcomeText;
     private ProgressBar progressBar;
@@ -83,30 +75,40 @@ public class LoginActivity extends AppCompatActivity {
 
         configureRemoteConfig();
 
-        if (sharedPreferences.getBoolean("isStaging", false)) {
-            switchToStagingMode();
+        switch (sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION)) {
+            case App.BASE_URL_STAGING:
+                switchToStagingMode();
+                break;
+            case App.BASE_URL_DELIVERIN:
+                switchToDeliverinUrl();
+                break;
+            default:
+                switchToProductionMode();
+                break;
         }
-
-        login.setOnClickListener(view -> onLoginButtonClick());
-        btnSwitchToProduction.setOnClickListener(view -> switchToProductionMode());
     }
 
     private void switchToProductionMode() {
-        BASE_URL = App.BASE_URL;
-        sharedPreferences.edit().putBoolean("isStaging", false).apply();
-        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+        sharedPreferences.edit().putBoolean(Key.IS_STAGING, false).apply();
+        sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_PRODUCTION).apply();
         Toast.makeText(getApplicationContext(), "Switched to production", Toast.LENGTH_SHORT).show();
         welcomeText.setText(R.string.welcome_message);
         btnSwitchToProduction.setVisibility(View.GONE);
     }
 
     private void switchToStagingMode() {
-        BASE_URL = App.BASE_URL_STAGING;
-        sharedPreferences.edit().putBoolean("isStaging", true).apply();
-        sharedPreferences.edit().putString("base_url", BASE_URL).apply();
+        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true).apply();
+        sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_STAGING).apply();
         Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
-        MaterialTextView welcomeText = findViewById(R.id.welcome);
         welcomeText.setText(R.string.staging_mode);
+        btnSwitchToProduction.setVisibility(View.VISIBLE);
+    }
+
+    private void switchToDeliverinUrl() {
+        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true).apply();
+        sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_DELIVERIN).apply();
+        Toast.makeText(getApplicationContext(), "Switched to deliverin base url", Toast.LENGTH_SHORT).show();
+        welcomeText.setText(R.string.deliverin);
         btnSwitchToProduction.setVisibility(View.VISIBLE);
     }
 
@@ -114,18 +116,15 @@ public class LoginActivity extends AppCompatActivity {
      * method to initialize all the views in this activity
      */
     private void initViews() {
-        progressDialog = new Dialog(this);
-        progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        progressDialog.setContentView(R.layout.progress_dialog);
-        progressDialog.setCancelable(false);
-        CircularProgressIndicator progressIndicator = progressDialog.findViewById(R.id.progress);
-        progressIndicator.setIndeterminate(true);
 
-        login = findViewById(R.id.btn_login);
+        Button login = findViewById(R.id.btn_login);
+        login.setOnClickListener(view -> onLoginButtonClick());
+
+        btnSwitchToProduction = findViewById(R.id.btn_production);
         email = findViewById(R.id.tv_email);
         password = findViewById(R.id.tv_password);
-        header = findViewById(R.id.iv_header);
         btnSwitchToProduction = findViewById(R.id.btn_production);
+        btnSwitchToProduction.setOnClickListener(view -> switchToProductionMode());
         welcomeText = findViewById(R.id.welcome);
 
         progressBar = findViewById(R.id.progress_bar);
@@ -136,7 +135,7 @@ public class LoginActivity extends AppCompatActivity {
      * method to configure and setup Firebase Remote Config
      */
     private void configureRemoteConfig() {
-        mRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfig mRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings
                 .Builder()
                 .setMinimumFetchIntervalInSeconds(0)
@@ -148,11 +147,6 @@ public class LoginActivity extends AppCompatActivity {
         mRemoteConfig.activate();
 
         stores = new ArrayList<>();
-        BASE_URL = mRemoteConfig.getString("base_url");
-
-        if (BASE_URL.equals("")) {
-            BASE_URL = App.BASE_URL;
-        }
 
         testUser = mRemoteConfig.getString("test_user");
         testPass = mRemoteConfig.getString("test_pass");
@@ -161,9 +155,6 @@ public class LoginActivity extends AppCompatActivity {
             testUser = "qa_user";
             testPass = "qa@kalsym";
         }
-
-        Log.i("TAG", "test credentials  : user : " + testUser + " : password : " + testPass);
-
     }
 
 
@@ -171,9 +162,15 @@ public class LoginActivity extends AppCompatActivity {
      * onClick method for Login Button
      */
     private void onLoginButtonClick() {
-        if (email.getEditText().getText().toString().equals(testUser)
-                && password.getEditText().getText().toString().equals(testPass)) {
+        String emailInput = email.getEditText() != null ? email.getEditText().getText().toString() : "";
+        String passwordInput = password.getEditText() != null ? password.getEditText().getText().toString() : "";
+        if (emailInput.equals(testUser) && passwordInput.equals(testPass)) {
             switchToStagingMode();
+            email.getEditText().getText().clear();
+            password.getEditText().getText().clear();
+            email.getEditText().requestFocus();
+        } else if (emailInput.equals(deliverinUser) && passwordInput.equals(deliverinPass)) {
+            switchToDeliverinUrl();
             email.getEditText().getText().clear();
             password.getEditText().getText().clear();
             email.getEditText().requestFocus();
@@ -191,14 +188,10 @@ public class LoginActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         LoginData res = response.body().data;
                         SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("email", res.session.username);
                         editor.putString("accessToken", res.session.accessToken);
                         editor.putString("refreshToken", res.session.refreshToken);
                         editor.putString("ownerId", res.session.ownerId);
-                        editor.putString("expiry", res.session.expiry.toGMTString());
                         editor.putBoolean(Key.IS_LOGGED_IN, true);
-                        editor.putInt("versionCode", BuildConfig.VERSION_CODE);
-                        editor.putString("base_url", BASE_URL);
                         editor.apply();
                         getStoresAndRegister(sharedPreferences);
                     } else {
@@ -210,7 +203,6 @@ public class LoginActivity extends AppCompatActivity {
                 public void onFailure(Call<LoginResponse> call, Throwable t) {
                     Log.e("TAG", "onFailure: ", t.getCause());
                     Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-                    progressDialog.dismiss();
                     stopLoading();
                 }
 
@@ -241,7 +233,6 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString("storeIdList", storeIdList.toString()).apply();
         editor.putInt("hasLogos", 0).apply();
 
-        progressDialog.dismiss();
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
         startActivity(intent);
     }
@@ -289,7 +280,6 @@ public class LoginActivity extends AppCompatActivity {
             public void onFailure(Call<StoreResponse> call, Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
                 Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                progressDialog.dismiss();
             }
         });
 
@@ -315,9 +305,9 @@ public class LoginActivity extends AppCompatActivity {
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
                 }
             }
-            boolean isStaging = sharedPreferences.getBoolean("isStaging", false);
+            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
             sharedPreferences.edit().clear().apply();
-            sharedPreferences.edit().putBoolean("isStaging", isStaging).apply();
+            sharedPreferences.edit().putBoolean(Key.IS_STAGING, isStaging).apply();
         }
 
         super.onStart();
@@ -366,7 +356,6 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == UPDATE_REQUEST_CODE && resultCode == RESULT_OK) {
             Toast.makeText(this, "Update Started !", Toast.LENGTH_SHORT).show();
         } else if (resultCode == ActivityResult.RESULT_IN_APP_UPDATE_FAILED) {
-            Log.d(TAG, "onActivityResult: " + "Update flow failed! Result code: " + resultCode);
             Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
         }
     }
@@ -388,7 +377,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleError(okhttp3.Response rawResponse) {
-        progressDialog.dismiss();
         Toast.makeText(this, R.string.request_failure, Toast.LENGTH_SHORT).show();
         email.getEditText().setText("");
         password.getEditText().setText("");

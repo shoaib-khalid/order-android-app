@@ -10,11 +10,11 @@ import com.sunmi.peripheral.printer.SunmiPrinterService;
 import com.sunmi.peripheral.printer.WoyouConsts;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.Printer;
+import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
