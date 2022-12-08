@@ -10,7 +10,7 @@ android {
 
     compileSdk 33
     defaultConfig {
-        applicationId "com.symplified.easydukan"
+        applicationId "com.symplified.order"
         minSdk 23
         targetSdk 33
         versionCode 110
