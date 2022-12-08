@@ -32,7 +32,7 @@ public class App extends Application implements PrinterObserver {
     public static final String DELIVERY_SERVICE_URL = "delivery-service/v1/";
 
     public static final String SESSION_DETAILS_TITLE = "session";
-    public static final String CHANNEL_ID = "EASYDUKAN_ID";
+    public static final String CHANNEL_ID = "CHANNEL_ID";
     public static final String ORDERS = "ORDERS";
 
     @Override
@@ -46,7 +46,7 @@ public class App extends Application implements PrinterObserver {
         //initialize the notification manager to receive and display notifications.
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
             NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,"EasyDukan", NotificationManager.IMPORTANCE_HIGH
+                    CHANNEL_ID,"Symplified", NotificationManager.IMPORTANCE_HIGH
             );
 
             NotificationChannel orders = new NotificationChannel(

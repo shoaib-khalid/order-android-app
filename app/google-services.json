@@ -23,14 +23,6 @@
           }
         },
         {
-          "client_id": "616735524018-e9enbbmuh6m52hjs19pp6g89lughqg01.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.kalsym",
-            "certificate_hash": "5bf6313af0f42cb54b9ac8c61f3904f178f85201"
-          }
-        },
-        {
           "client_id": "616735524018-n5i4dorrsen6dj1655m7od07j4acbluh.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -59,14 +51,6 @@
         }
       },
       "oauth_client": [
-        {
-          "client_id": "616735524018-ek2nbigfjkjjgsn1mc2cj740tq2lbisg.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.kalsym.fooddelivery.deliveryguy",
-            "certificate_hash": "b32a83cd89b755d275807e1964895d78b935b0a7"
-          }
-        },
         {
           "client_id": "616735524018-usj4jo8199h69ut4as7ka8vdhar17e8h.apps.googleusercontent.com",
           "client_type": 1,
@@ -98,49 +82,12 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:616735524018:android:84efa6c1c725d05a91b5ab",
-        "android_client_info": {
-          "package_name": "com.symplified.order"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "616735524018-n5i4dorrsen6dj1655m7od07j4acbluh.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCyzvjNIVJ2W0Oh6sk0qf6wuxDuP4KhNKY"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "616735524018-n5i4dorrsen6dj1655m7od07j4acbluh.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:616735524018:android:ff53a19799dff9da91b5ab",
         "android_client_info": {
           "package_name": "com.symplified.order"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "616735524018-a7u9r61qigf1j66fcksc8pqrt5sgeabs.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.symplified.order",
-            "certificate_hash": "b67ac2cfef4c16a2f2b625c14920b554761acd3e"
-          }
-        },
         {
           "client_id": "616735524018-n5i4dorrsen6dj1655m7od07j4acbluh.apps.googleusercontent.com",
           "client_type": 3
