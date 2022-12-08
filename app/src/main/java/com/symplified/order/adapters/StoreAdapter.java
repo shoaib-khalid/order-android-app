@@ -1,6 +1,7 @@
 package com.symplified.order.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,10 +9,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.symplified.order.QrCodeActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
@@ -48,6 +51,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         private final TextView name;
         private final TextView status;
         private final ProgressBar progressBar;
+        private final AppCompatImageButton qrCodeButton;
         private boolean isLoading;
 
         public ViewHolder(View view) {
@@ -56,6 +60,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             name = view.findViewById(R.id.store_name);
             status = view.findViewById(R.id.store_status);
             progressBar = view.findViewById(R.id.progress_bar);
+            qrCodeButton = view.findViewById(R.id.qr_code_button);
         }
 
         public boolean isLoading() {
@@ -90,6 +95,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
                 bottomSheetDialogFragment.show(((FragmentActivity) context)
                         .getSupportFragmentManager(), "bottomSheetDialog");
             }
+        });
+
+        holder.qrCodeButton.setOnClickListener(view -> {
+            Intent intent = new Intent(context, QrCodeActivity.class);
+            intent.putExtra("storeId", storeId);
+            context.startActivity(intent);
         });
     }
 

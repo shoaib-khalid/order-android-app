@@ -36,7 +36,6 @@ public class SettingsActivity extends NavbarActivity {
                 .beginTransaction()
                 .add(R.id.settings_frame_layout, new StoreSelectionFragment())
                 .commit();
-
     }
 
     private void initToolbar() {

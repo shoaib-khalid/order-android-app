@@ -17,13 +17,20 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 
     <application
-        android:name="com.symplified.order.App"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
+        <activity
+            android:name=".QrCodeActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
         <activity
             android:name=".TrackOrderActivity"
             android:exported="false" />
@@ -46,10 +53,9 @@
             android:exported="true" />
         <activity
             android:name=".ProductsActivity"
-            android:exported="true" />
-<!--        <activity-->
-<!--            android:name=".ChooseStoreActivity"-->
-<!--            android:exported="true" />-->
+            android:exported="true" /> <!-- <activity -->
+        <!-- android:name=".ChooseStoreActivity" -->
+        <!-- android:exported="true" /> -->
         <activity
             android:name=".OrdersActivity"
             android:exported="true"
@@ -66,11 +72,7 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".services.StoreManagerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <service
+            <service
             android:name=".services.OrderNotificationService"
             android:exported="false">
             <intent-filter>
@@ -78,11 +80,11 @@
             </intent-filter>
         </service>
         <service
-            android:name="com.symplified.order.services.AlertService"
+            android:name=".services.AlertService"
             android:enabled="true" />
 
         <receiver
-            android:name="com.symplified.order.services.StartupReceiver"
+            android:name=".services.StartupReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

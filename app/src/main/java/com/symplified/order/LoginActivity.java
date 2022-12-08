@@ -91,7 +91,6 @@ public class LoginActivity extends AppCompatActivity {
     private void switchToProductionMode() {
         sharedPreferences.edit().putBoolean(Key.IS_STAGING, false).apply();
         sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_PRODUCTION).apply();
-        Toast.makeText(getApplicationContext(), "Switched to production", Toast.LENGTH_SHORT).show();
         welcomeText.setText(R.string.welcome_message);
         btnSwitchToProduction.setVisibility(View.GONE);
     }

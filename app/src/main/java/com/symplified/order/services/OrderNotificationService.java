@@ -27,6 +27,7 @@ import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.OrderObserver;
+import com.symplified.order.interfaces.QrCodeObserver;
 import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.item.ItemsResponse;
 import com.symplified.order.models.order.Order;
@@ -54,6 +55,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private static final List<OrderObserver> newOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
+    private static final List<QrCodeObserver> qrCodeObservers = new ArrayList<>();
 
     @Override
     public void onCreate() {
@@ -79,6 +81,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
             String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
             userService.ping(clientId, transactionId, new PingRequest(deviceModel))
                     .clone().enqueue(new EmptyCallback());
+        } else if (messageTitle != null && messageTitle.equalsIgnoreCase("qrcode")) {
+            for (QrCodeObserver observer : qrCodeObservers) {
+                observer.onRedeemed();
+            }
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
@@ -321,4 +327,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     public static void addPastOrderObserver(OrderObserver observer) { pastOrderObservers.add(observer); }
     public static void removePastOrderObserver(OrderObserver observer) { pastOrderObservers.remove(observer); }
+
+    public static void addQrCodeObserver(QrCodeObserver observer) { qrCodeObservers.add(observer); }
+    public static void removeQrCodeObserver(QrCodeObserver observer) { qrCodeObservers.remove(observer); }
 }
