@@ -40,6 +40,7 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.utils.Key;
+import com.symplified.order.utils.Utility;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -94,10 +95,6 @@ public class PlaceholderFragment extends Fragment
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", null);
-
-        if (clientId == null) {
-            Toast.makeText(getActivity(), "Client id is null", Toast.LENGTH_SHORT).show();
-        }
 
         orders = new ArrayList<>();
 
@@ -314,8 +311,15 @@ public class PlaceholderFragment extends Fragment
 
     @Override
     public void onOrderReceived(Order.OrderDetails orderDetails) {
-        if (orderAdapter != null && orders.add(orderDetails)) {
-            orderAdapter.notifyItemInserted(orders.indexOf(orderDetails));
+        if (orderAdapter != null) {
+            if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
+                orders.add(0, orderDetails);
+                orderAdapter.notifyItemInserted(0);
+                recyclerView.smoothScrollToPosition(0);
+            } else {
+                orders.add(orderDetails);
+                orderAdapter.notifyItemInserted(orders.indexOf(orderDetails));
+            }
             showOrders();
         }
     }
