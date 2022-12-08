@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputLayout;
@@ -261,20 +262,19 @@ public class LoginActivity extends AppCompatActivity {
                     subscriptionCount = 0;
                     for (Store store : stores) {
                         FirebaseMessaging.getInstance().subscribeToTopic(store.id)
-                                .addOnSuccessListener(emptyRes -> {
-                                    subscriptionCount++;
-                                    Log.d("login-activity", "Subscribed to store " + store.name + ", subCount: " + subscriptionCount);
-                                    if (subscriptionCount >= stores.size()) {
-                                        setStoreDataAndProceed();
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    removeUserData();
-                                    stopLoading();
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        subscriptionCount++;
+                                        Log.d("login-activity", "Subscribed to store " + store.name + ", subCount: " + subscriptionCount);
+                                        if (subscriptionCount >= stores.size()) {
+                                            setStoreDataAndProceed();
+                                        }
+                                    } else {
+                                        removeUserData();
+                                        stopLoading();
 
-                                    handleError(e.getLocalizedMessage() != null
-                                            ? e.getLocalizedMessage()
-                                            : "Failed to subscribe to firebase");
+                                        handleError("Failed to subscribe to firebase");
+                                    }
                                 });
                     }
                 } else {
