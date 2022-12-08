@@ -12,10 +12,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.textview.MaterialTextView;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
@@ -89,23 +92,23 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void switchToProductionMode() {
-        sharedPreferences.edit().putBoolean(Key.IS_STAGING, false).apply();
-        sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_PRODUCTION).apply();
+        sharedPreferences.edit().putBoolean(Key.IS_STAGING, false)
+                .putString(Key.BASE_URL, App.BASE_URL_PRODUCTION).apply();
         welcomeText.setText(R.string.welcome_message);
         btnSwitchToProduction.setVisibility(View.GONE);
     }
 
     private void switchToStagingMode() {
-        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true).apply();
-        sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_STAGING).apply();
+        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true)
+                .putString(Key.BASE_URL, App.BASE_URL_STAGING).apply();
         Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
         welcomeText.setText(R.string.staging_mode);
         btnSwitchToProduction.setVisibility(View.VISIBLE);
     }
 
     private void switchToDeliverinUrl() {
-        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true).apply();
-        sharedPreferences.edit().putString(Key.BASE_URL, App.BASE_URL_DELIVERIN).apply();
+        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true)
+                .putString(Key.BASE_URL, App.BASE_URL_DELIVERIN).apply();
         Toast.makeText(getApplicationContext(), "Switched to deliverin base url", Toast.LENGTH_SHORT).show();
         welcomeText.setText(R.string.deliverin);
         btnSwitchToProduction.setVisibility(View.VISIBLE);
@@ -183,23 +186,24 @@ public class LoginActivity extends AppCompatActivity {
 
             loginResponse.clone().enqueue(new Callback<LoginResponse>() {
                 @Override
-                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                public void onResponse(@NonNull Call<LoginResponse> call,
+                                       @NonNull Response<LoginResponse> response) {
                     if (response.isSuccessful()) {
                         LoginData res = response.body().data;
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.putString("accessToken", res.session.accessToken);
-                        editor.putString("refreshToken", res.session.refreshToken);
-                        editor.putString("ownerId", res.session.ownerId);
-                        editor.putBoolean(Key.IS_LOGGED_IN, true);
-                        editor.apply();
-                        getStoresAndRegister(sharedPreferences);
+                        sharedPreferences.edit()
+                                .putString("accessToken", res.session.accessToken)
+                                .putString("refreshToken", res.session.refreshToken)
+                                .putString("ownerId", res.session.ownerId)
+                                .apply();
+                        getStoresAndRegister();
                     } else {
-                        handleError(response.raw());
+                        handleError(response.raw().toString());
                     }
                 }
 
                 @Override
-                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<LoginResponse> call,
+                                      @NonNull Throwable t) {
                     Log.e("TAG", "onFailure: ", t.getCause());
                     Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
                     stopLoading();
@@ -212,66 +216,69 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * method to store information to sharedPreferences for user session management
      *
-     * @param context
-     * @param items
-     * @param sharedPreferences
      */
-    private void setStoreDataAndProceed(Context context, List<Store> items, SharedPreferences sharedPreferences) {
+    private void setStoreDataAndProceed() {
 
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         StringBuilder timeZoneList = new StringBuilder();
         StringBuilder storeIdList = new StringBuilder();
-        for (Store store : items) {
+        for (Store store : stores) {
             timeZoneList.append(store.regionCountry.timezone).append(" ");
             storeIdList.append(store.id).append(" ");
-            sharedPreferences.edit().putString(store.id + "-name", store.name).apply();
+            editor.putString(store.id + "-name", store.name).apply();
         }
-        editor.putString("currency", items.get(0).regionCountry.currencySymbol);
-        editor.putString("storeId", storeIdList.toString().split(" ")[0]).apply();
-        editor.putString("timezone", timeZoneList.toString()).apply();
-        editor.putString("storeIdList", storeIdList.toString()).apply();
-        editor.putInt("hasLogos", 0).apply();
+        editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
+                .putString("storeId", storeIdList.toString().split(" ")[0])
+                .putString("timezone", timeZoneList.toString())
+                .putString("storeIdList", storeIdList.toString())
+                .putInt("hasLogos", 0)
+                .putBoolean(Key.IS_LOGGED_IN, true)
+                .apply();
 
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
         startActivity(intent);
     }
 
-    /**
-     * method to subscribe the user to all the stores that belong to user, to receive new order notifications
-     *
-     * @param stores
-     * @param context
-     */
-    private void subscribeStores(List<Store> stores, Context context) {
-        Log.i("TAG", "subscribeStores: " + stores);
-
-        for (Store store : stores) {
-            FirebaseHelper.initializeFirebase(store.id);
-        }
-    }
+    int subscriptionCount = 0;
 
     /**
      * method to make the api call to get all the stores of user from backend
      *
-     * @param sharedPreferences
      */
-    private void getStoresAndRegister(SharedPreferences sharedPreferences) {
+    private void getStoresAndRegister() {
 
         String clientId = sharedPreferences.getString("ownerId", null);
 
         StoreApi storeApiService = ServiceGenerator.createStoreService();
         Call<StoreResponse> storeResponse = storeApiService.getStores(clientId);
-//        progressDialog.show();
         storeResponse.clone().enqueue(new Callback<StoreResponse>() {
-
             @Override
-            public void onResponse(Call<StoreResponse> call, Response<StoreResponse> response) {
+            public void onResponse(@NonNull Call<StoreResponse> call,
+                                   @NonNull Response<StoreResponse> response) {
                 if (response.isSuccessful()) {
                     stores = response.body().data.content;
-                    subscribeStores(stores, getApplicationContext());
-                    setStoreDataAndProceed(getApplicationContext(), stores, sharedPreferences);
+
+                    subscriptionCount = 0;
+                    for (Store store : stores) {
+                        FirebaseMessaging.getInstance().subscribeToTopic(store.id)
+                                .addOnSuccessListener(emptyRes -> {
+                                    subscriptionCount++;
+                                    Log.d("login-activity", "Subscribed to store " + store.name + ", subCount: " + subscriptionCount);
+                                    if (subscriptionCount >= stores.size()) {
+                                        setStoreDataAndProceed();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    removeUserData();
+                                    stopLoading();
+
+                                    handleError(e.getLocalizedMessage() != null
+                                            ? e.getLocalizedMessage()
+                                            : "Failed to subscribe to firebase");
+                                });
+                    }
                 } else {
-                    handleError(response.raw());
+                    handleError(response.raw().toString());
                 }
             }
 
@@ -281,8 +288,6 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-
     }
 
     /**
@@ -298,20 +303,7 @@ public class LoginActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         } else {
-            String storeIdList = sharedPreferences.getString("storeIdList", null);
-            if (storeIdList != null) {
-                for (String storeId : storeIdList.split(" ")) {
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                }
-            }
-            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
-            String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
-
-            sharedPreferences.edit().clear().apply();
-            sharedPreferences.edit()
-                    .putBoolean(Key.IS_STAGING, isStaging)
-                    .putString(Key.BASE_URL, baseUrl)
-                    .apply();
+            removeUserData();
         }
 
         super.onStart();
@@ -380,12 +372,29 @@ public class LoginActivity extends AppCompatActivity {
         mainLayout.setVisibility(View.VISIBLE);
     }
 
-    private void handleError(okhttp3.Response rawResponse) {
+    private void removeUserData() {
+        String storeIdList = sharedPreferences.getString("storeIdList", null);
+        if (storeIdList != null) {
+            for (String storeId : storeIdList.split(" ")) {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+            }
+        }
+        boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
+        String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+
+        sharedPreferences.edit().clear().apply();
+        sharedPreferences.edit()
+                .putBoolean(Key.IS_STAGING, isStaging)
+                .putString(Key.BASE_URL, baseUrl)
+                .apply();
+    }
+
+    private void handleError(String errorStr) {
         Toast.makeText(this, R.string.request_failure, Toast.LENGTH_SHORT).show();
         email.getEditText().setText("");
         password.getEditText().setText("");
         stopLoading();
         email.getEditText().requestFocus();
-        Log.e("login-activity", rawResponse.toString());
+        Log.e("login-activity", errorStr);
     }
 }
