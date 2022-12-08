@@ -87,4 +87,8 @@ public class Utility {
     public static boolean isOrderCompleted(OrderStatus completionStatus) {
         return completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER;
     }
+
+    public static boolean isBlank(String str) {
+        return str == null || "".equals(str);
+    }
 }

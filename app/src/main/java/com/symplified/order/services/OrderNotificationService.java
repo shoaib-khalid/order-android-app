@@ -191,9 +191,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                            @NonNull Response<OrderUpdateResponse> response) {
                         if (response.isSuccessful()) {
                             Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
-                            if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
+                            if (Utility.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
                                 addOrderToView(pastOrderObservers, updatedOrderDetails);
-                            } else if (Utility.isOrderOngoing(orderDetails.currentCompletionStatus)) {
+                            } else if (Utility.isOrderOngoing(updatedOrderDetails.currentCompletionStatus)) {
                                 addOrderToView(ongoingOrderObservers, updatedOrderDetails);
                             }
                         } else {

@@ -72,7 +72,7 @@
             </intent-filter>
         </activity>
 
-            <service
+        <service
             android:name=".services.OrderNotificationService"
             android:exported="false">
             <intent-filter>

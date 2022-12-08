@@ -10,8 +10,6 @@ public class FirebaseHelper {
      * @param storeId storeId
      */
     public static void initializeFirebase(String storeId) {
-        FirebaseMessaging.getInstance().getToken();
-
         FirebaseMessaging.getInstance().subscribeToTopic(storeId);
     }
 }

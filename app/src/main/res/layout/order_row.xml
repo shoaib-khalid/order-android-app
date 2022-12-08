@@ -399,6 +399,7 @@
                         android:layout_below="@+id/rl_subtotal"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
+                        android:visibility="gone"
                         android:paddingVertical="5dp">
 
                         <TextView

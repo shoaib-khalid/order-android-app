@@ -108,8 +108,12 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                 }
             }
             boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
+            String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
             sharedPreferences.edit().clear().apply();
-            sharedPreferences.edit().putBoolean(Key.IS_STAGING, isStaging).apply();
+            sharedPreferences.edit()
+                    .putBoolean(Key.IS_STAGING, isStaging)
+                    .putString(Key.BASE_URL, baseUrl)
+                    .apply();
 
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);

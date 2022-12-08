@@ -201,16 +201,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.total.setText(currency + " " + formatter.format(order.total));
 
         StringBuilder fullAddress = new StringBuilder();
-        if (order.orderShipmentDetail.address != null && !"".equals(order.orderShipmentDetail.address)) {
+        if (!Utility.isBlank(order.orderShipmentDetail.address)) {
             fullAddress.append(order.orderShipmentDetail.address).append(", ");
         }
-        if (order.orderShipmentDetail.city != null && !"".equals(order.orderShipmentDetail.city)) {
+        if (!Utility.isBlank(order.orderShipmentDetail.city)) {
             fullAddress.append(order.orderShipmentDetail.city).append(", ");
         }
-        if (order.orderShipmentDetail.state != null && !"".equals(order.orderShipmentDetail.state)) {
+        if (!Utility.isBlank(order.orderShipmentDetail.state)) {
             fullAddress.append(order.orderShipmentDetail.state).append(", ");
         }
-        if (order.orderShipmentDetail.zipcode != null && !"".equals(order.orderShipmentDetail.zipcode)) {
+        if (!Utility.isBlank(order.orderShipmentDetail.zipcode)) {
             fullAddress.append(order.orderShipmentDetail.zipcode);
         }
 
@@ -219,17 +219,16 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.rlAddress.setVisibility(View.VISIBLE);
         }
 
-        if (order.orderShipmentDetail.phoneNumber != null) {
+        if (!Utility.isBlank(order.orderShipmentDetail.phoneNumber)) {
             holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
             holder.rlContact.setVisibility(View.VISIBLE);
         }
 
         holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
 
-        if (order.appliedDiscount == null || order.appliedDiscount == 0.00) {
-            holder.rlDiscount.setVisibility(View.GONE);
-        } else {
+        if (order.appliedDiscount != null && order.appliedDiscount > 0) {
             holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
+            holder.rlDiscount.setVisibility(View.VISIBLE);
         }
 
         if (order.voucherDiscount != null && order.voucherDiscount > 0) {
@@ -242,7 +241,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.rlStoreVoucherDiscount.setVisibility(View.VISIBLE);
         }
 
-        holder.deliveryCharges.setText(order.deliveryCharges != null ? currency + " " + formatter.format(order.deliveryCharges) : currency + " " + "0.00");
+        holder.deliveryCharges.setText(order.deliveryCharges != null
+                ? currency + " " + formatter.format(order.deliveryCharges)
+                : currency + " " + "0.00");
         holder.total2.setText(currency + " " + formatter.format(order.total));
 
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
