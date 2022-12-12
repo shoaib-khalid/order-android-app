@@ -283,35 +283,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
         }
     }
 
-    private void notifyUser(String title, String body) {
-        Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-        PendingIntent pendingIntent =
-                stackBuilder.getPendingIntent(0,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(ChannelId.NEW_ORDERS,
-                    ChannelId.NEW_ORDERS, NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), ChannelId.NEW_ORDERS)
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setColor(Color.CYAN)
-                .build();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        notificationManager.notify(new Random().nextInt(), notification);
-    }
-
     public static void addNewOrderObserver(OrderObserver observer) { newOrderObservers.add(observer); }
     public static void removeNewOrderObserver(OrderObserver observer) { newOrderObservers.remove(observer); }
 
