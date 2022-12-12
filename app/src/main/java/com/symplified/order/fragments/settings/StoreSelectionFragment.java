@@ -55,7 +55,7 @@ public class StoreSelectionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        clientId = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE)
+        clientId = App.getAppContext().getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString("ownerId", null);
 
         storeApiService = ServiceGenerator.createStoreService();

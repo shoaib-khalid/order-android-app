@@ -52,7 +52,7 @@ public class ProductsActivity extends NavbarActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -64,7 +64,7 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setAdapter(productAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         storeIdList = sharedPreferences.getString("storeIdList", null);
 
         progressBar = findViewById(R.id.product_progress_bar);

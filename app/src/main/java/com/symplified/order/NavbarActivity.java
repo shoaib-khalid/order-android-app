@@ -51,7 +51,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
         version = BuildConfig.VERSION_NAME;
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
 
         storeId = sharedPreferences.getString("storeId", null);
 

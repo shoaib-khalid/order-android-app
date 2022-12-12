@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -34,6 +33,7 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.models.ping.PingRequest;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
@@ -69,7 +69,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         String messageTitle = remoteMessage.getData().get("title");
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
@@ -205,7 +205,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     private void sendErrorToServer(String errorMessage) {
-        String clientId = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE)
+        String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString("ownerId", "");
 
         LoginApi userService = ServiceGenerator.createUserService();
@@ -252,7 +252,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S 
                     ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
         
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), ChannelId.NEW_ORDERS)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(remoteMessage.getData().get("title"))
@@ -284,7 +284,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     private void notifyUser(String title, String body) {
-        
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addNextIntentWithParentStack(toOrdersActivity);
@@ -294,12 +293,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(App.CHANNEL_ID,
-                    "New Orders", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel channel = new NotificationChannel(ChannelId.NEW_ORDERS,
+                    ChannelId.NEW_ORDERS, NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
 
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), ChannelId.NEW_ORDERS)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)

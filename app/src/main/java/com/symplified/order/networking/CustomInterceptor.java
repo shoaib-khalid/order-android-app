@@ -29,7 +29,7 @@ public class CustomInterceptor implements Interceptor {
     LoginApi loginService;
 
     public CustomInterceptor() {
-        sharedPrefs = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        sharedPrefs = App.getAppContext().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
 
         String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())

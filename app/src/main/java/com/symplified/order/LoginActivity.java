@@ -17,11 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.android.material.textview.MaterialTextView;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
@@ -33,16 +29,18 @@ import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.symplified.order.apis.FirebaseApi;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.StoreApi;
-import com.symplified.order.firebase.FirebaseHelper;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
+import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,6 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextView welcomeText;
     private ProgressBar progressBar;
     private ConstraintLayout mainLayout;
+    private FirebaseApi firebaseApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +72,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         initViews();
 
-        sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        firebaseApiService = ServiceGenerator.createFirebaseService();
 
         callInAppUpdate();
 
@@ -177,46 +177,83 @@ public class LoginActivity extends AppCompatActivity {
             email.getEditText().getText().clear();
             password.getEditText().getText().clear();
             email.getEditText().requestFocus();
-        } else {
+        } else if (Utility.isConnectedToInternet(this)) {
             startLoading();
 
-            LoginApi loginApiService = ServiceGenerator.createUserService();
-            Call<LoginResponse> loginResponse = loginApiService
-                    .login(new LoginRequest(email.getEditText().getText().toString(),
-                            password.getEditText().getText().toString()));
-
-            loginResponse.clone().enqueue(new Callback<LoginResponse>() {
+            firebaseApiService.ping().clone().enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(@NonNull Call<LoginResponse> call,
-                                       @NonNull Response<LoginResponse> response) {
+                public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     if (response.isSuccessful()) {
-                        LoginData res = response.body().data;
-                        sharedPreferences.edit()
-                                .putString("accessToken", res.session.accessToken)
-                                .putString("refreshToken", res.session.refreshToken)
-                                .putString("ownerId", res.session.ownerId)
-                                .apply();
-                        getStoresAndRegister();
+                        tryLogin();
                     } else {
-                        handleError(response.raw().toString());
+                        stopLoading();
+
+                        Utility.notify(
+                                getApplicationContext(),
+                                getString(R.string.notif_firebase_error_title),
+                                getString(R.string.notif_firebase_error_body),
+                                ChannelId.ERRORS,
+                                ChannelId.ERRORS_NOTIF_ID,
+                                LoginActivity.class
+                        );
                     }
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<LoginResponse> call,
-                                      @NonNull Throwable t) {
-                    Log.e("TAG", "onFailure: ", t.getCause());
-                    Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+                public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     stopLoading();
-                }
 
+                    Utility.notify(
+                            getApplicationContext(),
+                            getString(R.string.notif_firebase_error_title),
+                            getString(R.string.notif_firebase_error_body),
+                            ChannelId.ERRORS,
+                            ChannelId.ERRORS_NOTIF_ID,
+                            LoginActivity.class
+                    );
+                }
             });
+        } else {
+            Toast.makeText(this, "Not connected to internet.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void tryLogin() {
+        LoginApi loginApiService = ServiceGenerator.createUserService();
+        Call<LoginResponse> loginResponse = loginApiService
+                .login(new LoginRequest(email.getEditText().getText().toString(),
+                        password.getEditText().getText().toString()));
+
+        loginResponse.clone().enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<LoginResponse> call,
+                                   @NonNull Response<LoginResponse> response) {
+                if (response.isSuccessful()) {
+                    LoginData res = response.body().data;
+                    sharedPreferences.edit()
+                            .putString("accessToken", res.session.accessToken)
+                            .putString("refreshToken", res.session.refreshToken)
+                            .putString("ownerId", res.session.ownerId)
+                            .commit();
+                    getStoresAndRegister();
+                } else {
+                    stopLoading();
+                    handleError(response.raw().toString());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<LoginResponse> call,
+                                  @NonNull Throwable t) {
+                Log.e("TAG", "onFailure: ", t.getCause());
+                Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+                stopLoading();
+            }
+        });
     }
 
     /**
      * method to store information to sharedPreferences for user session management
-     *
      */
     private void setStoreDataAndProceed() {
 
@@ -232,7 +269,6 @@ public class LoginActivity extends AppCompatActivity {
                 .putString("storeId", storeIdList.toString().split(" ")[0])
                 .putString("timezone", timeZoneList.toString())
                 .putString("storeIdList", storeIdList.toString())
-                .putInt("hasLogos", 0)
                 .putBoolean(Key.IS_LOGGED_IN, true)
                 .apply();
 
@@ -240,11 +276,9 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    int subscriptionCount = 0;
-
+    boolean isSubscriptionFailedOnce = false;
     /**
      * method to make the api call to get all the stores of user from backend
-     *
      */
     private void getStoresAndRegister() {
 
@@ -259,31 +293,32 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     stores = response.body().data.content;
 
-                    subscriptionCount = 0;
+                    isSubscriptionFailedOnce = false;
                     for (Store store : stores) {
-                        FirebaseMessaging.getInstance().subscribeToTopic(store.id)
-                                .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        subscriptionCount++;
-                                        Log.d("login-activity", "Subscribed to store " + store.name + ", subCount: " + subscriptionCount);
-                                        if (subscriptionCount >= stores.size()) {
-                                            setStoreDataAndProceed();
-                                        }
-                                    } else {
-                                        removeUserData();
-                                        stopLoading();
-
-                                        handleError("Failed to subscribe to firebase");
-                                    }
-                                });
+                        FirebaseMessaging.getInstance().subscribeToTopic(store.id).addOnCompleteListener(task -> {
+                            if (!task.isSuccessful() && !isSubscriptionFailedOnce) {
+                                isSubscriptionFailedOnce = true;
+                                removeUserData();
+                                stopLoading();
+                                Utility.notify(
+                                        getApplicationContext(),
+                                        getString(R.string.notif_firebase_error_title),
+                                        getString(R.string.notif_firebase_error_body),
+                                        ChannelId.ERRORS,
+                                        ChannelId.ERRORS_NOTIF_ID,
+                                        LoginActivity.class
+                                );
+                            }
+                        });
                     }
+                    setStoreDataAndProceed();
                 } else {
                     handleError(response.raw().toString());
                 }
             }
 
             @Override
-            public void onFailure(Call<StoreResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<StoreResponse> call, @NonNull Throwable t) {
                 Log.e("TAG", "onFailure: ", t.getCause());
                 Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }

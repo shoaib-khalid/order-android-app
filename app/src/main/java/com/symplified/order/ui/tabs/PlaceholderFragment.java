@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -93,7 +92,7 @@ public class PlaceholderFragment extends Fragment
 
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", null);
 
         orders = new ArrayList<>();

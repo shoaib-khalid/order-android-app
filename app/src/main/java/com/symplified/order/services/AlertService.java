@@ -13,9 +13,9 @@ import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 
-import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.enums.ServiceType;
+import com.symplified.order.utils.ChannelId;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class AlertService extends Service {
 
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Notification notification = new Notification.Builder(this, App.ORDERS)
+            Notification notification = new Notification.Builder(this, ChannelId.NEW_ORDERS)
                     .setContentTitle("Symplified")
                     .setContentText("You have new orders")
                     .setPriority(Notification.PRIORITY_LOW)

@@ -8,13 +8,11 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 
 import java.util.List;
-import java.util.Map;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.HeaderMap;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -40,11 +38,11 @@ public interface OrderApi {
     Call<OrderUpdateResponse> updateOrderStatus(@Body Order.OrderUpdate body, @Path("orderId") String orderId);
 
     @GET("orders/details/{orderId}")
-    Call<ResponseBody> getOrderStatusDetails(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId);
+    Call<ResponseBody> getOrderStatusDetails(@Path("orderId") String orderId);
 
     @GET("orders/{orderId}")
-    Call<Order.OrderByIdResponse> getOrderById(@HeaderMap Map<String,String> headers, @Path(value = "orderId", encoded = true) String orderId);
+    Call<Order.OrderByIdResponse> getOrderById(@Path(value = "orderId", encoded = true) String orderId);
 
     @PUT("orders/reviseitem/{orderId}")
-    Call<HttpResponse> reviseOrderItem(@HeaderMap Map<String,String> headers, @Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
+    Call<HttpResponse> reviseOrderItem(@Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
 }

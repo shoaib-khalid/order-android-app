@@ -25,7 +25,9 @@ import com.symplified.order.apis.OrderApi;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
+import com.symplified.order.utils.Utility;
 
 import java.util.Random;
 
@@ -37,11 +39,11 @@ public class StartupReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         SharedPreferences sharedPrefs = context
-                .getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+                .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         if ((Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
                 Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(intent.getAction()))
                 && sharedPrefs.getBoolean(Key.IS_LOGGED_IN, false)) {
-            if (isConnectedToInternet(context)) {
+            if (Utility.isConnectedToInternet(context)) {
                 checkForNewOrders(context);
             } else {
                 ConnectivityManager connMan =
@@ -62,14 +64,11 @@ public class StartupReceiver extends BroadcastReceiver {
         }
     }
 
-    private static boolean isConnectedToInternet(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
-    }
+
 
     private static void checkForNewOrders(Context context) {
         SharedPreferences sharedPrefs = context
-                .getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+                .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String clientId = sharedPrefs.getString("ownerId", "");
 
         OrderApi orderApiService = ServiceGenerator.createOrderService();
@@ -89,10 +88,10 @@ public class StartupReceiver extends BroadcastReceiver {
                         pendingIntent = taskStackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
                     }
 
-                    Notification notification = new NotificationCompat.Builder(context, App.CHANNEL_ID)
+                    Notification notification = new NotificationCompat.Builder(context, ChannelId.NEW_ORDERS)
                             .setContentIntent(pendingIntent)
                             .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentTitle("Symplified Merchant")
+                            .setContentTitle(context.getResources().getString(R.string.app_name))
                             .setContentText("You have new orders")
                             .setAutoCancel(false)
                             .setPriority(NotificationCompat.PRIORITY_MAX)

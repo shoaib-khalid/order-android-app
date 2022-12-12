@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.symplified.order.App;
 import com.symplified.order.apis.CategoryApi;
 import com.symplified.order.apis.DeliveryApi;
+import com.symplified.order.apis.FirebaseApi;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.ProductApi;
@@ -17,6 +18,16 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServiceGenerator {
+
+    public static FirebaseApi createFirebaseService() {
+        return new Retrofit.Builder()
+                .client(new OkHttpClient())
+                .baseUrl(FirebaseApi.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(FirebaseApi.class);
+    }
+
     public static CategoryApi createCategoryService() {
         return createRetrofitInstance(App.PRODUCT_SERVICE_URL).create(CategoryApi.class);
     }
@@ -47,7 +58,7 @@ public class ServiceGenerator {
                 .build();
 
         SharedPreferences sharedPrefs = App.getAppContext()
-                .getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+                .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
 
         return new Retrofit.Builder()

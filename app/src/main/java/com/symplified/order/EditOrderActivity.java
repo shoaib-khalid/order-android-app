@@ -34,9 +34,7 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Key;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -57,13 +55,12 @@ public class EditOrderActivity extends NavbarActivity {
     private Button update;
     private DecimalFormat formatter;
 
-    Map<String, String> headers;
     OrderApi orderApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
 
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -91,7 +88,6 @@ public class EditOrderActivity extends NavbarActivity {
             order = (Order) data.getSerializable("order");
         }
 
-        headers = new HashMap<>();
         orderApiService = ServiceGenerator.createOrderService();
 
         if (order != null) {
@@ -170,7 +166,7 @@ public class EditOrderActivity extends NavbarActivity {
 
         dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
             dialog.dismiss();
-            Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, adapter.getUpdatedItems());
+            Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(order.id, adapter.getUpdatedItems());
             progressDialog.show();
 
             updateItemsCall.clone().enqueue(new Callback<HttpResponse>() {
@@ -208,7 +204,7 @@ public class EditOrderActivity extends NavbarActivity {
     }
 
     public void getOrderByInvoiceId(String invoiceId) {
-        SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", "");
 
         Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
