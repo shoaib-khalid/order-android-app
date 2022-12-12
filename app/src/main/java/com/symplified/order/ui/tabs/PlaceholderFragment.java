@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +70,6 @@ public class PlaceholderFragment extends Fragment
     private Call<OrderDetailsResponse> orderResponse;
     private RecyclerView recyclerView;
     private String section;
-    private BroadcastReceiver ordersReceiver;
 
     private ProgressBar progressBar;
     private SwipeRefreshLayout mainLayout, emptyLayout;
@@ -137,13 +137,6 @@ public class PlaceholderFragment extends Fragment
                 break;
             }
         }
-
-        ordersReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onResume();
-            }
-        };
 
         if (App.isPrinterConnected()) {
             App.getPrinter().addObserver(this);
@@ -213,23 +206,17 @@ public class PlaceholderFragment extends Fragment
     public void onStart() {
         super.onStart();
         IntentFilter filter = new IntentFilter("com.symplified.order.GET_ORDERS");
-        if (getContext() != null) {
-            getContext().registerReceiver(ordersReceiver, filter);
-        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (getContext() != null) {
-            getContext().unregisterReceiver(ordersReceiver);
-        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        binding = null;
+//        binding = null;
     }
 
     @Override
@@ -248,7 +235,8 @@ public class PlaceholderFragment extends Fragment
         startLoading();
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
-            public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+            public void onResponse(@NonNull Call<OrderDetailsResponse> call,
+                                   @NonNull Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
                     orders = response.body().data.content;
                     orderAdapter = new OrderAdapter(orders, section, getContext(), orderManager);
@@ -266,7 +254,7 @@ public class PlaceholderFragment extends Fragment
             }
 
             @Override
-            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OrderDetailsResponse> call, @NonNull Throwable t) {
                 stopLoading();
                 showErrorMessage();
             }

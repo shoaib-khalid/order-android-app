@@ -88,7 +88,6 @@ public class App extends Application implements PrinterObserver {
             @Override
             public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Log.d("app-firebase", "Firebase accessible. Subscribing");
                     SharedPreferences sharedPreferences = getSharedPreferences(SESSION, Context.MODE_PRIVATE);
                     String storeIdList = sharedPreferences.getString("storeIdList", null);
                     if (storeIdList != null) {

@@ -47,15 +47,13 @@ public class OrdersActivity extends NavbarActivity {
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
-        viewPager.setOffscreenPageLimit(0);
+        viewPager.setOffscreenPageLimit(2);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
 
         mViewPager = viewPager;
 
         stopService(new Intent(this, AlertService.class));
-
-        subscribeToFirebase();
     }
 
     @Override
@@ -82,8 +80,5 @@ public class OrdersActivity extends NavbarActivity {
         } else {
             finishAffinity();
         }
-    }
-
-    private void subscribeToFirebase() {
     }
 }
