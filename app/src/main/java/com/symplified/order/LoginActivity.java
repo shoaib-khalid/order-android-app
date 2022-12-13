@@ -52,7 +52,7 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
 
     private static final int UPDATE_REQUEST_CODE = 112;
-    private static final String TAG = LoginActivity.class.getName();
+    private static final String TAG = "login-activity";
     private Button btnSwitchToProduction;
     private TextInputLayout email;
     private TextInputLayout password;
@@ -73,6 +73,7 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
 
         sharedPreferences = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+
         firebaseApiService = ServiceGenerator.createFirebaseService();
 
         callInAppUpdate();
@@ -191,7 +192,8 @@ public class LoginActivity extends AppCompatActivity {
                         Utility.notify(
                                 getApplicationContext(),
                                 getString(R.string.notif_firebase_error_title),
-                                getString(R.string.notif_firebase_error_body),
+                                getString(R.string.notif_firebase_error_text),
+                                getString(R.string.notif_firebase_error_text_full),
                                 ChannelId.ERRORS,
                                 ChannelId.ERRORS_NOTIF_ID,
                                 LoginActivity.class
@@ -206,7 +208,8 @@ public class LoginActivity extends AppCompatActivity {
                     Utility.notify(
                             getApplicationContext(),
                             getString(R.string.notif_firebase_error_title),
-                            getString(R.string.notif_firebase_error_body),
+                            getString(R.string.notif_firebase_error_text),
+                            getString(R.string.notif_firebase_error_text_full),
                             ChannelId.ERRORS,
                             ChannelId.ERRORS_NOTIF_ID,
                             LoginActivity.class
@@ -238,7 +241,11 @@ public class LoginActivity extends AppCompatActivity {
                     getStoresAndRegister();
                 } else {
                     stopLoading();
-                    handleError(response.raw().toString());
+                    if (response.code() == 401) {
+                        handleError(response.raw().toString(), "Username or password is incorrect");
+                    } else {
+                        handleError(response.raw().toString(), null);
+                    }
                 }
             }
 
@@ -250,30 +257,6 @@ public class LoginActivity extends AppCompatActivity {
                 stopLoading();
             }
         });
-    }
-
-    /**
-     * method to store information to sharedPreferences for user session management
-     */
-    private void setStoreDataAndProceed() {
-
-        final SharedPreferences.Editor editor = sharedPreferences.edit();
-        StringBuilder timeZoneList = new StringBuilder();
-        StringBuilder storeIdList = new StringBuilder();
-        for (Store store : stores) {
-            timeZoneList.append(store.regionCountry.timezone).append(" ");
-            storeIdList.append(store.id).append(" ");
-            editor.putString(store.id + "-name", store.name).apply();
-        }
-        editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
-                .putString("storeId", storeIdList.toString().split(" ")[0])
-                .putString("timezone", timeZoneList.toString())
-                .putString("storeIdList", storeIdList.toString())
-                .putBoolean(Key.IS_LOGGED_IN, true)
-                .apply();
-
-        Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
-        startActivity(intent);
     }
 
     boolean isSubscriptionFailedOnce = false;
@@ -292,28 +275,9 @@ public class LoginActivity extends AppCompatActivity {
                                    @NonNull Response<StoreResponse> response) {
                 if (response.isSuccessful()) {
                     stores = response.body().data.content;
-
-                    isSubscriptionFailedOnce = false;
-                    for (Store store : stores) {
-                        FirebaseMessaging.getInstance().subscribeToTopic(store.id).addOnCompleteListener(task -> {
-                            if (!task.isSuccessful() && !isSubscriptionFailedOnce) {
-                                isSubscriptionFailedOnce = true;
-                                removeUserData();
-                                stopLoading();
-                                Utility.notify(
-                                        getApplicationContext(),
-                                        getString(R.string.notif_firebase_error_title),
-                                        getString(R.string.notif_firebase_error_body),
-                                        ChannelId.ERRORS,
-                                        ChannelId.ERRORS_NOTIF_ID,
-                                        LoginActivity.class
-                                );
-                            }
-                        });
-                    }
                     setStoreDataAndProceed();
                 } else {
-                    handleError(response.raw().toString());
+                    handleError(response.raw().toString(), null);
                 }
             }
 
@@ -323,6 +287,27 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * method to store information to sharedPreferences for user session management
+     */
+    private void setStoreDataAndProceed() {
+
+        final SharedPreferences.Editor editor = sharedPreferences.edit();
+        StringBuilder storeIdList = new StringBuilder();
+        for (Store store : stores) {
+            storeIdList.append(store.id).append(" ");
+            editor.putString(store.id + "-name", store.name).apply();
+        }
+        editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
+                .putString("storeId", storeIdList.toString().split(" ")[0])
+                .putString("storeIdList", storeIdList.toString())
+                .putBoolean(Key.IS_LOGGED_IN, true)
+                .apply();
+
+        Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+        startActivity(intent);
     }
 
     /**
@@ -417,19 +402,19 @@ public class LoginActivity extends AppCompatActivity {
         boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
         String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
 
-        sharedPreferences.edit().clear().apply();
         sharedPreferences.edit()
+                .clear()
                 .putBoolean(Key.IS_STAGING, isStaging)
                 .putString(Key.BASE_URL, baseUrl)
                 .apply();
     }
 
-    private void handleError(String errorStr) {
-        Toast.makeText(this, R.string.request_failure, Toast.LENGTH_SHORT).show();
-        email.getEditText().setText("");
-        password.getEditText().setText("");
+    private void handleError(String debugString, String toastMessage) {
+        Toast.makeText(this,
+                toastMessage != null ? toastMessage : getString(R.string.request_failure),
+                Toast.LENGTH_SHORT).show();
         stopLoading();
         email.getEditText().requestFocus();
-        Log.e("login-activity", errorStr);
+        Log.e(TAG, debugString);
     }
 }

@@ -58,12 +58,6 @@ public class App extends Application implements PrinterObserver {
 
         GenericPrintHelper.getInstance().addObserver(this);
         GenericPrintHelper.getInstance().initPrinterService(this);
-
-        boolean isLoggedIn = getSharedPreferences(SESSION, Context.MODE_PRIVATE)
-                .getBoolean(Key.IS_LOGGED_IN, false);
-        if (Utility.isConnectedToInternet(this) && isLoggedIn) {
-            verifyFirebaseConnection();
-        }
     }
 
     public static Printer getPrinter() {
@@ -78,65 +72,4 @@ public class App extends Application implements PrinterObserver {
     }
 
     public static Context getAppContext() { return context; }
-
-    /**
-     * Check if firebase server is reachable and logout if not.
-     */
-    private void verifyFirebaseConnection() {
-        FirebaseApi firebaseApiService = ServiceGenerator.createFirebaseService();
-        firebaseApiService.ping().clone().enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
-                if (response.isSuccessful()) {
-                    SharedPreferences sharedPreferences = getSharedPreferences(SESSION, Context.MODE_PRIVATE);
-                    String storeIdList = sharedPreferences.getString("storeIdList", null);
-                    if (storeIdList != null) {
-                        for (String storeId : storeIdList.split(" ")) {
-                            FirebaseMessaging.getInstance().subscribeToTopic(storeId);
-                        }
-                    }
-                } else {
-                    logout();
-                    Utility.notify(
-                            getApplicationContext(),
-                            getString(R.string.notif_firebase_error_title),
-                            getString(R.string.notif_firebase_error_body),
-                            ChannelId.ERRORS,
-                            ChannelId.ERRORS_NOTIF_ID,
-                            LoginActivity.class
-                    );
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                logout();
-                Utility.notify(
-                        getApplicationContext(),
-                        getString(R.string.notif_firebase_error_title),
-                        getString(R.string.notif_firebase_error_body),
-                        ChannelId.ERRORS,
-                        ChannelId.ERRORS_NOTIF_ID,
-                        LoginActivity.class
-                );
-            }
-        });
-    }
-
-    private void logout() {
-        SharedPreferences sharedPrefs = getSharedPreferences(SESSION, Context.MODE_PRIVATE);
-        String storeIdList = sharedPrefs.getString("storeIdList", null);
-        if (storeIdList != null) {
-            for (String storeId : storeIdList.split(" ")) {
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-            }
-        }
-        boolean isStaging = sharedPrefs.getBoolean(Key.IS_STAGING, false);
-        String baseUrl = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
-        sharedPrefs.edit().clear().apply();
-        sharedPrefs.edit()
-                .putBoolean(Key.IS_STAGING, isStaging)
-                .putString(Key.BASE_URL, baseUrl)
-                .apply();
-    }
 }

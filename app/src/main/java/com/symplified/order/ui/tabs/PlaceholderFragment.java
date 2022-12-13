@@ -113,8 +113,6 @@ public class PlaceholderFragment extends Fragment
                 if (AlertService.isPlaying()) {
                     getActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
-                NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancelAll();
                 OrderNotificationService.addNewOrderObserver(this);
                 break;
             }
@@ -197,26 +195,8 @@ public class PlaceholderFragment extends Fragment
         if (AlertService.isPlaying()) {
             getActivity().stopService(new Intent(getContext(), AlertService.class));
         }
-        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        IntentFilter filter = new IntentFilter("com.symplified.order.GET_ORDERS");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-//        binding = null;
+//        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+//        notificationManager.cancelAll();
     }
 
     @Override

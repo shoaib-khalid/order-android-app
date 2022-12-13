@@ -114,7 +114,13 @@ public class Utility {
         return cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
     }
 
-    public static void notify(Context context, String title, String body, String channel, int notificationId, Class<?> activity) {
+    public static void notify(Context context,
+                              String title,
+                              String text,
+                              String bigText,
+                              String channel,
+                              int notificationId,
+                              Class<?> activity) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(new Intent(context, activity));
         PendingIntent pendingIntent =
@@ -127,17 +133,21 @@ public class Utility {
                     channel, NotificationManager.IMPORTANCE_DEFAULT));
         }
 
-        Notification notification = new NotificationCompat.Builder(context, channel)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(title)
-                .setContentText(body)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentText(text);
+        if (!isBlank(bigText)) {
+            builder.setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(bigText));
+        }
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setColor(Color.CYAN)
                 .setAutoCancel(true)
                 .build();
 
         notificationManager.cancel(notificationId);
-        notificationManager.notify(notificationId, notification);
+        notificationManager.notify(notificationId, builder.build());
     }
 }

@@ -2,9 +2,13 @@ package com.symplified.order.services;
 
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -12,7 +16,9 @@ import android.os.IBinder;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
+import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.utils.ChannelId;
@@ -21,20 +27,38 @@ import java.util.List;
 
 public class AlertService extends Service {
 
+    private NotificationManager notificationManager;
     private static MediaPlayer mediaPlayer;
     private static boolean hasRepeatedOnce = false;
+    public static final int notificationId = 27386;
 
     public void onCreate() {
         super.onCreate();
 
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Notification notification = new Notification.Builder(this, ChannelId.NEW_ORDERS)
-                    .setContentTitle("Symplified")
-                    .setContentText("You have new orders")
-                    .setPriority(Notification.PRIORITY_LOW)
-                    .build();
-            startForeground(1, notification);
+            Intent notificationIntent = new Intent(this, OrdersActivity.class);
+            PendingIntent pendingIntent =
+                    PendingIntent.getActivity(this, 0, notificationIntent,
+                            PendingIntent.FLAG_IMMUTABLE);
+
+            NotificationChannel chan = new NotificationChannel(
+                    ChannelId.NEW_ORDERS,
+                    ChannelId.NEW_ORDERS,
+                    NotificationManager.IMPORTANCE_HIGH);
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(chan);
+
+            Notification notification =
+                    new Notification.Builder(this, ChannelId.NEW_ORDERS)
+                            .setContentTitle("You have new orders")
+                            .setContentText("Tap to view")
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setContentIntent(pendingIntent)
+                            .build();
+            startForeground(notificationId, notification);
         }
     }
 
@@ -73,6 +97,8 @@ public class AlertService extends Service {
                     hasRepeatedOnce = true;
                     mp.seekTo(0);
                     mp.start();
+                } else {
+                    notificationManager.cancel(notificationId);
                 }
             });
         } else {
@@ -111,6 +137,7 @@ public class AlertService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stop();
+        notificationManager.cancel(notificationId);
     }
 
     private boolean isExternalAudioOutputPluggedIn() {
