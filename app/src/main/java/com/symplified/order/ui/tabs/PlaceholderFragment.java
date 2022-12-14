@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -61,8 +62,6 @@ public class PlaceholderFragment extends Fragment
 
     private static final String ARG_SECTION = "section";
 
-    private PageViewModel pageViewModel;
-    private NewOrdersBinding binding;
     private OrderAdapter orderAdapter;
 
     private List<Order.OrderDetails> orders = new ArrayList<>();
@@ -90,7 +89,7 @@ public class PlaceholderFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        PageViewModel pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", null);
@@ -136,14 +135,16 @@ public class PlaceholderFragment extends Fragment
             }
         }
 
-        if (App.isPrinterConnected()) {
+        if (!App.isPrinterConnected()) {
             App.getPrinter().addObserver(this);
         }
 
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && orderAdapter != null) {
+                    if (result.getResultCode() == Activity.RESULT_OK
+                            && orderAdapter != null
+                            && result.getData() != null) {
                         Intent data = result.getData();
                         Order.OrderDetails updatedOrderDetails
                                 = (Order.OrderDetails) data.getSerializableExtra(Key.ORDER_DETAILS);
@@ -167,7 +168,7 @@ public class PlaceholderFragment extends Fragment
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        binding = NewOrdersBinding.inflate(inflater, container, false);
+        com.symplified.order.databinding.NewOrdersBinding binding = NewOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         recyclerView = root.findViewById(R.id.order_recycler);
@@ -185,18 +186,6 @@ public class PlaceholderFragment extends Fragment
         getOrders();
 
         return root;
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (AlertService.isPlaying()) {
-            getActivity().stopService(new Intent(getContext(), AlertService.class));
-        }
-//        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-//        notificationManager.cancelAll();
     }
 
     @Override

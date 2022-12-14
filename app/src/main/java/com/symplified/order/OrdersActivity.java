@@ -71,7 +71,6 @@ public class OrdersActivity extends NavbarActivity {
 
         SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         if (!sharedPrefs.getBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, false)) {
-            Log.d("firebase-notifs", "Not subscribed to notifs. Verifying...");
             verifyFirebaseConnection();
         }
     }
@@ -103,7 +102,7 @@ public class OrdersActivity extends NavbarActivity {
     }
 
     /**
-     * Check if firebase server is reachable and logout if not.
+     * Check if firebase server is reachable when internet is available and logout if unreachable.
      */
     private void verifyFirebaseConnection() {
         ConnectivityManager connMan =

@@ -188,32 +188,14 @@ public class LoginActivity extends AppCompatActivity {
                         tryLogin();
                     } else {
                         stopLoading();
-
-                        Utility.notify(
-                                getApplicationContext(),
-                                getString(R.string.notif_firebase_error_title),
-                                getString(R.string.notif_firebase_error_text),
-                                getString(R.string.notif_firebase_error_text_full),
-                                ChannelId.ERRORS,
-                                ChannelId.ERRORS_NOTIF_ID,
-                                LoginActivity.class
-                        );
+                        showFirebaseErrorNotification();
                     }
                 }
 
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     stopLoading();
-
-                    Utility.notify(
-                            getApplicationContext(),
-                            getString(R.string.notif_firebase_error_title),
-                            getString(R.string.notif_firebase_error_text),
-                            getString(R.string.notif_firebase_error_text_full),
-                            ChannelId.ERRORS,
-                            ChannelId.ERRORS_NOTIF_ID,
-                            LoginActivity.class
-                    );
+                    showFirebaseErrorNotification();
                 }
             });
         } else {
@@ -259,7 +241,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    boolean isSubscriptionFailedOnce = false;
+    int subscriptionCount = 0;
     /**
      * method to make the api call to get all the stores of user from backend
      */
@@ -274,7 +256,27 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call<StoreResponse> call,
                                    @NonNull Response<StoreResponse> response) {
                 if (response.isSuccessful()) {
+                    subscriptionCount = 0;
                     stores = response.body().data.content;
+                    for (Store store : stores) {
+                        FirebaseMessaging.getInstance().subscribeToTopic(store.id)
+                                .addOnSuccessListener(unused -> {
+                                    Log.d(TAG, "Subscribed to " + store.name);
+                                    subscriptionCount++;
+                                    if (subscriptionCount >= stores.size()) {
+                                        sharedPreferences.edit()
+                                                .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
+                                                .apply();
+                                        setStoreDataAndProceed();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    stopLoading();
+                                    removeUserData();
+                                    handleError(e.getLocalizedMessage(), null);
+                                    showFirebaseErrorNotification();
+                                });
+                    }
                     setStoreDataAndProceed();
                 } else {
                     handleError(response.raw().toString(), null);
@@ -416,5 +418,17 @@ public class LoginActivity extends AppCompatActivity {
         stopLoading();
         email.getEditText().requestFocus();
         Log.e(TAG, debugString);
+    }
+
+    private void showFirebaseErrorNotification() {
+        Utility.notify(
+                getApplicationContext(),
+                getString(R.string.notif_firebase_error_title),
+                getString(R.string.notif_firebase_error_text),
+                getString(R.string.notif_firebase_error_text_full),
+                ChannelId.ERRORS,
+                ChannelId.ERRORS_NOTIF_ID,
+                LoginActivity.class
+        );
     }
 }

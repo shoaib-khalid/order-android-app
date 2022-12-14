@@ -12,22 +12,25 @@ import android.graphics.Color;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.symplified.order.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.utils.ChannelId;
+import com.symplified.order.utils.Utility;
 
 import java.util.List;
 
 public class AlertService extends Service {
 
-    private NotificationManager notificationManager;
     private static MediaPlayer mediaPlayer;
     private static boolean hasRepeatedOnce = false;
     public static final int notificationId = 27386;
@@ -36,30 +39,7 @@ public class AlertService extends Service {
         super.onCreate();
 
         mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            Intent notificationIntent = new Intent(this, OrdersActivity.class);
-            PendingIntent pendingIntent =
-                    PendingIntent.getActivity(this, 0, notificationIntent,
-                            PendingIntent.FLAG_IMMUTABLE);
-
-            NotificationChannel chan = new NotificationChannel(
-                    ChannelId.NEW_ORDERS,
-                    ChannelId.NEW_ORDERS,
-                    NotificationManager.IMPORTANCE_HIGH);
-            chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-
-            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(chan);
-
-            Notification notification =
-                    new Notification.Builder(this, ChannelId.NEW_ORDERS)
-                            .setContentTitle("You have new orders")
-                            .setContentText("Tap to view")
-                            .setSmallIcon(R.mipmap.ic_launcher)
-                            .setContentIntent(pendingIntent)
-                            .build();
-            startForeground(notificationId, notification);
-        }
+        startForeground(notificationId, getNotification("", ""));
     }
 
     @Nullable
@@ -74,17 +54,28 @@ public class AlertService extends Service {
 
         String storeType = "", serviceType = "";
         if (intent != null && intent.getExtras() != null) {
-            if (intent.hasExtra(String.valueOf(R.string.store_type))) {
-                storeType = intent.getExtras().getString(String.valueOf(R.string.store_type));
+            Log.d("alert-service", "extras not null");
+            if (intent.hasExtra(getString(R.string.store_type))) {
+                storeType = intent.getStringExtra(getString(R.string.store_type));
             }
 
-            if (intent.hasExtra(String.valueOf(R.string.service_type))) {
-                serviceType = intent.getExtras().getString(String.valueOf(R.string.service_type));
+            if (intent.hasExtra(getString(R.string.service_type))) {
+                serviceType = intent.getStringExtra(getString(R.string.service_type));
+            }
+
+            if (intent.hasExtra("title")
+                    && intent.hasExtra("body")) {
+                String title = intent.getStringExtra("title");
+                String body = intent.getStringExtra("body");
+
+                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(notificationId, getNotification(title, body));
             }
         }
 
         mediaPlayer = MediaPlayer.create(this,
-                serviceType.contains(ServiceType.DINEIN.toString())
+                serviceType != null
+                        && serviceType.contains(ServiceType.DINEIN.toString())
                         ? R.raw.dine_in : R.raw.ring);
 
         if (isAppOnForeground(this)
@@ -97,8 +88,6 @@ public class AlertService extends Service {
                     hasRepeatedOnce = true;
                     mp.seekTo(0);
                     mp.start();
-                } else {
-                    notificationManager.cancel(notificationId);
                 }
             });
         } else {
@@ -128,7 +117,7 @@ public class AlertService extends Service {
     }
 
     public static void stop() {
-        if (null != mediaPlayer) {
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
         }
     }
@@ -137,7 +126,6 @@ public class AlertService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stop();
-        notificationManager.cancel(notificationId);
     }
 
     private boolean isExternalAudioOutputPluggedIn() {
@@ -161,10 +149,38 @@ public class AlertService extends Service {
         }
         final String packageName = context.getPackageName();
         for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
-            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && appProcess.processName.equals(packageName)) {
+            if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+                    && appProcess.processName.equals(packageName)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private Notification getNotification(String title, String body) {
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this,
+                0,
+                new Intent(this, OrdersActivity.class),
+                PendingIntent.FLAG_IMMUTABLE
+        );
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel chan = new NotificationChannel(
+                    ChannelId.NEW_ORDERS,
+                    ChannelId.NEW_ORDERS,
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            chan.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.createNotificationChannel(chan);
+        }
+        return new NotificationCompat.Builder(this, ChannelId.NEW_ORDERS)
+                .setContentTitle(!Utility.isBlank(title) ? title : "You have new orders")
+                .setContentText(!Utility.isBlank(body) ? body : "Tap to view")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pendingIntent)
+                .build();
     }
 }

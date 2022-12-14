@@ -257,23 +257,25 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(remoteMessage.getData().get("title"))
                 .setContentText(remoteMessage.getData().get("body"))
-                .setAutoCancel(false)
+                .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setColor(Color.CYAN)
                 .build();
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(new Random().nextInt(), notification);
+//        notificationManager.notify(new Random().nextInt(), notification);
 
         if (!AlertService.isPlaying()) {
             Intent intent = new Intent(getApplicationContext(), AlertService.class);
-            intent.putExtra(String.valueOf(R.string.store_type),
+            intent.putExtra(getString(R.string.store_type),
                     order != null && order.store.verticalCode != null ? order.store.verticalCode : "");
-            intent.putExtra(String.valueOf(R.string.service_type),
+            intent.putExtra(getString(R.string.service_type),
                     order != null && order.serviceType != null ? order.serviceType.toString() : "");
+            intent.putExtra("title", remoteMessage.getData().get("title"));
+            intent.putExtra("body", remoteMessage.getData().get("body"));
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent);
