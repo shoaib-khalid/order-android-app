@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -56,7 +57,7 @@ public class ProductsActivity extends NavbarActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initToolbar(sharedPreferences);
+        initToolbar();
 
         RecyclerView recyclerView = findViewById(R.id.products_recyclerview);
 
@@ -71,14 +72,14 @@ public class ProductsActivity extends NavbarActivity {
         refreshLayout = findViewById(R.id.layout_products_refresh);
         refreshLayout.setOnRefreshListener(this::getProductsList);
 
-        productApiService = ServiceGenerator.createProductService();
+        productApiService = ServiceGenerator.createProductService(this);
 
         getProductsList();
     }
 
-    private void initToolbar(SharedPreferences sharedPreferences) {
+    private void initToolbar() {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_arrow_back_black_24dp));
         home.setOnClickListener(view -> onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);

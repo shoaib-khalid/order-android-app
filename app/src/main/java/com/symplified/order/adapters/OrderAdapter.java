@@ -72,8 +72,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.context = context;
         this.orderManager = orderManager;
 
-        orderApiService = ServiceGenerator.createOrderService();
-        deliveryApiService = ServiceGenerator.createDeliveryService();
+        orderApiService = ServiceGenerator.createOrderService(context);
+        deliveryApiService = ServiceGenerator.createDeliveryService(context);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -186,7 +186,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         formatter = Utility.getMonetaryAmountFormat();
 
-        String currency = Utility.getCurrencySymbol(order);
+        String currency = Utility.getCurrencySymbol(order, context);
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
 
@@ -649,7 +649,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> items) {
         try {
-            App.getPrinter().printReceipt(order, items);
+            App.getPrinter().printReceipt(order, items, context);
         } catch (Exception e) {
             Log.e("order-adapter", "Failed to print order. " + e.getLocalizedMessage());
             e.printStackTrace();

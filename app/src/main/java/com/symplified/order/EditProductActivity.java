@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 
@@ -40,10 +40,10 @@ public class EditProductActivity extends NavbarActivity {
     private Button updateButton;
     private Toolbar toolbar;
     private Product product = null;
-    private TextInputLayout productName, productDescription, statusMenu;
+    private TextInputLayout productName;
+    private TextInputLayout productDescription;
     private ImageView productImage;
     private AutoCompleteTextView statusTextView;
-    private final int REQ_CODE = 100;
 
     private String storeId;
 
@@ -52,16 +52,12 @@ public class EditProductActivity extends NavbarActivity {
 
     private static Dialog progressDialog;
 
-    private ActivityEditProductBinding binding;
-
-    private ActivityResultLauncher<Intent> selectImageActivityResultLauncher;
-
     private ProductApi productApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityEditProductBinding.inflate(getLayoutInflater());
+        com.symplified.order.databinding.ActivityEditProductBinding binding = ActivityEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         progressDialog = new Dialog(this);
@@ -89,9 +85,7 @@ public class EditProductActivity extends NavbarActivity {
         statusTextView.setAdapter(statusAdapter);
         setStatus();
 
-        updateButton.setOnClickListener(view -> {
-            updateProduct();
-        });
+        updateButton.setOnClickListener(view -> updateProduct());
 
         statusTextView.setOnItemClickListener((adapterView, view, i, l) -> {
             String selected = adapterView.getItemAtPosition(i).toString();
@@ -108,7 +102,7 @@ public class EditProductActivity extends NavbarActivity {
             }
         });
 
-        productApiService = ServiceGenerator.createProductService();
+        productApiService = ServiceGenerator.createProductService(this);
     }
 
     public void initToolbar() {
@@ -129,50 +123,43 @@ public class EditProductActivity extends NavbarActivity {
         productImage = findViewById(R.id.product_image);
         productName = findViewById(R.id.product_name);
         productDescription = findViewById(R.id.product_description);
-        statusMenu = findViewById(R.id.product_status);
         statusTextView = findViewById(R.id.statusTextView);
     }
 
 
     public void updateProduct() {
-        if (productName.getEditText().getText().equals("")
-                || productDescription.getEditText().getText().equals("")) {
+        if ("".equals(productName.getEditText() != null ? productName.getEditText().getText().toString() : "")
+                || "".equals(productDescription.getEditText() != null ? productDescription.getEditText().getText().toString() : "")) {
             Toast.makeText(this, "Please Fill all Fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        try {
-            product.name = productName.getEditText().getText().toString();
+        product.name = productName.getEditText().getText().toString();
 
-            ProductEditRequest requestBody = new ProductEditRequest(product);
-            Call<ResponseBody> responseCall = productApiService.updateProduct(storeId, product.id, requestBody);
-
-            progressDialog.show();
-            responseCall.clone().enqueue(new Callback<ResponseBody>() {
-                @Override
-                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                    if (response.isSuccessful()) {
-                        progressDialog.dismiss();
-                        Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
-                        startActivity(intent);
-                        Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
-                        Log.e("edit-product-activity", "ERROR: " + response.toString());
-                        progressDialog.dismiss();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+        progressDialog.show();
+        productApiService.updateProduct(storeId, product.id, new ProductEditRequest(product))
+                .clone().enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(@NonNull Call<ResponseBody> call,
+                                   @NonNull Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    progressDialog.dismiss();
+                    Intent intent = new Intent(getApplicationContext(), ProductsActivity.class);
+                    startActivity(intent);
+                    Toast.makeText(getApplicationContext(), "Product Updated Successfully", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
+                    Log.e("edit-product-activity", "ERROR: " + response);
                     progressDialog.dismiss();
                 }
-            });
-        } catch (Exception e) {
-            Log.e("edit-product-activity", "Error while editing product" + e.getLocalizedMessage());
-            e.printStackTrace();
-        }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        });
     }
 
 
@@ -188,19 +175,16 @@ public class EditProductActivity extends NavbarActivity {
             case "INACTIVE":
                 statusTextView.setText(statusList.get(1), false);
                 break;
-//            case "OUTOFSTOCK":
-//                statusTextView.setText(statusList.get(2), false);
-//                break;
         }
         statusAdapter.notifyDataSetChanged();
     }
 
     private void getProductDetails() {
 
-        if (product.name != null) {
+        if (product.name != null && productName.getEditText() != null) {
             productName.getEditText().setText(product.name);
         }
-        if (product.description != null) {
+        if (product.description != null && productDescription.getEditText() != null) {
             productDescription.getEditText().setText(Html.fromHtml(product.description));
         }
         if (product.thumbnailUrl != null) {

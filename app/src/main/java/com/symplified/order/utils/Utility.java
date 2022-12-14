@@ -44,8 +44,8 @@ public class Utility {
         return null;
     }
 
-    public static void logToFile(String text) {
-        File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
+    public static void logToFile(String text, Context context) {
+        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
         try {
             FileWriter fr = new FileWriter(file, true);
             fr.write(text);
@@ -56,14 +56,15 @@ public class Utility {
         }
     }
 
-    public static String getCurrencySymbol(Order order) {
-        if (order != null && order.store != null && order.store.regionCountry != null
+    public static String getCurrencySymbol(Order order, Context context) {
+        if (order != null
+                && order.store != null
+                && order.store.regionCountry != null
                 && order.store.regionCountry.currencySymbol != null) {
             return order.store.regionCountry.currencySymbol;
         }
-        SharedPreferences sharedPreferences
-                = App.getAppContext().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        return sharedPreferences.getString("currency", "RM");
+        return context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString("currency", "RM");
     }
 
     public static DecimalFormat getMonetaryAmountFormat() {

@@ -71,7 +71,7 @@ public class StartupReceiver extends BroadcastReceiver {
                 .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String clientId = sharedPrefs.getString("ownerId", "");
 
-        OrderApi orderApiService = ServiceGenerator.createOrderService();
+        OrderApi orderApiService = ServiceGenerator.createOrderService(context);
         Call<OrderDetailsResponse> orderResponse = orderApiService.getNewOrdersByClientId(clientId);
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override

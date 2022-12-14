@@ -1,5 +1,6 @@
 package com.symplified.order;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -30,8 +31,6 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.symplified.order.apis.FirebaseApi;
-import com.symplified.order.apis.LoginApi;
-import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
@@ -57,8 +56,6 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout email;
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
-    private String testUser, testPass;
-    private final String deliverinUser = "pak_user", deliverinPass = "pak@123";
     private List<Store> stores;
     private TextView welcomeText;
     private ProgressBar progressBar;
@@ -73,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
 
         sharedPreferences = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-
         firebaseApiService = ServiceGenerator.createFirebaseService();
 
         callInAppUpdate();
@@ -151,14 +147,6 @@ public class LoginActivity extends AppCompatActivity {
         mRemoteConfig.activate();
 
         stores = new ArrayList<>();
-
-        testUser = mRemoteConfig.getString("test_user");
-        testPass = mRemoteConfig.getString("test_pass");
-
-        if (testUser.equals("") || testPass.equals("")) {
-            testUser = "qa_user";
-            testPass = "qa@kalsym";
-        }
     }
 
 
@@ -166,8 +154,12 @@ public class LoginActivity extends AppCompatActivity {
      * onClick method for Login Button
      */
     private void onLoginButtonClick() {
+        String testUser = "qa_user", testPass = "qa@kalsym";
+        String deliverinUser = "pak_user", deliverinPass = "pak@123";
+
         String emailInput = email.getEditText() != null ? email.getEditText().getText().toString() : "";
         String passwordInput = password.getEditText() != null ? password.getEditText().getText().toString() : "";
+
         if (emailInput.equals(testUser) && passwordInput.equals(testPass)) {
             switchToStagingMode();
             email.getEditText().getText().clear();
@@ -204,12 +196,15 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void tryLogin() {
-        LoginApi loginApiService = ServiceGenerator.createUserService();
-        Call<LoginResponse> loginResponse = loginApiService
-                .login(new LoginRequest(email.getEditText().getText().toString(),
-                        password.getEditText().getText().toString()));
+        String emailInput = email.getEditText() != null
+                ? email.getEditText().getText().toString() : "";
+        String passwordInput = password.getEditText() != null
+                ? password.getEditText().getText().toString() : "";
 
-        loginResponse.clone().enqueue(new Callback<LoginResponse>() {
+        ServiceGenerator.createUserService(this)
+                .login(new LoginRequest(emailInput, passwordInput))
+                .clone().enqueue(new Callback<LoginResponse>() {
+            @SuppressLint("ApplySharedPref")
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call,
                                    @NonNull Response<LoginResponse> response) {
@@ -220,7 +215,7 @@ public class LoginActivity extends AppCompatActivity {
                             .putString("refreshToken", res.session.refreshToken)
                             .putString("ownerId", res.session.ownerId)
                             .commit();
-                    getStoresAndRegister();
+                    getStoresAndRegister(res.session.ownerId);
                 } else {
                     stopLoading();
                     if (response.code() == 401) {
@@ -245,13 +240,10 @@ public class LoginActivity extends AppCompatActivity {
     /**
      * method to make the api call to get all the stores of user from backend
      */
-    private void getStoresAndRegister() {
+    private void getStoresAndRegister(String clientId) {
 
-        String clientId = sharedPreferences.getString("ownerId", null);
-
-        StoreApi storeApiService = ServiceGenerator.createStoreService();
-        Call<StoreResponse> storeResponse = storeApiService.getStores(clientId);
-        storeResponse.clone().enqueue(new Callback<StoreResponse>() {
+        ServiceGenerator.createStoreService(this)
+                .getStores(clientId).clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(@NonNull Call<StoreResponse> call,
                                    @NonNull Response<StoreResponse> response) {
@@ -310,6 +302,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
         startActivity(intent);
+        finish();
     }
 
     /**
@@ -321,6 +314,7 @@ public class LoginActivity extends AppCompatActivity {
         //check if user session already exists, for persistent login
         if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
                 && sharedPreferences.contains("storeIdList")) {
+            Log.d("login-activity", "onStart");
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
@@ -416,7 +410,6 @@ public class LoginActivity extends AppCompatActivity {
                 toastMessage != null ? toastMessage : getString(R.string.request_failure),
                 Toast.LENGTH_SHORT).show();
         stopLoading();
-        email.getEditText().requestFocus();
         Log.e(TAG, debugString);
     }
 

@@ -28,37 +28,38 @@ public class ServiceGenerator {
                 .create(FirebaseApi.class);
     }
 
-    public static CategoryApi createCategoryService() {
-        return createRetrofitInstance(App.PRODUCT_SERVICE_URL).create(CategoryApi.class);
+    public static CategoryApi createCategoryService(Context context) {
+        return createRetrofitInstance(context, App.PRODUCT_SERVICE_URL).create(CategoryApi.class);
     }
 
-    public static DeliveryApi createDeliveryService() {
-        return createRetrofitInstance(App.DELIVERY_SERVICE_URL).create(DeliveryApi.class);
+    public static DeliveryApi createDeliveryService(Context context) {
+        return createRetrofitInstance(context, App.DELIVERY_SERVICE_URL).create(DeliveryApi.class);
     }
 
-    public static LoginApi createUserService() {
-        return createRetrofitInstance(App.USER_SERVICE_URL).create(LoginApi.class);
+    public static LoginApi createUserService(Context context) {
+        return createRetrofitInstance(context, App.USER_SERVICE_URL).create(LoginApi.class);
     }
 
-    public static OrderApi createOrderService() {
-        return createRetrofitInstance(App.ORDER_SERVICE_URL).create(OrderApi.class);
+    public static OrderApi createOrderService(Context context) {
+        return createRetrofitInstance(context, App.ORDER_SERVICE_URL).create(OrderApi.class);
     }
 
-    public static ProductApi createProductService() {
-        return createRetrofitInstance(App.PRODUCT_SERVICE_URL).create(ProductApi.class);
+    public static ProductApi createProductService(Context context) {
+        return createRetrofitInstance(context, App.PRODUCT_SERVICE_URL).create(ProductApi.class);
     }
 
-    public static StoreApi createStoreService() {
-        return createRetrofitInstance(App.PRODUCT_SERVICE_URL).create(StoreApi.class);
+    public static StoreApi createStoreService(Context context) {
+        return createRetrofitInstance(context, App.PRODUCT_SERVICE_URL).create(StoreApi.class);
     }
 
-    private static Retrofit createRetrofitInstance(String serviceUrl) {
+    private static Retrofit createRetrofitInstance(Context context, String serviceUrl) {
+        SharedPreferences sharedPrefs
+                = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+
         OkHttpClient httpClient = new OkHttpClient.Builder()
-                .addInterceptor(new CustomInterceptor())
+                .addInterceptor(new CustomInterceptor(sharedPrefs))
                 .build();
 
-        SharedPreferences sharedPrefs = App.getAppContext()
-                .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
 
         return new Retrofit.Builder()

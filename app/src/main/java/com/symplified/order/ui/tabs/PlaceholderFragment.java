@@ -91,12 +91,12 @@ public class PlaceholderFragment extends Fragment
 
         PageViewModel pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String clientId = sharedPreferences.getString("ownerId", null);
+        String clientId = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString("ownerId", null);
 
         orders = new ArrayList<>();
 
-        OrderApi orderApiService = ServiceGenerator.createOrderService();
+        OrderApi orderApiService = ServiceGenerator.createOrderService(getContext());
 
         section = null;
         if (getArguments() != null) {

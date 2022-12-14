@@ -32,9 +32,12 @@ public class SettingsActivity extends NavbarActivity {
 
         initToolbar();
 
+        String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
+                .getString("ownerId", null);
+
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.settings_frame_layout, new StoreSelectionFragment())
+                .add(R.id.settings_frame_layout, new StoreSelectionFragment(clientId))
                 .commit();
 
     }

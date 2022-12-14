@@ -28,7 +28,6 @@ import retrofit2.Response;
  */
 public class App extends Application implements PrinterObserver {
 
-    private static Context context;
     private static Printer connectedPrinter;
     public static final String DEV_TAG = "dev-logging";
 
@@ -47,11 +46,8 @@ public class App extends Application implements PrinterObserver {
     public void onCreate(){
         super.onCreate();
 
-        context = getApplicationContext();
         //restrict devices from forcing the dark mode on the app
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-        App.context = getApplicationContext();
 
         SunmiPrintHelper.getInstance().addObserver(this);
         SunmiPrintHelper.getInstance().initPrinterService(this);
@@ -70,6 +66,4 @@ public class App extends Application implements PrinterObserver {
     public static boolean isPrinterConnected() {
         return connectedPrinter != null && connectedPrinter.isPrinterConnected();
     }
-
-    public static Context getAppContext() { return context; }
 }

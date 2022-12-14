@@ -1,7 +1,6 @@
 package com.symplified.order.services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -38,7 +37,6 @@ import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,7 +71,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = sharedPreferences.getString("ownerId", "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
-            LoginApi userService = ServiceGenerator.createUserService();
+            LoginApi userService = ServiceGenerator.createUserService(this);
             String transactionId = remoteMessage.getData().get("body");
 
             String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
@@ -82,7 +80,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
-                OrderApi orderApiService = ServiceGenerator.createOrderService();
+                OrderApi orderApiService = ServiceGenerator.createOrderService(this);
                 Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
 
                 orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
@@ -137,7 +135,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         if (response.isSuccessful()) {
                             try {
                                 App.getPrinter()
-                                        .printReceipt(orderDetails.order, response.body().data.content);
+                                        .printReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
                                 processNewOrder(orderApiService, orderDetails);
                             } catch (Exception e) {
                                 addOrderToView(newOrderObservers, orderDetails);
@@ -208,7 +206,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString("ownerId", "");
 
-        LoginApi userService = ServiceGenerator.createUserService();
+        LoginApi userService = ServiceGenerator.createUserService(this);
         userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
                 .clone().enqueue(new EmptyCallback());
     }
