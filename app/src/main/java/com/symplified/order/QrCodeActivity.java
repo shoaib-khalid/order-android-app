@@ -52,11 +52,9 @@ public class QrCodeActivity extends AppCompatActivity implements QrCodeObserver 
         progressBar = findViewById(R.id.progress_bar);
         failureLayout = findViewById(R.id.failure_layout);
         retryButton = findViewById(R.id.btn_retry);
-        retryButton.setOnClickListener(v -> {
-           requestQrCode();
-        });
+        retryButton.setOnClickListener(v -> requestQrCode());
 
-        orderApiService = ServiceGenerator.createOrderService();
+        orderApiService = ServiceGenerator.createOrderService(this);
 
         Intent intent = getIntent();
         if (intent.hasExtra("storeId")) {
@@ -66,7 +64,7 @@ public class QrCodeActivity extends AppCompatActivity implements QrCodeObserver 
         } else {
             finish();
         }
-        storeId = "e5bd2d2b-a8f6-429b-8baf-e90bb123f29a";
+//        storeId = "e5bd2d2b-a8f6-429b-8baf-e90bb123f29a";
 
         requestQrCode();
         OrderNotificationService.addQrCodeObserver(this);
@@ -85,9 +83,9 @@ public class QrCodeActivity extends AppCompatActivity implements QrCodeObserver 
             @Override
             public void onResponse(@NonNull Call<QrCodeResponse> call,
                                    @NonNull Response<QrCodeResponse> response) {
-                if(response.isSuccessful()) {
+                if(response.isSuccessful() && response.body() != null) {
                     try {
-                        qrCodeImage.setImageBitmap(encodeAsBitmap(response.body() != null ? response.body().data.url : null));
+                        qrCodeImage.setImageBitmap(encodeAsBitmap(response.body().data.url));
                         stopLoadingWithSuccess();
                     } catch (WriterException e) {
                         stopLoadingWithFailure();

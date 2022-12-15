@@ -2,6 +2,7 @@ package com.symplified.order.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,17 +29,19 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
+
     public List<Store> items;
     public Context context;
 
     private final StoreApi storeApiService;
-    private static final String TAG = "StoreAdapter";
+    private static final String TAG = "store-adapter";
 
     public StoreAdapter(List<Store> items, Context context) {
         this.items = items;
@@ -48,8 +51,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView name;
-        private final TextView status;
+        private final TextView name, status;
         private final ProgressBar progressBar;
         private final AppCompatImageButton qrCodeButton;
         private boolean isLoading;
@@ -72,7 +74,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         }
     }
 
-
     @NonNull
     @Override
     public StoreAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -85,14 +86,15 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String storeId = items.get(holder.getAdapterPosition()).id;
         getStoreStatus(storeId, holder);
+        checkStoreQrCodeAvailability(storeId, holder);
 
         holder.name.setText(items.get(position).name);
 
         holder.itemView.setOnClickListener(view -> {
             if (!holder.isLoading()) {
-                BottomSheetDialogFragment bottomSheetDialogFragment
+                BottomSheetDialogFragment storeScheduleDialog
                         = new SettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
-                bottomSheetDialogFragment.show(((FragmentActivity) context)
+                storeScheduleDialog.show(((FragmentActivity) context)
                         .getSupportFragmentManager(), "bottomSheetDialog");
             }
         });
@@ -103,7 +105,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             context.startActivity(intent);
         });
     }
-
 
     @Override
     public int getItemCount() {
@@ -167,5 +168,24 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         holder.progressBar.setVisibility(View.GONE);
         holder.status.setVisibility(View.VISIBLE);
         holder.setIsLoading(false);
+    }
+
+    private void checkStoreQrCodeAvailability(String storeId, ViewHolder holder) {
+        Log.d("store-adapter", "checkQrCodeAvailability");
+        ServiceGenerator.createOrderService(context).verifyQrCodeAvailability(storeId).clone()
+                .enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ResponseBody> call,
+                                           @NonNull Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            Log.d("store-adapter", "checkQrCodeAvailability success");
+                            holder.qrCodeButton.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
+                    }
+                });
     }
 }

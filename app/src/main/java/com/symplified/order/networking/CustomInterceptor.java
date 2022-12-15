@@ -43,8 +43,7 @@ public class CustomInterceptor implements Interceptor {
     @NonNull
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
-        String accessToken = sharedPrefs.getString("accessToken", "");
-        Log.d("qr-code", "accessToken: " + accessToken);
+        String accessToken = sharedPrefs.getString("accessToken", "accessToken");
         Request originalRequest = chain.request();
         Request request = addTokenToRequest(originalRequest, accessToken);
 

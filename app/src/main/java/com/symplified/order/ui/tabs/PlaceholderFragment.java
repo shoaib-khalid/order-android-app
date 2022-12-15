@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -211,6 +212,7 @@ public class PlaceholderFragment extends Fragment
                         showEmptyOrdersMessage();
                     }
                 } else {
+                    Log.e("placeholder-fragment", response.raw().toString());
                     showErrorMessage();
                 }
                 stopLoading();
@@ -218,6 +220,7 @@ public class PlaceholderFragment extends Fragment
 
             @Override
             public void onFailure(@NonNull Call<OrderDetailsResponse> call, @NonNull Throwable t) {
+                Log.e("placeholder-fragment", "onFailure: " + t.getLocalizedMessage());
                 stopLoading();
                 showErrorMessage();
             }

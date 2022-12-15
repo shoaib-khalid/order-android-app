@@ -50,4 +50,7 @@ public interface OrderApi {
 
     @POST("qrcode/generate")
     Call<QrCodeResponse> generateQrCode(@Body QrCodeRequest request);
+
+    @GET("qrcode/preauth-generate")
+    Call<ResponseBody> verifyQrCodeAvailability(@Query("storeId") String storeId);
 }
