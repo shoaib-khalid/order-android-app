@@ -64,7 +64,8 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private ConstraintLayout mainLayout;
     private FirebaseApi firebaseApiService;
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
+    private boolean isLoading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -389,11 +390,13 @@ public class LoginActivity extends AppCompatActivity {
     private void startLoading() {
         progressBar.setVisibility(View.VISIBLE);
         mainLayout.setVisibility(View.GONE);
+        isLoading = true;
     }
 
     private void stopLoading() {
         progressBar.setVisibility(View.GONE);
         mainLayout.setVisibility(View.VISIBLE);
+        isLoading = false;
     }
 
     private void removeUserData() {
@@ -437,7 +440,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void run() {
             Log.d("login-activity", "SubscribeTimeoutTask");
-            if (subscriptionCount == 0) {
+            if (subscriptionCount == 0 && isLoading) {
                 runOnUiThread(() -> {
                     stopLoading();
                     removeUserData();

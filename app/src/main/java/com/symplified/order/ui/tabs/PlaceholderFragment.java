@@ -25,6 +25,8 @@ import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
+import com.symplified.order.helpers.GenericPrintHelper;
+import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.interfaces.Printer;
@@ -129,9 +131,8 @@ public class PlaceholderFragment extends Fragment
             }
         }
 
-        if (!App.isPrinterConnected()) {
-            App.getPrinter().addObserver(this);
-        }
+        SunmiPrintHelper.getInstance().addObserver(this);
+        GenericPrintHelper.getInstance().addObserver(this);
 
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
