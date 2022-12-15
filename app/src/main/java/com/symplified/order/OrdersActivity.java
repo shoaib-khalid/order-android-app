@@ -9,9 +9,9 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -21,7 +21,6 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -32,6 +31,9 @@ import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -83,9 +85,8 @@ public class OrdersActivity extends NavbarActivity {
     private void initToolbar() {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_menu_24));
-        home.setOnClickListener(view -> {
-            drawerLayout.openDrawer(GravityCompat.START);
-        });
+        home.setOnClickListener(view -> drawerLayout.openDrawer(GravityCompat.START));
+
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("Your Orders");
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);

@@ -2,8 +2,6 @@ package com.symplified.order.callbacks;
 
 import androidx.annotation.NonNull;
 
-import com.symplified.order.models.HttpResponse;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

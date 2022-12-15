@@ -1,7 +1,6 @@
 package com.symplified.order;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -53,7 +52,6 @@ public class ProductsActivity extends NavbarActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -65,8 +63,8 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setAdapter(productAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
-        storeIdList = sharedPreferences.getString("storeIdList", null);
+        storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
+                .getString("storeIdList", null);
 
         progressBar = findViewById(R.id.product_progress_bar);
         refreshLayout = findViewById(R.id.layout_products_refresh);
@@ -92,6 +90,7 @@ public class ProductsActivity extends NavbarActivity {
     private void getProductsList() {
         startLoading();
         products.clear();
+        productAdapter.notifyDataSetChanged();
 
         for (String storeId: storeIdList.split(" ")) {
 
@@ -125,6 +124,7 @@ public class ProductsActivity extends NavbarActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void startLoading() {

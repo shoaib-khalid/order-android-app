@@ -1,6 +1,5 @@
 package com.symplified.order.apis;
 
-import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;

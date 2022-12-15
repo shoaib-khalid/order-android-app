@@ -59,5 +59,6 @@ public class SettingsActivity extends NavbarActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
+        finish();
     }
 }

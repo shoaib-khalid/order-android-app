@@ -34,7 +34,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public List<Store> items;
     public Context context;
 
-    private StoreApi storeApiService;
+    private final StoreApi storeApiService;
     private static final String TAG = "StoreAdapter";
 
     public StoreAdapter(List<Store> items, Context context) {
