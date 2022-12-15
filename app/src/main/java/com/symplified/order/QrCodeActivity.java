@@ -1,10 +1,5 @@
 package com.symplified.order;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -13,8 +8,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.Toast;
-import android.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -22,7 +20,6 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.interfaces.QrCodeObserver;
-import com.symplified.order.models.order.Order;
 import com.symplified.order.models.qrcode.QrCodeRequest;
 import com.symplified.order.models.qrcode.QrCodeResponse;
 import com.symplified.order.networking.ServiceGenerator;

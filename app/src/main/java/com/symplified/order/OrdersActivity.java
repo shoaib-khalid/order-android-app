@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -31,9 +30,6 @@ import com.symplified.order.ui.tabs.SectionsPagerAdapter;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 import retrofit2.Call;
 import retrofit2.Callback;

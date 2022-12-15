@@ -26,6 +26,8 @@ import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.NewOrdersBinding;
+import com.symplified.order.helpers.GenericPrintHelper;
+import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.interfaces.Printer;
@@ -130,10 +132,6 @@ public class PlaceholderFragment extends Fragment
             }
         }
 
-        if (!App.isPrinterConnected()) {
-            App.getPrinter().addObserver(this);
-        }
-
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -156,6 +154,9 @@ public class PlaceholderFragment extends Fragment
                         }
                     }
                 });
+
+        SunmiPrintHelper.getInstance().addObserver(this);
+        GenericPrintHelper.getInstance().addObserver(this);
     }
 
     @Override
@@ -186,9 +187,6 @@ public class PlaceholderFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (App.isPrinterConnected()) {
-            App.getPrinter().removeObserver(this);
-        }
         OrderNotificationService.removeNewOrderObserver(this);
         OrderNotificationService.removeOngoingOrderObserver(this);
         OrderNotificationService.removePastOrderObserver(this);
@@ -256,13 +254,6 @@ public class PlaceholderFragment extends Fragment
     }
 
     @Override
-    public void onPrinterConnected(Printer printer) {
-        if (orderAdapter != null) {
-            orderAdapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
     public void onOrderReceived(Order.OrderDetails orderDetails) {
         if (orderAdapter != null) {
             if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
@@ -301,5 +292,12 @@ public class PlaceholderFragment extends Fragment
     @Override
     public void setOrderManager(OrderManager mediator) {
         this.orderManager = mediator;
+    }
+
+    @Override
+    public void onPrinterConnected(Printer printer) {
+        if (orderAdapter != null) {
+            orderAdapter.notifyDataSetChanged();
+        }
     }
 }

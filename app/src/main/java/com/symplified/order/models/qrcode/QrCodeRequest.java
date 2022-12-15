@@ -1,7 +1,5 @@
 package com.symplified.order.models.qrcode;
 
-import com.symplified.order.models.ping.PingRequest;
-
 import java.io.Serializable;
 
 public class QrCodeRequest implements Serializable {
