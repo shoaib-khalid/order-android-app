@@ -93,12 +93,12 @@ public class GenericPrintHelper implements Printer {
     }
 
     @Override
-    public void printReceipt(Order order, List<Item> items) throws Exception {
+    public void printReceipt(Order order, List<Item> items, Context context) throws Exception {
         if (!isPrinterConnected()) {
             return;
         }
 
-        String currency = Utility.getCurrencySymbol(order);
+        String currency = Utility.getCurrencySymbol(order, context);
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
         String divider = "\n------------------------";

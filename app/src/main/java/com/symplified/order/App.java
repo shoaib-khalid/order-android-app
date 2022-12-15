@@ -1,10 +1,6 @@
 package com.symplified.order;
 
 import android.app.Application;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.os.Build;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -18,7 +14,6 @@ import com.symplified.order.interfaces.PrinterObserver;
  */
 public class App extends Application implements PrinterObserver {
 
-    private static Context context;
     private static Printer connectedPrinter;
     public static final String DEV_TAG = "dev-logging";
 
@@ -31,35 +26,14 @@ public class App extends Application implements PrinterObserver {
     public static final String ORDER_SERVICE_URL = "order-service/v1/";
     public static final String DELIVERY_SERVICE_URL = "delivery-service/v1/";
 
-    public static final String SESSION_DETAILS_TITLE = "session";
-    public static final String CHANNEL_ID = "CHANNEL_ID";
-    public static final String ORDERS = "ORDERS";
+    public static final String SESSION = "session";
 
     @Override
     public void onCreate(){
         super.onCreate();
 
-        context = getApplicationContext();
         //restrict devices from forcing the dark mode on the app
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-
-        //initialize the notification manager to receive and display notifications.
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,"Symplified", NotificationManager.IMPORTANCE_HIGH
-            );
-
-            NotificationChannel orders = new NotificationChannel(
-                    ORDERS,"Orders", NotificationManager.IMPORTANCE_HIGH
-            );
-            orders.setSound(null, null);
-            channel.setSound(null,null);
-            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-            notificationManager.createNotificationChannel(channel);
-            notificationManager.createNotificationChannel(orders);
-        }
-
-        App.context = getApplicationContext();
 
         SunmiPrintHelper.getInstance().addObserver(this);
         SunmiPrintHelper.getInstance().initPrinterService(this);
@@ -71,15 +45,11 @@ public class App extends Application implements PrinterObserver {
     public static Printer getPrinter() {
         return connectedPrinter;
     }
-
     @Override
     public void onPrinterConnected(Printer printer) {
         connectedPrinter = printer;
     }
-
     public static boolean isPrinterConnected() {
         return connectedPrinter != null && connectedPrinter.isPrinterConnected();
     }
-
-    public static Context getAppContext() { return context; }
 }

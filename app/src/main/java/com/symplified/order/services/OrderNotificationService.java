@@ -1,14 +1,12 @@
 package com.symplified.order.services;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -35,11 +33,11 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.models.ping.PingRequest;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,11 +69,11 @@ public class OrderNotificationService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         String messageTitle = remoteMessage.getData().get("title");
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
-            LoginApi userService = ServiceGenerator.createUserService();
+            LoginApi userService = ServiceGenerator.createUserService(this);
             String transactionId = remoteMessage.getData().get("body");
 
             String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
@@ -88,7 +86,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         } else {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
-                OrderApi orderApiService = ServiceGenerator.createOrderService();
+                OrderApi orderApiService = ServiceGenerator.createOrderService(this);
                 Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
 
                 orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
@@ -143,7 +141,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         if (response.isSuccessful()) {
                             try {
                                 App.getPrinter()
-                                        .printReceipt(orderDetails.order, response.body().data.content);
+                                        .printReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
                                 processNewOrder(orderApiService, orderDetails);
                             } catch (Exception e) {
                                 addOrderToView(newOrderObservers, orderDetails);
@@ -211,10 +209,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     private void sendErrorToServer(String errorMessage) {
-        String clientId = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE)
+        String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString("ownerId", "");
 
-        LoginApi userService = ServiceGenerator.createUserService();
+        LoginApi userService = ServiceGenerator.createUserService(this);
         userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
                 .clone().enqueue(new EmptyCallback());
     }
@@ -258,28 +256,30 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.S 
                     ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
         
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), ChannelId.NEW_ORDERS)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle(remoteMessage.getData().get("title"))
                 .setContentText(remoteMessage.getData().get("body"))
-                .setAutoCancel(false)
+                .setAutoCancel(true)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
-                .setCategory(NotificationCompat.CATEGORY_ALARM)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                 .setColor(Color.CYAN)
                 .build();
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(new Random().nextInt(), notification);
+//        notificationManager.notify(new Random().nextInt(), notification);
 
         if (!AlertService.isPlaying()) {
             Intent intent = new Intent(getApplicationContext(), AlertService.class);
-            intent.putExtra(String.valueOf(R.string.store_type),
+            intent.putExtra(getString(R.string.store_type),
                     order != null && order.store.verticalCode != null ? order.store.verticalCode : "");
-            intent.putExtra(String.valueOf(R.string.service_type),
+            intent.putExtra(getString(R.string.service_type),
                     order != null && order.serviceType != null ? order.serviceType.toString() : "");
+            intent.putExtra("title", remoteMessage.getData().get("title"));
+            intent.putExtra("body", remoteMessage.getData().get("body"));
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(intent);
@@ -287,36 +287,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 startService(intent);
             }
         }
-    }
-
-    private void notifyUser(String title, String body) {
-        
-        Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-        PendingIntent pendingIntent =
-                stackBuilder.getPendingIntent(0,
-                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(App.CHANNEL_ID,
-                    "New Orders", NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), App.CHANNEL_ID)
-                .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(title)
-                .setContentText(body)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setColor(Color.CYAN)
-                .build();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        notificationManager.notify(new Random().nextInt(), notification);
     }
 
     public static void addNewOrderObserver(OrderObserver observer) { newOrderObservers.add(observer); }

@@ -37,14 +37,14 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public List<Store> items;
     public Context context;
 
-    private StoreApi storeApiService;
+    private final StoreApi storeApiService;
     private static final String TAG = "StoreAdapter";
 
     public StoreAdapter(List<Store> items, Context context) {
         this.items = items;
         this.context = context;
 
-        storeApiService = ServiceGenerator.createStoreService();
+        storeApiService = ServiceGenerator.createStoreService(context);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -91,7 +91,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(view -> {
             if (!holder.isLoading()) {
                 BottomSheetDialogFragment bottomSheetDialogFragment
-                        = new SettingsBottomSheet(storeId, holder.status, position, holder, StoreAdapter.this);
+                        = new SettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
                 bottomSheetDialogFragment.show(((FragmentActivity) context)
                         .getSupportFragmentManager(), "bottomSheetDialog");
             }

@@ -1,6 +1,5 @@
 package com.symplified.order.networking;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -28,8 +27,8 @@ public class CustomInterceptor implements Interceptor {
     SharedPreferences sharedPrefs;
     LoginApi loginService;
 
-    public CustomInterceptor() {
-        sharedPrefs = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+    public CustomInterceptor(SharedPreferences sharedPreferences) {
+        sharedPrefs = sharedPreferences;
 
         String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())

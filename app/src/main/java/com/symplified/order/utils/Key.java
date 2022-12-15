@@ -6,4 +6,5 @@ public interface Key {
     String ORDER_DETAILS = "order_details";
     String BASE_URL = "base_url";
     String IS_STAGING = "is_staging";
+    String IS_SUBSCRIBED_TO_NOTIFICATIONS = "is_subscribed_to_notifications";
 }

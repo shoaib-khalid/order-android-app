@@ -1,6 +1,5 @@
 package com.symplified.order.apis;
 
-import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.error.ErrorRequest;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
@@ -24,7 +23,7 @@ public interface LoginApi {
     Call<LoginResponse> refreshAccessToken(@Body String refreshToken);
 
     @PUT("{clientId}/pingresponse/{transactionId}")
-    Call<HttpResponse> ping(
+    Call<Void> ping(
             @Path("clientId") String clientId,
             @Path("transactionId") String transactionId,
             @Body PingRequest pingRequest
@@ -32,5 +31,5 @@ public interface LoginApi {
 
     @Headers("Content-Type: application/json")
     @POST("logerror")
-    Call<HttpResponse> logError(@Body ErrorRequest errorRequest);
+    Call<Void> logError(@Body ErrorRequest errorRequest);
 }

@@ -12,5 +12,5 @@ public interface Printer {
     void initPrinterService(Context context);
     void addObserver(PrinterObserver observer);
     void removeObserver(PrinterObserver observer);
-    void printReceipt(Order order, List<Item> items) throws Exception;
+    void printReceipt(Order order, List<Item> items, Context context) throws Exception;
 }

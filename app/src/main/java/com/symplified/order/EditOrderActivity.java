@@ -15,8 +15,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -34,9 +34,7 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Key;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -45,8 +43,6 @@ import retrofit2.Response;
 public class EditOrderActivity extends NavbarActivity {
 
     private Toolbar toolbar;
-    private ActivityEditOrderBinding binding;
-    private DrawerLayout drawerLayout;
 
     public final String TAG = EditOrderActivity.class.getName();
     private RecyclerView recyclerView;
@@ -57,13 +53,11 @@ public class EditOrderActivity extends NavbarActivity {
     private Button update;
     private DecimalFormat formatter;
 
-    Map<String, String> headers;
     OrderApi orderApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
 
         progressDialog = new Dialog(this);
         progressDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -73,15 +67,13 @@ public class EditOrderActivity extends NavbarActivity {
         progressIndicator.setIndeterminate(true);
         formatter = new DecimalFormat("#,###.00");
 
-        binding = ActivityEditOrderBinding.inflate(getLayoutInflater());
+        ActivityEditOrderBinding binding = ActivityEditOrderBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        drawerLayout = findViewById(R.id.drawer_layout);
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initToolbar(sharedPreferences);
+        initToolbar();
 
         initViews();
 
@@ -91,15 +83,14 @@ public class EditOrderActivity extends NavbarActivity {
             order = (Order) data.getSerializable("order");
         }
 
-        headers = new HashMap<>();
-        orderApiService = ServiceGenerator.createOrderService();
+        orderApiService = ServiceGenerator.createOrderService(this);
 
         if (order != null) {
             getOrderItems(order);
         }
     }
 
-    private void initToolbar(SharedPreferences sharedPreferences) {
+    private void initToolbar() {
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
@@ -122,7 +113,8 @@ public class EditOrderActivity extends NavbarActivity {
 
         itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
             @Override
-            public void onResponse(Call<ItemsResponse> call, Response<ItemsResponse> response) {
+            public void onResponse(@NonNull Call<ItemsResponse> call,
+                                   @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful()) {
                     items = response.body().data.content;
                     adapter = new EditItemAdapter(items, getApplicationContext(), order);
@@ -166,35 +158,29 @@ public class EditOrderActivity extends NavbarActivity {
         dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
         title.setText(R.string.update_order);
         message.setText(R.string.update_order_warning);
-        imageView.setImageDrawable(getDrawable(R.drawable.ic_baseline_warning_24));
+        imageView.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_baseline_warning_24));
 
         dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
             dialog.dismiss();
-            Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(headers, order.id, adapter.getUpdatedItems());
+            Call<HttpResponse> updateItemsCall = orderApiService.reviseOrderItem(order.id, adapter.getUpdatedItems());
             progressDialog.show();
 
             updateItemsCall.clone().enqueue(new Callback<HttpResponse>() {
                 @Override
-                public void onResponse(Call<HttpResponse> call, Response<HttpResponse> response) {
-                    Log.i("updatedItemListTAG", "onResponse: " + call.request());
+                public void onResponse(@NonNull Call<HttpResponse> call,
+                                       @NonNull Response<HttpResponse> response) {
                     progressDialog.dismiss();
                     if (response.isSuccessful()) {
                         getOrderByInvoiceId(order.invoiceId);
                     } else {
-                        progressDialog.dismiss();
-                        Log.e(TAG, "onResponse: " + response);
-                        try {
-                            Toast.makeText(getApplicationContext(), response.body().message,
-                                    Toast.LENGTH_SHORT).show();
-                        } catch (NullPointerException e) {
-                            Toast.makeText(getApplicationContext(),
-                                    R.string.request_failure, Toast.LENGTH_SHORT).show();
-                        }
+                        Log.e(TAG, "Error while editing order: " + response.raw());
+                        Toast.makeText(getApplicationContext(),
+                                R.string.request_failure, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<HttpResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<HttpResponse> call, @NonNull Throwable t) {
                     Toast.makeText(getApplicationContext(), R.string.request_failure, Toast.LENGTH_SHORT).show();
                     Log.e("TAG", "onFailure: ", t);
                     progressDialog.dismiss();
@@ -208,7 +194,7 @@ public class EditOrderActivity extends NavbarActivity {
     }
 
     public void getOrderByInvoiceId(String invoiceId) {
-        SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString("ownerId", "");
 
         Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
@@ -234,7 +220,7 @@ public class EditOrderActivity extends NavbarActivity {
             }
 
             @Override
-            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OrderDetailsResponse> call, @NonNull Throwable t) {
                 progressDialog.dismiss();
                 Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
                 closeActivityWithSuccessMessage();
@@ -255,7 +241,7 @@ public class EditOrderActivity extends NavbarActivity {
         title.setText(R.string.order_updated);
         String messageText = getResources().getString(R.string.order_updated_message) + formatter.format(refundAmount);
         message.setText(messageText);
-        imageView.setImageDrawable(getDrawable(R.drawable.ic_success));
+        imageView.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_success));
         dialog.findViewById(R.id.btn_neutral).setOnClickListener(view -> {
             dialog.dismiss();
             closeActivityWithSuccessMessage();

@@ -72,8 +72,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.context = context;
         this.orderManager = orderManager;
 
-        orderApiService = ServiceGenerator.createOrderService();
-        deliveryApiService = ServiceGenerator.createDeliveryService();
+        orderApiService = ServiceGenerator.createOrderService(context);
+        deliveryApiService = ServiceGenerator.createDeliveryService(context);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -186,7 +186,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         formatter = Utility.getMonetaryAmountFormat();
 
-        String currency = Utility.getCurrencySymbol(order);
+        String currency = Utility.getCurrencySymbol(order, context);
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
 
@@ -213,7 +213,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         if (!Utility.isBlank(order.orderShipmentDetail.zipcode)) {
             fullAddress.append(order.orderShipmentDetail.zipcode);
         }
-
         if (fullAddress.length() > 0) {
             holder.address.setText(String.valueOf(fullAddress));
             holder.rlAddress.setVisibility(View.VISIBLE);
@@ -286,66 +285,70 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.divider3.setVisibility(View.VISIBLE);
         }
 
-        if (section.equals("new")) {
-            if (order.isRevised) {
-                holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
-                holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
-            }
-            holder.editButton.setVisibility(View.VISIBLE);
-            holder.acceptButton.setText(orderDetails.nextActionText);
-            holder.cancelButton.setVisibility(order.serviceType == ServiceType.DINEIN ? View.GONE : View.VISIBLE);
-            holder.currStatusLayout.setVisibility(View.GONE);
-            holder.divider8.setVisibility(View.GONE);
-            holder.newLayout.setVisibility(View.VISIBLE);
-        } else if (section.equals("ongoing")) {
-            if (orderDetails.nextActionText != null) {
+        switch (section) {
+            case "new":
+                if (order.isRevised) {
+                    holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
+                    holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
+                }
+                holder.editButton.setVisibility(View.VISIBLE);
+                holder.acceptButton.setText(orderDetails.nextActionText);
+                holder.cancelButton.setVisibility(order.serviceType == ServiceType.DINEIN ? View.GONE : View.VISIBLE);
+                holder.currStatusLayout.setVisibility(View.GONE);
+                holder.divider8.setVisibility(View.GONE);
+                holder.newLayout.setVisibility(View.VISIBLE);
+                break;
+            case "ongoing":
+                if (orderDetails.nextActionText != null) {
+                    holder.ongoingLayout.setVisibility(View.VISIBLE);
+                    holder.statusLabel.setVisibility(View.VISIBLE);
+                    holder.statusLabel.setText("Update Status: ");
+                    holder.statusButton.setText(orderDetails.nextActionText);
+                    holder.statusButton.setVisibility(View.VISIBLE);
+                }
+
+                switch (order.completionStatus) {
+                    case BEING_PREPARED:
+                        holder.currStatus.setText("Preparing");
+                        holder.trackButton.setVisibility(View.GONE);
+                        break;
+                    case AWAITING_PICKUP:
+                        holder.currStatus.setText("Awaiting Pickup");
+                        if (!order.orderShipmentDetail.storePickup
+                                && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                            holder.trackButton.setVisibility(View.VISIBLE);
+                        }
+                        break;
+                    case BEING_DELIVERED:
+                        holder.currStatus.setText("Out for Delivery");
+                        if (!order.orderShipmentDetail.storePickup
+                                && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                            holder.trackButton.setVisibility(View.VISIBLE);
+                        }
+                        break;
+                }
+                break;
+            case "past":
                 holder.ongoingLayout.setVisibility(View.VISIBLE);
+                holder.typeLayout.setVisibility(View.GONE);
+                holder.currStatusLayout.setVisibility(View.GONE);
+                holder.status.setVisibility(View.VISIBLE);
                 holder.statusLabel.setVisibility(View.VISIBLE);
-                holder.statusLabel.setText("Update Status: ");
-                holder.statusButton.setText(orderDetails.nextActionText);
-                holder.statusButton.setVisibility(View.VISIBLE);
-            }
+                if (order.completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER) {
+                    holder.status.setText("Order Delivered");
+                    holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_accept_button));
+                } else if (order.completionStatus == OrderStatus.CANCELED_BY_MERCHANT
+                        || order.completionStatus == OrderStatus.CANCELED_BY_CUSTOMER) {
+                    holder.status.setText("Order Cancelled");
+                    holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
+                }
+                holder.divider7.setVisibility(View.GONE);
+                holder.divider8.setVisibility(View.GONE);
 
-            switch (order.completionStatus) {
-                case BEING_PREPARED:
-                    holder.currStatus.setText("Preparing");
-                    holder.trackButton.setVisibility(View.GONE);
-                    break;
-                case AWAITING_PICKUP:
-                    holder.currStatus.setText("Awaiting Pickup");
-                    if (!order.orderShipmentDetail.storePickup
-                            && order.orderShipmentDetail.deliveryPeriodDetails != null) {
-                        holder.trackButton.setVisibility(View.VISIBLE);
-                    }
-                    break;
-                case BEING_DELIVERED:
-                    holder.currStatus.setText("Out for Delivery");
-                    if (!order.orderShipmentDetail.storePickup
-                            && order.orderShipmentDetail.deliveryPeriodDetails != null) {
-                        holder.trackButton.setVisibility(View.VISIBLE);
-                    }
-                    break;
-            }
-        } else if (section.equals("past")) {
-            holder.ongoingLayout.setVisibility(View.VISIBLE);
-            holder.typeLayout.setVisibility(View.GONE);
-            holder.currStatusLayout.setVisibility(View.GONE);
-            holder.status.setVisibility(View.VISIBLE);
-            holder.statusLabel.setVisibility(View.VISIBLE);
-            if (order.completionStatus == OrderStatus.DELIVERED_TO_CUSTOMER) {
-                holder.status.setText("Order Delivered");
-                holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_accept_button));
-            } else if (order.completionStatus == OrderStatus.CANCELED_BY_MERCHANT
-                    || order.completionStatus == OrderStatus.CANCELED_BY_CUSTOMER) {
-                holder.status.setText("Order Cancelled");
-                holder.status.setTextColor(ContextCompat.getColor(context, R.color.sf_cancel_button));
-            }
-            holder.divider7.setVisibility(View.GONE);
-            holder.divider8.setVisibility(View.GONE);
-
-            if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null) {
-                getRiderDetails(holder, order, 2);
-            }
+                if (!order.orderShipmentDetail.storePickup && order.orderShipmentDetail.deliveryPeriodDetails != null) {
+                    getRiderDetails(holder, order, 2);
+                }
+                break;
         }
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
@@ -646,7 +649,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> items) {
         try {
-            App.getPrinter().printReceipt(order, items);
+            App.getPrinter().printReceipt(order, items, context);
         } catch (Exception e) {
             Log.e("order-adapter", "Failed to print order. " + e.getLocalizedMessage());
             e.printStackTrace();

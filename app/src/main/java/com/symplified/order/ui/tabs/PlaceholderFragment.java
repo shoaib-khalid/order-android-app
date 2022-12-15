@@ -1,19 +1,14 @@
 package com.symplified.order.ui.tabs;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -61,8 +56,6 @@ public class PlaceholderFragment extends Fragment
 
     private static final String ARG_SECTION = "section";
 
-    private PageViewModel pageViewModel;
-    private NewOrdersBinding binding;
     private OrderAdapter orderAdapter;
 
     private List<Order.OrderDetails> orders = new ArrayList<>();
@@ -70,7 +63,6 @@ public class PlaceholderFragment extends Fragment
     private Call<OrderDetailsResponse> orderResponse;
     private RecyclerView recyclerView;
     private String section;
-    private BroadcastReceiver ordersReceiver;
 
     private ProgressBar progressBar;
     private SwipeRefreshLayout mainLayout, emptyLayout;
@@ -91,14 +83,14 @@ public class PlaceholderFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        PageViewModel pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        String clientId = sharedPreferences.getString("ownerId", null);
+        String clientId = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString("ownerId", null);
 
         orders = new ArrayList<>();
 
-        OrderApi orderApiService = ServiceGenerator.createOrderService();
+        OrderApi orderApiService = ServiceGenerator.createOrderService(getContext());
 
         section = null;
         if (getArguments() != null) {
@@ -114,8 +106,6 @@ public class PlaceholderFragment extends Fragment
                 if (AlertService.isPlaying()) {
                     getActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
-                NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.cancelAll();
                 OrderNotificationService.addNewOrderObserver(this);
                 break;
             }
@@ -139,21 +129,16 @@ public class PlaceholderFragment extends Fragment
             }
         }
 
-        ordersReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                onResume();
-            }
-        };
-
-        if (App.isPrinterConnected()) {
+        if (!App.isPrinterConnected()) {
             App.getPrinter().addObserver(this);
         }
 
         editOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && orderAdapter != null) {
+                    if (result.getResultCode() == Activity.RESULT_OK
+                            && orderAdapter != null
+                            && result.getData() != null) {
                         Intent data = result.getData();
                         Order.OrderDetails updatedOrderDetails
                                 = (Order.OrderDetails) data.getSerializableExtra(Key.ORDER_DETAILS);
@@ -177,7 +162,7 @@ public class PlaceholderFragment extends Fragment
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        binding = NewOrdersBinding.inflate(inflater, container, false);
+        com.symplified.order.databinding.NewOrdersBinding binding = NewOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         recyclerView = root.findViewById(R.id.order_recycler);
@@ -197,42 +182,6 @@ public class PlaceholderFragment extends Fragment
         return root;
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (AlertService.isPlaying()) {
-            getActivity().stopService(new Intent(getContext(), AlertService.class));
-        }
-        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancelAll();
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        IntentFilter filter = new IntentFilter("com.symplified.order.GET_ORDERS");
-        if (getContext() != null) {
-            getContext().registerReceiver(ordersReceiver, filter);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (getContext() != null) {
-            getContext().unregisterReceiver(ordersReceiver);
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -249,7 +198,8 @@ public class PlaceholderFragment extends Fragment
         startLoading();
         orderResponse.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
-            public void onResponse(Call<OrderDetailsResponse> call, Response<OrderDetailsResponse> response) {
+            public void onResponse(@NonNull Call<OrderDetailsResponse> call,
+                                   @NonNull Response<OrderDetailsResponse> response) {
                 if (response.isSuccessful()) {
                     orders = response.body().data.content;
                     orderAdapter = new OrderAdapter(orders, section, getContext(), orderManager);
@@ -267,7 +217,7 @@ public class PlaceholderFragment extends Fragment
             }
 
             @Override
-            public void onFailure(Call<OrderDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OrderDetailsResponse> call, @NonNull Throwable t) {
                 stopLoading();
                 showErrorMessage();
             }

@@ -1,7 +1,6 @@
 package com.symplified.order;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -52,11 +52,10 @@ public class ProductsActivity extends NavbarActivity {
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initToolbar(sharedPreferences);
+        initToolbar();
 
         RecyclerView recyclerView = findViewById(R.id.products_recyclerview);
 
@@ -64,21 +63,21 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setAdapter(productAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
-        storeIdList = sharedPreferences.getString("storeIdList", null);
+        storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
+                .getString("storeIdList", null);
 
         progressBar = findViewById(R.id.product_progress_bar);
         refreshLayout = findViewById(R.id.layout_products_refresh);
         refreshLayout.setOnRefreshListener(this::getProductsList);
 
-        productApiService = ServiceGenerator.createProductService();
+        productApiService = ServiceGenerator.createProductService(this);
 
         getProductsList();
     }
 
-    private void initToolbar(SharedPreferences sharedPreferences) {
+    private void initToolbar() {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_arrow_back_black_24dp));
         home.setOnClickListener(view -> onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
@@ -91,6 +90,7 @@ public class ProductsActivity extends NavbarActivity {
     private void getProductsList() {
         startLoading();
         products.clear();
+        productAdapter.notifyDataSetChanged();
 
         for (String storeId: storeIdList.split(" ")) {
 
@@ -124,6 +124,7 @@ public class ProductsActivity extends NavbarActivity {
     public void onBackPressed() {
         Intent intent = new Intent(this, OrdersActivity.class);
         startActivity(intent);
+        finish();
     }
 
     private void startLoading() {

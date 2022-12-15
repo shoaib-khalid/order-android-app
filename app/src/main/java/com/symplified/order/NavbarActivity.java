@@ -32,7 +32,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     private String storeId;
     private DrawerLayout drawerLayout;
     private ImageView storeLogo;
-    private TextView storeName, storeEmail, appVersion;
+    private TextView storeName, storeEmail;
     private String version;
     private NavigationView navigationView;
     private StoreApi storeApiService;
@@ -51,7 +51,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
         version = BuildConfig.VERSION_NAME;
 
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
 
         storeId = sharedPreferences.getString("storeId", null);
 
@@ -59,7 +59,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-        storeApiService = ServiceGenerator.createStoreService();
+        storeApiService = ServiceGenerator.createStoreService(this);
         setUpNavbarData(sharedPreferences, header);
     }
 
@@ -67,7 +67,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeLogo = header.findViewById(R.id.nav_store_logo);
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
-        appVersion = navigationView.findViewById(R.id.nav_app_version);
+        TextView appVersion = navigationView.findViewById(R.id.nav_app_version);
         appVersion.setText("Symplified 2022 | version " + version);
 
         Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreById(storeId);

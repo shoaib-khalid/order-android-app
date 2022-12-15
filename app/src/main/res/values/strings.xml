@@ -122,4 +122,8 @@
     <string name="order_updated_message">The refund will be in place.\u000ARefund Amount:\u0020</string>
     <string name="call_error_message">Your device does not support this function.</string>
     <string name="deliverin">DeliverIn</string>
+
+    <string name="notif_firebase_error_title">Connectivity Error</string>
+    <string name="notif_firebase_error_text">Unable to connect to Google services on this network.</string>
+    <string name="notif_firebase_error_text_full">Unable to connect to Google services on this network. You will not be able to receive new order notifications. Please connect to a different network and try logging in again.</string>
 </resources>

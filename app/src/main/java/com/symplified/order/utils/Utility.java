@@ -1,11 +1,22 @@
 package com.symplified.order.utils;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.util.Log;
 
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.models.order.Order;
 
@@ -31,8 +42,8 @@ public class Utility {
         return null;
     }
 
-    public static void logToFile(String text) {
-        File file = new File(App.getAppContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
+    public static void logToFile(String text, Context context) {
+        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
         try {
             FileWriter fr = new FileWriter(file, true);
             fr.write(text);
@@ -43,14 +54,15 @@ public class Utility {
         }
     }
 
-    public static String getCurrencySymbol(Order order) {
-        if (order != null && order.store != null && order.store.regionCountry != null
+    public static String getCurrencySymbol(Order order, Context context) {
+        if (order != null
+                && order.store != null
+                && order.store.regionCountry != null
                 && order.store.regionCountry.currencySymbol != null) {
             return order.store.regionCountry.currencySymbol;
         }
-        SharedPreferences sharedPreferences
-                = App.getAppContext().getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
-        return sharedPreferences.getString("currency", "RM");
+        return context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString("currency", "RM");
     }
 
     public static DecimalFormat getMonetaryAmountFormat() {
@@ -90,5 +102,51 @@ public class Utility {
 
     public static boolean isBlank(String str) {
         return str == null || "".equals(str);
+    }
+
+    public static boolean isGooglePlayServicesAvailable(Context context) {
+        return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
+    }
+
+    public static boolean isConnectedToInternet(Context context) {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
+    }
+
+    public static void notify(Context context,
+                              String title,
+                              String text,
+                              String bigText,
+                              String channel,
+                              int notificationId,
+                              Class<?> activity) {
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addNextIntentWithParentStack(new Intent(context, activity));
+        PendingIntent pendingIntent =
+                stackBuilder.getPendingIntent(0,
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            notificationManager.createNotificationChannel(new NotificationChannel(channel,
+                    channel, NotificationManager.IMPORTANCE_DEFAULT));
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
+                .setContentIntent(pendingIntent)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(text);
+        if (!isBlank(bigText)) {
+            builder.setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(bigText));
+        }
+        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setColor(Color.CYAN)
+                .setAutoCancel(true)
+                .build();
+
+        notificationManager.cancel(notificationId);
+        notificationManager.notify(notificationId, builder.build());
     }
 }

@@ -99,7 +99,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull EditItemAdapter.ViewHolder holder, int position) {
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION_DETAILS_TITLE, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
         formatter = new DecimalFormat("#,###0.00");
@@ -162,7 +162,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     }
 
     private void getProductImageFromAssets(Item item, ViewHolder holder) {
-        ProductApi productApiService = ServiceGenerator.createProductService();
+        ProductApi productApiService = ServiceGenerator.createProductService(context);
         productApiService.getStoreProductAssets(order.storeId, item.productId)
                 .clone().enqueue(new Callback<StoreProductAsset.StoreProductAssetListResponse>() {
                     @Override
