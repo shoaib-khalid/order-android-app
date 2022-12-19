@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.symplified.order.App;
-import com.symplified.order.EditProductActivity;
+import com.symplified.order.ui.products.EditProductActivity;
 import com.symplified.order.R;
 import com.symplified.order.models.product.Product;
 

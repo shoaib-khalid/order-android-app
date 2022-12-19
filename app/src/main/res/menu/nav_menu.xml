@@ -16,6 +16,10 @@
             android:id="@+id/nav_products"
             android:icon="@drawable/ic_products"
             android:title="Update Products" />
+        <item
+            android:id="@+id/nav_qr_code"
+            android:icon="@drawable/ic_qr_code"
+            android:title="Store QR Code" />
 
         <item
             android:enabled="false"

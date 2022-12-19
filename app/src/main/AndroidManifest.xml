@@ -25,17 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
-            android:name=".QrCodeActivity"
-            android:exported="false">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
-            android:name=".TrackOrderActivity"
+            android:name=".ui.orders.TrackOrderActivity"
             android:exported="false" />
         <activity
-            android:name=".EditOrderActivity"
+            android:name=".ui.orders.EditOrderActivity"
             android:exported="false" />
 
         <meta-data
@@ -43,26 +36,27 @@
             android:resource="@mipmap/ic_launcher" />
 
         <activity
-            android:name=".NavbarActivity"
+            android:name=".ui.NavbarActivity"
             android:exported="true" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".ui.stores.StoresActivity"
             android:exported="false" />
         <activity
-            android:name=".EditProductActivity"
+            android:name=".ui.products.EditProductActivity"
             android:exported="true" />
         <activity
-            android:name=".ProductsActivity"
-            android:exported="true" /> <!-- <activity -->
-        <!-- android:name=".ChooseStoreActivity" -->
-        <!-- android:exported="true" /> -->
+            android:name=".ui.products.ProductsActivity"
+            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".ChooseStoreActivity"-->
+<!--            android:exported="true" />-->
         <activity
-            android:name=".OrdersActivity"
+            android:name=".ui.orders.OrdersActivity"
             android:exported="true"
             android:label="@string/title_activity_orders"
             android:theme="@style/Theme.SymplifiedOrderUpdate.NoActionBar" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.LoginActivity"
             android:exported="true"
             android:noHistory="true">
             <intent-filter>

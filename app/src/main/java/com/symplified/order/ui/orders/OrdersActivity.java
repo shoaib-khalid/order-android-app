@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui.orders;
 
 import android.content.Context;
 import android.content.Intent;
@@ -23,10 +23,14 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
-import com.symplified.order.ui.tabs.SectionsPagerAdapter;
+import com.symplified.order.ui.LoginActivity;
+import com.symplified.order.ui.NavbarActivity;
+import com.symplified.order.ui.orders.tabs.SectionsPagerAdapter;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
@@ -49,6 +53,8 @@ public class OrdersActivity extends NavbarActivity {
         ActivityOrdersBinding binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Utility.verifyLoginStatus(this);
+
         drawerLayout = findViewById(R.id.drawer_layout);
 
         toolbar = findViewById(R.id.toolbar);
@@ -67,15 +73,11 @@ public class OrdersActivity extends NavbarActivity {
 
         stopService(new Intent(this, AlertService.class));
 
-        SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        if (!sharedPrefs.getBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, false)) {
+        boolean isSubscribedToNotifications = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, false);
+        if (!isSubscribedToNotifications) {
             verifyFirebaseConnection();
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     private void initToolbar() {
@@ -118,7 +120,7 @@ public class OrdersActivity extends NavbarActivity {
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-                            String storeIdList = sharedPreferences.getString("storeIdList", null);
+                            String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
                             if (storeIdList != null) {
                                 for (String storeId : storeIdList.split(" ")) {
                                     FirebaseMessaging.getInstance().subscribeToTopic(storeId)
@@ -126,39 +128,24 @@ public class OrdersActivity extends NavbarActivity {
                                                 sharedPreferences.edit()
                                                         .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();
-                                            }).addOnFailureListener(e -> logout());
+                                            }).addOnFailureListener(e -> logoutWithFirebaseErrorNotification());
                                 }
                             }
                         } else {
-                            logout();
+                            logoutWithFirebaseErrorNotification();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
-                        logout();
+                        logoutWithFirebaseErrorNotification();
                     }
                 });
             }
         });
     }
 
-    private void logout() {
-        SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String storeIdList = sharedPrefs.getString("storeIdList", null);
-        if (storeIdList != null) {
-            for (String storeId : storeIdList.split(" ")) {
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-            }
-        }
-        boolean isStaging = sharedPrefs.getBoolean(Key.IS_STAGING, false);
-        String baseUrl = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
-        sharedPrefs.edit()
-                .clear()
-                .putBoolean(Key.IS_STAGING, isStaging)
-                .putString(Key.BASE_URL, baseUrl)
-                .apply();
-
+    private void logoutWithFirebaseErrorNotification() {
         Utility.notify(
                 getApplicationContext(),
                 getString(R.string.notif_firebase_error_title),
@@ -169,7 +156,6 @@ public class OrdersActivity extends NavbarActivity {
                 LoginActivity.class
         );
 
-        startActivity(new Intent(this, LoginActivity.class));
-        finish();
+        Utility.logout(this);
     }
 }

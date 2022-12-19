@@ -1,10 +1,12 @@
 package com.symplified.order.utils;
 
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Environment;
@@ -15,7 +17,9 @@ import androidx.core.app.TaskStackBuilder;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.App;
+import com.symplified.order.ui.LoginActivity;
 import com.symplified.order.R;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.models.order.Order;
@@ -148,5 +152,36 @@ public class Utility {
 
         notificationManager.cancel(notificationId);
         notificationManager.notify(notificationId, builder.build());
+    }
+
+    public static void verifyLoginStatus(Activity activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        if (!sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
+                || sharedPreferences.getString(Key.STORE_ID_LIST, null) == null) {
+            Log.d("utility", "Not logged in");
+            logout(activity);
+        }
+    }
+
+    public static void logout(Activity activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
+        if (storeIdList != null) {
+            for (String storeId : storeIdList.split(" ")) {
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+            }
+        }
+        boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
+        String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+        sharedPreferences.edit().clear().apply();
+        sharedPreferences.edit()
+                .putBoolean(Key.IS_STAGING, isStaging)
+                .putString(Key.BASE_URL, baseUrl)
+                .apply();
+
+        Intent intent = new Intent(activity, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        activity.startActivity(intent);
+        activity.finish();
     }
 }

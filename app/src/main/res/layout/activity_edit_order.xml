@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:theme="@style/Theme.SymplifiedOrderUpdate"
     android:layout_height="match_parent"
-    tools:context=".EditOrderActivity">
+    tools:context=".ui.orders.EditOrderActivity">
 
     <RelativeLayout
         android:id="@+id/rl_edit_order"

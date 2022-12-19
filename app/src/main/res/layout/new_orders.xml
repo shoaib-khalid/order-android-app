@@ -6,7 +6,7 @@
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.tabs.PlaceholderFragment">
+    tools:context=".ui.orders.tabs.OrdersFragment">
 
     <ProgressBar
         android:id="@+id/orders_progress_bar"
@@ -21,7 +21,7 @@
         android:id="@+id/full_swipe_refresh_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.tabs.PlaceholderFragment"
+        tools:context=".ui.orders.tabs.OrdersFragment"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

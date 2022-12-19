@@ -1,4 +1,4 @@
-package com.symplified.order.ui.tabs;
+package com.symplified.order.ui.orders.tabs;
 
 import android.content.Context;
 import android.view.ViewGroup;
@@ -24,7 +24,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.new_orders, R.string.ongoing_orders, R.string.past_orders};
     private final Context mContext;
-    private PlaceholderFragment newOrderFragment, ongoingOrderFragment;
+    private OrdersFragment newOrderFragment, ongoingOrderFragment;
     private OrderObserver historyOrderFragment;
     private OrderManager orderManager;
 
@@ -37,18 +37,18 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     public Fragment getItem(int position) {
         // getItem is called to instantiate the fragment for the given page.
         // Return a PlaceholderFragment (defined as a static inner class below).
-        Fragment fragment = PlaceholderFragment.newInstance("new");
+        Fragment fragment = OrdersFragment.newInstance("new");
         switch (position) {
             case 0: {
-                fragment = PlaceholderFragment.newInstance("new");
+                fragment = OrdersFragment.newInstance("new");
                 break;
             }
             case 1: {
-                fragment = PlaceholderFragment.newInstance("ongoing");
+                fragment = OrdersFragment.newInstance("ongoing");
                 break;
             }
             case 2: {
-                fragment = PlaceholderFragment.newInstance("past");
+                fragment = OrdersFragment.newInstance("past");
                 break;
             }
         }
@@ -63,11 +63,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
 
         switch (position) {
             case 0:
-                newOrderFragment = (PlaceholderFragment) createdFragment;
+                newOrderFragment = (OrdersFragment) createdFragment;
                 newOrderFragment.setOrderManager(this);
                 break;
             case 1:
-                ongoingOrderFragment = (PlaceholderFragment) createdFragment;
+                ongoingOrderFragment = (OrdersFragment) createdFragment;
                 ongoingOrderFragment.setOrderManager(this);
                 break;
             case 2:

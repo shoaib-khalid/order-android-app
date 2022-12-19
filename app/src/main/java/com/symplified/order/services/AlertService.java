@@ -18,7 +18,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.symplified.order.OrdersActivity;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.utils.ChannelId;

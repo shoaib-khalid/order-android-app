@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui.products;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,12 +18,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.NavbarActivity;
+import com.symplified.order.ui.orders.OrdersActivity;
+import com.symplified.order.utils.Key;
+import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +56,8 @@ public class ProductsActivity extends NavbarActivity {
         ActivityProductsBinding binding = ActivityProductsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Utility.verifyLoginStatus(this);
+
         drawerLayout = findViewById(R.id.drawer_layout);
 
         toolbar = findViewById(R.id.toolbar);
@@ -64,7 +72,7 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString("storeIdList", null);
+                .getString(Key.STORE_ID_LIST, null);
 
         progressBar = findViewById(R.id.product_progress_bar);
         refreshLayout = findViewById(R.id.layout_products_refresh);
@@ -100,7 +108,7 @@ public class ProductsActivity extends NavbarActivity {
                 @Override
                 public void onResponse(@NonNull Call<ProductListResponse> call,
                                        @NonNull Response<ProductListResponse> response) {
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.body() != null) {
                         products.addAll(response.body().data.content);
                         productAdapter.notifyDataSetChanged();
                     } else {

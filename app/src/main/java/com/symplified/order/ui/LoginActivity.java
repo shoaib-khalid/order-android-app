@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +30,8 @@ import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.apis.FirebaseApi;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
@@ -38,6 +39,7 @@ import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
@@ -60,9 +62,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
     private List<Store> stores;
-    private TextView welcomeText;
-    private ProgressBar progressBar;
-    private ConstraintLayout mainLayout;
+    private TextView welcomeText, progressText;
+    private ConstraintLayout mainLayout, progressBarLayout;
     private FirebaseApi firebaseApiService;
     private final Timer timer = new Timer();
     private boolean isLoading = false;
@@ -131,8 +132,9 @@ public class LoginActivity extends AppCompatActivity {
         btnSwitchToProduction = findViewById(R.id.btn_production);
         btnSwitchToProduction.setOnClickListener(view -> switchToProductionMode());
         welcomeText = findViewById(R.id.welcome);
+        progressText = findViewById(R.id.login_progress_text);
 
-        progressBar = findViewById(R.id.progress_bar);
+        progressBarLayout = findViewById(R.id.login_progress_layout);
         mainLayout = findViewById(R.id.main_layout);
     }
 
@@ -177,6 +179,7 @@ public class LoginActivity extends AppCompatActivity {
             email.getEditText().requestFocus();
         } else if (Utility.isConnectedToInternet(this)) {
             startLoading();
+            progressText.setText("Checking access to firebase servers");
 
             firebaseApiService.ping().clone().enqueue(new Callback<Void>() {
                 @Override
@@ -201,6 +204,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void tryLogin() {
+        progressText.setText("Attempting login");
+
         String emailInput = email.getEditText() != null
                 ? email.getEditText().getText().toString() : "";
         String passwordInput = password.getEditText() != null
@@ -247,6 +252,7 @@ public class LoginActivity extends AppCompatActivity {
      * method to make the api call to get all the stores of user from backend
      */
     private void getStoresAndRegister(String clientId) {
+        progressText.setText("Getting store data");
 
         ServiceGenerator.createStoreService(this)
                 .getStores(clientId).clone().enqueue(new Callback<StoreResponse>() {
@@ -254,6 +260,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<StoreResponse> call,
                                            @NonNull Response<StoreResponse> response) {
                         if (response.isSuccessful()) {
+                            progressText.setText("Subscribing to order notifications");
+
                             subscriptionCount = 0;
                             stores = response.body().data.content;
                             timer.schedule(new SubscribeTimeoutTask(), 8000L);
@@ -264,7 +272,9 @@ public class LoginActivity extends AppCompatActivity {
                                                     .cancel(ChannelId.ERRORS_NOTIF_ID);
                                             Log.d(TAG, "Subscribed to " + store.name);
                                             subscriptionCount++;
-                                            if (subscriptionCount >= stores.size()) {
+                                            boolean isLoggedIn = sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false);
+                                            if (subscriptionCount >= stores.size()
+                                                && !isLoggedIn) {
                                                 sharedPreferences.edit()
                                                         .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();
@@ -278,7 +288,6 @@ public class LoginActivity extends AppCompatActivity {
                                             showFirebaseErrorNotification();
                                         });
                             }
-                            setStoreDataAndProceed();
                         } else {
                             handleError(response.raw().toString(), null);
                         }
@@ -296,19 +305,20 @@ public class LoginActivity extends AppCompatActivity {
      * method to store information to sharedPreferences for user session management
      */
     private void setStoreDataAndProceed() {
+        progressText.setText("Storing data");
 
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         StringBuilder storeIdList = new StringBuilder();
         for (Store store : stores) {
             storeIdList.append(store.id).append(" ");
-            editor.putString(store.id + "-name", store.name).apply();
         }
         editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
-                .putString("storeId", storeIdList.toString().split(" ")[0])
-                .putString("storeIdList", storeIdList.toString())
+                .putString("storeId", stores.get(0).id)
+                .putString(Key.STORE_ID_LIST, storeIdList.toString())
                 .putBoolean(Key.IS_LOGGED_IN, true)
-                .apply();
+                .commit();
 
+        Log.d(TAG, "setStoreDataAndProceed");
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
         startActivity(intent);
         finish();
@@ -319,19 +329,22 @@ public class LoginActivity extends AppCompatActivity {
      */
     @Override
     protected void onStart() {
+        super.onStart();
+
+        Log.d(TAG, "onStart");
+
         callInAppUpdate();
         //check if user session already exists, for persistent login
         if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
-                && sharedPreferences.contains("storeIdList")) {
-            Log.d("login-activity", "onStart");
+                && sharedPreferences.contains(Key.STORE_ID_LIST)) {
+            Log.d(TAG, "Starting orderActivity from onStart");
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
-        } else {
+        } else if (!isLoading) {
             removeUserData();
         }
 
-        super.onStart();
     }
 
     /**
@@ -388,19 +401,20 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void startLoading() {
-        progressBar.setVisibility(View.VISIBLE);
+        progressBarLayout.setVisibility(View.VISIBLE);
         mainLayout.setVisibility(View.GONE);
         isLoading = true;
     }
 
     private void stopLoading() {
-        progressBar.setVisibility(View.GONE);
+        progressBarLayout.setVisibility(View.GONE);
+        progressText.setText("");
         mainLayout.setVisibility(View.VISIBLE);
         isLoading = false;
     }
 
     private void removeUserData() {
-        String storeIdList = sharedPreferences.getString("storeIdList", null);
+        String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
         if (storeIdList != null) {
             for (String storeId : storeIdList.split(" ")) {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);

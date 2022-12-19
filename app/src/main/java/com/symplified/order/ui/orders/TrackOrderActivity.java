@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui.orders;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -19,8 +19,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.symplified.order.R;
 import com.symplified.order.databinding.ActivityTrackOrderBinding;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
+import com.symplified.order.ui.NavbarActivity;
 
 public class TrackOrderActivity extends NavbarActivity {
 
