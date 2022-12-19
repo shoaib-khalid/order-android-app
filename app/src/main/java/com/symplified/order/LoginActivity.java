@@ -60,9 +60,8 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout password;
     private SharedPreferences sharedPreferences;
     private List<Store> stores;
-    private TextView welcomeText;
-    private ProgressBar progressBar;
-    private ConstraintLayout mainLayout;
+    private TextView welcomeText, progressText;
+    private ConstraintLayout mainLayout, progressBarLayout;
     private FirebaseApi firebaseApiService;
     private final Timer timer = new Timer();
     private boolean isLoading = false;
@@ -131,8 +130,9 @@ public class LoginActivity extends AppCompatActivity {
         btnSwitchToProduction = findViewById(R.id.btn_production);
         btnSwitchToProduction.setOnClickListener(view -> switchToProductionMode());
         welcomeText = findViewById(R.id.welcome);
+        progressText = findViewById(R.id.login_progress_text);
 
-        progressBar = findViewById(R.id.progress_bar);
+        progressBarLayout = findViewById(R.id.login_progress_layout);
         mainLayout = findViewById(R.id.main_layout);
     }
 
@@ -177,6 +177,7 @@ public class LoginActivity extends AppCompatActivity {
             email.getEditText().requestFocus();
         } else if (Utility.isConnectedToInternet(this)) {
             startLoading();
+            progressText.setText("Checking access to firebase servers");
 
             firebaseApiService.ping().clone().enqueue(new Callback<Void>() {
                 @Override
@@ -201,6 +202,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void tryLogin() {
+        progressText.setText("Attempting login");
+
         String emailInput = email.getEditText() != null
                 ? email.getEditText().getText().toString() : "";
         String passwordInput = password.getEditText() != null
@@ -247,6 +250,7 @@ public class LoginActivity extends AppCompatActivity {
      * method to make the api call to get all the stores of user from backend
      */
     private void getStoresAndRegister(String clientId) {
+        progressText.setText("Getting store data");
 
         ServiceGenerator.createStoreService(this)
                 .getStores(clientId).clone().enqueue(new Callback<StoreResponse>() {
@@ -254,6 +258,8 @@ public class LoginActivity extends AppCompatActivity {
                     public void onResponse(@NonNull Call<StoreResponse> call,
                                            @NonNull Response<StoreResponse> response) {
                         if (response.isSuccessful()) {
+                            progressText.setText("Subscribing to order notifications");
+
                             subscriptionCount = 0;
                             stores = response.body().data.content;
                             timer.schedule(new SubscribeTimeoutTask(), 8000L);
@@ -297,6 +303,7 @@ public class LoginActivity extends AppCompatActivity {
      * method to store information to sharedPreferences for user session management
      */
     private void setStoreDataAndProceed() {
+        progressText.setText("Storing data");
 
         final SharedPreferences.Editor editor = sharedPreferences.edit();
         StringBuilder storeIdList = new StringBuilder();
@@ -392,13 +399,14 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void startLoading() {
-        progressBar.setVisibility(View.VISIBLE);
+        progressBarLayout.setVisibility(View.VISIBLE);
         mainLayout.setVisibility(View.GONE);
         isLoading = true;
     }
 
     private void stopLoading() {
-        progressBar.setVisibility(View.GONE);
+        progressBarLayout.setVisibility(View.GONE);
+        progressText.setText("");
         mainLayout.setVisibility(View.VISIBLE);
         isLoading = false;
     }
