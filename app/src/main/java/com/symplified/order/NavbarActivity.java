@@ -22,6 +22,7 @@ import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.Key;
+import com.symplified.order.utils.Utility;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -100,24 +101,25 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         }
 
         logout.setOnClickListener(view -> {
-            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-            String storeIdList = sharedPreferences.getString("storeIdList", null);
-            if (storeIdList != null) {
-                for (String storeId : storeIdList.split(" ")) {
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-                }
-            }
-            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
-            String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
-            sharedPreferences.edit().clear().apply();
-            sharedPreferences.edit()
-                    .putBoolean(Key.IS_STAGING, isStaging)
-                    .putString(Key.BASE_URL, baseUrl)
-                    .apply();
-
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
+//            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+//            String storeIdList = sharedPreferences.getString("storeIdList", null);
+//            if (storeIdList != null) {
+//                for (String storeId : storeIdList.split(" ")) {
+//                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
+//                }
+//            }
+//            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
+//            String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+//            sharedPreferences.edit().clear().apply();
+//            sharedPreferences.edit()
+//                    .putBoolean(Key.IS_STAGING, isStaging)
+//                    .putString(Key.BASE_URL, baseUrl)
+//                    .apply();
+//
+//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//            startActivity(intent);
+//            finish();
+            Utility.logout(this);
         });
 
         navigationView.setNavigationItemSelectedListener(item -> {

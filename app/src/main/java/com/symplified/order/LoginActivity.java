@@ -264,7 +264,9 @@ public class LoginActivity extends AppCompatActivity {
                                                     .cancel(ChannelId.ERRORS_NOTIF_ID);
                                             Log.d(TAG, "Subscribed to " + store.name);
                                             subscriptionCount++;
-                                            if (subscriptionCount >= stores.size()) {
+                                            boolean isLoggedIn = sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false);
+                                            if (subscriptionCount >= stores.size()
+                                                && !isLoggedIn) {
                                                 sharedPreferences.edit()
                                                         .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();
@@ -278,7 +280,6 @@ public class LoginActivity extends AppCompatActivity {
                                             showFirebaseErrorNotification();
                                         });
                             }
-                            setStoreDataAndProceed();
                         } else {
                             handleError(response.raw().toString(), null);
                         }
@@ -301,7 +302,6 @@ public class LoginActivity extends AppCompatActivity {
         StringBuilder storeIdList = new StringBuilder();
         for (Store store : stores) {
             storeIdList.append(store.id).append(" ");
-            editor.putString(store.id + "-name", store.name).apply();
         }
         editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
                 .putString("storeId", storeIdList.toString().split(" ")[0])
@@ -309,6 +309,7 @@ public class LoginActivity extends AppCompatActivity {
                 .putBoolean(Key.IS_LOGGED_IN, true)
                 .apply();
 
+        Log.d(TAG, "setStoreDataAndProceed");
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
         startActivity(intent);
         finish();
@@ -319,19 +320,22 @@ public class LoginActivity extends AppCompatActivity {
      */
     @Override
     protected void onStart() {
+        super.onStart();
+
+        Log.d(TAG, "onStart");
+
         callInAppUpdate();
         //check if user session already exists, for persistent login
         if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
                 && sharedPreferences.contains("storeIdList")) {
-            Log.d("login-activity", "onStart");
+            Log.d(TAG, "Starting orderActivity from onStart");
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
-        } else {
+        } else if (!isLoading) {
             removeUserData();
         }
 
-        super.onStart();
     }
 
     /**
