@@ -312,7 +312,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
                 .putString("storeId", storeIdList.toString().split(" ")[0])
-                .putString("storeIdList", storeIdList.toString())
+                .putString(Key.STORE_ID_LIST, storeIdList.toString())
                 .putBoolean(Key.IS_LOGGED_IN, true)
                 .apply();
 
@@ -334,7 +334,7 @@ public class LoginActivity extends AppCompatActivity {
         callInAppUpdate();
         //check if user session already exists, for persistent login
         if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
-                && sharedPreferences.contains("storeIdList")) {
+                && sharedPreferences.contains(Key.STORE_ID_LIST)) {
             Log.d(TAG, "Starting orderActivity from onStart");
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
@@ -412,7 +412,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void removeUserData() {
-        String storeIdList = sharedPreferences.getString("storeIdList", null);
+        String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
         if (storeIdList != null) {
             for (String storeId : storeIdList.split(" ")) {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);

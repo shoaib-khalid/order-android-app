@@ -154,10 +154,18 @@ public class Utility {
         notificationManager.notify(notificationId, builder.build());
     }
 
-    public static void logout(Activity activity) {
-        Intent intent = new Intent(activity, LoginActivity.class);
+    public static void verifyLoginStatus(Activity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String storeIdList = sharedPreferences.getString("storeIdList", null);
+        if (!sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
+                || sharedPreferences.getString(Key.STORE_ID_LIST, null) == null) {
+            Log.d("utility", "Not logged in");
+            logout(activity);
+        }
+    }
+
+    public static void logout(Activity activity) {
+        SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
         if (storeIdList != null) {
             for (String storeId : storeIdList.split(" ")) {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
@@ -171,6 +179,7 @@ public class Utility {
                 .putString(Key.BASE_URL, baseUrl)
                 .apply();
 
+        Intent intent = new Intent(activity, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         activity.startActivity(intent);
         activity.finish();

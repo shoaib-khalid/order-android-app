@@ -1,5 +1,6 @@
 package com.symplified.order;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +25,8 @@ import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.Key;
+import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +53,8 @@ public class ProductsActivity extends NavbarActivity {
         ActivityProductsBinding binding = ActivityProductsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Utility.verifyLoginStatus(this);
+
         drawerLayout = findViewById(R.id.drawer_layout);
 
         toolbar = findViewById(R.id.toolbar);
@@ -64,7 +69,7 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString("storeIdList", null);
+                .getString(Key.STORE_ID_LIST, null);
 
         progressBar = findViewById(R.id.product_progress_bar);
         refreshLayout = findViewById(R.id.layout_products_refresh);
@@ -100,7 +105,7 @@ public class ProductsActivity extends NavbarActivity {
                 @Override
                 public void onResponse(@NonNull Call<ProductListResponse> call,
                                        @NonNull Response<ProductListResponse> response) {
-                    if (response.isSuccessful()) {
+                    if (response.isSuccessful() && response.body() != null) {
                         products.addAll(response.body().data.content);
                         productAdapter.notifyDataSetChanged();
                     } else {

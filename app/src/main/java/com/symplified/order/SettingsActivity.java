@@ -11,6 +11,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 import com.symplified.order.databinding.ActivitySettingsBinding;
 import com.symplified.order.fragments.settings.StoreSelectionFragment;
+import com.symplified.order.utils.Utility;
 
 public class SettingsActivity extends NavbarActivity {
 
@@ -24,6 +25,8 @@ public class SettingsActivity extends NavbarActivity {
 
         binding = ActivitySettingsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Utility.verifyLoginStatus(this);
 
         drawerLayout = findViewById(R.id.drawer_layout);
 

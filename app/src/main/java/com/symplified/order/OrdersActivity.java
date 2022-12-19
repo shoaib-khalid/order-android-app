@@ -53,6 +53,8 @@ public class OrdersActivity extends NavbarActivity {
         ActivityOrdersBinding binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Utility.verifyLoginStatus(this);
+
         drawerLayout = findViewById(R.id.drawer_layout);
 
         toolbar = findViewById(R.id.toolbar);
@@ -122,7 +124,7 @@ public class OrdersActivity extends NavbarActivity {
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-                            String storeIdList = sharedPreferences.getString("storeIdList", null);
+                            String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
                             if (storeIdList != null) {
                                 for (String storeId : storeIdList.split(" ")) {
                                     FirebaseMessaging.getInstance().subscribeToTopic(storeId)
@@ -149,7 +151,7 @@ public class OrdersActivity extends NavbarActivity {
 
     private void logout() {
         SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String storeIdList = sharedPrefs.getString("storeIdList", null);
+        String storeIdList = sharedPrefs.getString(Key.STORE_ID_LIST, null);
         if (storeIdList != null) {
             for (String storeId : storeIdList.split(" ")) {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);

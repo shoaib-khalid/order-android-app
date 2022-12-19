@@ -16,8 +16,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.symplified.order.apis.StoreApi;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
@@ -34,9 +32,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     private DrawerLayout drawerLayout;
     private ImageView storeLogo;
     private TextView storeName, storeEmail;
-    private String version;
     private NavigationView navigationView;
-    private StoreApi storeApiService;
     public FrameLayout frameLayout;
 
     @Override
@@ -50,8 +46,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         navigationView = findViewById(R.id.nav_view);
         View header = navigationView.getHeaderView(0);
 
-        version = BuildConfig.VERSION_NAME;
-
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
 
         storeId = sharedPreferences.getString("storeId", null);
@@ -60,7 +54,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-        storeApiService = ServiceGenerator.createStoreService(this);
         setUpNavbarData(sharedPreferences, header);
     }
 
@@ -68,12 +61,11 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeLogo = header.findViewById(R.id.nav_store_logo);
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
-        TextView appVersion = navigationView.findViewById(R.id.nav_app_version);
-        appVersion.setText("Symplified 2022 | version " + version);
+        ((TextView) navigationView.findViewById(R.id.nav_app_version))
+                .setText("Symplified 2022 | version " + BuildConfig.VERSION_NAME);
 
-        Call<StoreResponse.SingleStoreResponse> storeResponse = storeApiService.getStoreById(storeId);
-
-        storeResponse.enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
+        ServiceGenerator.createStoreService(this).getStoreById(storeId)
+                .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
             @Override
             public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,
                                    @NonNull Response<StoreResponse.SingleStoreResponse> response) {
@@ -100,27 +92,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
             logout.setVisibility(View.VISIBLE);
         }
 
-        logout.setOnClickListener(view -> {
-//            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//            String storeIdList = sharedPreferences.getString("storeIdList", null);
-//            if (storeIdList != null) {
-//                for (String storeId : storeIdList.split(" ")) {
-//                    FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
-//                }
-//            }
-//            boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
-//            String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
-//            sharedPreferences.edit().clear().apply();
-//            sharedPreferences.edit()
-//                    .putBoolean(Key.IS_STAGING, isStaging)
-//                    .putString(Key.BASE_URL, baseUrl)
-//                    .apply();
-//
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
-//            finish();
-            Utility.logout(this);
-        });
+        logout.setOnClickListener(view -> Utility.logout(this));
 
         navigationView.setNavigationItemSelectedListener(item -> {
 
