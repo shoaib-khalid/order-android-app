@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui.orders;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -21,6 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.adapters.EditItemAdapter;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.databinding.ActivityEditOrderBinding;
@@ -31,6 +33,7 @@ import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.NavbarActivity;
 import com.symplified.order.utils.Key;
 
 import java.text.DecimalFormat;

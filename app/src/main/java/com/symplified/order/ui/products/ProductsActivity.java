@@ -1,6 +1,5 @@
-package com.symplified.order;
+package com.symplified.order.ui.products;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,12 +18,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.NavbarActivity;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
 

@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +30,8 @@ import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.apis.FirebaseApi;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
@@ -38,6 +39,7 @@ import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
@@ -311,10 +313,10 @@ public class LoginActivity extends AppCompatActivity {
             storeIdList.append(store.id).append(" ");
         }
         editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
-                .putString("storeId", storeIdList.toString().split(" ")[0])
+                .putString("storeId", stores.get(0).id)
                 .putString(Key.STORE_ID_LIST, storeIdList.toString())
                 .putBoolean(Key.IS_LOGGED_IN, true)
-                .apply();
+                .commit();
 
         Log.d(TAG, "setStoreDataAndProceed");
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);

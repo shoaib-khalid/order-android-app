@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,9 +16,15 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
+import com.symplified.order.App;
+import com.symplified.order.BuildConfig;
+import com.symplified.order.R;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.orders.OrdersActivity;
+import com.symplified.order.ui.products.ProductsActivity;
+import com.symplified.order.ui.stores.StoresActivity;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
 
@@ -118,7 +124,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                     break;
                 case R.id.nav_stores:
                     if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                        intent = new Intent(getApplicationContext(), StoresActivity.class);
                         startActivity(intent);
                     } else {
                         Toast.makeText(NavbarActivity.this, "Opened", Toast.LENGTH_SHORT).show();

@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui.stores;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,11 +9,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
+import com.symplified.order.App;
+import com.symplified.order.R;
 import com.symplified.order.databinding.ActivitySettingsBinding;
-import com.symplified.order.fragments.settings.StoreSelectionFragment;
+import com.symplified.order.ui.NavbarActivity;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.Utility;
 
-public class SettingsActivity extends NavbarActivity {
+public class StoresActivity extends NavbarActivity {
 
     private Toolbar toolbar;
     private ActivitySettingsBinding binding;
@@ -52,7 +55,7 @@ public class SettingsActivity extends NavbarActivity {
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(view -> SettingsActivity.super.onBackPressed());
+        home.setOnClickListener(view -> StoresActivity.super.onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("Stores");

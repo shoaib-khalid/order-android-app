@@ -1,4 +1,4 @@
-package com.symplified.order.fragments.settings;
+package com.symplified.order.ui.stores;
 
 import android.os.Bundle;
 import android.util.Log;

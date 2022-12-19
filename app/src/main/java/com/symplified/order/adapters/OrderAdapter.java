@@ -28,7 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.TrackOrderActivity;
+import com.symplified.order.ui.orders.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.OrderStatus;

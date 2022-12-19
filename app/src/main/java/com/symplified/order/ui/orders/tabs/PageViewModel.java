@@ -1,4 +1,4 @@
-package com.symplified.order.ui.tabs;
+package com.symplified.order.ui.orders.tabs;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;

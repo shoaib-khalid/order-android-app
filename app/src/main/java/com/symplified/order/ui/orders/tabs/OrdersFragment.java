@@ -1,4 +1,4 @@
-package com.symplified.order.ui.tabs;
+package com.symplified.order.ui.orders.tabs;
 
 import android.app.Activity;
 import android.content.Context;
@@ -20,11 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.symplified.order.App;
-import com.symplified.order.EditOrderActivity;
+import com.symplified.order.databinding.NewOrdersBinding;
+import com.symplified.order.ui.orders.EditOrderActivity;
 import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
-import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.helpers.GenericPrintHelper;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.interfaces.OrderManager;
@@ -53,7 +53,7 @@ import retrofit2.Response;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class PlaceholderFragment extends Fragment
+public class OrdersFragment extends Fragment
         implements PrinterObserver, OrderObserver, OrderManager {
 
     private static final String ARG_SECTION = "section";
@@ -73,8 +73,8 @@ public class PlaceholderFragment extends Fragment
 
     private ActivityResultLauncher<Intent> editOrderActivityResultLauncher;
 
-    public static PlaceholderFragment newInstance(String type) {
-        PlaceholderFragment fragment = new PlaceholderFragment();
+    public static OrdersFragment newInstance(String type) {
+        OrdersFragment fragment = new OrdersFragment();
         Bundle bundle = new Bundle();
         bundle.putString(ARG_SECTION, type);
         fragment.setArguments(bundle);

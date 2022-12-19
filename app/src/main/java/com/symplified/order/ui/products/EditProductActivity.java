@@ -1,4 +1,4 @@
-package com.symplified.order;
+package com.symplified.order.ui.products;
 
 import android.app.Dialog;
 import android.content.Intent;
@@ -21,11 +21,12 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
+import com.symplified.order.R;
 import com.symplified.order.apis.ProductApi;
-import com.symplified.order.databinding.ActivityEditProductBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductEditRequest;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.NavbarActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class EditProductActivity extends NavbarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        com.symplified.order.databinding.ActivityEditProductBinding binding = ActivityEditProductBinding.inflate(getLayoutInflater());
+        com.symplified.order.databinding.ActivityEditProductBinding binding = com.symplified.order.databinding.ActivityEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         progressDialog = new Dialog(this);
