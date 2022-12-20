@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -36,6 +37,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     ProgressBar progressBar;
     ConstraintLayout failureLayout;
     Button retryButton;
+    AppCompatImageButton closeButton;
 
     String storeId;
 
@@ -51,6 +53,10 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
         qrCodeImage = view.findViewById(R.id.qr_code_image);
         progressBar = view.findViewById(R.id.progress_bar);
         failureLayout = view.findViewById(R.id.failure_layout);
+
+        closeButton = view.findViewById(R.id.btn_close);
+        closeButton.setOnClickListener(v -> closeFragment());
+
         retryButton = view.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(v -> requestQrCode());
 
@@ -58,7 +64,6 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
 
         storeId = requireArguments().getString("storeId");
         storeId = "e5bd2d2b-a8f6-429b-8baf-e90bb123f29a";
-        Log.d("qr-code", "Store id: " + storeId);
 
         requestQrCode();
         OrderNotificationService.addQrCodeObserver(this);
@@ -67,6 +72,13 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        Log.d("qr-code", "onAttach");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d("qr-code", "onDestroyView");
     }
 
     private void requestQrCode() {
@@ -135,5 +147,9 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onRedeemed() {
         requestQrCode();
+    }
+
+    private void closeFragment() {
+        getActivity().getSupportFragmentManager().popBackStack();
     }
 }
