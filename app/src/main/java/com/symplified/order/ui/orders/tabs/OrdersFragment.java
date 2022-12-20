@@ -89,7 +89,7 @@ public class OrdersFragment extends Fragment
         PageViewModel pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
         String clientId = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
-                .getString("ownerId", null);
+                .getString(Key.CLIENT_ID, null);
 
         orders = new ArrayList<>();
 

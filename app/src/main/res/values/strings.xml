@@ -59,7 +59,8 @@
     <string name="ready_for_pickup">Process</string>
     <string name="symplified">Symplified</string>
     <string name="choose_a_store">Choose a Store</string>
-    <string name="no_store_msg">No Stores Added Yet !</string>
+    <string name="no_store_msg">No Stores Added Yet</string>
+    <string name="no_store_with_qr_code_msg">No Stores With QR Code Available</string>
     <string name="total">Total:\u0020</string>
     <string name="set_store_status">Set Store Status</string>
     <string name="normal">Normal</string>
@@ -126,4 +127,6 @@
     <string name="notif_firebase_error_title">Connectivity Error</string>
     <string name="notif_firebase_error_text">Unable to connect to Google services on this network.</string>
     <string name="notif_firebase_error_text_full">Unable to connect to Google services on this network. You will not be able to receive new order notifications. Please connect to a different network and try logging in again.</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

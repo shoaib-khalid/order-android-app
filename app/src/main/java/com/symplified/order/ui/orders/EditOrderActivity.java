@@ -198,7 +198,7 @@ public class EditOrderActivity extends NavbarActivity {
 
     public void getOrderByInvoiceId(String invoiceId) {
         SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, MODE_PRIVATE);
-        String clientId = sharedPreferences.getString("ownerId", "");
+        String clientId = sharedPreferences.getString(Key.CLIENT_ID, "");
 
         Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
         orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {

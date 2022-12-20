@@ -223,7 +223,7 @@ public class LoginActivity extends AppCompatActivity {
                             sharedPreferences.edit()
                                     .putString("accessToken", res.session.accessToken)
                                     .putString("refreshToken", res.session.refreshToken)
-                                    .putString("ownerId", res.session.ownerId)
+                                    .putString(Key.CLIENT_ID, res.session.ownerId)
                                     .commit();
                             getStoresAndRegister(res.session.ownerId);
                         } else {

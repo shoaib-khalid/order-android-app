@@ -15,19 +15,24 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.gson.JsonElement;
 import com.symplified.order.QrCodeActivity;
 import com.symplified.order.R;
+import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
+import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.stores.StoreSelectionFragment;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -37,17 +42,31 @@ import retrofit2.Response;
 
 public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> {
 
+    public interface StoreSelectionListener {
+        void onStoreSelected(String storeId);
+    }
+
     public List<Store> items;
     public Context context;
 
+    private final StoreSelectionListener selectionListener;
+    private final NavIntentStore action;
     private final StoreApi storeApiService;
+    private final OrderApi orderApiService;
     private static final String TAG = "store-adapter";
 
-    public StoreAdapter(List<Store> items, Context context) {
+    public StoreAdapter(List<Store> items,
+                        NavIntentStore action,
+                        StoreSelectionListener selectionListener,
+                        Context context) {
         this.items = items;
+        this.action = action;
+        this.selectionListener = selectionListener;
         this.context = context;
 
         storeApiService = ServiceGenerator.createStoreService(context);
+        orderApiService = ServiceGenerator.createOrderService(context);
+        ServiceGenerator.createOrderService(context);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -85,19 +104,23 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String storeId = items.get(holder.getAdapterPosition()).id;
-        getStoreStatus(storeId, holder);
-        checkStoreQrCodeAvailability(storeId, holder);
+        if (action == NavIntentStore.DISPLAY_QR_CODE) {
+            holder.itemView.setOnClickListener(view -> {
+                selectionListener.onStoreSelected(storeId);
+            });
+        } else {
+            getStoreStatus(storeId, holder);
+            holder.itemView.setOnClickListener(view -> {
+                if (!holder.isLoading()) {
+                    BottomSheetDialogFragment storeScheduleDialog
+                            = new SettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
+                    storeScheduleDialog.show(((FragmentActivity) context).getSupportFragmentManager(),
+                            "bottomSheetDialog");
+                }
+            });
+        }
 
         holder.name.setText(items.get(position).name);
-
-        holder.itemView.setOnClickListener(view -> {
-            if (!holder.isLoading()) {
-                BottomSheetDialogFragment storeScheduleDialog
-                        = new SettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
-                storeScheduleDialog.show(((FragmentActivity) context)
-                        .getSupportFragmentManager(), "bottomSheetDialog");
-            }
-        });
 
         holder.qrCodeButton.setOnClickListener(view -> {
             Intent intent = new Intent(context, QrCodeActivity.class);
@@ -119,8 +142,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         startLoading(holder);
         holder.status.setText("");
 
-        Call<StoreStatusResponse> getStoreStatusCall = storeApiService.getStoreStatusById(storeId);
-        getStoreStatusCall.clone().enqueue(new Callback<StoreStatusResponse>() {
+        storeApiService.getStoreStatusById(storeId).clone().enqueue(new Callback<StoreStatusResponse>() {
             @Override
             public void onResponse(@NonNull Call<StoreStatusResponse> call, @NonNull Response<StoreStatusResponse> response) {
                 if (response.isSuccessful()) {
@@ -146,12 +168,13 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     }
 
     public void setStoreStatus(String closedUntil, TextView status) {
-        SimpleDateFormat dtf = new SimpleDateFormat("hh:mm a");
+        SimpleDateFormat dtFormatter = new SimpleDateFormat("hh:mm a", Locale.getDefault());
+        SimpleDateFormat dtParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         Calendar calendar = new GregorianCalendar();
         String closedText = "Closed";
         try {
-            calendar.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(closedUntil));
-            closedText += " Until: " + dtf.format(calendar.getTime());
+            calendar.setTime(dtParser.parse(closedUntil));
+            closedText += " Until: " + dtFormatter.format(calendar.getTime());
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -168,24 +191,5 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         holder.progressBar.setVisibility(View.GONE);
         holder.status.setVisibility(View.VISIBLE);
         holder.setIsLoading(false);
-    }
-
-    private void checkStoreQrCodeAvailability(String storeId, ViewHolder holder) {
-        Log.d("store-adapter", "checkQrCodeAvailability");
-        ServiceGenerator.createOrderService(context).verifyQrCodeAvailability(storeId).clone()
-                .enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ResponseBody> call,
-                                           @NonNull Response<ResponseBody> response) {
-                        if (response.isSuccessful()) {
-                            Log.d("store-adapter", "checkQrCodeAvailability success");
-                            holder.qrCodeButton.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ResponseBody> call, @NonNull Throwable t) {
-                    }
-                });
     }
 }

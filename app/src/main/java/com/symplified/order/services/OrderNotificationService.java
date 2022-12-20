@@ -34,6 +34,7 @@ import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.models.ping.PingRequest;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.ChannelId;
+import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         String messageTitle = remoteMessage.getData().get("title");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
-        String clientId = sharedPreferences.getString("ownerId", "null");
+        String clientId = sharedPreferences.getString(Key.CLIENT_ID, "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
             LoginApi userService = ServiceGenerator.createUserService(this);
@@ -210,7 +211,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private void sendErrorToServer(String errorMessage) {
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString("ownerId", "");
+                .getString(Key.CLIENT_ID, "");
 
         LoginApi userService = ServiceGenerator.createUserService(this);
         userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
