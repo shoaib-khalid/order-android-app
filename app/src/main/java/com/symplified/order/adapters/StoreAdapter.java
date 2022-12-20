@@ -2,7 +2,6 @@ package com.symplified.order.adapters;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +9,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.gson.JsonElement;
 import com.symplified.order.QrCodeActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.OrderApi;
@@ -25,7 +23,6 @@ import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.ui.stores.StoreSelectionFragment;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,7 +31,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -72,7 +68,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView name, status;
         private final ProgressBar progressBar;
-        private final AppCompatImageButton qrCodeButton;
+        private final AppCompatImageView qrCodeImage;
         private boolean isLoading;
 
         public ViewHolder(View view) {
@@ -81,7 +77,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             name = view.findViewById(R.id.store_name);
             status = view.findViewById(R.id.store_status);
             progressBar = view.findViewById(R.id.progress_bar);
-            qrCodeButton = view.findViewById(R.id.qr_code_button);
+            qrCodeImage = view.findViewById(R.id.qr_code_button);
         }
 
         public boolean isLoading() {
@@ -105,6 +101,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String storeId = items.get(holder.getAdapterPosition()).id;
         if (action == NavIntentStore.DISPLAY_QR_CODE) {
+            holder.qrCodeImage.setVisibility(View.VISIBLE);
             holder.itemView.setOnClickListener(view -> {
                 selectionListener.onStoreSelected(storeId);
             });
@@ -121,12 +118,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         }
 
         holder.name.setText(items.get(position).name);
-
-        holder.qrCodeButton.setOnClickListener(view -> {
-            Intent intent = new Intent(context, QrCodeActivity.class);
-            intent.putExtra("storeId", storeId);
-            context.startActivity(intent);
-        });
     }
 
     @Override
@@ -145,7 +136,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         storeApiService.getStoreStatusById(storeId).clone().enqueue(new Callback<StoreStatusResponse>() {
             @Override
             public void onResponse(@NonNull Call<StoreStatusResponse> call, @NonNull Response<StoreStatusResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     StoreStatusResponse.StoreStatus storeStatus = response.body().data;
                     if (storeStatus.isSnooze) {
                         setStoreStatus(storeStatus.snoozeEndTime, holder.status);

@@ -86,7 +86,7 @@ public class ProductsActivity extends NavbarActivity {
     private void initToolbar() {
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(view -> onBackPressed());
+        home.setOnClickListener(view -> super.onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("All Products");
@@ -128,12 +128,12 @@ public class ProductsActivity extends NavbarActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(this, OrdersActivity.class);
-        startActivity(intent);
-        finish();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        Intent intent = new Intent(this, OrdersActivity.class);
+//        startActivity(intent);
+//        finish();
+//    }
 
     private void startLoading() {
         refreshLayout.setRefreshing(true);

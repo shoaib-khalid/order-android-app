@@ -51,6 +51,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private Pattern pattern;
     private final String TAG = "order-notification-service";
     private final String PRINT_TAG = "print-helper";
+
+    private static boolean isOrderNotifsEnabled = true;
+
     private static final List<OrderObserver> newOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
@@ -84,7 +87,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             for (QrCodeObserver observer : qrCodeObservers) {
                 observer.onRedeemed();
             }
-        } else {
+        } else if (isOrderNotifsEnabled) {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
                 OrderApi orderApiService = ServiceGenerator.createOrderService(this);
@@ -111,8 +114,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             }
                         } else {
                             alert(remoteMessage, null);
-                            sendErrorToServer("Error " + response.code() + " received when querying order "
-                                    + invoiceId + " after receiving Firebase notification.");
+                            if (!response.isSuccessful()) {
+                                sendErrorToServer("Error " + response.code() + " received when querying order "
+                                        + invoiceId + " after receiving Firebase notification.");
+                            }
                         }
                     }
 
@@ -133,46 +138,44 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                       RemoteMessage remoteMessage,
                                       Order.OrderDetails orderDetails) {
 
-        orderApiService.getItemsForOrder(orderDetails.order.id)
-                .clone()
-                .enqueue(new Callback<ItemsResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<ItemsResponse> call,
-                                           @NonNull Response<ItemsResponse> response) {
-                        if (response.isSuccessful()) {
-                            try {
-                                App.getPrinter()
-                                        .printReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
-                                processNewOrder(orderApiService, orderDetails);
-                            } catch (Exception e) {
-                                addOrderToView(newOrderObservers, orderDetails);
-
-                                String errorMessage = "Error occurred while printing Dine-in order "
-                                        + orderDetails.order.id + " after receiving notification. " +
-                                        "Cannot proceed with auto-process of order.";
-                                sendErrorToServer(errorMessage);
-                            }
-                        } else {
-                            addOrderToView(newOrderObservers, orderDetails);
-
-                            String errorMessage = "Error " + response.code() + " received while retrieving items for " +
-                                    "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
-                                    "Cannot proceed with printing and auto-process of order.";
-                            sendErrorToServer(errorMessage);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<ItemsResponse> call,
-                                          @NonNull Throwable t) {
+        orderApiService.getItemsForOrder(orderDetails.order.id).clone().enqueue(new Callback<ItemsResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<ItemsResponse> call,
+                                   @NonNull Response<ItemsResponse> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        App.getPrinter()
+                                .printReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
+                        processNewOrder(orderApiService, orderDetails);
+                    } catch (Exception e) {
                         addOrderToView(newOrderObservers, orderDetails);
-                        String errorMessage = "Failed to retrieve items for " +
-                                "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
-                                "Cannot proceed with printing and auto-process of order. Error: " +
-                                t.getLocalizedMessage();
+
+                        String errorMessage = "Error occurred while printing Dine-in order "
+                                + orderDetails.order.id + " after receiving notification. " +
+                                "Cannot proceed with auto-process of order.";
                         sendErrorToServer(errorMessage);
                     }
-                });
+                } else {
+                    addOrderToView(newOrderObservers, orderDetails);
+
+                    String errorMessage = "Error " + response.code() + " received while retrieving items for " +
+                            "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
+                            "Cannot proceed with printing and auto-process of order.";
+                    sendErrorToServer(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ItemsResponse> call,
+                                  @NonNull Throwable t) {
+                addOrderToView(newOrderObservers, orderDetails);
+                String errorMessage = "Failed to retrieve items for " +
+                        "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
+                        "Cannot proceed with printing and auto-process of order. Error: " +
+                        t.getLocalizedMessage();
+                sendErrorToServer(errorMessage);
+            }
+        });
     }
 
     private void processNewOrder(OrderApi orderApiService, Order.OrderDetails orderDetails) {
@@ -182,31 +185,29 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 : orderDetails.nextCompletionStatus;
 
         orderApiService.updateOrderStatus(new Order.OrderUpdate(orderDetails.order.id, nextCompletionStatus),
-                        orderDetails.order.id)
-                .clone()
-                .enqueue(new Callback<OrderUpdateResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<OrderUpdateResponse> call,
-                                           @NonNull Response<OrderUpdateResponse> response) {
-                        if (response.isSuccessful()) {
-                            Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
-                            if (Utility.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
-                                addOrderToView(pastOrderObservers, updatedOrderDetails);
-                            } else if (Utility.isOrderOngoing(updatedOrderDetails.currentCompletionStatus)) {
-                                addOrderToView(ongoingOrderObservers, updatedOrderDetails);
-                            }
-                        } else {
-                            addOrderToView(newOrderObservers, orderDetails);
-                            sendErrorToServer("Failed to auto-process order " + orderDetails.order.id);
-                        }
+                orderDetails.order.id).clone().enqueue(new Callback<OrderUpdateResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<OrderUpdateResponse> call,
+                                   @NonNull Response<OrderUpdateResponse> response) {
+                if (response.isSuccessful()) {
+                    Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
+                    if (Utility.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
+                        addOrderToView(pastOrderObservers, updatedOrderDetails);
+                    } else if (Utility.isOrderOngoing(updatedOrderDetails.currentCompletionStatus)) {
+                        addOrderToView(ongoingOrderObservers, updatedOrderDetails);
                     }
+                } else {
+                    addOrderToView(newOrderObservers, orderDetails);
+                    sendErrorToServer("Failed to auto-process order " + orderDetails.order.id);
+                }
+            }
 
-                    @Override
-                    public void onFailure(@NonNull Call<OrderUpdateResponse> call,
-                                          @NonNull Throwable t) {
-                        addOrderToView(newOrderObservers, orderDetails);
-                    }
-                });
+            @Override
+            public void onFailure(@NonNull Call<OrderUpdateResponse> call,
+                                  @NonNull Throwable t) {
+                addOrderToView(newOrderObservers, orderDetails);
+            }
+        });
     }
 
     private void sendErrorToServer(String errorMessage) {
@@ -244,8 +245,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
      * Shows notification for order and plays a custom track on loop
      *
      * @param remoteMessage Message received from firebase used for notification
-     * @param order Values used by AlertService to determine looping frequency
-     *
+     * @param order         Values used by AlertService to determine looping frequency
      */
     private void alert(RemoteMessage remoteMessage, Order order) {
         Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
@@ -253,10 +253,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
         TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
         taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
 
-        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0, 
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S 
-                    ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
-        
+        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0,
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                        ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
+
         Notification notification = new NotificationCompat.Builder(getApplicationContext(), ChannelId.NEW_ORDERS)
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -290,15 +290,43 @@ public class OrderNotificationService extends FirebaseMessagingService {
         }
     }
 
-    public static void addNewOrderObserver(OrderObserver observer) { newOrderObservers.add(observer); }
-    public static void removeNewOrderObserver(OrderObserver observer) { newOrderObservers.remove(observer); }
+    public static void addNewOrderObserver(OrderObserver observer) {
+        newOrderObservers.add(observer);
+    }
 
-    public static void addOngoingOrderObserver(OrderObserver observer) { ongoingOrderObservers.add(observer); }
-    public static void removeOngoingOrderObserver(OrderObserver observer) { ongoingOrderObservers.remove(observer); }
+    public static void removeNewOrderObserver(OrderObserver observer) {
+        newOrderObservers.remove(observer);
+    }
 
-    public static void addPastOrderObserver(OrderObserver observer) { pastOrderObservers.add(observer); }
-    public static void removePastOrderObserver(OrderObserver observer) { pastOrderObservers.remove(observer); }
+    public static void addOngoingOrderObserver(OrderObserver observer) {
+        ongoingOrderObservers.add(observer);
+    }
 
-    public static void addQrCodeObserver(QrCodeObserver observer) { qrCodeObservers.add(observer); }
-    public static void removeQrCodeObserver(QrCodeObserver observer) { qrCodeObservers.remove(observer); }
+    public static void removeOngoingOrderObserver(OrderObserver observer) {
+        ongoingOrderObservers.remove(observer);
+    }
+
+    public static void addPastOrderObserver(OrderObserver observer) {
+        pastOrderObservers.add(observer);
+    }
+
+    public static void removePastOrderObserver(OrderObserver observer) {
+        pastOrderObservers.remove(observer);
+    }
+
+    public static void addQrCodeObserver(QrCodeObserver observer) {
+        qrCodeObservers.add(observer);
+    }
+
+    public static void removeQrCodeObserver(QrCodeObserver observer) {
+        qrCodeObservers.remove(observer);
+    }
+
+    public static void disableOrderNotifications() {
+        isOrderNotifsEnabled = false;
+    }
+
+    public static void enableOrderNotifications() {
+        isOrderNotifsEnabled = true;
+    }
 }

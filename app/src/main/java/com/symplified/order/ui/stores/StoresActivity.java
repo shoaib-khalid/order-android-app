@@ -56,12 +56,7 @@ public class StoresActivity extends NavbarActivity
         Bundle bundle = new Bundle();
         bundle.putString(Key.CLIENT_ID, clientId);
         action = (NavIntentStore) getIntent().getExtras().getSerializable("action");
-        if (action == NavIntentStore.DISPLAY_QR_CODE) {
-            bundle.putSerializable("action", NavIntentStore.DISPLAY_QR_CODE);
-        } else if (action == NavIntentStore.SET_STORE_TIMING) {
-            bundle.putSerializable("action", NavIntentStore.SET_STORE_TIMING);
-        }
-
+        bundle.putSerializable("action", action);
         getSupportFragmentManager()
                 .beginTransaction()
                 .add(R.id.settings_fragment_container, StoreSelectionFragment.class, bundle)
@@ -75,10 +70,12 @@ public class StoresActivity extends NavbarActivity
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
-        home.setOnClickListener(view -> StoresActivity.super.onBackPressed());
+        home.setOnClickListener(view -> super.onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
-        title.setText("Stores With QR Code");
+        title.setText(action == NavIntentStore.DISPLAY_QR_CODE
+                ? "Stores With QR Code"
+                : "Store Timings");
     }
 
     @Override

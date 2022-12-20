@@ -28,6 +28,7 @@ import com.symplified.order.R;
 import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
+import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.ui.LoginActivity;
 import com.symplified.order.ui.NavbarActivity;
 import com.symplified.order.ui.orders.tabs.SectionsPagerAdapter;
@@ -78,6 +79,7 @@ public class OrdersActivity extends NavbarActivity {
         if (!isSubscribedToNotifications) {
             verifyFirebaseConnection();
         }
+        OrderNotificationService.enableOrderNotifications();
     }
 
     private void initToolbar() {

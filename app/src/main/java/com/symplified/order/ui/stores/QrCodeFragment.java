@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -63,7 +62,6 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
         orderApiService = ServiceGenerator.createOrderService(getContext());
 
         storeId = requireArguments().getString("storeId");
-        storeId = "e5bd2d2b-a8f6-429b-8baf-e90bb123f29a";
 
         requestQrCode();
         OrderNotificationService.addQrCodeObserver(this);
@@ -72,13 +70,13 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        Log.d("qr-code", "onAttach");
+        OrderNotificationService.disableOrderNotifications();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d("qr-code", "onDestroyView");
+        OrderNotificationService.enableOrderNotifications();
     }
 
     private void requestQrCode() {

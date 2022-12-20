@@ -83,12 +83,6 @@ public class StoreSelectionFragment extends Fragment implements StoreAdapter.Sto
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         clientId = requireArguments().getString(Key.CLIENT_ID);
         action = (NavIntentStore) requireArguments().getSerializable("action");
@@ -153,10 +147,11 @@ public class StoreSelectionFragment extends Fragment implements StoreAdapter.Sto
                 public void onResponse(@NonNull Call<ResponseBody> call,
                                        @NonNull Response<ResponseBody> response) {
                     storesChecked++;
-                    if (!response.isSuccessful()) {
+                    if (response.isSuccessful()) {
                         storesWithQrCodeAvailability.add(store);
                     }
                     if (storesChecked >= stores.size()) {
+                        Log.d("store-selection", "All stores checked");
                         if (!storesWithQrCodeAvailability.isEmpty()) {
                             storeAdapter = new StoreAdapter(storesWithQrCodeAvailability, action, listener, getContext());
                             recyclerView.setAdapter(storeAdapter);
@@ -192,6 +187,7 @@ public class StoreSelectionFragment extends Fragment implements StoreAdapter.Sto
         refreshLayout.setRefreshing(false);
         progressBarLayout.setVisibility(View.GONE);
         emptyStoresTextView.setText(message);
+
         emptyLayout.setVisibility(View.VISIBLE);
     }
 
