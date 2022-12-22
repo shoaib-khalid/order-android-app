@@ -143,9 +143,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     }
 
     @Override
-    public void onRedeemed() {
-        requestQrCode();
-    }
+    public void onRedeemed() { getActivity().runOnUiThread(() -> requestQrCode()); }
 
     private void closeFragment() {
         getActivity().getSupportFragmentManager().popBackStack();

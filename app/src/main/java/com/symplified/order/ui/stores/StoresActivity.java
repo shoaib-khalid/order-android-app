@@ -1,10 +1,10 @@
 package com.symplified.order.ui.stores;
 
-import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsetsController;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,7 +21,6 @@ import com.symplified.order.R;
 import com.symplified.order.databinding.ActivitySettingsBinding;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.ui.NavbarActivity;
-import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
 
@@ -48,14 +47,14 @@ public class StoresActivity extends NavbarActivity
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initToolbar();
-
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString(Key.CLIENT_ID, null);
+        action = (NavIntentStore) getIntent().getExtras().getSerializable("action");
+
+        initToolbar();
 
         Bundle bundle = new Bundle();
         bundle.putString(Key.CLIENT_ID, clientId);
-        action = (NavIntentStore) getIntent().getExtras().getSerializable("action");
         bundle.putSerializable("action", action);
         getSupportFragmentManager()
                 .beginTransaction()
@@ -72,10 +71,9 @@ public class StoresActivity extends NavbarActivity
         home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
         home.setOnClickListener(view -> super.onBackPressed());
 
-        TextView title = toolbar.findViewById(R.id.app_bar_title);
-        title.setText(action == NavIntentStore.DISPLAY_QR_CODE
-                ? "Stores With QR Code"
-                : "Store Timings");
+        ((TextView) findViewById(R.id.app_bar_title)).setText(
+                action == NavIntentStore.DISPLAY_QR_CODE
+                        ? "Stores With QR Code" : "Store Timings");
     }
 
     @Override
@@ -100,18 +98,18 @@ public class StoresActivity extends NavbarActivity
     }
 
     private void hideSystemUi() {
-        Window window = getWindow();
-        WindowCompat.setDecorFitsSystemWindows(window, false);
-        WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(getWindow(), binding.getRoot());
-        controller.hide(WindowInsetsCompat.Type.systemBars());
-        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        WindowInsetsControllerCompat windowInsetsController =
+                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        windowInsetsController.setSystemBarsBehavior(
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        );
+        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
         toolbar.setVisibility(View.GONE);
     }
 
     private void showSystemUi() {
-        Window window = getWindow();
-        WindowCompat.setDecorFitsSystemWindows(getWindow(), true);
-        new WindowInsetsControllerCompat(window, binding.getRoot()).show(WindowInsetsCompat.Type.systemBars());
+        new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView())
+                .show(WindowInsetsCompat.Type.systemBars());
         toolbar.setVisibility(View.VISIBLE);
     }
 }

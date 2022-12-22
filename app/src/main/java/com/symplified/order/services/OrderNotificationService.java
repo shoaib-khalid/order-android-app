@@ -16,7 +16,6 @@ import androidx.core.app.TaskStackBuilder;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.symplified.order.App;
-import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
@@ -33,6 +32,7 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.models.ping.PingRequest;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
@@ -309,7 +309,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public static void addPastOrderObserver(OrderObserver observer) {
         pastOrderObservers.add(observer);
     }
-
     public static void removePastOrderObserver(OrderObserver observer) {
         pastOrderObservers.remove(observer);
     }
@@ -317,7 +316,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public static void addQrCodeObserver(QrCodeObserver observer) {
         qrCodeObservers.add(observer);
     }
-
     public static void removeQrCodeObserver(QrCodeObserver observer) {
         qrCodeObservers.remove(observer);
     }

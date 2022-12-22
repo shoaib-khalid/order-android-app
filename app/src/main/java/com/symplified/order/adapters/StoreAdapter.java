@@ -1,7 +1,6 @@
 package com.symplified.order.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +13,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.symplified.order.QrCodeActivity;
 import com.symplified.order.R;
-import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
 import com.symplified.order.enums.NavIntentStore;
@@ -48,7 +45,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
     private final StoreSelectionListener selectionListener;
     private final NavIntentStore action;
     private final StoreApi storeApiService;
-    private final OrderApi orderApiService;
     private static final String TAG = "store-adapter";
 
     public StoreAdapter(List<Store> items,
@@ -61,8 +57,6 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         this.context = context;
 
         storeApiService = ServiceGenerator.createStoreService(context);
-        orderApiService = ServiceGenerator.createOrderService(context);
-        ServiceGenerator.createOrderService(context);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -102,9 +96,8 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         String storeId = items.get(holder.getAdapterPosition()).id;
         if (action == NavIntentStore.DISPLAY_QR_CODE) {
             holder.qrCodeImage.setVisibility(View.VISIBLE);
-            holder.itemView.setOnClickListener(view -> {
-                selectionListener.onStoreSelected(storeId);
-            });
+            holder.itemView.setOnClickListener(view ->
+                    selectionListener.onStoreSelected(storeId));
         } else {
             getStoreStatus(storeId, holder);
             holder.itemView.setOnClickListener(view -> {

@@ -19,12 +19,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
 import com.symplified.order.App;
-import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;

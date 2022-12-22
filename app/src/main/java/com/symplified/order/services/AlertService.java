@@ -18,9 +18,9 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.R;
 import com.symplified.order.enums.ServiceType;
+import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Utility;
 
@@ -44,7 +44,6 @@ public class AlertService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

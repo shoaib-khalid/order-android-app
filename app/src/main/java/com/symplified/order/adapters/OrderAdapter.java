@@ -28,7 +28,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.ui.orders.TrackOrderActivity;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.enums.OrderStatus;
@@ -40,6 +39,7 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.ui.orders.TrackOrderActivity;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;

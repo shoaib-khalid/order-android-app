@@ -21,11 +21,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.symplified.order.App;
-import com.symplified.order.databinding.NewOrdersBinding;
-import com.symplified.order.ui.orders.EditOrderActivity;
 import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.apis.OrderApi;
+import com.symplified.order.databinding.NewOrdersBinding;
 import com.symplified.order.helpers.GenericPrintHelper;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.interfaces.OrderManager;
@@ -37,6 +36,7 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
+import com.symplified.order.ui.orders.EditOrderActivity;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
 

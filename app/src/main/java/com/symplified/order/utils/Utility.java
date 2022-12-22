@@ -19,10 +19,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.App;
-import com.symplified.order.ui.LoginActivity;
 import com.symplified.order.R;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.ui.LoginActivity;
 
 import java.io.File;
 import java.io.FileWriter;

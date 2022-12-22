@@ -6,9 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +74,12 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Rect bounds = getSystemService(WindowManager.class).getCurrentWindowMetrics().getBounds();
+            Log.d("login-activity", "Width " + bounds.width() + ", height: " + bounds.height());
+        }
+
         setTheme(R.style.Theme_SymplifiedOrderUpdate);
         setContentView(R.layout.activity_login);
         initViews();
@@ -211,39 +220,38 @@ public class LoginActivity extends AppCompatActivity {
         String passwordInput = password.getEditText() != null
                 ? password.getEditText().getText().toString() : "";
 
-        ServiceGenerator.createUserService(this)
-                .login(new LoginRequest(emailInput, passwordInput))
-                .clone().enqueue(new Callback<LoginResponse>() {
-                    @SuppressLint("ApplySharedPref")
-                    @Override
-                    public void onResponse(@NonNull Call<LoginResponse> call,
-                                           @NonNull Response<LoginResponse> response) {
-                        if (response.isSuccessful()) {
-                            LoginData res = response.body().data;
-                            sharedPreferences.edit()
-                                    .putString("accessToken", res.session.accessToken)
-                                    .putString("refreshToken", res.session.refreshToken)
-                                    .putString(Key.CLIENT_ID, res.session.ownerId)
-                                    .commit();
-                            getStoresAndRegister(res.session.ownerId);
-                        } else {
-                            stopLoading();
-                            if (response.code() == 401) {
-                                handleError(response.raw().toString(), "Username or password is incorrect");
-                            } else {
-                                handleError(response.raw().toString(), null);
-                            }
-                        }
+        LoginRequest loginRequest = new LoginRequest(emailInput, passwordInput);
+        ServiceGenerator.createUserService(this).login(loginRequest).clone().enqueue(new Callback<LoginResponse>() {
+            @SuppressLint("ApplySharedPref")
+            @Override
+            public void onResponse(@NonNull Call<LoginResponse> call,
+                                   @NonNull Response<LoginResponse> response) {
+                if (response.isSuccessful()) {
+                    LoginData res = response.body().data;
+                    sharedPreferences.edit()
+                            .putString("accessToken", res.session.accessToken)
+                            .putString("refreshToken", res.session.refreshToken)
+                            .putString(Key.CLIENT_ID, res.session.ownerId)
+                            .commit();
+                    getStoresAndRegister(res.session.ownerId);
+                } else {
+                    stopLoading();
+                    if (response.code() == 401) {
+                        handleError(response.raw().toString(), "Username or password is incorrect");
+                    } else {
+                        handleError(response.raw().toString(), null);
                     }
+                }
+            }
 
-                    @Override
-                    public void onFailure(@NonNull Call<LoginResponse> call,
-                                          @NonNull Throwable t) {
-                        Log.e("TAG", "onFailure: ", t.getCause());
-                        Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
-                        stopLoading();
-                    }
-                });
+            @Override
+            public void onFailure(@NonNull Call<LoginResponse> call,
+                                  @NonNull Throwable t) {
+                Log.e("TAG", "onFailure: ", t.getCause());
+                Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
+                stopLoading();
+            }
+        });
     }
 
     int subscriptionCount = 0;
@@ -274,7 +282,7 @@ public class LoginActivity extends AppCompatActivity {
                                             subscriptionCount++;
                                             boolean isLoggedIn = sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false);
                                             if (subscriptionCount >= stores.size()
-                                                && !isLoggedIn) {
+                                                    && !isLoggedIn) {
                                                 sharedPreferences.edit()
                                                         .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();

@@ -1,6 +1,5 @@
 package com.symplified.order.ui.products;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,7 +26,6 @@ import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.NavbarActivity;
-import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.Key;
 import com.symplified.order.utils.Utility;
 
