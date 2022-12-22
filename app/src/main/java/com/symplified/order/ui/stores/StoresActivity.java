@@ -1,13 +1,18 @@
 package com.symplified.order.ui.stores;
 
+import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -68,7 +73,8 @@ public class StoresActivity extends NavbarActivity
         navigationView.getMenu().getItem(1).setChecked(true);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
-        home.setImageDrawable(getDrawable(R.drawable.ic_arrow_back_black_24dp));
+        home.setImageDrawable(AppCompatResources
+                .getDrawable(this, R.drawable.ic_arrow_back_black_24dp));
         home.setOnClickListener(view -> super.onBackPressed());
 
         ((TextView) findViewById(R.id.app_bar_title)).setText(
@@ -89,27 +95,42 @@ public class StoresActivity extends NavbarActivity
                     .add(R.id.settings_fragment_container, QrCodeFragment.class, bundle)
                     .commit();
             hideSystemUi();
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
     }
 
     @Override
     public void onStoreListReopened() {
         showSystemUi();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR);
     }
 
     private void hideSystemUi() {
-        WindowInsetsControllerCompat windowInsetsController =
-                WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        windowInsetsController.setSystemBarsBehavior(
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        );
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-        toolbar.setVisibility(View.GONE);
+        View fragmentContainer = findViewById(R.id.settings_fragment_container);
+        if (Build.VERSION.SDK_INT >= 30) {
+            fragmentContainer.getWindowInsetsController().hide(WindowInsets.Type.systemBars());
+        } else {
+            fragmentContainer.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+        }
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.hide();
     }
 
     private void showSystemUi() {
-        new WindowInsetsControllerCompat(getWindow(), getWindow().getDecorView())
-                .show(WindowInsetsCompat.Type.systemBars());
-        toolbar.setVisibility(View.VISIBLE);
+        if (Build.VERSION.SDK_INT >= 30) {
+            binding.getRoot().getWindowInsetsController().show(WindowInsets.Type.systemBars());
+        } else {
+            binding.getRoot().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        }
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) actionBar.show();
     }
 }

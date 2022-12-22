@@ -1,9 +1,11 @@
 package com.symplified.order.ui.stores;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -48,6 +50,8 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        Log.d("qr-code", "onViewCreated");
+
         // Inflate the layout for this fragment
         qrCodeImage = view.findViewById(R.id.qr_code_image);
         progressBar = view.findViewById(R.id.progress_bar);
@@ -59,24 +63,28 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
         retryButton = view.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(v -> requestQrCode());
 
-        orderApiService = ServiceGenerator.createOrderService(getContext());
 
         storeId = requireArguments().getString("storeId");
 
         requestQrCode();
-        OrderNotificationService.addQrCodeObserver(this);
     }
 
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
+        orderApiService = ServiceGenerator.createOrderService(getContext());
+
+        Log.d("qr-code", "onAttach");
         OrderNotificationService.disableOrderNotifications();
+        OrderNotificationService.addQrCodeObserver(this);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        Log.d("qr-code", "onDestroyView");
         OrderNotificationService.enableOrderNotifications();
+        OrderNotificationService.removeQrCodeObserver(this);
     }
 
     private void requestQrCode() {
@@ -143,9 +151,15 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     }
 
     @Override
-    public void onRedeemed() { getActivity().runOnUiThread(() -> requestQrCode()); }
+    public void onRedeemed() {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(this::requestQrCode);
+        };
+    }
 
     private void closeFragment() {
-        getActivity().getSupportFragmentManager().popBackStack();
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().popBackStack();
+        }
     }
 }
