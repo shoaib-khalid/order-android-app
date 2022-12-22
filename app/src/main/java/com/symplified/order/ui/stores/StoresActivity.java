@@ -106,7 +106,9 @@ public class StoresActivity extends NavbarActivity
     }
 
     private void hideSystemUi() {
-        View fragmentContainer = findViewById(R.id.settings_fragment_container);
+//        View fragmentContainer = findViewById(R.id.settings_fragment_container);
+        View fragmentContainer = binding.getRoot();
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (Build.VERSION.SDK_INT >= 30) {
             fragmentContainer.getWindowInsetsController().hide(WindowInsets.Type.systemBars());
         } else {
@@ -117,19 +119,18 @@ public class StoresActivity extends NavbarActivity
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         }
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) actionBar.hide();
     }
 
     private void showSystemUi() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (Build.VERSION.SDK_INT >= 30) {
             binding.getRoot().getWindowInsetsController().show(WindowInsets.Type.systemBars());
         } else {
             binding.getRoot().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
         }
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) actionBar.show();
     }

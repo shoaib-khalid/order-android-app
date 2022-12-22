@@ -35,14 +35,17 @@
 
             <TextView
                 android:id="@+id/instruction_text_1"
+                style="@style/TextAppearance.MaterialComponents.Headline3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="20dp"
                 android:layout_marginEnd="20dp"
-                android:text="Scan to order your food and drinks"
+                android:text="SCAN TO ORDER YOUR FOOD AND DRINKS."
                 android:textAlignment="center"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -60,6 +63,7 @@
 
                 <TextView
                     android:id="@+id/step_1_text"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="STEP"
@@ -68,6 +72,7 @@
 
                 <TextView
                     android:id="@+id/step_1_counter"
+                    style="@style/TextAppearance.MaterialComponents.Headline4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="1"
@@ -77,6 +82,7 @@
 
                 <TextView
                     android:id="@+id/step_1_instructions"
+                    style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15dp"
@@ -102,6 +108,7 @@
 
                 <TextView
                     android:id="@+id/step_2_text"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="STEP"
@@ -110,6 +117,7 @@
 
                 <TextView
                     android:id="@+id/step_2_counter"
+                    style="@style/TextAppearance.MaterialComponents.Headline4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="2"
@@ -119,6 +127,7 @@
 
                 <TextView
                     android:id="@+id/step_2_instructions"
+                    style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15dp"
@@ -144,6 +153,7 @@
 
                 <TextView
                     android:id="@+id/step_3_text"
+                    style="@style/TextAppearance.MaterialComponents.Headline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="STEP"
@@ -152,6 +162,7 @@
 
                 <TextView
                     android:id="@+id/step_3_counter"
+                    style="@style/TextAppearance.MaterialComponents.Headline4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="3"
@@ -161,6 +172,7 @@
 
                 <TextView
                     android:id="@+id/step_3_instructions"
+                    style="@style/TextAppearance.MaterialComponents.Headline5"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15dp"
@@ -243,10 +255,12 @@
 
         <TextView
             android:id="@+id/provisional_instructions"
+            style="@style/TextAppearance.MaterialComponents.Headline3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:text="You can scan the QR code with your smartphone camera"
+            android:padding="25dp"
+            android:text="You can scan the QR code with your smartphone camera."
+            android:visibility="gone"
             android:textAlignment="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

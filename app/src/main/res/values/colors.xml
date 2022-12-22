@@ -19,4 +19,5 @@
     <color name="sf_cancel_button">#FF0000</color>
     <color name="sf_accept_button">#2FA94E</color>
 
+    <color name="qr_screen_background">#C3EBEA</color>
 </resources>

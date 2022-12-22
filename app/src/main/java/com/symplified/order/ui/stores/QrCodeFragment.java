@@ -1,14 +1,19 @@
 package com.symplified.order.ui.stores;
 
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
@@ -39,6 +44,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     ConstraintLayout failureLayout;
     Button retryButton;
     AppCompatImageButton closeButton;
+    int screenWidth = 800, screenHeight = 0;
 
     String storeId;
 
@@ -50,19 +56,28 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        Log.d("qr-code", "onViewCreated");
-
         // Inflate the layout for this fragment
         qrCodeImage = view.findViewById(R.id.qr_code_image);
         progressBar = view.findViewById(R.id.progress_bar);
         failureLayout = view.findViewById(R.id.failure_layout);
 
-        closeButton = view.findViewById(R.id.btn_close);
-        closeButton.setOnClickListener(v -> closeFragment());
+//        closeButton = view.findViewById(R.id.btn_close);
+//        closeButton.setOnClickListener(v -> closeFragment());
 
         retryButton = view.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(v -> requestQrCode());
 
+        if (screenHeight >= 1000) {
+            View topInstructionText = view.findViewById(R.id.instruction_text_1);
+            if (topInstructionText != null) {
+                topInstructionText.setVisibility(View.VISIBLE);
+            }
+
+            View provInstructions = view.findViewById(R.id.provisional_instructions);
+            if (provInstructions != null) {
+                provInstructions.setVisibility(View.VISIBLE);
+            }
+        }
 
         storeId = requireArguments().getString("storeId");
 
@@ -72,17 +87,27 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        orderApiService = ServiceGenerator.createOrderService(getContext());
-
         Log.d("qr-code", "onAttach");
+        orderApiService = ServiceGenerator.createOrderService(context);
         OrderNotificationService.disableOrderNotifications();
         OrderNotificationService.addQrCodeObserver(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            Rect bounds = context.getSystemService(WindowManager.class).getCurrentWindowMetrics()
+                    .getBounds();
+            screenWidth = bounds.width();
+            screenHeight = bounds.height();
+        } else if (getActivity() != null) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            screenWidth = displayMetrics.widthPixels;
+            screenHeight = displayMetrics.heightPixels;
+        }
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d("qr-code", "onDestroyView");
         OrderNotificationService.enableOrderNotifications();
         OrderNotificationService.removeQrCodeObserver(this);
     }
