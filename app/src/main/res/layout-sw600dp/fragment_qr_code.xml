@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/qr_screen_gradient_bg"
+    android:background="@drawable/qr_screen_bg_wallpaper"
     android:keepScreenOn="true"
     tools:context=".ui.stores.QrCodeFragment">
 
@@ -189,7 +189,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_right"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:paddingStart="50dp"
             app:layout_constraintBottom_toTopOf="@id/provisional_instructions"
             app:layout_constraintEnd_toEndOf="parent"

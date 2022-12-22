@@ -141,7 +141,8 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
 
     Bitmap encodeAsBitmap(String stringToShow) throws WriterException {
         QRCodeWriter writer = new QRCodeWriter();
-        BitMatrix bitMatrix = writer.encode(stringToShow, BarcodeFormat.QR_CODE, 400, 400);
+        int dimensions = (int)(0.3 * screenWidth);
+        BitMatrix bitMatrix = writer.encode(stringToShow, BarcodeFormat.QR_CODE, dimensions, dimensions);
 
         int w = bitMatrix.getWidth();
         int h = bitMatrix.getHeight();
