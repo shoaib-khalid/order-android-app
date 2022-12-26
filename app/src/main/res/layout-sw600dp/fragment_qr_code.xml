@@ -2,9 +2,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_fragment_qr_code"
+    android:background="@drawable/bg_qr_screen_wallpaper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/qr_screen_bg_wallpaper"
     android:keepScreenOn="true"
     tools:context=".ui.stores.QrCodeFragment">
 
@@ -67,6 +68,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="STEP"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -76,6 +79,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="1"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@id/step_1_instructions"
                     app:layout_constraintStart_toStartOf="@id/step_1_text"
                     app:layout_constraintTop_toBottomOf="@id/step_1_text" />
@@ -87,6 +92,8 @@
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15dp"
                     android:text="SCAN QR CODE"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/step_1_text"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -112,6 +119,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="STEP"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -121,6 +130,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="2"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@id/step_2_instructions"
                     app:layout_constraintStart_toStartOf="@id/step_2_text"
                     app:layout_constraintTop_toBottomOf="@id/step_2_text" />
@@ -132,6 +143,8 @@
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15dp"
                     android:text="CHOOSE YOUR FAVOURITE FOOD AND DRINKS AND ADD THEM TO YOUR CART"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/step_2_text"
                     app:layout_constraintTop_toTopOf="parent"
@@ -157,6 +170,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="STEP"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -166,6 +181,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="3"
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintEnd_toStartOf="@id/step_3_instructions"
                     app:layout_constraintStart_toStartOf="@id/step_3_text"
                     app:layout_constraintTop_toBottomOf="@id/step_3_text" />
@@ -177,6 +194,8 @@
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="15dp"
                     android:text="PLACE YOUR ORDER WHEN YOU HAVE SEATED BY ENTERING THE TABLE NUMBER."
+                    android:textColor="#2abab3"
+                    android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/step_3_text"
                     app:layout_constraintTop_toTopOf="parent"
@@ -190,7 +209,6 @@
             android:id="@+id/layout_right"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:paddingStart="50dp"
             app:layout_constraintBottom_toTopOf="@id/provisional_instructions"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/layout_left"
@@ -258,7 +276,7 @@
             style="@style/TextAppearance.MaterialComponents.Headline3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="25dp"
+            android:padding="5dp"
             android:text="You can scan the QR code with your smartphone camera."
             android:visibility="gone"
             android:textAlignment="center"

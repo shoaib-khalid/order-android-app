@@ -3,6 +3,7 @@ package com.symplified.order.ui.stores;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowInsets;
@@ -94,6 +95,14 @@ public class StoresActivity extends NavbarActivity
                     .addToBackStack(null)
                     .add(R.id.settings_fragment_container, QrCodeFragment.class, bundle)
                     .commit();
+
+//            try {
+//                Fragment qrCodeFragment = getSupportFragmentManager().findFragmentById(R.id.layout_fragment_qr_code);
+//                qrCodeFragment.getView().setBackground(AppCompatResources.getDrawable(this, R.drawable.qr_screen_bg_wallpaper));
+//            } catch (Exception e) {
+//                Log.e("qr-code", "Failed to set wallpaper. " + e.getLocalizedMessage());
+//            }
+
             hideSystemUi();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }

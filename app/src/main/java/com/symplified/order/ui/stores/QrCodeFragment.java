@@ -11,11 +11,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -57,6 +59,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+
         qrCodeImage = view.findViewById(R.id.qr_code_image);
         progressBar = view.findViewById(R.id.progress_bar);
         failureLayout = view.findViewById(R.id.failure_layout);
@@ -140,8 +143,10 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     }
 
     Bitmap encodeAsBitmap(String stringToShow) throws WriterException {
+        double fraction = screenHeight > 720 ? 0.4 : 0.35;
+        String output = "Width: " + screenWidth + ", Height: " + screenHeight + ", Fraction: " + fraction;
         QRCodeWriter writer = new QRCodeWriter();
-        int dimensions = (int)(0.3 * screenWidth);
+        int dimensions = (int)(fraction * screenWidth);
         BitMatrix bitMatrix = writer.encode(stringToShow, BarcodeFormat.QR_CODE, dimensions, dimensions);
 
         int w = bitMatrix.getWidth();
