@@ -11,13 +11,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -74,11 +70,6 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
             View topInstructionText = view.findViewById(R.id.instruction_text_1);
             if (topInstructionText != null) {
                 topInstructionText.setVisibility(View.VISIBLE);
-            }
-
-            View provInstructions = view.findViewById(R.id.provisional_instructions);
-            if (provInstructions != null) {
-                provInstructions.setVisibility(View.VISIBLE);
             }
         }
 
@@ -185,7 +176,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     public void onRedeemed() {
         if (getActivity() != null) {
             getActivity().runOnUiThread(this::requestQrCode);
-        };
+        }
     }
 
     private void closeFragment() {
