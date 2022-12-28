@@ -66,13 +66,6 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
         retryButton = view.findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(v -> requestQrCode());
 
-        if (screenHeight >= 1000) {
-            View topInstructionText = view.findViewById(R.id.instruction_text_1);
-            if (topInstructionText != null) {
-                topInstructionText.setVisibility(View.VISIBLE);
-            }
-        }
-
         storeId = requireArguments().getString("storeId");
 
         requestQrCode();
@@ -134,7 +127,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     }
 
     Bitmap encodeAsBitmap(String stringToShow) throws WriterException {
-        double fraction = screenHeight > 720 ? 0.4 : 0.35;
+        double fraction = 0.35;
         String output = "Width: " + screenWidth + ", Height: " + screenHeight + ", Fraction: " + fraction;
         QRCodeWriter writer = new QRCodeWriter();
         int dimensions = (int)(fraction * screenWidth);

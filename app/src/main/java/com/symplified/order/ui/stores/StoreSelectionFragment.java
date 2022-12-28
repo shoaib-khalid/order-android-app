@@ -109,6 +109,8 @@ public class StoreSelectionFragment extends Fragment implements StoreAdapter.Sto
             @Override
             public void onResponse(@NonNull Call<StoreResponse> call,
                                    @NonNull Response<StoreResponse> response) {
+                Log.d("login-activity", call.request().url().toString());
+                Log.d("login-activity", "Response:" + response.raw());
                 if (response.isSuccessful() && response.body() != null) {
                     stores = response.body().data.content;
                     if (stores.isEmpty()) {

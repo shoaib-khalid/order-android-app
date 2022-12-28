@@ -226,6 +226,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call,
                                    @NonNull Response<LoginResponse> response) {
+                Log.d("login-activity", "Login request: " + response.raw().toString());
                 if (response.isSuccessful()) {
                     LoginData res = response.body().data;
                     sharedPreferences.edit()
