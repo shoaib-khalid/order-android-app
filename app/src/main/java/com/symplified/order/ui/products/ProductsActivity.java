@@ -26,7 +26,7 @@ import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.NavbarActivity;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
@@ -70,7 +70,7 @@ public class ProductsActivity extends NavbarActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString(Key.STORE_ID_LIST, null);
+                .getString(SharedPrefsKey.STORE_ID_LIST, null);
 
         progressBar = findViewById(R.id.product_progress_bar);
         refreshLayout = findViewById(R.id.layout_products_refresh);

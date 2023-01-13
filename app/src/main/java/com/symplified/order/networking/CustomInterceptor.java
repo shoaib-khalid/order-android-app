@@ -9,7 +9,7 @@ import com.symplified.order.App;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.login.Session;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 
 import java.io.IOException;
 
@@ -30,7 +30,7 @@ public class CustomInterceptor implements Interceptor {
     public CustomInterceptor(SharedPreferences sharedPreferences) {
         sharedPrefs = sharedPreferences;
 
-        String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+        String baseURL = sharedPrefs.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
                 .baseUrl(baseURL + App.USER_SERVICE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
@@ -49,7 +49,7 @@ public class CustomInterceptor implements Interceptor {
 
         Response response = chain.proceed(request);
 
-        if (response.code() == 401 && sharedPrefs.getBoolean(Key.IS_LOGGED_IN, false)) {
+        if (response.code() == 401 && sharedPrefs.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)) {
             try {
                 String refreshToken = sharedPrefs.getString("refreshToken", "");
                 Call<LoginResponse> refreshRequest = loginService.refreshAccessToken(refreshToken);

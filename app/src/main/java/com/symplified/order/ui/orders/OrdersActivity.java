@@ -33,7 +33,7 @@ import com.symplified.order.ui.LoginActivity;
 import com.symplified.order.ui.NavbarActivity;
 import com.symplified.order.ui.orders.tabs.SectionsPagerAdapter;
 import com.symplified.order.utils.ChannelId;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import retrofit2.Call;
@@ -75,7 +75,7 @@ public class OrdersActivity extends NavbarActivity {
         stopService(new Intent(this, AlertService.class));
 
         boolean isSubscribedToNotifications = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
-                .getBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, false);
+                .getBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, false);
         if (!isSubscribedToNotifications) {
             verifyFirebaseConnection();
         }
@@ -122,13 +122,13 @@ public class OrdersActivity extends NavbarActivity {
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                         if (response.isSuccessful()) {
                             SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-                            String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
+                            String storeIdList = sharedPreferences.getString(SharedPrefsKey.STORE_ID_LIST, null);
                             if (storeIdList != null) {
                                 for (String storeId : storeIdList.split(" ")) {
                                     FirebaseMessaging.getInstance().subscribeToTopic(storeId)
                                             .addOnSuccessListener(unused -> {
                                                 sharedPreferences.edit()
-                                                        .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
+                                                        .putBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();
                                             }).addOnFailureListener(e -> logoutWithFirebaseErrorNotification());
                                 }

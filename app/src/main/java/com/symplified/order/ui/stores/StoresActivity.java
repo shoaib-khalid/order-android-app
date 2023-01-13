@@ -18,17 +18,17 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.navigation.NavigationView;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.databinding.ActivitySettingsBinding;
+import com.symplified.order.databinding.ActivityStoresBinding;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.ui.NavbarActivity;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 public class StoresActivity extends NavbarActivity
         implements StoreSelectionFragment.StoreFragmentListener {
 
     private Toolbar toolbar;
-    private ActivitySettingsBinding binding;
+    private ActivityStoresBinding binding;
     private DrawerLayout drawerLayout;
 
     private NavIntentStore action;
@@ -37,7 +37,7 @@ public class StoresActivity extends NavbarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivitySettingsBinding.inflate(getLayoutInflater());
+        binding = ActivityStoresBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         Utility.verifyLoginStatus(this);
@@ -48,17 +48,18 @@ public class StoresActivity extends NavbarActivity
         setSupportActionBar(toolbar);
 
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString(Key.CLIENT_ID, null);
+                .getString(SharedPrefsKey.CLIENT_ID, "");
+
         action = (NavIntentStore) getIntent().getExtras().getSerializable("action");
 
         initToolbar();
 
         Bundle bundle = new Bundle();
-        bundle.putString(Key.CLIENT_ID, clientId);
+        bundle.putString(SharedPrefsKey.CLIENT_ID, clientId);
         bundle.putSerializable("action", action);
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.settings_fragment_container, StoreSelectionFragment.class, bundle)
+                .add(R.id.store_fragment_container, StoreSelectionFragment.class, bundle)
                 .commit();
     }
 
@@ -87,15 +88,8 @@ public class StoresActivity extends NavbarActivity
                     .beginTransaction()
                     .hide(fragment)
                     .addToBackStack(null)
-                    .add(R.id.settings_fragment_container, QrCodeFragment.class, bundle)
+                    .add(R.id.store_fragment_container, QrCodeFragment.class, bundle)
                     .commit();
-
-//            try {
-//                Fragment qrCodeFragment = getSupportFragmentManager().findFragmentById(R.id.layout_fragment_qr_code);
-//                qrCodeFragment.getView().setBackground(AppCompatResources.getDrawable(this, R.drawable.qr_screen_bg_wallpaper));
-//            } catch (Exception e) {
-//                Log.e("qr-code", "Failed to set wallpaper. " + e.getLocalizedMessage());
-//            }
 
             hideSystemUi();
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -109,7 +103,6 @@ public class StoresActivity extends NavbarActivity
     }
 
     private void hideSystemUi() {
-//        View fragmentContainer = findViewById(R.id.settings_fragment_container);
         View fragmentContainer = binding.getRoot();
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         if (Build.VERSION.SDK_INT >= 30) {

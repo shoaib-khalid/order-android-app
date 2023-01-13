@@ -25,6 +25,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
+            android:name=".ui.staff.StaffManagementActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".ui.orders.TrackOrderActivity"
             android:exported="false" />
         <activity
@@ -47,10 +54,9 @@
             android:exported="true" />
         <activity
             android:name=".ui.products.ProductsActivity"
-            android:exported="true" />
-<!--        <activity-->
-<!--            android:name=".ChooseStoreActivity"-->
-<!--            android:exported="true" />-->
+            android:exported="true" /> <!-- <activity -->
+        <!-- android:name=".ChooseStoreActivity" -->
+        <!-- android:exported="true" /> -->
         <activity
             android:name=".ui.orders.OrdersActivity"
             android:exported="true"

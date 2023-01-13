@@ -11,7 +11,7 @@ import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.apis.StoreApi;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -60,7 +60,7 @@ public class ServiceGenerator {
                 .addInterceptor(new CustomInterceptor(sharedPrefs))
                 .build();
 
-        String baseURL = sharedPrefs.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+        String baseURL = sharedPrefs.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);
 
         return new Retrofit.Builder()
                 .client(httpClient)

@@ -6,12 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Rect;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +41,7 @@ import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
@@ -75,11 +72,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            Rect bounds = getSystemService(WindowManager.class).getCurrentWindowMetrics().getBounds();
-            Log.d("login-activity", "Width " + bounds.width() + ", height: " + bounds.height());
-        }
-
         setTheme(R.style.Theme_SymplifiedOrderUpdate);
         setContentView(R.layout.activity_login);
         initViews();
@@ -91,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
 
         configureRemoteConfig();
 
-        switch (sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION)) {
+        switch (sharedPreferences.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION)) {
             case App.BASE_URL_STAGING:
                 switchToStagingMode();
                 break;
@@ -105,23 +97,22 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void switchToProductionMode() {
-        sharedPreferences.edit().putBoolean(Key.IS_STAGING, false)
-                .putString(Key.BASE_URL, App.BASE_URL_PRODUCTION).apply();
+        sharedPreferences.edit().putBoolean(SharedPrefsKey.IS_STAGING, false)
+                .putString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION).apply();
         welcomeText.setText(R.string.welcome_message);
         btnSwitchToProduction.setVisibility(View.GONE);
     }
 
     private void switchToStagingMode() {
-        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true)
-                .putString(Key.BASE_URL, App.BASE_URL_STAGING).apply();
-        Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
+        sharedPreferences.edit().putBoolean(SharedPrefsKey.IS_STAGING, true)
+                .putString(SharedPrefsKey.BASE_URL, App.BASE_URL_STAGING).apply();
         welcomeText.setText(R.string.staging_mode);
         btnSwitchToProduction.setVisibility(View.VISIBLE);
     }
 
     private void switchToDeliverinUrl() {
-        sharedPreferences.edit().putBoolean(Key.IS_STAGING, true)
-                .putString(Key.BASE_URL, App.BASE_URL_DELIVERIN).apply();
+        sharedPreferences.edit().putBoolean(SharedPrefsKey.IS_STAGING, true)
+                .putString(SharedPrefsKey.BASE_URL, App.BASE_URL_DELIVERIN).apply();
         Toast.makeText(getApplicationContext(), "Switched to deliverin base url", Toast.LENGTH_SHORT).show();
         welcomeText.setText(R.string.deliverin);
         btnSwitchToProduction.setVisibility(View.VISIBLE);
@@ -181,6 +172,7 @@ public class LoginActivity extends AppCompatActivity {
             email.getEditText().getText().clear();
             password.getEditText().getText().clear();
             email.getEditText().requestFocus();
+            Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
         } else if (emailInput.equals(deliverinUser) && passwordInput.equals(deliverinPass)) {
             switchToDeliverinUrl();
             email.getEditText().getText().clear();
@@ -232,7 +224,7 @@ public class LoginActivity extends AppCompatActivity {
                     sharedPreferences.edit()
                             .putString("accessToken", res.session.accessToken)
                             .putString("refreshToken", res.session.refreshToken)
-                            .putString(Key.CLIENT_ID, res.session.ownerId)
+                            .putString(SharedPrefsKey.CLIENT_ID, res.session.ownerId)
                             .commit();
                     getStoresAndRegister(res.session.ownerId);
                 } else {
@@ -282,11 +274,11 @@ public class LoginActivity extends AppCompatActivity {
                                                     .cancel(ChannelId.ERRORS_NOTIF_ID);
                                             Log.d(TAG, "Subscribed to " + store.name);
                                             subscriptionCount++;
-                                            boolean isLoggedIn = sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false);
+                                            boolean isLoggedIn = sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false);
                                             if (subscriptionCount >= stores.size()
                                                     && !isLoggedIn) {
                                                 sharedPreferences.edit()
-                                                        .putBoolean(Key.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
+                                                        .putBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();
                                                 setStoreDataAndProceed();
                                             }
@@ -324,8 +316,8 @@ public class LoginActivity extends AppCompatActivity {
         }
         editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
                 .putString("storeId", stores.get(0).id)
-                .putString(Key.STORE_ID_LIST, storeIdList.toString())
-                .putBoolean(Key.IS_LOGGED_IN, true)
+                .putString(SharedPrefsKey.STORE_ID_LIST, storeIdList.toString())
+                .putBoolean(SharedPrefsKey.IS_LOGGED_IN, true)
                 .commit();
 
         Log.d(TAG, "setStoreDataAndProceed");
@@ -345,13 +337,14 @@ public class LoginActivity extends AppCompatActivity {
 
         callInAppUpdate();
         //check if user session already exists, for persistent login
-        if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
-                && sharedPreferences.contains(Key.STORE_ID_LIST)) {
+        if (sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)
+                && sharedPreferences.contains(SharedPrefsKey.STORE_ID_LIST)) {
             Log.d(TAG, "Starting orderActivity from onStart");
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
         } else if (!isLoading) {
+            Log.d(TAG, "User not logged in");
             removeUserData();
         }
 
@@ -362,7 +355,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     @Override
     public void onBackPressed() {
-        if (sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)) {
+        if (sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)) {
             this.finishAffinity();
         } else {
             super.onBackPressed();
@@ -424,19 +417,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void removeUserData() {
-        String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
+        String storeIdList = sharedPreferences.getString(SharedPrefsKey.STORE_ID_LIST, null);
         if (storeIdList != null) {
             for (String storeId : storeIdList.split(" ")) {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
             }
         }
-        boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
-        String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+        boolean isStaging = sharedPreferences.getBoolean(SharedPrefsKey.IS_STAGING, false);
+        String baseUrl = sharedPreferences.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);
 
         sharedPreferences.edit()
                 .clear()
-                .putBoolean(Key.IS_STAGING, isStaging)
-                .putString(Key.BASE_URL, baseUrl)
+                .putBoolean(SharedPrefsKey.IS_STAGING, isStaging)
+                .putString(SharedPrefsKey.BASE_URL, baseUrl)
                 .apply();
     }
 

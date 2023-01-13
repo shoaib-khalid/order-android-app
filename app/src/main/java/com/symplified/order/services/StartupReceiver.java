@@ -26,7 +26,7 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.util.Random;
@@ -42,7 +42,7 @@ public class StartupReceiver extends BroadcastReceiver {
                 .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         if ((Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
                 Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(intent.getAction()))
-                && sharedPrefs.getBoolean(Key.IS_LOGGED_IN, false)) {
+                && sharedPrefs.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)) {
             if (Utility.isConnectedToInternet(context)) {
                 checkForNewOrders(context);
             } else {
@@ -69,7 +69,7 @@ public class StartupReceiver extends BroadcastReceiver {
     private static void checkForNewOrders(Context context) {
         SharedPreferences sharedPrefs = context
                 .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String clientId = sharedPrefs.getString(Key.CLIENT_ID, "");
+        String clientId = sharedPrefs.getString(SharedPrefsKey.CLIENT_ID, "");
 
         OrderApi orderApiService = ServiceGenerator.createOrderService(context);
         Call<OrderDetailsResponse> orderResponse = orderApiService.getNewOrdersByClientId(clientId);

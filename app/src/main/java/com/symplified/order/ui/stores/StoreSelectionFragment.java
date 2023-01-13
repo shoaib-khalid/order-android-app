@@ -22,7 +22,7 @@ import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public class StoreSelectionFragment extends Fragment implements StoreAdapter.Sto
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        clientId = requireArguments().getString(Key.CLIENT_ID);
+        clientId = requireArguments().getString(SharedPrefsKey.CLIENT_ID);
         action = (NavIntentStore) requireArguments().getSerializable("action");
 
         // Inflate the layout for this fragment

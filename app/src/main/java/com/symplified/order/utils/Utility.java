@@ -156,8 +156,8 @@ public class Utility {
 
     public static void verifyLoginStatus(Activity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        if (!sharedPreferences.getBoolean(Key.IS_LOGGED_IN, false)
-                || sharedPreferences.getString(Key.STORE_ID_LIST, null) == null) {
+        if (!sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)
+                || sharedPreferences.getString(SharedPrefsKey.STORE_ID_LIST, null) == null) {
             Log.d("utility", "Not logged in");
             logout(activity);
         }
@@ -165,18 +165,18 @@ public class Utility {
 
     public static void logout(Activity activity) {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String storeIdList = sharedPreferences.getString(Key.STORE_ID_LIST, null);
+        String storeIdList = sharedPreferences.getString(SharedPrefsKey.STORE_ID_LIST, null);
         if (storeIdList != null) {
             for (String storeId : storeIdList.split(" ")) {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
             }
         }
-        boolean isStaging = sharedPreferences.getBoolean(Key.IS_STAGING, false);
-        String baseUrl = sharedPreferences.getString(Key.BASE_URL, App.BASE_URL_PRODUCTION);
+        boolean isStaging = sharedPreferences.getBoolean(SharedPrefsKey.IS_STAGING, false);
+        String baseUrl = sharedPreferences.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);
         sharedPreferences.edit().clear().apply();
         sharedPreferences.edit()
-                .putBoolean(Key.IS_STAGING, isStaging)
-                .putString(Key.BASE_URL, baseUrl)
+                .putBoolean(SharedPrefsKey.IS_STAGING, isStaging)
+                .putString(SharedPrefsKey.BASE_URL, baseUrl)
                 .apply();
 
         Intent intent = new Intent(activity, LoginActivity.class);

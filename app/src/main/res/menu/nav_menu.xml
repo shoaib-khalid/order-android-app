@@ -22,8 +22,21 @@
             android:title="Store QR Code" />
 
         <item
-            android:enabled="false"
-            android:title=""/>
+            android:icon="@drawable/ic_person"
+            android:title="Shift Management">
+            <menu>
+                <item
+                    android:id="@+id/nav_daily_sales"
+                    android:icon="@drawable/ic_currency_exchange"
+                    android:title="Staff Daily Sales" />
+
+                <item
+                    android:id="@+id/nav_manage_staff"
+                    android:icon="@drawable/ic_person"
+                    android:title="Manage Staff" />
+
+            </menu>
+        </item>
     </group>
 
 </menu>

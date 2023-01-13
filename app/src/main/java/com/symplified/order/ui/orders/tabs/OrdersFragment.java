@@ -37,7 +37,7 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.ui.orders.EditOrderActivity;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.text.SimpleDateFormat;
@@ -89,7 +89,7 @@ public class OrdersFragment extends Fragment
         PageViewModel pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
         String clientId = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
-                .getString(Key.CLIENT_ID, null);
+                .getString(SharedPrefsKey.CLIENT_ID, null);
 
         orders = new ArrayList<>();
 
@@ -140,7 +140,7 @@ public class OrdersFragment extends Fragment
                             && result.getData() != null) {
                         Intent data = result.getData();
                         Order.OrderDetails updatedOrderDetails
-                                = (Order.OrderDetails) data.getSerializableExtra(Key.ORDER_DETAILS);
+                                = (Order.OrderDetails) data.getSerializableExtra(SharedPrefsKey.ORDER_DETAILS);
                         int indexOfUpdatedOrderDetails = -1;
                         for (Order.OrderDetails element : orders) {
                             if (element.order.id

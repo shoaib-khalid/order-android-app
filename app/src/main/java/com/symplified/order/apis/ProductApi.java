@@ -21,5 +21,7 @@ public interface ProductApi {
 
     @GET("stores/{storeId}/products/{productId}/assets")
     Call<StoreProductAsset.StoreProductAssetListResponse> getStoreProductAssets(
-            @Path("storeId") String storeId, @Path("productId") String productId);
+            @Path("storeId") String storeId,
+            @Path("productId") String productId
+    );
 }

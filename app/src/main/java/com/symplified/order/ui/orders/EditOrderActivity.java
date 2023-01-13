@@ -34,7 +34,7 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.NavbarActivity;
-import com.symplified.order.utils.Key;
+import com.symplified.order.utils.SharedPrefsKey;
 
 import java.text.DecimalFormat;
 import java.util.List;
@@ -198,7 +198,7 @@ public class EditOrderActivity extends NavbarActivity {
 
     public void getOrderByInvoiceId(String invoiceId) {
         SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, MODE_PRIVATE);
-        String clientId = sharedPreferences.getString(Key.CLIENT_ID, "");
+        String clientId = sharedPreferences.getString(SharedPrefsKey.CLIENT_ID, "");
 
         Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
         orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
@@ -255,7 +255,7 @@ public class EditOrderActivity extends NavbarActivity {
 
     private void setActivityResult(Order.OrderDetails updatedOrderDetails) {
         Intent resultIntent = new Intent();
-        resultIntent.putExtra(Key.ORDER_DETAILS, updatedOrderDetails);
+        resultIntent.putExtra(SharedPrefsKey.ORDER_DETAILS, updatedOrderDetails);
         setResult(Activity.RESULT_OK, resultIntent);
     }
 
