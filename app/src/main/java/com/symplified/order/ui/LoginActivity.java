@@ -273,6 +273,7 @@ public class LoginActivity extends AppCompatActivity {
 
                             subscriptionCount = 0;
                             stores = response.body().data.content;
+
                             timer.schedule(new SubscribeTimeoutTask(), 8000L);
                             for (Store store : stores) {
                                 FirebaseMessaging.getInstance().subscribeToTopic(store.id)

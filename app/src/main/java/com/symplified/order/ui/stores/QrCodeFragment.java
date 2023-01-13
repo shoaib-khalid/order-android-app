@@ -127,7 +127,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     }
 
     Bitmap encodeAsBitmap(String stringToShow) throws WriterException {
-        double fraction = 0.35;
+        double fraction = screenWidth > 1500 ? 0.4 : 0.35;
         String output = "Width: " + screenWidth + ", Height: " + screenHeight + ", Fraction: " + fraction;
         QRCodeWriter writer = new QRCodeWriter();
         int dimensions = (int)(fraction * screenWidth);
