@@ -66,7 +66,7 @@ public class StoresActivity extends NavbarActivity
     private void initToolbar() {
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
-        navigationView.getMenu().getItem(1).setChecked(true);
+        navigationView.getMenu().getItem(action == NavIntentStore.SET_STORE_TIMING ? 1 : 3).setChecked(true);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources

@@ -32,7 +32,7 @@ public class CustomInterceptor implements Interceptor {
 
         String baseURL = sharedPrefs.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);
         Retrofit retrofit = new Retrofit.Builder().client(new OkHttpClient())
-                .baseUrl(baseURL + App.USER_SERVICE_URL)
+                .baseUrl(baseURL + App.USER_CLIENT_SERVICE_URL)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();

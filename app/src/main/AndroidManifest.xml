@@ -25,7 +25,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
-            android:name=".ui.staff.StaffManagementActivity"
+            android:name=".ui.staff.StaffActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
@@ -33,9 +34,11 @@
         </activity>
         <activity
             android:name=".ui.orders.TrackOrderActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
             android:name=".ui.orders.EditOrderActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
 
         <meta-data
@@ -44,6 +47,7 @@
 
         <activity
             android:name=".ui.NavbarActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true" />
         <activity
             android:name=".ui.stores.StoresActivity"
@@ -51,19 +55,23 @@
             android:exported="false" />
         <activity
             android:name=".ui.products.EditProductActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true" />
         <activity
             android:name=".ui.products.ProductsActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true" /> <!-- <activity -->
         <!-- android:name=".ChooseStoreActivity" -->
         <!-- android:exported="true" /> -->
         <activity
             android:name=".ui.orders.OrdersActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true"
             android:label="@string/title_activity_orders"
             android:theme="@style/Theme.SymplifiedOrderUpdate.NoActionBar" />
         <activity
             android:name=".ui.LoginActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true"
             android:noHistory="true">
             <intent-filter>

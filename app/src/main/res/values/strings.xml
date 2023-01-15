@@ -129,4 +129,11 @@
     <string name="notif_firebase_error_text_full">Unable to connect to Google services on this network. You will not be able to receive new order notifications. Please connect to a different network and try logging in again.</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_staff_member">Add Staff Member</string>
+    <string name="name_label">Name:</string>
+    <string name="username_label">Username:</string>
+    <string name="add_staff_member_title">Add Staff Member</string>
+    <string name="staff_member_name_label">Staff Member Name</string>
+    <string name="hint_username">Username</string>
+    <string name="hint_staff_member_name">Staff Member Name</string>
 </resources>

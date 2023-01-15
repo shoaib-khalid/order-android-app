@@ -10,6 +10,7 @@ import com.symplified.order.apis.FirebaseApi;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.ProductApi;
+import com.symplified.order.apis.StaffApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.utils.SharedPrefsKey;
 
@@ -37,7 +38,7 @@ public class ServiceGenerator {
     }
 
     public static LoginApi createUserService(Context context) {
-        return createRetrofitInstance(context, App.USER_SERVICE_URL).create(LoginApi.class);
+        return createRetrofitInstance(context, App.USER_CLIENT_SERVICE_URL).create(LoginApi.class);
     }
 
     public static OrderApi createOrderService(Context context) {
@@ -50,6 +51,10 @@ public class ServiceGenerator {
 
     public static StoreApi createStoreService(Context context) {
         return createRetrofitInstance(context, App.PRODUCT_SERVICE_URL).create(StoreApi.class);
+    }
+
+    public static StaffApi createStaffService(Context context) {
+        return createRetrofitInstance(context, App.USER_SERVICE_URL).create(StaffApi.class);
     }
 
     private static Retrofit createRetrofitInstance(Context context, String serviceUrl) {

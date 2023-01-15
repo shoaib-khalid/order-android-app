@@ -25,7 +25,7 @@ import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.ui.products.ProductsActivity;
-import com.symplified.order.ui.staff.StaffManagementActivity;
+import com.symplified.order.ui.staff.StaffActivity;
 import com.symplified.order.ui.stores.StoresActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
@@ -136,14 +136,14 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                     break;
                 case R.id.nav_daily_sales:
                     if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), StaffManagementActivity.class);
+                        intent = new Intent(getApplicationContext(), StaffActivity.class);
                         intent.putExtra("action", NavIntentStaff.VIEW_DAILY_SALES);
                         startActivity(intent);
                     }
                     break;
                 case R.id.nav_manage_staff:
                     if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), StaffManagementActivity.class);
+                        intent = new Intent(getApplicationContext(), StaffActivity.class);
                         intent.putExtra("action", NavIntentStaff.MANAGE_STAFF);
                         startActivity(intent);
                     }
