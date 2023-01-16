@@ -46,7 +46,7 @@ public class QrCodeActivity extends AppCompatActivity implements QrCodeObserver 
         setContentView(R.layout.activity_qr_code);
 
         qrCodeImage = findViewById(R.id.qr_code_image);
-        progressBar = findViewById(R.id.progress_bar);
+        progressBar = findViewById(R.id.circular_progress_bar);
         failureLayout = findViewById(R.id.failure_layout);
         retryButton = findViewById(R.id.btn_retry);
         retryButton.setOnClickListener(v -> requestQrCode());

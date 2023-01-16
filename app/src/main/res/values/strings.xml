@@ -136,4 +136,9 @@
     <string name="staff_member_name_label">Staff Member Name</string>
     <string name="hint_username">Username</string>
     <string name="hint_staff_member_name">Staff Member Name</string>
+    <string name="change_password">Change Password</string>
+    <string name="delete_staff_member">Delete Staff Member</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="empty_staff_text">No staff members added yet.</string>
 </resources>

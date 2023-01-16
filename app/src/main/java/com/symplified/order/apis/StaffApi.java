@@ -6,6 +6,7 @@ import com.symplified.order.models.staff.RegisterStaffMemberResponse;
 import com.symplified.order.models.staff.SingleStaffMemberResponse;
 import com.symplified.order.models.staff.StaffMemberListResponse;
 
+import io.reactivex.Observable;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -19,6 +20,9 @@ public interface StaffApi {
     @GET("stores/{storeId}/users/?page=0&pageSize=1000000")
     Call<StaffMemberListResponse> getStaffMembersByStoreId(@Path("storeId") String storeId);
 
+    @GET("stores/{storeId}/users/?page=0&pageSize=1000000")
+    Observable<StaffMemberListResponse> getStaffMembersByStoreIdObservable(@Path("storeId") String storeId);
+
     @POST("stores/{storeId}/users/register")
     Call<RegisterStaffMemberResponse> addStaffMember(
             @Path("storeId") String storeId,
@@ -26,7 +30,7 @@ public interface StaffApi {
     );
 
     @PUT("stores/{storeId}/users/{userId}")
-    Call<SingleStaffMemberResponse> changePassword(
+    Call<Void> changePassword(
             @Path("storeId") String storeId,
             @Path("userId") String userId,
             @Body PasswordChangeRequest body

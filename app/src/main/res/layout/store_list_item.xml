@@ -64,7 +64,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <ProgressBar
-            android:id="@+id/progress_bar"
+            android:id="@+id/circular_progress_bar"
             style="@android:style/Widget.DeviceDefault.ProgressBar.Horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -36,16 +36,20 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
     private final OnAddStaffMemberListener listener;
     private final Store[] stores;
     private Button submitButton;
-    private List<EditText> textInputs = new ArrayList<>();
+    private final List<EditText> textInputs = new ArrayList<>();
+    private Store selectedStore;
 
     public AddStaffMemberDialogFragment(Store[] stores, OnAddStaffMemberListener listener) {
         super();
         this.listener = listener;
         this.stores = stores;
+        if (stores.length > 0) {
+            this.selectedStore = stores[0];
+        }
     }
 
     public interface OnAddStaffMemberListener {
-        void onStaffMemberAdded(String name, String username, String password);
+        void onStaffMemberAdded(String storeId, String name, String username, String password);
     }
 
     @Nullable
@@ -60,21 +64,10 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         view.findViewById(R.id.cancel_button).setOnClickListener(v -> dismiss());
         submitButton = view.findViewById(R.id.add_staff_member_button);
 
-        StoreAdapter adapter = new StoreAdapter(getContext(), android.R.layout.simple_spinner_item, stores);
-        Spinner spinner = view.findViewById(R.id.stores_spinner);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Store store = adapter.getItem(position);
-                Toast.makeText(getContext(), "Selected " + store.name, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        TextView prefixTextView = view.findViewById(R.id.username_prefix_text);
+        if (selectedStore != null) {
+            prefixTextView.setText(selectedStore.id.substring(selectedStore.id.length() - 4));
+        }
 
         EditText nameEditText = view.findViewById(R.id.name_edit_text);
         EditText usernameEditText = view.findViewById(R.id.username_edit_text);
@@ -87,10 +80,27 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         usernameEditText.addTextChangedListener(new DialogTextWatcher("Username", usernameEditText));
         passwordEditText.addTextChangedListener(new DialogTextWatcher("Password", passwordEditText));
 
+        StoreAdapter adapter = new StoreAdapter(getContext(), android.R.layout.simple_spinner_item, stores);
+        Spinner spinner = view.findViewById(R.id.stores_spinner);
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedStore = adapter.getItem(position);
+                prefixTextView.setText(selectedStore.id.substring(selectedStore.id.length() - 4));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Toast.makeText(getContext(), "Nothing selected", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         submitButton.setOnClickListener(v -> {
             listener.onStaffMemberAdded(
+                    selectedStore.id,
                     nameEditText.getText().toString(),
-                    usernameEditText.getText().toString(),
+                    prefixTextView.getText() + usernameEditText.getText().toString(),
                     passwordEditText.getText().toString()
             );
             dismiss();
@@ -107,8 +117,9 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
             }
         }
 
-        if (validInputs == 3)
+        if (validInputs == 3) {
             submitButton.setEnabled(true);
+        }
     }
 
     private class DialogTextWatcher implements TextWatcher {
@@ -173,7 +184,6 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         @Override
         public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             TextView label = (TextView) super.getView(position, convertView, parent);
-            label.setTextColor(Color.BLACK);
             label.setText(stores[position].name);
             return label;
         }
@@ -181,7 +191,6 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         @Override
         public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
             TextView label = (TextView) super.getDropDownView(position, convertView, parent);
-            label.setTextColor(Color.BLACK);
             label.setText(stores[position].name);
             return label;
         }

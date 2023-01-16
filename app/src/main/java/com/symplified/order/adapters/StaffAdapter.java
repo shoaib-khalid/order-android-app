@@ -1,35 +1,52 @@
 package com.symplified.order.adapters;
 
+import android.app.AlertDialog;
+import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
+import com.symplified.order.callbacks.EmptyCallback;
 import com.symplified.order.models.staff.StaffMember;
+import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> {
 
-    private List<StaffMember> staffMembers = new ArrayList<>();
-
-    public StaffAdapter() {
+    public interface OnShowPasswordChangeDialogListener {
+        void onShowChangePasswordDialog(StaffMember staffMember);
     }
 
-    public StaffAdapter(List<StaffMember> staffMembers) {
+    private List<StaffMember> staffMembers = new ArrayList<>();
+    private final OnShowPasswordChangeDialogListener listener;
+
+    public StaffAdapter(OnShowPasswordChangeDialogListener listener) {
+        this.listener = listener;
+    }
+
+    public StaffAdapter(
+            List<StaffMember> staffMembers,
+            OnShowPasswordChangeDialogListener listener
+    ) {
         this.staffMembers = staffMembers;
+        this.listener = listener;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView nameTextView, usernameTextView;
         private final ImageButton editButton, deleteButton;
+        private final ProgressBar progressBar;
 
         public ViewHolder(View view) {
             super(view);
@@ -38,6 +55,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
             usernameTextView = view.findViewById(R.id.username_text_view);
             editButton = view.findViewById(R.id.edit_button);
             deleteButton = view.findViewById(R.id.delete_button);
+            progressBar = view.findViewById(R.id.progress_bar);
         }
     }
 
@@ -55,9 +73,40 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
         viewHolder.nameTextView.setText(staffMembers.get(position).name);
         viewHolder.usernameTextView.setText(staffMembers.get(position).username);
         viewHolder.editButton.setOnClickListener(view -> {
+            listener.onShowChangePasswordDialog(staffMembers.get(viewHolder.getAdapterPosition()));
         });
         viewHolder.deleteButton.setOnClickListener(view -> {
+            StaffMember selectedStaffMember = staffMembers.get(viewHolder.getAdapterPosition());
+
+            new AlertDialog.Builder(view.getContext())
+                    .setTitle("Delete Staff Member")
+                    .setMessage("Are you sure you want to delete staff member " + selectedStaffMember.name + "?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        ServiceGenerator
+                                .createStaffService(view.getContext().getApplicationContext())
+                                .deleteStaffMember(selectedStaffMember.storeId, selectedStaffMember.id)
+                                .clone().enqueue(new EmptyCallback());
+
+                        staffMembers.remove(viewHolder.getAdapterPosition());
+                        notifyItemRemoved(viewHolder.getAdapterPosition());
+                    })
+                    .setNegativeButton("No", null)
+                    .setIcon(R.drawable.ic_delete)
+                    .show();
         });
+
+        if (Build.VERSION.SDK_INT < 26) {
+            viewHolder.editButton.setOnLongClickListener(v -> {
+                Toast.makeText(v.getContext(), v.getContext().getString(R.string.change_password), Toast.LENGTH_SHORT).show();
+                return true;
+            });
+            viewHolder.deleteButton.setOnLongClickListener(v -> {
+                Toast.makeText(v.getContext(), v.getContext().getString(R.string.delete_staff_member), Toast.LENGTH_SHORT).show();
+                return true;
+            });
+        }
+
+        viewHolder.progressBar.setVisibility(staffMembers.get(position).isLoading ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -72,9 +121,24 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
         }
     }
 
+    public void addStaffMember(StaffMember staffMemberToAdd) {
+        if (staffMembers.add(staffMemberToAdd)) {
+            notifyItemInserted(staffMembers.size() - 1);
+        }
+    }
+
     public void clear() {
         int originalSize = staffMembers.size();
         staffMembers.clear();
         notifyItemRangeRemoved(0, originalSize);
+    }
+
+    public void setLoadingStatus(StaffMember selectedStaffMember, Boolean isLoading) {
+        for (StaffMember staffMember : staffMembers) {
+            if (selectedStaffMember == staffMember) {
+                staffMember.isLoading = isLoading;
+                notifyItemChanged(staffMembers.indexOf(staffMember));
+            }
+        }
     }
 }

@@ -57,7 +57,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
         // Inflate the layout for this fragment
 
         qrCodeImage = view.findViewById(R.id.qr_code_image);
-        progressBar = view.findViewById(R.id.progress_bar);
+        progressBar = view.findViewById(R.id.circular_progress_bar);
         failureLayout = view.findViewById(R.id.failure_layout);
 
 //        closeButton = view.findViewById(R.id.btn_close);

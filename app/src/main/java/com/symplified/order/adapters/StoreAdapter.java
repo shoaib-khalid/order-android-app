@@ -70,7 +70,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             isLoading = false;
             name = view.findViewById(R.id.store_name);
             status = view.findViewById(R.id.store_status);
-            progressBar = view.findViewById(R.id.progress_bar);
+            progressBar = view.findViewById(R.id.circular_progress_bar);
             qrCodeImage = view.findViewById(R.id.qr_code_button);
         }
 
