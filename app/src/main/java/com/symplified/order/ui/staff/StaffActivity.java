@@ -62,7 +62,13 @@ public class StaffActivity extends NavbarActivity {
         bundle.putSerializable("action", action);
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.staff_fragment_container, StaffManagementFragment.class, bundle)
+                .add(
+                        R.id.staff_fragment_container,
+                        action == NavIntentStaff.MANAGE_STAFF
+                                ? StaffManagementFragment.class
+                                : ShiftManagementFragment.class,
+                        bundle
+                )
                 .commit();
     }
 
@@ -70,7 +76,7 @@ public class StaffActivity extends NavbarActivity {
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(4)
-                .getSubMenu().getItem(0).setChecked(true);
+                .getSubMenu().getItem(action == NavIntentStaff.VIEW_DAILY_SALES ? 0 : 1).setChecked(true);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources

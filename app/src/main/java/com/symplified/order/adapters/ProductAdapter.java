@@ -17,21 +17,44 @@ import com.bumptech.glide.Glide;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.models.product.Product;
+import com.symplified.order.models.store.Store;
 import com.symplified.order.ui.products.EditProductActivity;
+import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
-    private Context context;
-    private List<Product> products;
+    private final Context context;
+    private List<Store> stores = new ArrayList<>();
+    private List<Product> products = new ArrayList<>();
     private static final String TAG = "ProductAdapter";
-    private DecimalFormat formatter;
+    private DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
-    public ProductAdapter(Context context, List<Product> products) {
+    public ProductAdapter(Context context) {
         this.context = context;
+    }
+
+    public void setProducts(List<Product> products) {
+        clear();
         this.products = products;
+        notifyItemRangeInserted(0, products.size());
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView productName, productPrice, productStatus;
+        private final ImageView productImage, statusIcon;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            productName = itemView.findViewById(R.id.product_name);
+            productPrice = itemView.findViewById(R.id.product_price);
+            productImage = itemView.findViewById(R.id.product_image);
+            productStatus = itemView.findViewById(R.id.product_status);
+            statusIcon = itemView.findViewById(R.id.ic_product_status);
+        }
     }
 
     @NonNull
@@ -47,10 +70,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString("currency", null);
 
-        formatter = new DecimalFormat("#,###0.00");
+        Product product = products.get(position);
 
-        holder.productName.setText(products.get(position).name);
-        holder.productPrice.setText(currency+" "+ formatter.format(products.get(position).productInventories.get(0).price));
+        holder.productName.setText(product.name);
+        for (Store store : stores) {
+            if(product.storeId.equals(store.id)) {
+                Product.ProductInventory productInventory = product.productInventories.get(0);
+                String price = formatter.format(
+                        store.isDineIn ? productInventory.dineInPrice : productInventory.price
+                );
+
+                holder.productPrice.setText(currency + " " + price);
+            }
+        }
+
         String status = products.get(position).status;
 
         switch (status) {
@@ -79,8 +112,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             context.startActivity(intent);
         });
 
-            Glide.with(context).load(products.get(position).thumbnailUrl).into(holder.productImage);
-
+        Glide.with(context).load(products.get(position).thumbnailUrl).into(holder.productImage);
     }
 
     @Override
@@ -88,17 +120,13 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         return products.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView productName, productPrice, productStatus;
-        private final ImageView productImage, statusIcon;
+    public void setStores(List<Store> stores) {
+        this.stores = stores;
+    }
 
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            productName = itemView.findViewById(R.id.product_name);
-            productPrice = itemView.findViewById(R.id.product_price);
-            productImage = itemView.findViewById(R.id.product_image);
-            productStatus = itemView.findViewById(R.id.product_status);
-            statusIcon = itemView.findViewById(R.id.ic_product_status);
-        }
+    public void clear() {
+        int originalSize = products.size();
+        products.clear();
+        notifyItemRangeRemoved(0, originalSize);
     }
 }

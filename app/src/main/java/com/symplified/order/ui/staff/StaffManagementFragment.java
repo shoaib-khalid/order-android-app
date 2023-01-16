@@ -28,7 +28,10 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.utils.SharedPrefsKey;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -49,7 +52,7 @@ public class StaffManagementFragment
     private FragmentStaffManagementBinding binding;
     private StaffApi staffApi;
     private StoreApi storeApi;
-    private Store[] stores;
+    private Store[] stores = new Store[]{};
     private String clientId;
     private StaffAdapter staffAdapter;
 
@@ -93,9 +96,14 @@ public class StaffManagementFragment
                         if (response.isSuccessful() && response.body() != null) {
                             List<Store> content = response.body().data.content;
                             stores = new Store[content.size()];
-                            for (int i = 0; i < content.size(); i++) {
-                                stores[i] = content.get(i);
+                            content.toArray(stores);
+
+                            Map<String, String> storesMap = new HashMap<>();
+                            for (Store store : content) {
+                                storesMap.put(store.id, store.name);
                             }
+                            staffAdapter.setStores(storesMap);
+
                             binding.addMemberButton.setVisibility(View.VISIBLE);
                             binding.addMemberButton.setOnClickListener(v ->
                                     new AddStaffMemberDialogFragment(stores, listener)

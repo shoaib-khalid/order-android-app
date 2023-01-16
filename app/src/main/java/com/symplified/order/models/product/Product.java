@@ -70,6 +70,7 @@ public class Product implements Serializable {
     public class ProductInventory implements Serializable {
         public String itemCode;
         public double price;
+        public double dineInPrice;
         public int quantity;
         public String productId;
         public String status;
@@ -81,6 +82,7 @@ public class Product implements Serializable {
             return "ProductInventory{" +
                     "itemCode='" + itemCode + '\'' +
                     ", price=" + price +
+                    ", dineInPrice=" + dineInPrice +
                     ", quantity=" + quantity +
                     ", productId='" + productId + '\'' +
                     ", status='" + status + '\'' +

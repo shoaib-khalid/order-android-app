@@ -141,4 +141,11 @@
     <string name="new_password">New Password</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="empty_staff_text">No staff members added yet.</string>
+    <string name="store_label">Store:</string>
+    <string name="date_label">Date:</string>
+    <string name="total_sales_label">Total Sales:</string>
+    <string name="payment_type_label">Payment Type</string>
+    <string name="sales_amount_label">Sales Amount</string>
+    <string name="end_shift">End Shift</string>
+    <string name="empty_sales_text">No sales to show for this user at this time.</string>
 </resources>

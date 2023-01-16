@@ -80,7 +80,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         usernameEditText.addTextChangedListener(new DialogTextWatcher("Username", usernameEditText));
         passwordEditText.addTextChangedListener(new DialogTextWatcher("Password", passwordEditText));
 
-        StoreAdapter adapter = new StoreAdapter(getContext(), android.R.layout.simple_spinner_item, stores);
+        StoreAdapter adapter = new StoreAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, stores);
         Spinner spinner = view.findViewById(R.id.stores_spinner);
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -91,9 +91,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                Toast.makeText(getContext(), "Nothing selected", Toast.LENGTH_SHORT).show();
-            }
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         submitButton.setOnClickListener(v -> {
@@ -151,8 +149,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
     }
 
     private class StoreAdapter extends ArrayAdapter<Store> {
-        private Context context;
-        private Store[] stores;
+        private final Store[] stores;
 
         public StoreAdapter(
                 Context context,
@@ -160,7 +157,6 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
                 Store[] stores
         ) {
             super(context, textViewResourceId, stores);
-            this.context = context;
             this.stores = stores;
         }
 

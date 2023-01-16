@@ -7,25 +7,13 @@ public class Store implements Serializable {
 
     public String id;
     public String name;
-    public String city;
-    public String address;
     public String clientId;
     public String verticalCode;
-    public String storeDescription;
-    public String postcode;
     public String email;
-    public String domain;
-    public String liveChatOrdersGroupId;
-    public String liveChatOrdersGroupName;
-    public String liveChatCsrGroupId;
-    public String liveChatCsrGroupName;
-    public String regionCountryId;
-    public String phoneNumber;
-    public String regionCountryStateId;
-    public String paymentType;
-    public int serviceChargesPercentage;
+    public Boolean isDineIn;
     public RegionCountry regionCountry;
     public List<StoreTiming> storeTiming;
+
     public List<StoreAsset> storeAssets;
 
     public static class RegionCountry implements Serializable{

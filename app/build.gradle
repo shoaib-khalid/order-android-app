@@ -13,8 +13,8 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 33
-        versionCode 123
-        versionName "1.9.93"
+        versionCode 124
+        versionName "1.9.94"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 

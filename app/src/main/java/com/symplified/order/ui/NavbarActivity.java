@@ -61,6 +61,8 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
+        navigationView.bringToFront();
+        navigationView.setVerticalScrollBarEnabled(true);
 
         setUpNavbarData(sharedPreferences, header);
     }
@@ -69,8 +71,8 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeLogo = header.findViewById(R.id.nav_store_logo);
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
-        ((TextView) navigationView.findViewById(R.id.nav_app_version))
-                .setText("Symplified 2022 | version " + BuildConfig.VERSION_NAME);
+//        ((TextView) navigationView.findViewById(R.id.nav_app_version))
+//                .setText("Symplified 2022 | version " + BuildConfig.VERSION_NAME);
 
         ServiceGenerator.createStoreService(this).getStoreById(storeId)
                 .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {

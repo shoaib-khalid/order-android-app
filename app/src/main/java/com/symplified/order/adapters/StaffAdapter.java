@@ -17,10 +17,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.symplified.order.R;
 import com.symplified.order.callbacks.EmptyCallback;
 import com.symplified.order.models.staff.StaffMember;
+import com.symplified.order.models.store.Store;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> {
 
@@ -29,6 +32,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
     }
 
     private List<StaffMember> staffMembers = new ArrayList<>();
+    private Map<String, String> stores = new HashMap<>();
     private final OnShowPasswordChangeDialogListener listener;
 
     public StaffAdapter(OnShowPasswordChangeDialogListener listener) {
@@ -44,7 +48,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final TextView nameTextView, usernameTextView;
+        private final TextView nameTextView, usernameTextView, storeNameTextView;
         private final ImageButton editButton, deleteButton;
         private final ProgressBar progressBar;
 
@@ -53,6 +57,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
 
             nameTextView = view.findViewById(R.id.name_text_view);
             usernameTextView = view.findViewById(R.id.username_text_view);
+            storeNameTextView = view.findViewById(R.id.store_name_text_view);
             editButton = view.findViewById(R.id.edit_button);
             deleteButton = view.findViewById(R.id.delete_button);
             progressBar = view.findViewById(R.id.progress_bar);
@@ -72,6 +77,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
         viewHolder.nameTextView.setText(staffMembers.get(position).name);
         viewHolder.usernameTextView.setText(staffMembers.get(position).username);
+        viewHolder.storeNameTextView.setText(stores.get(staffMembers.get(position).storeId));
         viewHolder.editButton.setOnClickListener(view -> {
             listener.onShowChangePasswordDialog(staffMembers.get(viewHolder.getAdapterPosition()));
         });
@@ -140,5 +146,9 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
                 notifyItemChanged(staffMembers.indexOf(staffMember));
             }
         }
+    }
+
+    public void setStores(Map<String, String> stores) {
+        this.stores = stores;
     }
 }

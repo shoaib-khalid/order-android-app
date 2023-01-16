@@ -15,11 +15,16 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.staff.StaffMember;
+import com.symplified.order.models.staff.shift.SummaryDetails;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class SunmiPrintHelper implements Printer {
@@ -240,6 +245,55 @@ public class SunmiPrintHelper implements Printer {
             printerService.printTextWithFont(String.valueOf(prefix), null, 26, null);
             printerService.printTextWithFont(String.valueOf(itemText), null, 30, null);
             printerService.printTextWithFont(String.valueOf(suffix), null, 26, null);
+        }
+
+        helper.feedPaper();
+    }
+
+    public void printSalesSummary(
+            StaffMember staffMember,
+            List<SummaryDetails> summaryDetailsList,
+            String currency
+    ) {
+        if (!isPrinterConnected()) {
+            return;
+        }
+
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+        String divider = "\n----------------------------";
+        String divider2 = "\n****************************";
+        StringBuilder body = new StringBuilder();
+
+        String title = "\n\tShift Summary";
+        body.append(divider)
+                .append("\nStaff: ").append(staffMember.name)
+                .append("\n").append(dateFormatter.format(new Date()))
+                .append(divider);
+        Double totalSales = 0.0;
+        for (SummaryDetails summaryDetails : summaryDetailsList) {
+            totalSales += summaryDetails.saleAmount;
+            body.append("\n")
+                    .append(summaryDetails.paymentChannel)
+                    .append("\n")
+                    .append(currency)
+                    .append(" ")
+                    .append(formatter.format(summaryDetails.saleAmount))
+                    .append("\n");
+        }
+        body.append(divider)
+                .append("\nTotal               ")
+                .append(currency).append(" ").append(formatter.format(totalSales))
+                .append(divider2)
+                .append("\n");
+
+        if (printerService != null) {
+            try {
+                printerService.printTextWithFont(title, null, 34, null);
+                printerService.printTextWithFont(String.valueOf(body), null, 26, null);
+            } catch (RemoteException e) {
+                Log.e("printer-service", "Failed to print. " + e.getLocalizedMessage());
+            }
         }
 
         helper.feedPaper();

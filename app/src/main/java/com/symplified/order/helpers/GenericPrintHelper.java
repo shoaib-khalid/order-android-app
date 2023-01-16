@@ -17,6 +17,8 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.staff.StaffMember;
+import com.symplified.order.models.staff.shift.SummaryDetails;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
@@ -198,5 +200,10 @@ public class GenericPrintHelper implements Printer {
             mIPosPrinterService.printSpecifiedTypeText(String.valueOf(suffix), "ST", 32, emptyCallback);
             mIPosPrinterService.printerPerformPrint(150,  emptyCallback);
         }
+    }
+
+    @Override
+    public void printSalesSummary(StaffMember staffMember, List<SummaryDetails> summaryDetails, String currency) {
+
     }
 }

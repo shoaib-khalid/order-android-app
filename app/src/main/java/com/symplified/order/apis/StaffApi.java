@@ -3,8 +3,9 @@ package com.symplified.order.apis;
 import com.symplified.order.models.staff.PasswordChangeRequest;
 import com.symplified.order.models.staff.RegisterStaffMemberRequest;
 import com.symplified.order.models.staff.RegisterStaffMemberResponse;
-import com.symplified.order.models.staff.SingleStaffMemberResponse;
 import com.symplified.order.models.staff.StaffMemberListResponse;
+import com.symplified.order.models.staff.shift.EndShiftRequest;
+import com.symplified.order.models.staff.shift.SummaryDetailsResponse;
 
 import io.reactivex.Observable;
 import retrofit2.Call;
@@ -23,10 +24,22 @@ public interface StaffApi {
     @GET("stores/{storeId}/users/?page=0&pageSize=1000000")
     Observable<StaffMemberListResponse> getStaffMembersByStoreIdObservable(@Path("storeId") String storeId);
 
+    @GET("stores/{storeId}/users/shiftSummary/{userId}")
+    Call<SummaryDetailsResponse> getShiftSummary(
+            @Path("storeId") String storeId,
+            @Path("userId") String userId
+    );
+
     @POST("stores/{storeId}/users/register")
     Call<RegisterStaffMemberResponse> addStaffMember(
             @Path("storeId") String storeId,
             @Body RegisterStaffMemberRequest body
+    );
+
+    @POST("stores/{storeId}/users/endShift")
+    Call<Void> endShift(
+            @Path("storeId") String storeId,
+            @Body EndShiftRequest body
     );
 
     @PUT("stores/{storeId}/users/{userId}")

@@ -29,8 +29,7 @@
             android:id="@+id/form_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="10dp"
-            android:paddingHorizontal="20dp">
+            android:padding="10dp">
 
             <LinearLayout
                 android:id="@+id/spinner_layout"
@@ -46,7 +45,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:overlapAnchor="false"
-                    android:paddingVertical="15dp"
                     android:spinnerMode="dropdown" />
             </LinearLayout>
 
@@ -69,9 +67,11 @@
 
             <TextView
                 android:id="@+id/username_prefix_text"
+                style="@style/TextAppearance.AppCompat.Medium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="5dp"
+                android:text="abcd"
                 app:layout_constraintBottom_toBottomOf="@id/username_text_input"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toLeftOf="@id/username_text_input"
