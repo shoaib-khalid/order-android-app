@@ -138,6 +138,11 @@ public class GenericPrintHelper implements Printer {
                 ? "Dine In"
                 : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
 
+        if (order.orderPaymentDetail != null) {
+            prefix.append("\nPayment Type: ")
+                    .append(order.orderPaymentDetail.paymentChannel);
+        }
+
         if (order.orderShipmentDetail.phoneNumber != null
                 && !"".equals(order.orderShipmentDetail.phoneNumber)) {
             prefix.append("\nCustomer no.: ").append(order.orderShipmentDetail.phoneNumber);

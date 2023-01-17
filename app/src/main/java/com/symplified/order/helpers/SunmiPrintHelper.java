@@ -178,10 +178,15 @@ public class SunmiPrintHelper implements Printer {
             prefix.append("\n").append(Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
         }
 
-        prefix.append("\nOrder Type: ");
-        prefix.append(order.serviceType == ServiceType.DINEIN
-                ? "Dine In"
-                : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
+        prefix.append("\nOrder Type: ")
+                .append(order.serviceType == ServiceType.DINEIN
+                        ? "Dine In"
+                        : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
+
+        if (order.orderPaymentDetail != null) {
+            prefix.append("\nPayment Type: ")
+                    .append(order.orderPaymentDetail.paymentChannel);
+        }
 
         if (order.orderShipmentDetail.phoneNumber != null
                 && !"".equals(order.orderShipmentDetail.phoneNumber)) {

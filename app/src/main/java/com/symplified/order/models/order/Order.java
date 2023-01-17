@@ -143,13 +143,8 @@ public class Order implements Serializable {
 
 
     public static class OrderPaymentDetail implements Serializable {
-        public String accountName;
-        public String gatewayId;
-        public String couponId;
-        public String time;
         public String orderId;
-        public String deliveryQuotationReferenceId;
-        public Double deliveryQuotationAmount;
+        public String paymentChannel;
     }
 
     public static class Customer implements Serializable {
