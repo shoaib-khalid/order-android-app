@@ -87,7 +87,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedStore = adapter.getItem(position);
-                prefixTextView.setText(selectedStore.id.substring(selectedStore.id.length() - 4));
+                prefixTextView.setText(selectedStore != null ? selectedStore.storePrefix : "");
             }
 
             @Override
@@ -98,7 +98,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
             listener.onStaffMemberAdded(
                     selectedStore.id,
                     nameEditText.getText().toString(),
-                    prefixTextView.getText() + usernameEditText.getText().toString(),
+                    selectedStore.storePrefix + usernameEditText.getText().toString(),
                     passwordEditText.getText().toString()
             );
             dismiss();

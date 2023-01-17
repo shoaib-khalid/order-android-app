@@ -11,6 +11,7 @@ public class Store implements Serializable {
     public String verticalCode;
     public String email;
     public Boolean isDineIn;
+    public String storePrefix;
     public RegionCountry regionCountry;
     public List<StoreTiming> storeTiming;
 

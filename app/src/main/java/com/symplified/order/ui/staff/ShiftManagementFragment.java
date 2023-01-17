@@ -56,6 +56,7 @@ public class ShiftManagementFragment extends Fragment {
     private String clientId;
     private SalesAdapter salesAdapter;
     private String currency = "RM";
+    private StaffMember currentStaffMember;
 
     @Override
     public View onCreateView(
@@ -153,8 +154,10 @@ public class ShiftManagementFragment extends Fragment {
                         binding.staffSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                StaffMember selectedStaffMember = adapter.getItem(position);
-                                fetchSalesData(selectedStaffMember);
+                                currentStaffMember = adapter.getItem(position);
+                                if (currentStaffMember != null) {
+                                    fetchSalesData(currentStaffMember);
+                                }
 //                                Toast.makeText(getContext(), "selected " + adapter.getItem(position).name, Toast.LENGTH_SHORT).show();
                             }
 
@@ -208,7 +211,9 @@ public class ShiftManagementFragment extends Fragment {
                                         + Utility.getMonetaryAmountFormat().format(totalSales));
 
                                 binding.endShiftButton.setOnClickListener(v -> {
-                                    App.getPrinter().printSalesSummary(selectedStaffMember, summaryDetails, currency);
+                                    if (App.isPrinterConnected()) {
+                                        App.getPrinter().printSalesSummary(selectedStaffMember, summaryDetails, currency);
+                                    }
                                     endShift(selectedStaffMember);
                                 });
                                 binding.endShiftButton.setEnabled(true);
@@ -243,15 +248,20 @@ public class ShiftManagementFragment extends Fragment {
                         stopLoading();
                         if (response.isSuccessful()) {
                             salesAdapter.clear();
-                            binding.endShiftButton.setEnabled(false);
                         } else {
-                            Toast.makeText(getContext(), "Failed to end shift. Please try again.", Toast.LENGTH_SHORT).show();
+                            if (currentStaffMember.id.equals(selectedStaffMember.id)) {
+                                binding.endShiftButton.setEnabled(true);
+                            }
+                            Toast.makeText(getContext(), "Failed to end shift for " + selectedStaffMember.name + ". Please try again.", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                         stopLoading();
+                        if (currentStaffMember.id.equals(selectedStaffMember.id)) {
+                            binding.endShiftButton.setEnabled(true);
+                        }
                         Toast.makeText(getContext(), "Failed to end shift. Please try again.", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -259,6 +269,7 @@ public class ShiftManagementFragment extends Fragment {
 
 
     private void startLoading() {
+        binding.endShiftButton.setEnabled(false);
         binding.progressBar.setVisibility(View.VISIBLE);
         binding.emptySalesTextView.setVisibility(View.GONE);
     }
@@ -267,7 +278,7 @@ public class ShiftManagementFragment extends Fragment {
         binding.progressBar.setVisibility(View.GONE);
     }
 
-    private class StaffSpinnerAdapter extends ArrayAdapter<StaffMember> {
+    private static class StaffSpinnerAdapter extends ArrayAdapter<StaffMember> {
         private final StaffMember[] staffMembers;
 
         public StaffSpinnerAdapter(
