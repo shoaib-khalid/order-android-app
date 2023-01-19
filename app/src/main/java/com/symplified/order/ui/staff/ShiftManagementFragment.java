@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,6 +82,15 @@ public class ShiftManagementFragment extends Fragment {
         SimpleDateFormat dateFormatter
                 = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         binding.dateTextView.setText(dateFormatter.format(new Date()));
+
+        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
+            if (currentStaffMember != null) {
+                fetchSalesData(currentStaffMember);
+            } else {
+                stopLoading();
+                Toast.makeText(getContext(), "No staff member selected", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         return binding.getRoot();
     }
@@ -276,6 +286,7 @@ public class ShiftManagementFragment extends Fragment {
 
     private void stopLoading() {
         binding.progressBar.setVisibility(View.GONE);
+        binding.swipeRefreshLayout.setRefreshing(false);
     }
 
     private static class StaffSpinnerAdapter extends ArrayAdapter<StaffMember> {

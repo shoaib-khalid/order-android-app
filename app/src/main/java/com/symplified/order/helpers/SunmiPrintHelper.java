@@ -265,15 +265,19 @@ public class SunmiPrintHelper implements Printer {
         }
 
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm:ss", Locale.getDefault());
+
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
         String divider = "\n----------------------------";
         String divider2 = "\n****************************";
         StringBuilder body = new StringBuilder();
 
         String title = "\n\tShift Summary";
+        Date date = new Date();
         body.append(divider)
                 .append("\nStaff: ").append(staffMember.name)
-                .append("\n").append(dateFormatter.format(new Date()))
+                .append("\n").append(dateFormatter.format(date))
+                .append("\n").append(timeFormatter.format(date))
                 .append(divider);
         Double totalSales = 0.0;
         for (SummaryDetails summaryDetails : summaryDetailsList) {

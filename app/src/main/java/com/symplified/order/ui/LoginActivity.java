@@ -156,7 +156,6 @@ public class LoginActivity extends AppCompatActivity {
         stores = new ArrayList<>();
     }
 
-
     /**
      * onClick method for Login Button
      */
