@@ -32,7 +32,7 @@ public class SalesAdapter extends RecyclerView.Adapter<SalesAdapter.ViewHolder> 
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView paymentTypeTextView, salesAmountTextView;
+        private final TextView paymentTypeTextView, salesAmountTextView;
 
         public ViewHolder(View view) {
             super(view);

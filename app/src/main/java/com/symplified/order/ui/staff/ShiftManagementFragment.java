@@ -107,8 +107,8 @@ public class ShiftManagementFragment extends Fragment {
                             List<Store> stores = response.body().data.content;
                             fetchStaffMembers(stores);
                             for (Store store : stores) {
-                                salesAdapter.setCurrency(store.regionCountry.currencySymbol);
                                 currency = store.regionCountry.currencySymbol;
+                                salesAdapter.setCurrency(currency);
                                 break;
                             }
                         }
@@ -121,6 +121,7 @@ public class ShiftManagementFragment extends Fragment {
                 });
     }
 
+
     @SuppressLint("CheckResult")
     private void fetchStaffMembers(List<Store> stores) {
 
@@ -130,15 +131,13 @@ public class ShiftManagementFragment extends Fragment {
             requests.add(staffApi.getStaffMembersByStoreIdObservable(store.id));
         }
 
-        Observable<List<StaffMemberListResponse>> observableResult
-                = Observable.zip(requests, objects -> {
-            List<StaffMemberListResponse> responses = new ArrayList<>();
-            for (Object o : objects) {
-                responses.add((StaffMemberListResponse) o);
-            }
-            return responses;
-        }).subscribeOn(Schedulers.newThread());
-        observableResult
+        Observable.zip(requests, objects -> {
+                    List<StaffMemberListResponse> responses = new ArrayList<>();
+                    for (Object o : objects) {
+                        responses.add((StaffMemberListResponse) o);
+                    }
+                    return responses;
+                }).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeWith(new Observer<List<StaffMemberListResponse>>() {
                     @Override
@@ -154,7 +153,9 @@ public class ShiftManagementFragment extends Fragment {
                             }
                         }
                         if (staffMembersList.isEmpty()) {
-                            binding.emptySalesTextView.setText(getContext().getApplicationContext().getString(R.string.empty_staff_text));
+                            if (getContext() != null) {
+                                binding.emptySalesTextView.setText(getContext().getApplicationContext().getString(R.string.empty_staff_text));
+                            }
                             binding.emptySalesTextView.setVisibility(View.VISIBLE);
                         }
                         StaffMember[] staffMembers = new StaffMember[staffMembersList.size()];
@@ -205,6 +206,9 @@ public class ShiftManagementFragment extends Fragment {
                             @NonNull Call<SummaryDetailsResponse> call,
                             @NonNull Response<SummaryDetailsResponse> response) {
                         stopLoading();
+
+                        Double totalSales = 0.0;
+
                         if (response.isSuccessful()) {
                             if (response.body() != null
                                     && response.body().data != null
@@ -213,12 +217,9 @@ public class ShiftManagementFragment extends Fragment {
                                 List<SummaryDetails> summaryDetails = response.body().data.summaryDetails;
                                 salesAdapter.setSummaryDetails(summaryDetails);
 
-                                Double totalSales = 0.0;
                                 for (SummaryDetails summaryDetail : summaryDetails) {
                                     totalSales += summaryDetail.saleAmount;
                                 }
-                                binding.totalSalesTextView.setText(currency
-                                        + Utility.getMonetaryAmountFormat().format(totalSales));
 
                                 binding.endShiftButton.setOnClickListener(v -> {
                                     if (App.isPrinterConnected()) {
@@ -234,6 +235,8 @@ public class ShiftManagementFragment extends Fragment {
                         } else {
                             Toast.makeText(getContext(), "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
                         }
+                        binding.totalSalesTextView.setText(currency
+                                + Utility.getMonetaryAmountFormat().format(totalSales));
                     }
 
                     @Override
