@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -41,11 +43,19 @@ import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -58,6 +68,9 @@ public class OrdersFragment extends Fragment
         implements PrinterObserver, OrderObserver, OrderManager {
 
     private static final String ARG_SECTION = "section";
+
+    private final Handler handler = new Handler();
+    private static Boolean isActive = false;
 
     private OrderAdapter orderAdapter;
 
@@ -88,17 +101,14 @@ public class OrdersFragment extends Fragment
 
         PageViewModel pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
-        String clientId = getActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+        String clientId = requireActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
                 .getString(SharedPrefsKey.CLIENT_ID, null);
 
         orders = new ArrayList<>();
 
         OrderApi orderApiService = ServiceGenerator.createOrderService(getContext());
 
-        section = null;
-        if (getArguments() != null) {
-            section = getArguments().getString(ARG_SECTION);
-        }
+        section = requireArguments().getString(ARG_SECTION);
 
         pageViewModel.setIndex(0);
 
@@ -107,7 +117,7 @@ public class OrdersFragment extends Fragment
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.getNewOrdersByClientId(clientId);
                 if (AlertService.isPlaying()) {
-                    getActivity().stopService(new Intent(getContext(), AlertService.class));
+                    requireActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
                 OrderNotificationService.addNewOrderObserver(this);
                 break;
@@ -128,6 +138,7 @@ public class OrdersFragment extends Fragment
 
                 orderResponse = orderApiService.getSentOrdersByClientId(clientId, currentDate, currentDate);
                 OrderNotificationService.addPastOrderObserver(this);
+
                 break;
             }
         }
@@ -167,7 +178,7 @@ public class OrdersFragment extends Fragment
         com.symplified.order.databinding.NewOrdersBinding binding = NewOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        recyclerView = root.findViewById(R.id.order_recycler);
+        recyclerView = binding.orderRecycler;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         progressBar = binding.ordersProgressBar;
@@ -181,6 +192,11 @@ public class OrdersFragment extends Fragment
 
         getOrders();
 
+        if (section.equals("past")) {
+            isActive = true;
+            setClearHistoryHandler();
+        }
+
         return root;
     }
 
@@ -190,6 +206,8 @@ public class OrdersFragment extends Fragment
         OrderNotificationService.removeNewOrderObserver(this);
         OrderNotificationService.removeOngoingOrderObserver(this);
         OrderNotificationService.removePastOrderObserver(this);
+        isActive = false;
+        handler.removeCallbacksAndMessages(null);
     }
 
     private void getOrders() {
@@ -300,4 +318,27 @@ public class OrdersFragment extends Fragment
             orderAdapter.notifyDataSetChanged();
         }
     }
+
+    private void setClearHistoryHandler() {
+        Calendar currentTime = Calendar.getInstance();
+        Calendar midnight = Calendar.getInstance();
+        midnight.add(Calendar.DAY_OF_MONTH, 1);
+        midnight.set(Calendar.HOUR_OF_DAY, 0);
+        midnight.set(Calendar.MINUTE, 0);
+        midnight.set(Calendar.SECOND, 0);
+        long initialDelay =  midnight.getTimeInMillis() - currentTime.getTimeInMillis();
+
+        handler.postDelayed(clearHistoryTask, initialDelay);
+    }
+
+    // Clears orders
+    private final Runnable clearHistoryTask = new Runnable() {
+        @Override
+        public void run() {
+            if (isActive) {
+                orderAdapter.clear();
+                handler.postDelayed(this, 86400000);
+            }
+        }
+    };
 }

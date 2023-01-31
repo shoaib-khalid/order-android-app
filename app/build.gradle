@@ -13,8 +13,8 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 33
-        versionCode 128
-        versionName "1.9.97"
+        versionCode 129
+        versionName "1.9.98"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,10 +43,10 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
-    implementation 'com.github.bumptech.glide:glide:4.13.2'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.13.2'
+    implementation 'com.github.bumptech.glide:glide:4.14.2'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
 
-    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'com.google.android.material:material:1.8.0'
     implementation platform('com.google.firebase:firebase-bom:28.4.0')
     implementation 'com.google.code.gson:gson:2.9.0'
     implementation 'com.google.firebase:firebase-messaging:23.1.1'
@@ -57,7 +57,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-gcm:17.0.0'
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.5.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.2'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
 

@@ -148,4 +148,5 @@
     <string name="sales_amount_label">Sales Amount</string>
     <string name="end_shift">End Shift</string>
     <string name="empty_sales_text">No sales to show for this user at this time.</string>
+    <string name="version_indicator">Symplified 2023 | Ver. %1$s </string>
 </resources>

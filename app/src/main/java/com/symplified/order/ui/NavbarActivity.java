@@ -71,8 +71,8 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeLogo = header.findViewById(R.id.nav_store_logo);
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
-//        ((TextView) navigationView.findViewById(R.id.nav_app_version))
-//                .setText("Symplified 2022 | version " + BuildConfig.VERSION_NAME);
+        ((TextView) navigationView.findViewById(R.id.nav_app_version))
+                .setText(getString(R.string.version_indicator, BuildConfig.VERSION_NAME));
 
         ServiceGenerator.createStoreService(this).getStoreById(storeId)
                 .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
@@ -96,7 +96,6 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         });
 
         TextView logout = navigationView.findViewById(R.id.nav_logout);
-
 
         if (sharedPreferences.getBoolean(SharedPrefsKey.IS_STAGING, false)) {
             logout.setVisibility(View.VISIBLE);
