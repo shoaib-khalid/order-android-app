@@ -2,7 +2,6 @@ package com.symplified.order.adapters;
 
 import android.app.AlertDialog;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,9 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
-import com.symplified.order.callbacks.EmptyCallback;
+import com.symplified.order.utils.EmptyCallback;
 import com.symplified.order.models.staff.StaffMember;
-import com.symplified.order.models.store.Store;
 import com.symplified.order.networking.ServiceGenerator;
 
 import java.util.ArrayList;

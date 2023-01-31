@@ -1,4 +1,4 @@
-package com.symplified.order.callbacks;
+package com.symplified.order.utils;
 
 import androidx.annotation.NonNull;
 

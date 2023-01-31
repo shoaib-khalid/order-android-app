@@ -9,4 +9,5 @@ public interface SharedPrefsKey {
     String IS_SUBSCRIBED_TO_NOTIFICATIONS = "is_subscribed_to_notifications";
     String STORE_ID_LIST = "storeIdList";
     String CLIENT_ID = "ownerId";
+    String USERNAME = "username";
 }

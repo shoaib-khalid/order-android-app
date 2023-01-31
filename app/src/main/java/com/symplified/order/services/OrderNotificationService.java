@@ -19,7 +19,7 @@ import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.apis.LoginApi;
 import com.symplified.order.apis.OrderApi;
-import com.symplified.order.callbacks.EmptyCallback;
+import com.symplified.order.utils.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
@@ -98,7 +98,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
 
-                        if (response.isSuccessful() && response.body().data.content.size() > 0) {
+                        if (response.isSuccessful() &&
+                                response.body() != null &&
+                                response.body().data.content.size() > 0) {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
@@ -142,7 +144,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             @Override
             public void onResponse(@NonNull Call<ItemsResponse> call,
                                    @NonNull Response<ItemsResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     try {
                         App.getPrinter()
                                 .printReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
@@ -189,7 +191,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             @Override
             public void onResponse(@NonNull Call<OrderUpdateResponse> call,
                                    @NonNull Response<OrderUpdateResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
                     if (Utility.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
                         addOrderToView(pastOrderObservers, updatedOrderDetails);

@@ -16,8 +16,4 @@ public enum OrderStatus {
     REQUESTING_DELIVERY_FAILED,
     AWAITING_PICKUP,
     FAILED;
-
-    public static OrderStatus fromString(String name) {
-        return Utility.getEnumFromString(OrderStatus.class, name);
-    }
 }

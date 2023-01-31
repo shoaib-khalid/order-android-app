@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
@@ -29,22 +30,14 @@ import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Utility {
 
-    private static final SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss aa");
-
-    public static <T extends Enum<T>> T getEnumFromString(Class<T> c, String string) {
-        if (c != null && string != null) {
-            try {
-                return Enum.valueOf(c, string.trim().toUpperCase());
-            } catch (IllegalArgumentException ex) {
-            }
-        }
-        return null;
-    }
+    private static final String inputDatePattern = "yyyy-MM-dd HH:mm:ss";
+    private static final String outputDatePattern = "dd/MM/yyyy hh:mm:ss aa";
 
     public static void logToFile(String text, Context context) {
         File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
@@ -75,15 +68,19 @@ public class Utility {
 
     public static String convertUtcTimeToLocalTimezone(String dateTime, TimeZone localTimeZone) {
 
+        SimpleDateFormat dateParser = new SimpleDateFormat(inputDatePattern, Locale.getDefault());
+        SimpleDateFormat dateFormatter = new SimpleDateFormat(outputDatePattern, Locale.getDefault());
+
         dateParser.setTimeZone(TimeZone.getTimeZone("UTC"));
         dateFormatter.setTimeZone(localTimeZone);
 
         try {
-            return dateFormatter.format(dateParser.parse(dateTime));
+            Date parsedDate = dateParser.parse(dateTime);
+            if (parsedDate != null) {
+                return dateFormatter.format(parsedDate);
+            }
         } catch (ParseException e) {
             Log.e("datetime", "Failed to parse date. " + e.getLocalizedMessage());
-        } catch (NullPointerException e) {
-            Log.e("datetime", "Parsed date was null. " + e.getLocalizedMessage());
         }
 
         return dateTime;
@@ -117,13 +114,15 @@ public class Utility {
         return cm.getActiveNetwork() != null && cm.getNetworkCapabilities(cm.getActiveNetwork()) != null;
     }
 
-    public static void notify(Context context,
-                              String title,
-                              String text,
-                              String bigText,
-                              String channel,
-                              int notificationId,
-                              Class<?> activity) {
+    public static void notify(
+            Context context,
+            String title,
+            String text,
+            String bigText,
+            String channel,
+            int notificationId,
+            Class<?> activity
+    ) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(new Intent(context, activity));
         PendingIntent pendingIntent =
@@ -171,6 +170,7 @@ public class Utility {
                 FirebaseMessaging.getInstance().unsubscribeFromTopic(storeId);
             }
         }
+
         boolean isStaging = sharedPreferences.getBoolean(SharedPrefsKey.IS_STAGING, false);
         String baseUrl = sharedPreferences.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);
         sharedPreferences.edit().clear().apply();
