@@ -656,4 +656,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             Toast.makeText(context, "Failed to print order.", Toast.LENGTH_SHORT).show();
         }
     }
+
+    public void clear() {
+        int lastPosition = orders.size() > 0 ? orders.size() - 1 : 0;
+        orders.clear();
+        notifyItemRangeRemoved(0, lastPosition);
+    }
 }
