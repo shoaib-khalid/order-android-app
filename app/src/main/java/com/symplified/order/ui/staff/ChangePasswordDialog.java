@@ -36,8 +36,10 @@ public class ChangePasswordDialog extends DialogFragment {
     private EditText editTextNewPassword, editTextConfirmPassword;
     private List<EditText> textInputs = new ArrayList<>();
 
-    public ChangePasswordDialog(StaffMember staffMember,
-                                OnChangePasswordSubmitListener listener) {
+    public ChangePasswordDialog(
+            StaffMember staffMember,
+            OnChangePasswordSubmitListener listener
+    ) {
         this.staffMember = staffMember;
         this.listener = listener;
     }
@@ -73,8 +75,11 @@ public class ChangePasswordDialog extends DialogFragment {
 
     private void validate() {
         boolean doPasswordsMatch
-                = editTextNewPassword.getText().toString().equals(
-                editTextConfirmPassword.getText().toString());
+                =
+                !editTextNewPassword.getText().toString().isEmpty()
+                        && !editTextConfirmPassword.getText().toString().isEmpty()
+                        && editTextNewPassword.getText().toString().equals(
+                                editTextConfirmPassword.getText().toString());
         submitButton.setEnabled(doPasswordsMatch);
         layoutConfirmPassword.setErrorEnabled(doPasswordsMatch);
         layoutNewPassword.setErrorEnabled(doPasswordsMatch);

@@ -1,11 +1,9 @@
 package com.symplified.order.ui.staff;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,15 +13,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.google.android.material.textfield.TextInputLayout;
 import com.symplified.order.R;
-import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.store.Store;
 
 import java.util.ArrayList;
@@ -39,6 +34,10 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
     private final List<EditText> textInputs = new ArrayList<>();
     private Store selectedStore;
 
+    public interface OnAddStaffMemberListener {
+        void onStaffMemberAdded(String storeId, String name, String username, String password);
+    }
+
     public AddStaffMemberDialogFragment(Store[] stores, OnAddStaffMemberListener listener) {
         super();
         this.listener = listener;
@@ -46,10 +45,6 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         if (stores.length > 0) {
             this.selectedStore = stores[0];
         }
-    }
-
-    public interface OnAddStaffMemberListener {
-        void onStaffMemberAdded(String storeId, String name, String username, String password);
     }
 
     @Nullable
@@ -62,7 +57,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_add_staff_member, container, false);
 
         view.findViewById(R.id.cancel_button).setOnClickListener(v -> dismiss());
-        submitButton = view.findViewById(R.id.add_staff_member_button);
+        submitButton = view.findViewById(R.id.confirm);
 
         TextView prefixTextView = view.findViewById(R.id.username_prefix_text);
         if (selectedStore != null) {

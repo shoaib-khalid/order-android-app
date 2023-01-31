@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.symplified.order.App;
-import com.symplified.order.apis.LoginApi;
+import com.symplified.order.apis.AuthApi;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.login.Session;
 import com.symplified.order.utils.SharedPrefsKey;
@@ -25,7 +25,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class CustomInterceptor implements Interceptor {
 
     SharedPreferences sharedPrefs;
-    LoginApi loginService;
+    AuthApi loginService;
 
     public CustomInterceptor(SharedPreferences sharedPreferences) {
         sharedPrefs = sharedPreferences;
@@ -37,13 +37,13 @@ public class CustomInterceptor implements Interceptor {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        loginService = retrofit.create(LoginApi.class);
+        loginService = retrofit.create(AuthApi.class);
     }
 
     @NonNull
     @Override
     public Response intercept(@NonNull Chain chain) throws IOException {
-        String accessToken = sharedPrefs.getString("accessToken", "accessToken");
+        String accessToken = sharedPrefs.getString(SharedPrefsKey.ACCESS_TOKEN, "accessToken");
         Request originalRequest = chain.request();
         Request request = addTokenToRequest(originalRequest, accessToken);
 
@@ -51,15 +51,15 @@ public class CustomInterceptor implements Interceptor {
 
         if (response.code() == 401 && sharedPrefs.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)) {
             try {
-                String refreshToken = sharedPrefs.getString("refreshToken", "");
+                String refreshToken = sharedPrefs.getString(SharedPrefsKey.REFRESH_TOKEN, "");
                 Call<LoginResponse> refreshRequest = loginService.refreshAccessToken(refreshToken);
 
                 Session sessionData = refreshRequest.execute().body().data.session;
 
                 String newAccessToken = sessionData.accessToken;
                 SharedPreferences.Editor editor = sharedPrefs.edit();
-                editor.putString("accessToken", newAccessToken);
-                editor.putString("refreshToken", sessionData.refreshToken);
+                editor.putString(SharedPrefsKey.ACCESS_TOKEN, newAccessToken);
+                editor.putString(SharedPrefsKey.REFRESH_TOKEN, sessionData.refreshToken);
                 editor.apply();
 
                 request = addTokenToRequest(originalRequest, newAccessToken);

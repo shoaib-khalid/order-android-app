@@ -70,7 +70,7 @@ public class OrdersFragment extends Fragment
     private static final String ARG_SECTION = "section";
 
     private final Handler handler = new Handler();
-    private static Boolean isActive = false;
+    private Boolean isActive = false;
 
     private OrderAdapter orderAdapter;
 
@@ -217,7 +217,7 @@ public class OrdersFragment extends Fragment
             @Override
             public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                    @NonNull Response<OrderDetailsResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     orders = response.body().data.content;
                     orderAdapter = new OrderAdapter(orders, section, getContext(), orderManager);
                     recyclerView.setAdapter(orderAdapter);

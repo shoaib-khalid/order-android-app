@@ -125,10 +125,10 @@
         android:textColor="@color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toLeftOf="@id/add_staff_member_button" />
+        app:layout_constraintRight_toLeftOf="@id/confirm" />
 
     <Button
-        android:id="@+id/add_staff_member_button"
+        android:id="@+id/confirm"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:enabled="false"

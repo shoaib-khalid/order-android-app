@@ -83,9 +83,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final MaterialButton editButton, cancelButton, acceptButton, statusButton,
                 trackButton, callButton;
         private final ImageButton printButton;
-        private final CardView cardView;
-        private final TextView invoiceLabel, dateLabel, totalLabel, statusLabel, typeLabel, orderType,
-                currStatusLabel, currStatus, customerNotes, riderName, riderContact;
+        private final TextView statusLabel, orderType, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
         private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
                 rlStoreVoucherDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote,
@@ -106,7 +104,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             date = itemView.findViewById(R.id.order_date_value);
             total = itemView.findViewById(R.id.order_total_value);
             status = itemView.findViewById(R.id.order_status_value);
-            typeLabel = itemView.findViewById(R.id.order_type);
             orderType = itemView.findViewById(R.id.order_type_value);
             customerNotes = itemView.findViewById(R.id.customer_note_value);
 
@@ -135,7 +132,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             riderCallIcon = itemView.findViewById(R.id.address_icon_phone);
 
-            currStatusLabel = itemView.findViewById(R.id.order_curr_status);
             currStatus = itemView.findViewById(R.id.order_curr_status_value);
             recyclerView = itemView.findViewById(R.id.order_items_recycler);
 
@@ -145,11 +141,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             statusButton = itemView.findViewById(R.id.btn_order_status);
             trackButton = itemView.findViewById(R.id.btn_track_order);
 
-            cardView = itemView.findViewById(R.id.order_card_parent);
-
-            invoiceLabel = itemView.findViewById(R.id.order_invoice);
-            dateLabel = itemView.findViewById(R.id.order_date);
-            totalLabel = itemView.findViewById(R.id.order_total);
             statusLabel = itemView.findViewById(R.id.update_status);
 
             typeLayout = itemView.findViewById(R.id.layout_order_type_row);
@@ -403,14 +394,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
             @Override
-            public void onResponse(Call<ItemsResponse> call, Response<ItemsResponse> response) {
-                if (response.isSuccessful()) {
+            public void onResponse(@NonNull Call<ItemsResponse> call, @NonNull Response<ItemsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
                     printReceipt(order, response.body().data.content);
                 }
             }
 
             @Override
-            public void onFailure(Call<ItemsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<ItemsResponse> call, @NonNull Throwable t) {
                 Log.e(TAG, "onFailureItems: ", t);
             }
         });
@@ -436,7 +427,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     .updateOrderStatus(new Order.OrderUpdate(order.id, OrderStatus.CANCELED_BY_MERCHANT), order.id);
             processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
                 @Override
-                public void onResponse(Call<OrderUpdateResponse> call, Response<OrderUpdateResponse> response) {
+                public void onResponse(@NonNull Call<OrderUpdateResponse> call, @NonNull Response<OrderUpdateResponse> response) {
                     if (response.isSuccessful()) {
                         Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
                     } else if (response.code() != 406) {
@@ -446,7 +437,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 }
 
                 @Override
-                public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
+                public void onFailure(@NonNull Call<OrderUpdateResponse> call, @NonNull Throwable t) {
                     Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ", t);
 
@@ -475,7 +466,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             public void onResponse(@NonNull Call<OrderUpdateResponse> call,
                                    @NonNull Response<OrderUpdateResponse> response) {
                 int indexOfOrder = orders.indexOf(currentOrderDetails);
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
 
                     String statusUpdateToastText = "Status Updated";
@@ -522,7 +513,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             }
 
             @Override
-            public void onFailure(Call<OrderUpdateResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<OrderUpdateResponse> call, @NonNull Throwable t) {
                 Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                 stopLoading(holder, currentOrderDetails.order.completionStatus);
                 Log.e(TAG, "onFailure: ", t);

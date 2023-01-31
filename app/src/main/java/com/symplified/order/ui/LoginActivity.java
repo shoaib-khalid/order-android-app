@@ -212,7 +212,11 @@ public class LoginActivity extends AppCompatActivity {
                 ? password.getEditText().getText().toString() : "";
 
         LoginRequest loginRequest = new LoginRequest(emailInput, passwordInput);
-        ServiceGenerator.createUserService(this).login(loginRequest).clone().enqueue(new Callback<LoginResponse>() {
+        ServiceGenerator
+                .createUserService(this)
+                .authenticate(loginRequest)
+                .clone()
+                .enqueue(new Callback<LoginResponse>() {
             @SuppressLint("ApplySharedPref")
             @Override
             public void onResponse(@NonNull Call<LoginResponse> call,
@@ -221,8 +225,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     LoginData res = response.body().data;
                     sharedPreferences.edit()
-                            .putString("accessToken", res.session.accessToken)
-                            .putString("refreshToken", res.session.refreshToken)
+                            .putString(SharedPrefsKey.USERNAME, res.session.username)
+                            .putString(SharedPrefsKey.ACCESS_TOKEN, res.session.accessToken)
+                            .putString(SharedPrefsKey.REFRESH_TOKEN, res.session.refreshToken)
                             .putString(SharedPrefsKey.CLIENT_ID, res.session.ownerId)
                             .commit();
                     getStoresAndRegister(res.session.ownerId);
@@ -247,7 +252,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     int subscriptionCount = 0;
-
     /**
      * method to make the api call to get all the stores of user from backend
      */

@@ -74,7 +74,7 @@
     <string name="setting_title">Store Settings</string>
     <string name="store_status">Store Status</string>
     <string name="click_here"><u>Click Here</u></string>
-    <string name="cancel_order">Cancel</string>
+    <string name="cancel">Cancel</string>
     <string name="update_order">Update Order</string>
     <string name="edit_order">Edit Order</string>
     <string name="track_order">Track</string>

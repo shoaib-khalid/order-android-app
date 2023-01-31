@@ -2,13 +2,13 @@ package com.symplified.order.ui.staff;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,9 +20,13 @@ import android.widget.Toast;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
+import com.symplified.order.apis.AuthApi;
 import com.symplified.order.apis.StaffApi;
 import com.symplified.order.apis.StoreApi;
 import com.symplified.order.databinding.FragmentShiftManagementBinding;
+import com.symplified.order.models.client.ClientResponse;
+import com.symplified.order.models.login.LoginRequest;
+import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.StaffMemberListResponse;
 import com.symplified.order.models.staff.shift.EndShiftRequest;
@@ -49,11 +53,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ShiftManagementFragment extends Fragment {
+public class ShiftManagementFragment extends Fragment
+        implements ConfirmPasswordDialogFragment.OnConfirmPasswordListener {
 
     private FragmentShiftManagementBinding binding;
     private StaffApi staffApi;
     private StoreApi storeApi;
+    private AuthApi authApi;
     private String clientId;
     private SalesAdapter salesAdapter;
     private String currency = "RM";
@@ -72,8 +78,9 @@ public class ShiftManagementFragment extends Fragment {
         binding.salesList.setAdapter(salesAdapter);
         binding.salesList.setLayoutManager(new LinearLayoutManager(binding.getRoot().getContext()));
 
-        staffApi = ServiceGenerator.createStaffService(getActivity().getApplicationContext());
-        storeApi = ServiceGenerator.createStoreService(getActivity().getApplicationContext());
+        staffApi = ServiceGenerator.createStaffService(requireActivity().getApplicationContext());
+        storeApi = ServiceGenerator.createStoreService(requireActivity().getApplicationContext());
+        authApi = ServiceGenerator.createUserService(requireActivity().getApplicationContext());
 
         Bundle bundle = requireArguments();
         clientId = bundle.getString(SharedPrefsKey.CLIENT_ID, "");
@@ -196,6 +203,8 @@ public class ShiftManagementFragment extends Fragment {
     }
 
     private void fetchSalesData(StaffMember selectedStaffMember) {
+        ConfirmPasswordDialogFragment.OnConfirmPasswordListener endShiftListener = this;
+
         salesAdapter.clear();
         startLoading();
         staffApi.getShiftSummary(selectedStaffMember.storeId, selectedStaffMember.id)
@@ -222,10 +231,8 @@ public class ShiftManagementFragment extends Fragment {
                                 }
 
                                 binding.endShiftButton.setOnClickListener(v -> {
-                                    if (App.isPrinterConnected()) {
-                                        App.getPrinter().printSalesSummary(selectedStaffMember, summaryDetails, currency);
-                                    }
-                                    endShift(selectedStaffMember);
+                                    new ConfirmPasswordDialogFragment(selectedStaffMember, summaryDetails, endShiftListener)
+                                            .show(getChildFragmentManager(), ConfirmPasswordDialogFragment.TAG);
                                 });
                                 binding.endShiftButton.setEnabled(true);
                             } else {
@@ -247,7 +254,108 @@ public class ShiftManagementFragment extends Fragment {
                 });
     }
 
-    private void endShift(StaffMember selectedStaffMember) {
+    @Override
+    public void onPasswordConfirmed(
+            StaffMember selectedStaffMember,
+            List<SummaryDetails> summaryDetails,
+            String password
+    ) {
+        binding.endShiftButton.setEnabled(false);
+        startLoading();
+
+        SharedPreferences sharedPrefs = requireActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        String username = sharedPrefs.getString(SharedPrefsKey.USERNAME, null);
+        if (username != null) {
+            authenticateAndEndShift(selectedStaffMember, summaryDetails, username, password);
+        } else {
+            getUsernameToAuthenticateAndEndShift(selectedStaffMember, summaryDetails, password);
+        }
+    }
+
+    private void getUsernameToAuthenticateAndEndShift(
+            StaffMember selectedStaffMember,
+            List<SummaryDetails> summaryDetails,
+            String password
+    ) {
+        startLoading();
+
+        SharedPreferences sharedPrefs = requireActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        String clientId = sharedPrefs.getString(SharedPrefsKey.CLIENT_ID, null);
+        if (clientId == null && getActivity() != null) {
+            Utility.logout(getActivity());
+            return;
+        }
+        authApi.getClientById(clientId)
+                .clone()
+                .enqueue(new Callback<ClientResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ClientResponse> call, @NonNull Response<ClientResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            String username = response.body().data.username;
+                            sharedPrefs.edit().putString(SharedPrefsKey.USERNAME, username).apply();
+                            authenticateAndEndShift(selectedStaffMember, summaryDetails, username, password);
+                        } else {
+                            stopLoading();
+                            if (currentStaffMember.id.equals(selectedStaffMember.id)) {
+                                binding.endShiftButton.setEnabled(true);
+                            }
+                            Toast.makeText(getContext(), "An error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<ClientResponse> call, @NonNull Throwable t) {
+                        stopLoading();
+                        if (currentStaffMember.id.equals(selectedStaffMember.id)) {
+                            binding.endShiftButton.setEnabled(true);
+                        }
+                        Toast.makeText(getContext(), "An error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void authenticateAndEndShift(
+            StaffMember selectedStaffMember,
+            List<SummaryDetails> summaryDetails,
+            String username,
+            String password
+    ) {
+        startLoading();
+
+        authApi.authenticate(new LoginRequest(username, password))
+                .clone()
+                .enqueue(new Callback<LoginResponse>() {
+                    @Override
+                    public void onResponse(
+                            @NonNull Call<LoginResponse> call,
+                            @NonNull Response<LoginResponse> response
+                    ) {
+                        if (response.isSuccessful()) {
+                            endShift(selectedStaffMember, summaryDetails);
+                        } else {
+                            stopLoading();
+                            if (currentStaffMember.id.equals(selectedStaffMember.id)) {
+                                binding.endShiftButton.setEnabled(true);
+                            }
+                            Toast.makeText(getContext(), "Incorrect password.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(
+                            @NonNull Call<LoginResponse> call,
+                            @NonNull Throwable t
+                    ) {
+                        stopLoading();
+                        if (currentStaffMember.id.equals(selectedStaffMember.id)) {
+                            binding.endShiftButton.setEnabled(true);
+                        }
+                        Toast.makeText(getContext(), "Failed to end shift. Please try again.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void endShift(StaffMember selectedStaffMember, List<SummaryDetails> summaryDetails) {
         startLoading();
 
         staffApi.endShift(selectedStaffMember.storeId, new EndShiftRequest(selectedStaffMember.id))
@@ -256,10 +364,14 @@ public class ShiftManagementFragment extends Fragment {
                     @Override
                     public void onResponse(
                             @NonNull Call<Void> call,
-                            @NonNull Response<Void> response) {
+                            @NonNull Response<Void> response
+                    ) {
 
                         stopLoading();
                         if (response.isSuccessful()) {
+                            if (App.isPrinterConnected()) {
+                                App.getPrinter().printSalesSummary(selectedStaffMember, summaryDetails, currency);
+                            }
                             salesAdapter.clear();
                         } else {
                             if (currentStaffMember.id.equals(selectedStaffMember.id)) {
@@ -275,7 +387,7 @@ public class ShiftManagementFragment extends Fragment {
                         if (currentStaffMember.id.equals(selectedStaffMember.id)) {
                             binding.endShiftButton.setEnabled(true);
                         }
-                        Toast.makeText(getContext(), "Failed to end shift. Please try again.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Failed to end shift for " + selectedStaffMember.name + ". Please try again.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }

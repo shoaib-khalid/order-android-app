@@ -10,4 +10,6 @@ public interface SharedPrefsKey {
     String STORE_ID_LIST = "storeIdList";
     String CLIENT_ID = "ownerId";
     String USERNAME = "username";
+    String ACCESS_TOKEN = "accessToken";
+    String REFRESH_TOKEN = "refreshToken";
 }

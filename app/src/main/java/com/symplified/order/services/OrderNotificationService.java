@@ -17,7 +17,7 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.apis.LoginApi;
+import com.symplified.order.apis.AuthApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.utils.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
@@ -77,7 +77,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = sharedPreferences.getString(SharedPrefsKey.CLIENT_ID, "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
-            LoginApi userService = ServiceGenerator.createUserService(this);
+            AuthApi userService = ServiceGenerator.createUserService(this);
             String transactionId = remoteMessage.getData().get("body");
 
             String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
@@ -216,7 +216,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString(SharedPrefsKey.CLIENT_ID, "");
 
-        LoginApi userService = ServiceGenerator.createUserService(this);
+        AuthApi userService = ServiceGenerator.createUserService(this);
         userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
                 .clone().enqueue(new EmptyCallback());
     }

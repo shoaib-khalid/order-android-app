@@ -9,8 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
-import com.symplified.order.adapters.StaffAdapter;
-import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.shift.SummaryDetails;
 import com.symplified.order.utils.Utility;
 
@@ -65,6 +63,9 @@ public class SalesAdapter extends RecyclerView.Adapter<SalesAdapter.ViewHolder> 
         clear();
         this.summaryDetails = summaryDetails;
         notifyItemRangeInserted(0, summaryDetails.size());
+    }
+    public List<SummaryDetails> getSummaryDetails() {
+        return summaryDetails;
     }
     public void clear() {
         int originalSize = summaryDetails.size();

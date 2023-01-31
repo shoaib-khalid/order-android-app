@@ -7,7 +7,7 @@ import com.symplified.order.App;
 import com.symplified.order.apis.CategoryApi;
 import com.symplified.order.apis.DeliveryApi;
 import com.symplified.order.apis.FirebaseApi;
-import com.symplified.order.apis.LoginApi;
+import com.symplified.order.apis.AuthApi;
 import com.symplified.order.apis.OrderApi;
 import com.symplified.order.apis.ProductApi;
 import com.symplified.order.apis.StaffApi;
@@ -38,8 +38,8 @@ public class ServiceGenerator {
         return createRetrofitInstance(context, App.DELIVERY_SERVICE_URL).create(DeliveryApi.class);
     }
 
-    public static LoginApi createUserService(Context context) {
-        return createRetrofitInstance(context, App.USER_CLIENT_SERVICE_URL).create(LoginApi.class);
+    public static AuthApi createUserService(Context context) {
+        return createRetrofitInstance(context, App.USER_CLIENT_SERVICE_URL).create(AuthApi.class);
     }
 
     public static OrderApi createOrderService(Context context) {
