@@ -98,11 +98,12 @@ public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTa
         consolidateOrderActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    Log.d("consolidate", "UnpaidOrdersFragment result: " + result);
                     if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                         Intent data = result.getData();
-                        ConsolidatedOrder order = (ConsolidatedOrder) data.getSerializableExtra(ConsolidateOrderActivity.CONSOLIDATED_ORDER_KEY);
-                        tablesAdapter.removeOrder(order);
+                        ConsolidatedOrder order = (ConsolidatedOrder) data
+                                .getSerializableExtra(ConsolidateOrderActivity.CONSOLIDATED_ORDER_KEY);
+//                        tablesAdapter.removeOrder(order);
+                        tablesAdapter.updatedOrder(order);
                     }
                 });
 

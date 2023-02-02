@@ -188,7 +188,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         holder.invoice.setText(order.invoiceId);
-//        holder.total.setText(currency + " " + formatter.format(order.total));
         holder.total.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.total)));
 
         StringBuilder fullAddress = new StringBuilder();
@@ -214,12 +213,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.rlContact.setVisibility(View.VISIBLE);
         }
 
-//        holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
         holder.subTotal.setText(context.getString(R.string.monetary_amount,
                 currency, formatter.format(order.subTotal)));
 
         if (order.appliedDiscount != null && order.appliedDiscount > 0) {
-//            holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
             holder.discount.setText(context.getString(R.string.inverse_monetary_amount,
                     currency, formatter.format(order.appliedDiscount)));
 
@@ -227,14 +224,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         if (order.voucherDiscount != null && order.voucherDiscount > 0) {
-//            holder.voucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
             holder.voucherDiscount.setText(context.getString(R.string.inverse_monetary_amount,
                     currency, formatter.format(order.voucherDiscount)));
             holder.rlVoucherDiscount.setVisibility(View.VISIBLE);
         }
 
         if (order.storeVoucherDiscount != null && order.storeVoucherDiscount > 0) {
-//            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.storeVoucherDiscount));
             holder.storeVoucherDiscount.setText(context.getString(R.string.inverse_monetary_amount,
                     currency, formatter.format(order.voucherDiscount)));
 
@@ -244,20 +239,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.deliveryCharges.setText(order.deliveryCharges != null
                 ? currency + " " + formatter.format(order.deliveryCharges)
                 : currency + " " + "0.00");
-//        holder.total2.setText(currency + " " + formatter.format(order.total));
         holder.total2.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.total)));
 
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
             holder.rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
-//            holder.deliveryDiscount.setText("- " + currency + " " + formatter.format(order.deliveryDiscount));
             holder.deliveryDiscount.setText(context.getString(R.string.inverse_monetary_amount, currency, formatter.format(order.deliveryDiscount)));
         }
 
         if (order.storeServiceCharges == null || order.storeServiceCharges == 0.00) {
             holder.rlServiceCharges.setVisibility(View.GONE);
         } else {
-//            holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
             holder.serviceCharges.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.storeServiceCharges)));
         }
 

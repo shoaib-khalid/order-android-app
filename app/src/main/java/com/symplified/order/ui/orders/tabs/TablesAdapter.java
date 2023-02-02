@@ -19,7 +19,7 @@ import java.util.List;
 public class TablesAdapter extends RecyclerView.Adapter<TablesAdapter.ViewHolder> {
 
     private final OnTableClickListener clickListener;
-    private List<ConsolidatedOrder> orders = new ArrayList<>();
+    private final List<ConsolidatedOrder> orders = new ArrayList<>();
 
     public interface OnTableClickListener {
         void onTableClicked(ConsolidatedOrder order);
@@ -61,6 +61,16 @@ public class TablesAdapter extends RecyclerView.Adapter<TablesAdapter.ViewHolder
         clear();
         this.orders.addAll(orders);
         notifyItemRangeInserted(0, orders.size());
+    }
+
+    public void updatedOrder(ConsolidatedOrder updatedOrder) {
+        for (int i = 0; i < orders.size(); i++) {
+            if (orders.get(i).invoiceNo.equals(updatedOrder.invoiceNo)) {
+                orders.set(i, updatedOrder);
+                notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     public void removeOrder(ConsolidatedOrder orderToRemove) {

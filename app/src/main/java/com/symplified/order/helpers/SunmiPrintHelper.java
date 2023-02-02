@@ -257,8 +257,14 @@ public class SunmiPrintHelper implements Printer {
                 .append("\nService Charges     ").append(currency).append(" ")
                 .append(formatter.format(order.serviceCharges))
                 .append(divider)
-                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.totalOrderAmount))
-                .append(divider2)
+                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.totalOrderAmount));
+        if (order.localCashPaymentAmount != null) {
+            suffix.append("\nCASH                ").append(currency).append(" ").append(formatter.format(order.localCashPaymentAmount));
+        }
+        if (order.changeDue != null) {
+            suffix.append("\nChange Due          ").append(currency).append(" ").append(formatter.format(order.changeDue));
+        }
+        suffix.append(divider2)
                 .append("\n");
 
         if (printerService != null) {

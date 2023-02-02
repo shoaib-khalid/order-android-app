@@ -1,7 +1,6 @@
 package com.symplified.order.ui.orders;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -11,8 +10,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.symplified.order.App;
@@ -36,6 +33,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
 
     public static String CONSOLIDATED_ORDER_KEY = "order";
 
+    private final DecimalFormat formatter = Utility.getMonetaryAmountFormat();
     private ActivityConsolidateOrderBinding binding;
     private OrderApi orderApiService;
     private ConsolidatedOrder consolidatedOrder;
@@ -72,29 +70,42 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
 
         currencySymbol = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
                 .getString(SharedPrefsKey.CURRENCY_SYMBOL, "RM");
-        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+
+        Log.d("consolidate", "Consolidated order isPaid: " + consolidatedOrder.isPaid + ", changeDue: " + consolidatedOrder.changeDue);
+        if (consolidatedOrder.isPaid && consolidatedOrder.changeDue != null) {
+            binding.changeDueLabel.setVisibility(View.VISIBLE);
+            binding.changeDueTextView.setText(getString(R.string.monetary_amount,
+                    currencySymbol, formatter.format(consolidatedOrder.changeDue)));
+            binding.changeDueTextView.setVisibility(View.VISIBLE);
+        }
 
         binding.subtotalText.setText(getString(R.string.monetary_amount, currencySymbol, formatter.format(consolidatedOrder.subTotal)));
         binding.serviceChargesText.setText(getString(R.string.monetary_amount, currencySymbol, formatter.format(consolidatedOrder.serviceCharges)));
-        Log.d("consolidate", "discount " + consolidatedOrder.appliedDiscount);
         binding.appliedDiscountText.setText(getString(R.string.inverse_monetary_amount, currencySymbol, formatter.format(consolidatedOrder.appliedDiscount)));
         binding.totalSalesTextView.setText(getString(R.string.monetary_amount, currencySymbol, formatter.format(consolidatedOrder.totalOrderAmount)));
 
-        binding.paymentButtonCash.setOnClickListener(v -> showConfirmationDialog("CASH"));
-        binding.paymentButtonDuitnow.setOnClickListener(v -> showConfirmationDialog("Duit Now"));
-        binding.paymentButtonOther.setOnClickListener(v -> showConfirmationDialog("Other"));
+        setPaymentButtonsEnabled(!consolidatedOrder.isPaid);
     }
 
     private void initToolbar() {
     }
 
-    private void showConfirmationDialog(String paymentType) {
-        new ConfirmProcessOrderDialog(paymentType, this)
+    private void showConfirmationDialog() {
+        new ConfirmProcessOrderDialog(currencySymbol, consolidatedOrder, this)
                 .show(getSupportFragmentManager(), ConfirmProcessOrderDialog.TAG);
     }
 
     @Override
-    public void onProcessConfirmed() {
+    public void onProcessConfirmed(ConsolidatedOrder updatedOrder) {
+        consolidatedOrder = updatedOrder;
+        binding.changeDueLabel.setVisibility(View.VISIBLE);
+        binding.changeDueTextView.setText(getString(R.string.monetary_amount,
+                currencySymbol, formatter.format(updatedOrder.changeDue)));
+        binding.changeDueTextView.setVisibility(View.VISIBLE);
+        processOrder();
+    }
+
+    private void processOrder() {
         setLoading(true);
 
         Context context = this;
@@ -103,10 +114,14 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
                 .enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
+                        setLoading(false);
                         if (response.isSuccessful()) {
+                            consolidatedOrder.isPaid = true;
+                            setPaymentButtonsEnabled(false);
                             Intent resultIntent = new Intent();
                             resultIntent.putExtra(CONSOLIDATED_ORDER_KEY, consolidatedOrder);
                             setResult(Activity.RESULT_OK, resultIntent);
+
                             Toast.makeText(context, "Table No. " + consolidatedOrder.tableNo + " paid.", Toast.LENGTH_SHORT).show();
                             if (App.isPrinterConnected()) {
                                 try {
@@ -115,9 +130,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
                                     Toast.makeText(context, "Failed to print order.", Toast.LENGTH_SHORT).show();
                                 }
                             }
-                            finish();
                         } else {
-                            setLoading(false);
                             Toast.makeText(context, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -135,5 +148,17 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
         binding.paymentButtonDuitnow.setEnabled(!isLoading);
         binding.paymentButtonDuitnow.setEnabled(!isLoading);
         binding.progressLayout.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+    }
+
+    private void setPaymentButtonsEnabled(boolean isEnabled) {
+        binding.paymentButtonCash.setVisibility(isEnabled ? View.VISIBLE : View.INVISIBLE);
+        binding.paymentButtonDuitnow.setVisibility(isEnabled ? View.VISIBLE : View.INVISIBLE);
+        binding.paymentButtonOther.setVisibility(isEnabled ? View.VISIBLE : View.INVISIBLE);
+
+        if (isEnabled) {
+            binding.paymentButtonCash.setOnClickListener(v -> showConfirmationDialog());
+            binding.paymentButtonDuitnow.setOnClickListener(v -> processOrder());
+            binding.paymentButtonOther.setOnClickListener(v -> processOrder());
+        }
     }
 }

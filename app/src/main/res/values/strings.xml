@@ -21,19 +21,16 @@
     <string name="tv_shipment_note">Customer Notes: \u0020</string>
     <string name="tv_shipment_note_value">Please Ring the bell</string>
     <string name="header_item">Item</string>
-    <string name="header_special_instruction">Special Instructions: \u0020</string>
     <string name="header_variant">Variation</string>
     <string name="header_qty">Quantity</string>
     <string name="header_org_qty">Org Qty</string>
     <string name="header_price">Price</string>
     <string name="sub_total">Sub-Total</string>
-    <string name="sub_total_value" />
     <string name="discount">Discount</string>
     <string name="voucher_discount_label">Voucher Discount</string>
     <string name="store_voucher_discount_label">Store Voucher Discount</string>
     <string name="discount_value">0.00</string>
     <string name="service_charges">Service Charges</string>
-    <string name="service_charges_value" />
     <string name="delivery_charges">Delivery Charges</string>
     <string name="monetary_value">RM 0.00</string>
     <string name="delivery_charges_discount">Delivery Charges Discount</string>
@@ -62,7 +59,7 @@
     <string name="choose_a_store">Choose a Store</string>
     <string name="no_store_msg">No Stores Added Yet</string>
     <string name="no_store_with_qr_code_msg">No Stores With QR Code Available</string>
-    <string name="total">Total:\u0020</string>
+    <string name="total">Total:</string>
     <string name="set_store_status">Set Store Status</string>
     <string name="normal">Normal</string>
     <string name="paused">Paused Until</string>
@@ -156,4 +153,8 @@
     <string name="paid">Paid</string>
     <string name="payment_type_heading">%1$s Payment</string>
     <string name="invoice_no">Invoice Id: %1$s</string>
+    <string name="applied_discount">Applied Discount</string>
+    <string name="cash_payment">Cash Payment</string>
+    <string name="header_special_instruction">Special Instructions:</string>
+    <string name="change_due_label">Change Due:</string>
 </resources>

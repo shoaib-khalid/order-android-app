@@ -153,8 +153,7 @@
             android:layout_height="wrap_content"
             android:textStyle="italic"
             android:textSize="12sp"
-            android:layout_toRightOf="@id/item_special_instructions_label"
-            android:text="@string/header_special_instruction"/>
+            android:layout_toRightOf="@id/item_special_instructions_label" />
 
     </RelativeLayout>
 

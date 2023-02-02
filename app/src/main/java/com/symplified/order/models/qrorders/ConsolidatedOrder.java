@@ -15,4 +15,8 @@ public class ConsolidatedOrder implements Serializable {
     public Double serviceCharges;
     public Double totalOrderAmount;
     public List<Item> orderItemWithDetails;
+
+    public boolean isPaid = false;
+    public Double changeDue;
+    public Double localCashPaymentAmount;
 }
