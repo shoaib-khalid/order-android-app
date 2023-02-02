@@ -32,7 +32,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.apis.FirebaseApi;
+import com.symplified.order.networking.apis.FirebaseApi;
 import com.symplified.order.models.login.LoginData;
 import com.symplified.order.models.login.LoginRequest;
 import com.symplified.order.models.login.LoginResponse;
@@ -317,7 +317,7 @@ public class LoginActivity extends AppCompatActivity {
         for (Store store : stores) {
             storeIdList.append(store.id).append(" ");
         }
-        editor.putString("currency", stores.get(0).regionCountry.currencySymbol)
+        editor.putString(SharedPrefsKey.CURRENCY_SYMBOL, stores.get(0).regionCountry.currencySymbol)
                 .putString("storeId", stores.get(0).id)
                 .putString(SharedPrefsKey.STORE_ID_LIST, storeIdList.toString())
                 .putBoolean(SharedPrefsKey.IS_LOGGED_IN, true)

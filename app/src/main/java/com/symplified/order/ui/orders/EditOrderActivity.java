@@ -24,7 +24,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.EditItemAdapter;
-import com.symplified.order.apis.OrderApi;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.databinding.ActivityEditOrderBinding;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.item.Item;
@@ -75,7 +75,6 @@ public class EditOrderActivity extends NavbarActivity {
 
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         initToolbar();
 
         initViews();

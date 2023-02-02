@@ -59,7 +59,7 @@ public class Utility {
             return order.store.regionCountry.currencySymbol;
         }
         return context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
-                .getString("currency", "RM");
+                .getString(SharedPrefsKey.CURRENCY_SYMBOL, "RM");
     }
 
     public static DecimalFormat getMonetaryAmountFormat() {

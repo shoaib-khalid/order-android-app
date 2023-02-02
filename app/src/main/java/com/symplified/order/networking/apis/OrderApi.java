@@ -1,4 +1,4 @@
-package com.symplified.order.apis;
+package com.symplified.order.networking.apis;
 
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.item.ItemsResponse;
@@ -8,9 +8,12 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.models.qrcode.QrCodeRequest;
 import com.symplified.order.models.qrcode.QrCodeResponse;
+import com.symplified.order.models.qrorders.ConsolidatedOrder;
+import com.symplified.order.models.qrorders.ConsolidatedOrdersResponse;
 
 import java.util.List;
 
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -53,4 +56,12 @@ public interface OrderApi {
 
     @GET("qrcode/preauth-generate")
     Call<ResponseBody> verifyQrCodeAvailability(@Query("storeId") String storeId);
+
+    @GET("qrorder/pending?pageSize=100000&sortingOrder=DESC")
+    Observable<ConsolidatedOrdersResponse> getPendingConsolidatedOrders(
+            @Query("storeId") String storeId
+    );
+
+    @PUT("qrorder/update")
+    Call<Void> consolidateOrder(@Body ConsolidatedOrder order);
 }

@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.networking.ServiceGenerator;
 

@@ -20,9 +20,9 @@ import android.widget.Toast;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.apis.AuthApi;
-import com.symplified.order.apis.StaffApi;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.AuthApi;
+import com.symplified.order.networking.apis.StaffApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.databinding.FragmentShiftManagementBinding;
 import com.symplified.order.models.client.ClientResponse;
 import com.symplified.order.models.login.LoginRequest;

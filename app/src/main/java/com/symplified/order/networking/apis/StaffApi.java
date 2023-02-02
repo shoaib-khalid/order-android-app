@@ -1,4 +1,4 @@
-package com.symplified.order.apis;
+package com.symplified.order.networking.apis;
 
 import com.symplified.order.models.staff.PasswordChangeRequest;
 import com.symplified.order.models.staff.RegisterStaffMemberRequest;

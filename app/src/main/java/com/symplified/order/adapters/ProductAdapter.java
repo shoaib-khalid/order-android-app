@@ -19,6 +19,7 @@ import com.symplified.order.R;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.ui.products.EditProductActivity;
+import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
@@ -68,7 +69,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String currency = sharedPreferences.getString("currency", null);
+        String currency = sharedPreferences.getString(SharedPrefsKey.CURRENCY_SYMBOL, null);
 
         Product product = products.get(position);
 

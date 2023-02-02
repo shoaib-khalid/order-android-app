@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.shift.SummaryDetails;
 
@@ -14,10 +15,11 @@ public interface Printer {
     void initPrinterService(Context context);
     void addObserver(PrinterObserver observer);
     void removeObserver(PrinterObserver observer);
-    void printReceipt(Order order, List<Item> items, Context context) throws Exception;
+    void printOrderReceipt(Order order, List<Item> items, Context context) throws Exception;
     void printSalesSummary(
             StaffMember staffMember,
             List<SummaryDetails> summaryDetails,
             String currency
     );
+    void printConsolidatedOrderReceipt(ConsolidatedOrder consolidatedOrder, String currency) throws Exception;
 }

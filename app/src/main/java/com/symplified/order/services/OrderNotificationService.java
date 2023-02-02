@@ -17,8 +17,8 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.apis.AuthApi;
-import com.symplified.order.apis.OrderApi;
+import com.symplified.order.networking.apis.AuthApi;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.utils.EmptyCallback;
 import com.symplified.order.enums.DineInOption;
 import com.symplified.order.enums.OrderStatus;
@@ -147,7 +147,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         App.getPrinter()
-                                .printReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
+                                .printOrderReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
                         processNewOrder(orderApiService, orderDetails);
                     } catch (Exception e) {
                         addOrderToView(newOrderObservers, orderDetails);

@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,8 +27,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.apis.DeliveryApi;
-import com.symplified.order.apis.OrderApi;
+import com.symplified.order.networking.apis.DeliveryApi;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.OrderManager;
@@ -371,7 +370,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             public void onResponse(@NonNull Call<ItemsResponse> call, @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful()) {
                     List<Item> orderItems = response.body().data.content;
-                    ItemAdapter itemsAdapter = new ItemAdapter(orderItems, order, context);
+                    ItemAdapter itemsAdapter = new ItemAdapter(orderItems);
                     holder.recyclerView.setAdapter(itemsAdapter);
                     itemsAdapter.notifyDataSetChanged();
                 } else {
@@ -640,7 +639,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void printReceipt(Order order, List<Item> items) {
         try {
-            App.getPrinter().printReceipt(order, items, context);
+            App.getPrinter().printOrderReceipt(order, items, context);
         } catch (Exception e) {
             Log.e("order-adapter", "Failed to print order. " + e.getLocalizedMessage());
             e.printStackTrace();

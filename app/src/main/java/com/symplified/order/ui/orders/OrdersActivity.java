@@ -7,13 +7,11 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.os.Build;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -25,7 +23,9 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.symplified.order.App;
 import com.symplified.order.R;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.databinding.ActivityOrdersBinding;
+import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
@@ -36,6 +36,9 @@ import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,13 +48,15 @@ public class OrdersActivity extends NavbarActivity {
     private Toolbar toolbar;
     private ViewPager mViewPager;
     private DrawerLayout drawerLayout;
+    private List<String> tabTitles = new ArrayList<>();
+    private ActivityOrdersBinding binding;
+    private SectionsPagerAdapter sectionsPagerAdapter;
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityOrdersBinding binding = ActivityOrdersBinding.inflate(getLayoutInflater());
+        binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         Utility.verifyLoginStatus(this);
@@ -63,14 +68,24 @@ public class OrdersActivity extends NavbarActivity {
 
         initToolbar();
 
-        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        tabTitles = new ArrayList<>();
+        tabTitles.add(getString(R.string.new_orders));
+        tabTitles.add(getString(R.string.ongoing_orders));
+        tabTitles.add(getString(R.string.past_orders));
+        if (getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false)) {
+            tabTitles.add(getString(R.string.unpaid_orders));
+        }
+
+        sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager(), tabTitles);
         ViewPager viewPager = binding.viewPager;
         viewPager.setAdapter(sectionsPagerAdapter);
-        viewPager.setOffscreenPageLimit(2);
+        viewPager.setOffscreenPageLimit(4);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
-
         mViewPager = viewPager;
+
+        queryStoresForConsolidateOption();
 
         stopService(new Intent(this, AlertService.class));
 
@@ -145,6 +160,42 @@ public class OrdersActivity extends NavbarActivity {
                 });
             }
         });
+    }
+
+    boolean isOrderConsolidationEnabled = false;
+    private void queryStoresForConsolidateOption() {
+
+        StoreApi storeApiService = ServiceGenerator.createStoreService(getApplicationContext());
+        SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        isOrderConsolidationEnabled = sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false);
+
+        Context context = this;
+        for (String storeId : sharedPrefs.getString(SharedPrefsKey.STORE_ID_LIST, "")
+                .split(" ")) {
+            storeApiService.getStoreById(storeId).clone().enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
+                @Override
+                public void onResponse(
+                        @NonNull Call<StoreResponse.SingleStoreResponse> call,
+                        @NonNull Response<StoreResponse.SingleStoreResponse> response
+                ) {
+
+                    if (response.isSuccessful()
+                            && response.body() != null
+                            && response.body().data.dineInConsolidatedOrder
+                            && !isOrderConsolidationEnabled) {
+                        isOrderConsolidationEnabled = true;
+                        sharedPrefs.edit()
+                                .putBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, true)
+                                .apply();
+                        sectionsPagerAdapter.showUnpaidTab();
+                        sectionsPagerAdapter.notifyDataSetChanged();
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call, @NonNull Throwable t) {}
+            });
+        }
     }
 
     private void logoutWithFirebaseErrorNotification() {

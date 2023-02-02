@@ -15,6 +15,7 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.shift.SummaryDetails;
 import com.symplified.order.utils.Utility;
@@ -139,7 +140,7 @@ public class SunmiPrintHelper implements Printer {
         ex.printStackTrace();
     }
 
-    public void printReceipt(Order order, List<Item> items, Context context) throws Exception {
+    public void printOrderReceipt(Order order, List<Item> items, Context context) throws Exception {
 
         if (!isPrinterConnected()) {
             return;
@@ -152,7 +153,6 @@ public class SunmiPrintHelper implements Printer {
         String divider2 = "\n****************************";
         StringBuilder prefix = new StringBuilder();
         StringBuilder suffix = new StringBuilder();
-        StringBuilder itemText = new StringBuilder();
 
         String customerNotes = order.customerNotes != null ? order.customerNotes : "";
         switch (customerNotes.toUpperCase()) {
@@ -164,7 +164,7 @@ public class SunmiPrintHelper implements Printer {
                 break;
         }
 
-        String title = "\n\t" + (order.serviceType == ServiceType.DINEIN
+        String title = "\n" + (order.serviceType == ServiceType.DINEIN
                 ? customerNotes
                 : order.store != null ? order.store.name : "Deliverin.MY Order Chit");
 
@@ -199,6 +199,80 @@ public class SunmiPrintHelper implements Printer {
 
         prefix.append(divider).append("\n");
 
+        String itemText = generateItemPrintText(items, currency, formatter);
+
+        suffix.append(divider)
+                .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
+                .append("\nService Charges     ").append(currency).append(" ")
+                .append(order.storeServiceCharges != null
+                        ? formatter.format(order.storeServiceCharges)
+                        : " 0.00");
+
+        if (order.serviceType != ServiceType.DINEIN) {
+            suffix.append("\nDelivery Charges    ").append(currency).append(" ")
+                    .append(order.deliveryCharges != null
+                            ? formatter.format(order.deliveryCharges)
+                            : " 0.00");
+        }
+
+        suffix.append(divider)
+                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.total))
+                .append(divider2)
+                .append("\n");
+
+        if (printerService != null) {
+            printerService.printTextWithFont(title, null, 34, null);
+            printerService.printTextWithFont(String.valueOf(prefix), null, 26, null);
+            printerService.printTextWithFont(itemText, null, 30, null);
+            printerService.printTextWithFont(String.valueOf(suffix), null, 26, null);
+        }
+
+        helper.feedPaper();
+    }
+
+    @Override
+    public void printConsolidatedOrderReceipt(ConsolidatedOrder order, String currency) throws Exception {
+        if (!isPrinterConnected)
+            return;
+
+        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+
+        String divider = "\n----------------------------";
+        String divider2 = "\n****************************";
+        StringBuilder prefix = new StringBuilder();
+        StringBuilder suffix = new StringBuilder();
+
+        String title = "\nTable No. " + order.tableNo;
+        prefix.append(divider);
+        prefix.append("\nOrder Id: ").append(order.invoiceNo)
+                .append("\n").append(order.orderTimeConverted)
+                .append("\nOrder Type: Dine In")
+                .append(divider)
+                .append("\n");
+
+        String itemText = generateItemPrintText(order.orderItemWithDetails, currency, formatter);
+
+        suffix.append(divider)
+                .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
+                .append("\nService Charges     ").append(currency).append(" ")
+                .append(formatter.format(order.serviceCharges))
+                .append(divider)
+                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.totalOrderAmount))
+                .append(divider2)
+                .append("\n");
+
+        if (printerService != null) {
+            printerService.printTextWithFont(title, null, 34, null);
+            printerService.printTextWithFont(String.valueOf(prefix), null, 26, null);
+            printerService.printTextWithFont(itemText, null, 30, null);
+            printerService.printTextWithFont(String.valueOf(suffix), null, 26, null);
+        }
+
+        helper.feedPaper();
+    }
+
+    private String generateItemPrintText(List<Item> items, String currency, DecimalFormat formatter) {
+        StringBuilder itemText = new StringBuilder();
         for (Item item : items) {
             itemText.append("\n").append(item.quantity).append(" x ").append(item.productName);
             String spacing = Integer.toString(item.quantity).replaceAll("\\d", " ") + " * ";
@@ -226,33 +300,7 @@ public class SunmiPrintHelper implements Printer {
                     .append("\n");
         }
 
-        suffix.append(divider)
-                .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
-                .append("\nService Charges     ").append(currency).append(" ")
-                .append(order.storeServiceCharges != null
-                        ? formatter.format(order.storeServiceCharges)
-                        : " 0.00");
-
-        if (order.serviceType != ServiceType.DINEIN) {
-            suffix.append("\nDelivery Charges    ").append(currency).append(" ")
-                    .append(order.deliveryCharges != null
-                            ? formatter.format(order.deliveryCharges)
-                            : " 0.00");
-        }
-
-        suffix.append(divider)
-                .append("\nTotal               ").append(currency).append(" ").append(formatter.format(order.total))
-                .append(divider2)
-                .append("\n");
-
-        if (printerService != null) {
-            printerService.printTextWithFont(title, null, 34, null);
-            printerService.printTextWithFont(String.valueOf(prefix), null, 26, null);
-            printerService.printTextWithFont(String.valueOf(itemText), null, 30, null);
-            printerService.printTextWithFont(String.valueOf(suffix), null, 26, null);
-        }
-
-        helper.feedPaper();
+        return String.valueOf(itemText);
     }
 
     public void printSalesSummary(

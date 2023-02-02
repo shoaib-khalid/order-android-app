@@ -12,4 +12,6 @@ public interface SharedPrefsKey {
     String USERNAME = "username";
     String ACCESS_TOKEN = "accessToken";
     String REFRESH_TOKEN = "refreshToken";
+    String IS_ORDER_CONSOLIDATION_ENABLED = "is_order_consolidation_enabled";
+    String CURRENCY_SYMBOL = "currency";
 }

@@ -18,12 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.apis.ProductApi;
+import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.models.asset.StoreProductAsset;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.SharedPrefsKey;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
             increment = itemView.findViewById(R.id.item_increment);
 
             name = itemView.findViewById(R.id.item_name);
-            price = itemView.findViewById(R.id.item_price);
+            price = itemView.findViewById(R.id.item_price_label);
             qty = itemView.findViewById(R.id.item_quantity);
             specialInstructions = itemView.findViewById(R.id.item_special_instructions_value);
             layoutSpecialInstructions = itemView.findViewById(R.id.rl_special_instructions);
@@ -100,7 +101,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull EditItemAdapter.ViewHolder holder, int position) {
 
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String currency = sharedPreferences.getString("currency", null);
+        String currency = sharedPreferences.getString(SharedPrefsKey.CURRENCY_SYMBOL, null);
 
         formatter = new DecimalFormat("#,###0.00");
 

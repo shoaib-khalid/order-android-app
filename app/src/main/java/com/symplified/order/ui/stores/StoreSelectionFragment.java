@@ -16,8 +16,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.symplified.order.R;
 import com.symplified.order.adapters.StoreAdapter;
-import com.symplified.order.apis.OrderApi;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.OrderApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;

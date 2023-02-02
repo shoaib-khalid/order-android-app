@@ -17,6 +17,7 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.shift.SummaryDetails;
 import com.symplified.order.utils.Utility;
@@ -95,7 +96,7 @@ public class GenericPrintHelper implements Printer {
     }
 
     @Override
-    public void printReceipt(Order order, List<Item> items, Context context) throws Exception {
+    public void printOrderReceipt(Order order, List<Item> items, Context context) throws Exception {
         if (!isPrinterConnected()) {
             return;
         }
@@ -203,12 +204,17 @@ public class GenericPrintHelper implements Printer {
             mIPosPrinterService.printSpecifiedTypeText(String.valueOf(prefix), "ST", 32, emptyCallback);
             mIPosPrinterService.printSpecifiedTypeText(String.valueOf(itemText), "ST", 32, emptyCallback);
             mIPosPrinterService.printSpecifiedTypeText(String.valueOf(suffix), "ST", 32, emptyCallback);
-            mIPosPrinterService.printerPerformPrint(150,  emptyCallback);
+            mIPosPrinterService.printerPerformPrint(150, emptyCallback);
         }
     }
 
     @Override
     public void printSalesSummary(StaffMember staffMember, List<SummaryDetails> summaryDetails, String currency) {
+
+    }
+
+    @Override
+    public void printConsolidatedOrderReceipt(ConsolidatedOrder consolidatedOrder, String currencySymbol) throws Exception {
 
     }
 }

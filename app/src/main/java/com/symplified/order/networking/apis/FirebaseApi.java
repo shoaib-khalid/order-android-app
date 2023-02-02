@@ -1,4 +1,4 @@
-package com.symplified.order.apis;
+package com.symplified.order.networking.apis;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -42,6 +42,7 @@
     <string name="is_pickup">Pickup \u0020</string>
     <string name="title_activity_orders">Orders</string>
     <string name="new_orders">NEW</string>
+    <string name="unpaid_orders">UNPAID</string>
     <string name="processed_orders">Processed </string>
     <string name="pickup_orders">PickUp</string>
     <string name="dispatched_orders">Dispatched</string>
@@ -127,8 +128,6 @@
     <string name="notif_firebase_error_title">Connectivity Error</string>
     <string name="notif_firebase_error_text">Unable to connect to Google services on this network.</string>
     <string name="notif_firebase_error_text_full">Unable to connect to Google services on this network. You will not be able to receive new order notifications. Please connect to a different network and try logging in again.</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="add_staff_member">Add Staff Member</string>
     <string name="name_label">Name:</string>
     <string name="username_label">Username:</string>
@@ -149,4 +148,11 @@
     <string name="end_shift">End Shift</string>
     <string name="empty_sales_text">No sales to show for this user at this time.</string>
     <string name="version_indicator">Symplified 2023 | Ver. %1$s </string>
+
+    <string name="monetary_amount">%1$s %2$s</string>
+    <string name="inverse_monetary_amount">- %1$s %2$s</string>
+    <string name="table_no">Table No. %1$s</string>
+    <string name="amount_paid">Amount Paid</string>
+    <string name="paid">Paid</string>
+    <string name="payment_type_heading">%1$s Payment</string>
 </resources>

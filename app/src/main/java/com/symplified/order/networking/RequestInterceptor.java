@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.symplified.order.App;
-import com.symplified.order.apis.AuthApi;
+import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.login.Session;
 import com.symplified.order.utils.SharedPrefsKey;
@@ -22,12 +22,12 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-public class CustomInterceptor implements Interceptor {
+public class RequestInterceptor implements Interceptor {
 
     SharedPreferences sharedPrefs;
     AuthApi loginService;
 
-    public CustomInterceptor(SharedPreferences sharedPreferences) {
+    public RequestInterceptor(SharedPreferences sharedPreferences) {
         sharedPrefs = sharedPreferences;
 
         String baseURL = sharedPrefs.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);

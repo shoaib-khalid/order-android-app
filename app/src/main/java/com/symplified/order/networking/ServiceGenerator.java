@@ -4,14 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.symplified.order.App;
-import com.symplified.order.apis.CategoryApi;
-import com.symplified.order.apis.DeliveryApi;
-import com.symplified.order.apis.FirebaseApi;
-import com.symplified.order.apis.AuthApi;
-import com.symplified.order.apis.OrderApi;
-import com.symplified.order.apis.ProductApi;
-import com.symplified.order.apis.StaffApi;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.CategoryApi;
+import com.symplified.order.networking.apis.DeliveryApi;
+import com.symplified.order.networking.apis.FirebaseApi;
+import com.symplified.order.networking.apis.AuthApi;
+import com.symplified.order.networking.apis.OrderApi;
+import com.symplified.order.networking.apis.ProductApi;
+import com.symplified.order.networking.apis.StaffApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.utils.SharedPrefsKey;
 
 import okhttp3.OkHttpClient;
@@ -63,7 +63,7 @@ public class ServiceGenerator {
                 = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
 
         OkHttpClient httpClient = new OkHttpClient.Builder()
-                .addInterceptor(new CustomInterceptor(sharedPrefs))
+                .addInterceptor(new RequestInterceptor(sharedPrefs))
                 .build();
 
         String baseURL = sharedPrefs.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION);

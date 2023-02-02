@@ -22,7 +22,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.symplified.order.R;
-import com.symplified.order.apis.ProductApi;
+import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductEditRequest;
 import com.symplified.order.networking.ServiceGenerator;

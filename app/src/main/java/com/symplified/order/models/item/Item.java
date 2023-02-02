@@ -1,9 +1,10 @@
 package com.symplified.order.models.item;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Item{
+public class Item implements Serializable {
     public String id;
     public String itemCode;
     public String orderId;

@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -25,8 +24,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
-import com.symplified.order.apis.OrderApi;
-import com.symplified.order.databinding.NewOrdersBinding;
+import com.symplified.order.networking.apis.OrderApi;
+import com.symplified.order.databinding.FragmentOrdersBinding;
 import com.symplified.order.helpers.GenericPrintHelper;
 import com.symplified.order.helpers.SunmiPrintHelper;
 import com.symplified.order.interfaces.OrderManager;
@@ -43,19 +42,12 @@ import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -171,11 +163,13 @@ public class OrdersFragment extends Fragment
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(
+            @NonNull LayoutInflater inflater,
+            ViewGroup container,
+            Bundle savedInstanceState
+    ) {
 
-        com.symplified.order.databinding.NewOrdersBinding binding = NewOrdersBinding.inflate(inflater, container, false);
+        FragmentOrdersBinding binding = FragmentOrdersBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
         recyclerView = binding.orderRecycler;

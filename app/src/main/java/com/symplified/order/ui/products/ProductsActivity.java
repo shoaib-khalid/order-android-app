@@ -2,7 +2,6 @@ package com.symplified.order.ui.products;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -21,8 +20,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.ProductAdapter;
-import com.symplified.order.apis.ProductApi;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.ProductApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;

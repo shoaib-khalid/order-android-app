@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.symplified.order.R;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;

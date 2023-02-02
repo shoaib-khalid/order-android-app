@@ -19,6 +19,8 @@ import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.utils.SharedPrefsKey;
+import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -28,17 +30,13 @@ import java.util.List;
 public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     public List<Item> items;
-    public Order order;
     public List<UpdatedItem> updatedItemsList;
-    public Context context;
     public DecimalFormat formatter;
     private static String TAG = ItemAdapter.class.getName();
 
-    public ItemAdapter(List<Item> items, Order order, Context context){
+    public ItemAdapter(List<Item> items){
         this.items = items;
-        this.order = order;
         this.updatedItemsList = new ArrayList<>();
-        this.context = context;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
@@ -76,8 +74,8 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
         Item orderItem = items.get(position);
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
-        String currency = sharedPreferences.getString("currency", null);
+        SharedPreferences sharedPreferences = holder.itemView.getContext().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+        String currency = sharedPreferences.getString(SharedPrefsKey.CURRENCY_SYMBOL, "RM");
 
         formatter = new DecimalFormat("#,###0.00");
         holder.name.setText(orderItem.productName);

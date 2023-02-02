@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.symplified.order.R;
 import com.symplified.order.adapters.StaffAdapter;
-import com.symplified.order.apis.StaffApi;
-import com.symplified.order.apis.StoreApi;
+import com.symplified.order.networking.apis.StaffApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.databinding.FragmentStaffManagementBinding;
 import com.symplified.order.models.staff.PasswordChangeRequest;
 import com.symplified.order.models.staff.RegisterStaffMemberRequest;
@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
