@@ -10,6 +10,7 @@ import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
@@ -48,7 +49,6 @@ public class OrdersActivity extends NavbarActivity {
     private Toolbar toolbar;
     private ViewPager mViewPager;
     private DrawerLayout drawerLayout;
-    private List<String> tabTitles = new ArrayList<>();
     private ActivityOrdersBinding binding;
     private SectionsPagerAdapter sectionsPagerAdapter;
 
@@ -68,12 +68,13 @@ public class OrdersActivity extends NavbarActivity {
 
         initToolbar();
 
-        tabTitles = new ArrayList<>();
+        SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
+
+        List<String> tabTitles = new ArrayList<>();
         tabTitles.add(getString(R.string.new_orders));
         tabTitles.add(getString(R.string.ongoing_orders));
         tabTitles.add(getString(R.string.past_orders));
-        if (getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
-                .getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false)) {
+        if (sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false)) {
             tabTitles.add(getString(R.string.unpaid_orders));
         }
 
@@ -85,12 +86,31 @@ public class OrdersActivity extends NavbarActivity {
         tabs.setupWithViewPager(viewPager);
         mViewPager = viewPager;
 
-        queryStoresForConsolidateOption();
+        if (!sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false)) {
+            if (Utility.isConnectedToInternet(this)) {
+                queryStoresForConsolidateOption();
+            } else {
+                ConnectivityManager connMan =
+                        getSystemService(ConnectivityManager.class);
+                NetworkRequest networkRequest = new NetworkRequest.Builder()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                        .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        .build();
+                connMan.requestNetwork(networkRequest, new ConnectivityManager.NetworkCallback() {
+                    @Override
+                    public void onAvailable(Network network) {
+                        super.onAvailable(network);
+                        queryStoresForConsolidateOption();
+                    }
+                });
+                Toast.makeText(this, "Unable to sync stores with server. Please connect to the internet.", Toast.LENGTH_SHORT).show();
+            }
+        }
 
         stopService(new Intent(this, AlertService.class));
 
-        boolean isSubscribedToNotifications = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
-                .getBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, false);
+        boolean isSubscribedToNotifications = sharedPrefs.getBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, false);
         if (!isSubscribedToNotifications) {
             verifyFirebaseConnection();
         }
@@ -169,7 +189,6 @@ public class OrdersActivity extends NavbarActivity {
         SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         isOrderConsolidationEnabled = sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false);
 
-        Context context = this;
         for (String storeId : sharedPrefs.getString(SharedPrefsKey.STORE_ID_LIST, "")
                 .split(" ")) {
             storeApiService.getStoreById(storeId).clone().enqueue(new Callback<StoreResponse.SingleStoreResponse>() {

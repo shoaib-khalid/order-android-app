@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,8 +28,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.networking.apis.DeliveryApi;
-import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.OrderManager;
@@ -39,6 +37,8 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDeliveryDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.DeliveryApi;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.ui.orders.TrackOrderActivity;
 import com.symplified.order.utils.Utility;
 
@@ -85,7 +85,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         private final ImageButton printButton;
         private final TextView statusLabel, orderType, currStatus, customerNotes, riderName, riderContact;
         private final LinearLayout newLayout, ongoingLayout;
-        private final RelativeLayout currStatusLayout, typeLayout, rlDiscount, rlVoucherDiscount,
+        private final RelativeLayout currStatusLayout, rlDiscount, rlVoucherDiscount,
                 rlStoreVoucherDiscount, rlServiceCharges, rlDeliveryDiscount, rlCustomerNote,
                 rlRiderDetails, rlAddress, rlContact;
         private final ConstraintLayout clOrderProgressBar;
@@ -143,7 +143,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
             statusLabel = itemView.findViewById(R.id.update_status);
 
-            typeLayout = itemView.findViewById(R.id.layout_order_type_row);
             currStatusLayout = itemView.findViewById(R.id.layout_order_status_row);
             newLayout = itemView.findViewById(R.id.layout_new);
             ongoingLayout = itemView.findViewById(R.id.layout_ongoing);
@@ -189,7 +188,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         }
 
         holder.invoice.setText(order.invoiceId);
-        holder.total.setText(currency + " " + formatter.format(order.total));
+//        holder.total.setText(currency + " " + formatter.format(order.total));
+        holder.total.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.total)));
 
         StringBuilder fullAddress = new StringBuilder();
         if (!Utility.isBlank(order.orderShipmentDetail.address)) {
@@ -214,41 +214,56 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.rlContact.setVisibility(View.VISIBLE);
         }
 
-        holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
+//        holder.subTotal.setText(currency + " " + formatter.format(order.subTotal));
+        holder.subTotal.setText(context.getString(R.string.monetary_amount,
+                currency, formatter.format(order.subTotal)));
 
         if (order.appliedDiscount != null && order.appliedDiscount > 0) {
-            holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
+//            holder.discount.setText("- " + currency + " " + formatter.format(order.appliedDiscount));
+            holder.discount.setText(context.getString(R.string.inverse_monetary_amount,
+                    currency, formatter.format(order.appliedDiscount)));
+
             holder.rlDiscount.setVisibility(View.VISIBLE);
         }
 
         if (order.voucherDiscount != null && order.voucherDiscount > 0) {
-            holder.voucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
+//            holder.voucherDiscount.setText("- " + currency + " " + formatter.format(order.voucherDiscount));
+            holder.voucherDiscount.setText(context.getString(R.string.inverse_monetary_amount,
+                    currency, formatter.format(order.voucherDiscount)));
             holder.rlVoucherDiscount.setVisibility(View.VISIBLE);
         }
 
         if (order.storeVoucherDiscount != null && order.storeVoucherDiscount > 0) {
-            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.storeVoucherDiscount));
+//            holder.storeVoucherDiscount.setText("- " + currency + " " + formatter.format(order.storeVoucherDiscount));
+            holder.storeVoucherDiscount.setText(context.getString(R.string.inverse_monetary_amount,
+                    currency, formatter.format(order.voucherDiscount)));
+
             holder.rlStoreVoucherDiscount.setVisibility(View.VISIBLE);
         }
 
         holder.deliveryCharges.setText(order.deliveryCharges != null
                 ? currency + " " + formatter.format(order.deliveryCharges)
                 : currency + " " + "0.00");
-        holder.total2.setText(currency + " " + formatter.format(order.total));
+//        holder.total2.setText(currency + " " + formatter.format(order.total));
+        holder.total2.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.total)));
 
         if (order.deliveryDiscount == null || order.deliveryDiscount == 0.00) {
             holder.rlDeliveryDiscount.setVisibility(View.GONE);
         } else {
-            holder.deliveryDiscount.setText("- " + currency + " " + formatter.format(order.deliveryDiscount));
+//            holder.deliveryDiscount.setText("- " + currency + " " + formatter.format(order.deliveryDiscount));
+            holder.deliveryDiscount.setText(context.getString(R.string.inverse_monetary_amount, currency, formatter.format(order.deliveryDiscount)));
         }
 
         if (order.storeServiceCharges == null || order.storeServiceCharges == 0.00) {
             holder.rlServiceCharges.setVisibility(View.GONE);
         } else {
-            holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
+//            holder.serviceCharges.setText(currency + " " + formatter.format(order.storeServiceCharges));
+            holder.serviceCharges.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.storeServiceCharges)));
         }
 
-        holder.callButton.setOnClickListener(view -> startCallActivity(order.orderShipmentDetail.phoneNumber));
+        holder.callButton.setOnClickListener(view ->
+                startCallActivity(order.orderShipmentDetail.phoneNumber)
+        );
         holder.printButton.setOnClickListener(view -> {
             ItemAdapter adapter = (ItemAdapter) holder.recyclerView.getAdapter();
             List<Item> items = adapter != null ? adapter.getItems() : new ArrayList<>();
@@ -281,8 +296,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 if (order.isRevised) {
                     holder.editButton.setTextColor(context.getColor(R.color.dark_grey));
                     holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getColor(R.color.dark_grey)));
-////                    holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
-//                    holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
                 }
                 holder.editButton.setVisibility(View.VISIBLE);
                 holder.acceptButton.setText(orderDetails.nextActionText);
@@ -370,11 +383,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         itemResponseCall.clone().enqueue(new Callback<ItemsResponse>() {
             @Override
             public void onResponse(@NonNull Call<ItemsResponse> call, @NonNull Response<ItemsResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     List<Item> orderItems = response.body().data.content;
                     ItemAdapter itemsAdapter = new ItemAdapter(orderItems);
                     holder.recyclerView.setAdapter(itemsAdapter);
-                    itemsAdapter.notifyDataSetChanged();
                 } else {
                     holder.itemsErrorTextView.setVisibility(View.VISIBLE);
                 }
@@ -410,8 +422,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     public void onCancelOrderButtonClick(Order order, ViewHolder holder) {
 
-        Map<String, String> headers = new HashMap<>();
-
         dialog = new Dialog(context);
         dialog.setContentView(R.layout.custom_alert_dialog);
         dialog.setCancelable(false);
@@ -446,10 +456,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 }
             });
         });
-        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
-            dialog.dismiss();
-        });
-
+        dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> dialog.dismiss());
         dialog.show();
     }
 
@@ -537,14 +544,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             dialog.findViewById(R.id.btn_negative).setVisibility(View.VISIBLE);
             title.setText(R.string.edit_order);
             message.setText(R.string.edit_order_warning);
-            imageView.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_warning_24));
+            imageView.setImageDrawable(AppCompatResources.getDrawable(context, R.drawable.ic_baseline_warning_24));
             dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
                 dialog.dismiss();
                 orderManager.editOrder(order);
             });
-            dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
-                dialog.dismiss();
-            });
+            dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> dialog.dismiss());
             dialog.show();
         }
     }
@@ -569,7 +574,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(@NonNull Call<OrderDeliveryDetailsResponse> call,
                                    @NonNull Response<OrderDeliveryDetailsResponse> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && response.body() != null) {
                     if (tag == 1) {
                         Intent intent = new Intent(context, TrackOrderActivity.class);
                         intent.putExtra("riderDetails", response.body().data);
@@ -594,7 +599,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 } else {
                     if (tag == 1)
                         Toast.makeText(context, R.string.request_failure, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "ERROR: " + response.toString());
+                    Log.e(TAG, "ERROR: " + response);
                 }
             }
 

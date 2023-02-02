@@ -4,7 +4,8 @@
     android:id="@+id/order_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="5dp">
+    android:paddingVertical="5dp"
+    android:paddingHorizontal="10dp">
 
     <LinearLayout
         android:id="@+id/item_row_non_expanded"

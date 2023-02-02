@@ -84,7 +84,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     public void showUnpaidTab() {
         if (tabTitles.size() == 3) {
             tabTitles.add(mContext.getString(R.string.unpaid_orders));
-            Log.d("consolidate", "notifyDataSetChanged");
         }
     }
 
@@ -119,7 +118,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        Log.d("consolidate", "instantiateItem position " + position);
         Fragment createdFragment = (Fragment) super.instantiateItem(container, position);
 
         switch (position) {

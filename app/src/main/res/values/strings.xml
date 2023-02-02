@@ -155,4 +155,5 @@
     <string name="amount_paid">Amount Paid</string>
     <string name="paid">Paid</string>
     <string name="payment_type_heading">%1$s Payment</string>
+    <string name="invoice_no">Invoice Id: %1$s</string>
 </resources>

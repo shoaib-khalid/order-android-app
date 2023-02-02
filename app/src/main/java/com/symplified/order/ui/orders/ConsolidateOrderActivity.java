@@ -67,7 +67,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
         binding.itemsList.setAdapter(new ItemAdapter(consolidatedOrder.orderItemWithDetails));
 
         binding.heading.setText(getString(R.string.table_no, consolidatedOrder.tableNo));
-        binding.invoiceIdText.setText(consolidatedOrder.invoiceNo);
+        binding.invoiceIdText.setText(getString(R.string.invoice_no, consolidatedOrder.invoiceNo));
         binding.dateTextView.setText(consolidatedOrder.orderTimeConverted);
 
         currencySymbol = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
