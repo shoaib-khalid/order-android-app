@@ -4,7 +4,11 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="10dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintBottom_toBottomOf="parent">
 
     <TextView
         android:id="@+id/text_view"
@@ -13,6 +17,8 @@
         android:background="@drawable/bg_table_circle"
         android:gravity="center"
         android:textAlignment="center"
+        android:textSize="30sp"
+        android:textStyle="bold"
         android:foreground="?attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"

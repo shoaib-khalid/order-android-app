@@ -137,7 +137,7 @@ public class Utility {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
                 .setContentIntent(pendingIntent)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
                 .setContentText(text);
         if (!isBlank(bigText)) {

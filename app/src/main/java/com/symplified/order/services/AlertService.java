@@ -175,7 +175,7 @@ public class AlertService extends Service {
         return new NotificationCompat.Builder(this, ChannelId.NEW_ORDERS)
                 .setContentTitle(!Utility.isBlank(title) ? title : "You have new orders")
                 .setContentText(!Utility.isBlank(body) ? body : "Tap to view")
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .build();
     }

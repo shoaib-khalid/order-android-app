@@ -107,7 +107,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
                             Intent resultIntent = new Intent();
                             resultIntent.putExtra(CONSOLIDATED_ORDER_KEY, consolidatedOrder);
                             setResult(Activity.RESULT_OK, resultIntent);
-                            Toast.makeText(context, "Order consolidated.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Table No. " + consolidatedOrder.tableNo + " paid.", Toast.LENGTH_SHORT).show();
                             if (App.isPrinterConnected()) {
                                 try {
                                     App.getPrinter().printConsolidatedOrderReceipt(consolidatedOrder, currencySymbol);

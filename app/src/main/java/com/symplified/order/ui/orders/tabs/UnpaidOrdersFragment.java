@@ -5,11 +5,16 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Insets;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
+import android.view.WindowMetrics;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -18,13 +23,22 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 
+import com.google.android.flexbox.AlignItems;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.flexbox.JustifyContent;
 import com.symplified.order.App;
 import com.symplified.order.R;
+import com.symplified.order.interfaces.OrderManager;
+import com.symplified.order.interfaces.OrderObserver;
+import com.symplified.order.models.order.Order;
 import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.databinding.FragmentTablesBinding;
 import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.qrorders.ConsolidatedOrdersResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.ui.orders.ConsolidateOrderActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 
@@ -38,7 +52,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTableClickListener {
+public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTableClickListener, OrderObserver {
 
     FragmentTablesBinding binding;
     private List<String> storeIds;
@@ -71,7 +85,12 @@ public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTa
                 .split(" ")));
 
         binding.swipeRefreshLayout.setOnRefreshListener(this::fetchPendingOrders);
-        binding.tablesList.setLayoutManager(new GridLayoutManager(view.getContext(), 4));
+
+        FlexboxLayoutManager flexboxLayoutManager =
+                new FlexboxLayoutManager(view.getContext(), FlexDirection.ROW, FlexWrap.WRAP);
+        flexboxLayoutManager.setJustifyContent(JustifyContent.SPACE_EVENLY);
+        flexboxLayoutManager.setAlignItems(AlignItems.CENTER);
+        binding.tablesList.setLayoutManager(flexboxLayoutManager);
         tablesAdapter = new TablesAdapter(this);
         binding.tablesList.setAdapter(tablesAdapter);
         fetchPendingOrders();
@@ -86,7 +105,20 @@ public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTa
                         tablesAdapter.removeOrder(order);
                     }
                 });
+
+        OrderNotificationService.addNewOrderObserver(this);
+        OrderNotificationService.addOngoingOrderObserver(this);
+        OrderNotificationService.addPastOrderObserver(this);
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        OrderNotificationService.removeNewOrderObserver(this);
+        OrderNotificationService.removeOngoingOrderObserver(this);
+        OrderNotificationService.removePastOrderObserver(this);
+    }
+
 
     @SuppressLint("CheckResult")
     private void fetchPendingOrders() {
@@ -148,5 +180,27 @@ public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTa
         Intent intent = new Intent(getActivity(), ConsolidateOrderActivity.class);
         intent.putExtra(ConsolidateOrderActivity.CONSOLIDATED_ORDER_KEY, order);
         consolidateOrderActivityResultLauncher.launch(intent);
+    }
+
+    @Override
+    public void onOrderReceived(Order.OrderDetails orderDetails) {
+        fetchPendingOrders();
+    }
+
+    @Override
+    public void setOrderManager(OrderManager orderManager) {}
+
+    private int getScreenWidth() {
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowMetrics windowMetrics = requireActivity().getWindowManager().getCurrentWindowMetrics();
+            Insets insets = windowMetrics.getWindowInsets()
+                    .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+
+            return windowMetrics.getBounds().width() - insets.left - insets.right;
+        }
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        return displayMetrics.widthPixels;
     }
 }
