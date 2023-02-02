@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -278,8 +279,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         switch (section) {
             case "new":
                 if (order.isRevised) {
-                    holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
-                    holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
+                    holder.editButton.setTextColor(context.getColor(R.color.dark_grey));
+                    holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getColor(R.color.dark_grey)));
+////                    holder.editButton.setTextColor(context.getResources().getColor(R.color.dark_grey));
+//                    holder.editButton.setStrokeColor(ColorStateList.valueOf(context.getResources().getColor(R.color.dark_grey)));
                 }
                 holder.editButton.setVisibility(View.VISIBLE);
                 holder.acceptButton.setText(orderDetails.nextActionText);
@@ -320,7 +323,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 break;
             case "past":
                 holder.ongoingLayout.setVisibility(View.VISIBLE);
-                holder.typeLayout.setVisibility(View.GONE);
                 holder.currStatusLayout.setVisibility(View.GONE);
                 holder.status.setVisibility(View.VISIBLE);
                 holder.statusLabel.setVisibility(View.VISIBLE);
@@ -538,9 +540,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             imageView.setImageDrawable(context.getDrawable(R.drawable.ic_baseline_warning_24));
             dialog.findViewById(R.id.btn_positive).setOnClickListener(view -> {
                 dialog.dismiss();
-//                Intent intent = new Intent(context, EditOrderActivity.class);
-//                intent.putExtra("order", order);
-//                context.startActivity(intent);
                 orderManager.editOrder(order);
             });
             dialog.findViewById(R.id.btn_negative).setOnClickListener(view -> {
@@ -648,8 +647,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     }
 
     public void clear() {
-        int lastPosition = orders.size() > 0 ? orders.size() - 1 : 0;
+        int originalSize = orders.size();
         orders.clear();
-        notifyItemRangeRemoved(0, lastPosition);
+        notifyItemRangeRemoved(0, originalSize);
     }
 }

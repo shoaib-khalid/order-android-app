@@ -69,11 +69,7 @@ public class AlertService extends Service {
             }
         }
 
-        mediaPlayer = MediaPlayer.create(this,
-                serviceType != null
-                        && serviceType.contains(ServiceType.DINEIN.toString())
-                        ? R.raw.dine_in : R.raw.ring);
-
+        mediaPlayer = MediaPlayer.create(this, R.raw.ring_dine_in);
         if (isAppOnForeground(this)
                 || !storeType.contains("FnB")
                 || serviceType.contains(ServiceType.DINEIN.toString())) {
@@ -90,26 +86,26 @@ public class AlertService extends Service {
             mediaPlayer.setLooping(true);
         }
 
-        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+//        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 
-        if (!isExternalAudioOutputPluggedIn() && !serviceType.contains(ServiceType.DINEIN.toString())) {
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
-                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                    AudioManager.FLAG_PLAY_SOUND);
-
-            mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
-                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
-        }
+//        if (!isExternalAudioOutputPluggedIn() &&
+//                serviceType != null &&
+//                serviceType.contains(ServiceType.DELIVERIN.toString())
+//        ) {
+//            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+//                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+//                    AudioManager.FLAG_PLAY_SOUND);
+//
+//            mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+//                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+//        }
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.start();
         return START_STICKY;
     }
 
     public static boolean isPlaying() {
-        if (mediaPlayer != null) {
-            return mediaPlayer.isPlaying();
-        }
-        return false;
+        return mediaPlayer != null && mediaPlayer.isPlaying();
     }
 
     public static void stop() {

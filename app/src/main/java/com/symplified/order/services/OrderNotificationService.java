@@ -48,7 +48,7 @@ import retrofit2.Response;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
-    private Pattern pattern;
+    private final Pattern pattern = Pattern.compile("\\#(\\S+?)$");;
     private final String TAG = "order-notification-service";
     private final String PRINT_TAG = "print-helper";
 
@@ -59,11 +59,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
     private static final List<QrCodeObserver> qrCodeObservers = new ArrayList<>();
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        pattern = Pattern.compile("\\#(\\S+?)$");
-    }
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -250,30 +245,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
      * @param order         Values used by AlertService to determine looping frequency
      */
     private void alert(RemoteMessage remoteMessage, Order order) {
-//        Intent toOrdersActivity = new Intent(this, OrdersActivity.class);
-
-//        TaskStackBuilder taskStackBuilder = TaskStackBuilder.create(this);
-//        taskStackBuilder.addNextIntentWithParentStack(toOrdersActivity);
-
-//        PendingIntent pendingIntent = taskStackBuilder.getPendingIntent(0,
-//                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-//                        ? PendingIntent.FLAG_IMMUTABLE : PendingIntent.FLAG_UPDATE_CURRENT);
-
-//        Notification notification = new NotificationCompat.Builder(getApplicationContext(), ChannelId.NEW_ORDERS)
-//                .setContentIntent(pendingIntent)
-//                .setSmallIcon(R.mipmap.ic_launcher)
-//                .setContentTitle(remoteMessage.getData().get("title"))
-//                .setContentText(remoteMessage.getData().get("body"))
-//                .setAutoCancel(true)
-//                .setPriority(NotificationCompat.PRIORITY_MAX)
-//                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-//                .setColor(Color.CYAN)
-//                .build();
-
-//        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//        notificationManager.notify(new Random().nextInt(), notification);
 
         if (!AlertService.isPlaying()) {
             Intent intent = new Intent(getApplicationContext(), AlertService.class);
@@ -325,7 +296,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public static void disableOrderNotifications() {
         isOrderNotifsEnabled = false;
     }
-
     public static void enableOrderNotifications() {
         isOrderNotifsEnabled = true;
     }

@@ -49,6 +49,7 @@ public interface OrderApi {
     @GET("orders/{orderId}")
     Call<Order.OrderByIdResponse> getOrderById(@Path(value = "orderId", encoded = true) String orderId);
 
+    @PUT("orders/reviseitem/{orderId}")
     Call<HttpResponse> reviseOrderItem(@Path("orderId") String orderId, @Body List<UpdatedItem> bodyOrderItemList);
 
     @POST("qrcode/generate")
