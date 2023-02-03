@@ -26,16 +26,29 @@ import retrofit2.http.Query;
 public interface OrderApi {
 
     @GET("orders/search?completionStatus=PAYMENT_CONFIRMED,RECEIVED_AT_STORE&sortingOrder=ASC&pageSize=1000000")
-    Call<OrderDetailsResponse> getNewOrdersByClientId(@Query("clientId") String clientId);
+    Call<OrderDetailsResponse> searchNewOrdersByClientId(@Query("clientId") String clientId);
 
     @GET("orders/search?completionStatus=PAYMENT_CONFIRMED,RECEIVED_AT_STORE&sortingOrder=ASC&pageSize=1000000")
-    Call<OrderDetailsResponse> getNewOrdersByClientIdAndInvoiceId(@Query("clientId") String clientId, @Query("invoiceId") String invoiceId);
+    Call<OrderDetailsResponse> searchNewOrdersByClientIdAndInvoiceId(
+            @Query("clientId") String clientId,
+            @Query("invoiceId") String invoiceId
+    );
+
+    @GET("orders/search?completionStatus=PAYMENT_CONFIRMED,RECEIVED_AT_STORE&sortingOrder=ASC&pageSize=1000000")
+    Call<OrderDetailsResponse> searchNewOrdersByClientIdAndOrderId(
+            @Query("clientId") String clientId,
+            @Query("orderId") String orderId
+    );
 
     @GET("orders/search?completionStatus=BEING_PREPARED,AWAITING_PICKUP,BEING_DELIVERED&sortingOrder=ASC&pageSize=1000000")
-    Call<OrderDetailsResponse> getOngoingOrdersByClientId (@Query("clientId") String clientId);
+    Call<OrderDetailsResponse> searchOngoingOrdersByClientId(@Query("clientId") String clientId);
 
     @GET("orders/search?completionStatus=CANCELED_BY_MERCHANT,DELIVERED_TO_CUSTOMER,CANCELED_BY_CUSTOMER")
-    Call<OrderDetailsResponse> getSentOrdersByClientId (@Query("clientId") String clientId, @Query("from") String from, @Query("to") String to);
+    Call<OrderDetailsResponse> searchSentOrdersByClientId(
+            @Query("clientId") String clientId,
+            @Query("from") String from,
+            @Query("to") String to
+    );
 
     @GET("orders/{orderId}/items")
     Call<ItemsResponse> getItemsForOrder(@Path("orderId") String orderId);

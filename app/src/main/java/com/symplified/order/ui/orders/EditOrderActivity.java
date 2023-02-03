@@ -199,7 +199,7 @@ public class EditOrderActivity extends NavbarActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString(SharedPrefsKey.CLIENT_ID, "");
 
-        Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
+        Call<OrderDetailsResponse> orderRequest = orderApiService.searchNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
         orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
             @Override
             public void onResponse(@NonNull Call<OrderDetailsResponse> call,

@@ -107,7 +107,7 @@ public class OrdersFragment extends Fragment
         switch (section) {
             case "new": {
                 pageViewModel.setIndex(0);
-                orderResponse = orderApiService.getNewOrdersByClientId(clientId);
+                orderResponse = orderApiService.searchNewOrdersByClientId(clientId);
                 if (AlertService.isPlaying()) {
                     requireActivity().stopService(new Intent(getContext(), AlertService.class));
                 }
@@ -116,7 +116,7 @@ public class OrdersFragment extends Fragment
             }
             case "ongoing": {
                 pageViewModel.setIndex(1);
-                orderResponse = orderApiService.getOngoingOrdersByClientId(clientId);
+                orderResponse = orderApiService.searchOngoingOrdersByClientId(clientId);
                 OrderNotificationService.addOngoingOrderObserver(this);
                 break;
             }
@@ -128,7 +128,7 @@ public class OrdersFragment extends Fragment
                 ? LocalDate.now(TimeZone.getDefault().toZoneId()).toString()
                 : formatter.format(new Date());
 
-                orderResponse = orderApiService.getSentOrdersByClientId(clientId, currentDate, currentDate);
+                orderResponse = orderApiService.searchSentOrdersByClientId(clientId, currentDate, currentDate);
                 OrderNotificationService.addPastOrderObserver(this);
 
                 break;

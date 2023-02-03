@@ -1,17 +1,11 @@
 package com.symplified.order.services;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.TaskStackBuilder;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -32,8 +26,6 @@ import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.models.ping.PingRequest;
 import com.symplified.order.networking.ServiceGenerator;
-import com.symplified.order.ui.orders.OrdersActivity;
-import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
@@ -83,13 +75,19 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
-            String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
-            if (invoiceId != null) {
+            OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
+            String orderId = remoteMessage.getData().get("orderId");
+            String invoiceId = null;
 
-                Log.d(TAG, "clientId: " + clientId + ", invoiceId: " + invoiceId);
+            Call<OrderDetailsResponse> orderRequest;
+            if (orderId != null) {
+                orderRequest = orderApiService.searchNewOrdersByClientIdAndOrderId(clientId, orderId);
+            } else {
+                invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
+                orderRequest = orderApiService.searchNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
+            }
 
-                OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
-                Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
+            if (orderId != null || invoiceId != null) {
 
                 orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
                     @Override
@@ -107,21 +105,16 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
                                     && App.isPrinterConnected()) {
                                 Log.d(TAG, "Printing and processing order");
-                                printAndProcessOrder(orderApiService, remoteMessage, orderDetails);
+                                printAndProcessOrder(orderApiService, orderDetails);
                             } else {
                                 Log.d(TAG, "Adding serviceType " + orderDetails.order.serviceType + " to new order view");
                                 addOrderToView(newOrderObservers, orderDetails);
-
-                                if (orderDetails.order.serviceType == ServiceType.DINEIN) {
-                                    sendErrorToServer("Dine-In order " + invoiceId
-                                            + " cannot be printed and auto-processed because a printer was not detected");
-                                }
                             }
                         } else {
                             alert(remoteMessage, null);
                             if (!response.isSuccessful()) {
                                 sendErrorToServer("Error " + response.code() + " received when querying order "
-                                        + invoiceId + " after receiving Firebase notification.");
+                                        + (orderId != null ? orderId : "") + " after receiving Firebase notification.");
                             }
                         }
                     }
@@ -131,7 +124,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                           @NonNull Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
                         sendErrorToServer("Failed to query order "
-                                + invoiceId + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
+                                + (orderId != null ? orderId : "") + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
                         alert(remoteMessage, null);
                     }
                 });
@@ -140,7 +133,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     }
 
     private void printAndProcessOrder(OrderApi orderApiService,
-                                      RemoteMessage remoteMessage,
                                       Order.OrderDetails orderDetails) {
 
         orderApiService.getItemsForOrder(orderDetails.order.id).clone().enqueue(new Callback<ItemsResponse>() {
@@ -152,8 +144,11 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
                 if (response.isSuccessful() && response.body() != null) {
                     try {
-                        App.getPrinter()
-                                .printOrderReceipt(orderDetails.order, response.body().data.content, getApplicationContext());
+                        App.getPrinter().printOrderReceipt(
+                                orderDetails.order,
+                                response.body().data.content,
+                                getApplicationContext()
+                        );
                         processNewOrder(orderApiService, orderDetails);
                     } catch (Exception e) {
                         addOrderToView(newOrderObservers, orderDetails);
