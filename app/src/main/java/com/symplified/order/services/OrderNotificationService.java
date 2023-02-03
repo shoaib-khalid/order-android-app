@@ -40,7 +40,7 @@ import retrofit2.Response;
 
 public class OrderNotificationService extends FirebaseMessagingService {
 
-    private final Pattern pattern = Pattern.compile("\\#(\\S+?)$");;
+    private final Pattern pattern = Pattern.compile("orderId:(\\S+?)$");
     private final String TAG = "order-notification-service";
     private final String PRINT_TAG = "print-helper";
 
@@ -50,7 +50,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
     private static final List<OrderObserver> ongoingOrderObservers = new ArrayList<>();
     private static final List<OrderObserver> pastOrderObservers = new ArrayList<>();
     private static final List<QrCodeObserver> qrCodeObservers = new ArrayList<>();
-
 
     @Override
     public void onNewToken(@NonNull String token) {
@@ -75,21 +74,13 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
-            OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
-            String orderId = remoteMessage.getData().get("orderId");
-            String invoiceId = null;
+            String orderId = parseOrderId(remoteMessage.getData().get("body"));
+            Log.d(TAG, "OrderId: " + orderId);
 
-            Call<OrderDetailsResponse> orderRequest;
             if (orderId != null) {
-                orderRequest = orderApiService.searchNewOrdersByClientIdAndOrderId(clientId, orderId);
-            } else {
-                invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
-                orderRequest = orderApiService.searchNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
-            }
-
-            if (orderId != null || invoiceId != null) {
-
-                orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
+                OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
+                orderApiService.searchNewOrdersByClientIdAndOrderId(clientId, orderId)
+                        .clone().enqueue(new Callback<OrderDetailsResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
@@ -114,7 +105,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             alert(remoteMessage, null);
                             if (!response.isSuccessful()) {
                                 sendErrorToServer("Error " + response.code() + " received when querying order "
-                                        + (orderId != null ? orderId : "") + " after receiving Firebase notification.");
+                                        + orderId + " after receiving Firebase notification.");
                             }
                         }
                     }
@@ -124,7 +115,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                           @NonNull Throwable t) {
                         Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
                         sendErrorToServer("Failed to query order "
-                                + (orderId != null ? orderId : "") + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
+                                + orderId + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
                         alert(remoteMessage, null);
                     }
                 });
@@ -238,6 +229,20 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     return matcher.group().replace("#", "");
                 } catch (Exception e) {
                     Log.e(TAG, "Error while parsing invoiceId: " + e.getLocalizedMessage());
+                }
+            }
+        }
+        return null;
+    }
+
+    private String parseOrderId(String body) {
+        if (body != null) {
+            Matcher matcher = pattern.matcher(body);
+            if (matcher.find() && matcher.group(0) != null) {
+                try {
+                    return matcher.group().replace("orderId:", "");
+                } catch (Exception e) {
+                    Log.e(TAG, "Error while parsing orderId: " + e.getLocalizedMessage());
                 }
             }
         }
