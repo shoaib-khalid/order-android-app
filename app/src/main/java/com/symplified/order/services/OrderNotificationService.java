@@ -85,7 +85,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
         } else if (isOrderNotifsEnabled) {
             String invoiceId = parseInvoiceId(remoteMessage.getData().get("body"));
             if (invoiceId != null) {
-                OrderApi orderApiService = ServiceGenerator.createOrderService(this);
+
+                Log.d(TAG, "clientId: " + clientId + ", invoiceId: " + invoiceId);
+
+                OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
                 Call<OrderDetailsResponse> orderRequest = orderApiService.getNewOrdersByClientIdAndInvoiceId(clientId, invoiceId);
 
                 orderRequest.clone().enqueue(new Callback<OrderDetailsResponse>() {
@@ -93,6 +96,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
 
+                        Log.d(TAG, "Query order response: " + response.code() +
+                                "response body != null: " + (response.body() != null) +
+                                "dataSize: " + (response.body() != null ? response.body().data.content.size() : "body null"));
                         if (response.isSuccessful() &&
                                 response.body() != null &&
                                 response.body().data.content.size() > 0) {
@@ -100,8 +106,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
                                     && App.isPrinterConnected()) {
+                                Log.d(TAG, "Printing and processing order");
                                 printAndProcessOrder(orderApiService, remoteMessage, orderDetails);
                             } else {
+                                Log.d(TAG, "Adding serviceType " + orderDetails.order.serviceType + " to new order view");
                                 addOrderToView(newOrderObservers, orderDetails);
 
                                 if (orderDetails.order.serviceType == ServiceType.DINEIN) {
@@ -139,6 +147,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
             @Override
             public void onResponse(@NonNull Call<ItemsResponse> call,
                                    @NonNull Response<ItemsResponse> response) {
+
+                Log.d(TAG, "getItemsForOrder response: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
                     try {
                         App.getPrinter()
@@ -153,6 +164,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         sendErrorToServer(errorMessage);
                     }
                 } else {
+                    Log.d(TAG, "printAndProcessOrder: Adding order to view");
+
                     addOrderToView(newOrderObservers, orderDetails);
 
                     String errorMessage = "Error " + response.code() + " received while retrieving items for " +
@@ -186,14 +199,20 @@ public class OrderNotificationService extends FirebaseMessagingService {
             @Override
             public void onResponse(@NonNull Call<OrderUpdateResponse> call,
                                    @NonNull Response<OrderUpdateResponse> response) {
+
+                Log.d(TAG, "Process order response: " + response.code());
+
                 if (response.isSuccessful() && response.body() != null) {
-                    Order.OrderDetails updatedOrderDetails = new Order.OrderDetails(response.body().data);
+                    Order.OrderDetails updatedOrderDetails
+                            = new Order.OrderDetails(response.body().data);
                     if (Utility.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
                         addOrderToView(pastOrderObservers, updatedOrderDetails);
                     } else if (Utility.isOrderOngoing(updatedOrderDetails.currentCompletionStatus)) {
                         addOrderToView(ongoingOrderObservers, updatedOrderDetails);
                     }
                 } else {
+                    Log.d(TAG, "Process order: Adding order to view.");
+
                     addOrderToView(newOrderObservers, orderDetails);
                     sendErrorToServer("Failed to auto-process order " + orderDetails.order.id);
                 }

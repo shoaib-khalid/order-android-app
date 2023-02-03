@@ -130,6 +130,8 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
                                     Toast.makeText(context, "Failed to print order.", Toast.LENGTH_SHORT).show();
                                 }
                             }
+
+                            finish();
                         } else {
                             Toast.makeText(context, "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
                         }

@@ -37,7 +37,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     private final List<String> tabTitles;
     private final Context mContext;
     private OrdersFragment newOrderFragment, ongoingOrderFragment;
-    private OrderObserver historyOrderFragment;
+    private OrderObserver historyOrderFragment, unpaidOrderFragment;
     private OrderManager orderManager;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm, List<String> tabTitles) {
@@ -132,6 +132,9 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
             case 2:
                 historyOrderFragment = (OrderObserver) createdFragment;
                 break;
+            case 3:
+                unpaidOrderFragment = (OrderObserver) createdFragment;
+                break;
         }
 
         return createdFragment;
@@ -153,12 +156,20 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
         if (ongoingOrderFragment != null) {
             ongoingOrderFragment.onOrderReceived(orderDetails);
         }
+
+        if (unpaidOrderFragment != null) {
+            unpaidOrderFragment.onOrderReceived(orderDetails);
+        }
     }
 
     @Override
     public void addOrderToHistoryTab(Order.OrderDetails orderDetails) {
         if (historyOrderFragment != null) {
             historyOrderFragment.onOrderReceived(orderDetails);
+        }
+
+        if (unpaidOrderFragment != null) {
+            unpaidOrderFragment.onOrderReceived(orderDetails);
         }
     }
 

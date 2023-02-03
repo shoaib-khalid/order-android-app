@@ -52,7 +52,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTableClickListener, OrderObserver {
+public class UnpaidOrdersFragment
+        extends Fragment
+        implements TablesAdapter.OnTableClickListener, OrderObserver {
 
     FragmentTablesBinding binding;
     private List<String> storeIds;
@@ -102,8 +104,7 @@ public class UnpaidOrdersFragment extends Fragment implements TablesAdapter.OnTa
                         Intent data = result.getData();
                         ConsolidatedOrder order = (ConsolidatedOrder) data
                                 .getSerializableExtra(ConsolidateOrderActivity.CONSOLIDATED_ORDER_KEY);
-//                        tablesAdapter.removeOrder(order);
-                        tablesAdapter.updatedOrder(order);
+                        tablesAdapter.removeOrder(order);
                     }
                 });
 
