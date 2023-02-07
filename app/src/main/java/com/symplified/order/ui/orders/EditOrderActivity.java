@@ -24,7 +24,6 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.EditItemAdapter;
-import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.databinding.ActivityEditOrderBinding;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.item.Item;
@@ -33,6 +32,7 @@ import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.order.OrderDetailsResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.ui.NavbarActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 

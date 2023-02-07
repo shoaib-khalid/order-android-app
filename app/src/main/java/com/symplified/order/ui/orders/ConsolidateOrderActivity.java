@@ -1,9 +1,5 @@
 package com.symplified.order.ui.orders;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.symplified.order.App;
 import com.symplified.order.R;

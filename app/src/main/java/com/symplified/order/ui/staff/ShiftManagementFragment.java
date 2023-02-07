@@ -4,12 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,11 +12,13 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.networking.apis.AuthApi;
-import com.symplified.order.networking.apis.StaffApi;
-import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.databinding.FragmentShiftManagementBinding;
 import com.symplified.order.models.client.ClientResponse;
 import com.symplified.order.models.login.LoginRequest;
@@ -35,6 +31,9 @@ import com.symplified.order.models.staff.shift.SummaryDetailsResponse;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.AuthApi;
+import com.symplified.order.networking.apis.StaffApi;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 

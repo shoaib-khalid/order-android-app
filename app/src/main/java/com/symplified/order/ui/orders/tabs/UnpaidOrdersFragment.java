@@ -5,23 +5,17 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Insets;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowInsets;
-import android.view.WindowMetrics;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.flexbox.AlignItems;
 import com.google.android.flexbox.FlexDirection;
@@ -30,20 +24,21 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import com.google.android.flexbox.JustifyContent;
 import com.symplified.order.App;
 import com.symplified.order.R;
+import com.symplified.order.databinding.FragmentTablesBinding;
 import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.models.order.Order;
-import com.symplified.order.networking.apis.OrderApi;
-import com.symplified.order.databinding.FragmentTablesBinding;
 import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.qrorders.ConsolidatedOrdersResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.ui.orders.ConsolidateOrderActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -149,6 +144,13 @@ public class UnpaidOrdersFragment
                             }
                         }
 
+                        Collections.sort(pendingOrders, (o1, o2) -> {
+                            try {
+                                return Integer.parseInt(o1.tableNo) - Integer.parseInt(o2.tableNo);
+                            } catch (NumberFormatException ignored) {}
+                            return o1.tableNo.compareTo(o2.tableNo);
+                        });
+
                         tablesAdapter.setOrders(pendingOrders);
                     }
 
@@ -164,7 +166,6 @@ public class UnpaidOrdersFragment
 
                     @Override
                     public void onComplete() {
-                        Log.d("consolidate", "onComplete");
                         stopLoading();
                     }
                 });
@@ -191,18 +192,4 @@ public class UnpaidOrdersFragment
 
     @Override
     public void setOrderManager(OrderManager orderManager) {}
-
-    private int getScreenWidth() {
-        if (Build.VERSION.SDK_INT >= 30) {
-            WindowMetrics windowMetrics = requireActivity().getWindowManager().getCurrentWindowMetrics();
-            Insets insets = windowMetrics.getWindowInsets()
-                    .getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
-
-            return windowMetrics.getBounds().width() - insets.left - insets.right;
-        }
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        return displayMetrics.widthPixels;
-    }
 }

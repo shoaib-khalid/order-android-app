@@ -18,7 +18,11 @@ public interface ProductApi {
     Observable<ProductListResponse> getProducts(@Path("storeId") String storeId);
 
     @PUT("stores/{storeId}/products/{productId}")
-    Call<ResponseBody> updateProduct(@Path("storeId") String storeId, @Path("productId") String productId, @Body ProductEditRequest body);
+    Call<ResponseBody> updateProduct(
+            @Path("storeId") String storeId,
+            @Path("productId") String productId,
+            @Body ProductEditRequest body
+    );
 
     @GET("stores/{storeId}/products/{productId}/assets")
     Call<StoreProductAsset.StoreProductAssetListResponse> getStoreProductAssets(

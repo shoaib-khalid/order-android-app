@@ -71,7 +71,7 @@ public interface OrderApi {
     @GET("qrcode/preauth-generate")
     Call<ResponseBody> verifyQrCodeAvailability(@Query("storeId") String storeId);
 
-    @GET("qrorder/pending?pageSize=100000&sortingOrder=DESC")
+    @GET("qrorder/pending?pageSize=100000&sortingOrder=ASC")
     Observable<ConsolidatedOrdersResponse> getPendingConsolidatedOrders(
             @Query("storeId") String storeId
     );

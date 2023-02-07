@@ -1,7 +1,5 @@
 package com.symplified.order.models.staff;
 
-import com.symplified.order.models.staff.StaffMember;
-
 import java.io.Serializable;
 import java.util.List;
 

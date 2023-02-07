@@ -2,7 +2,6 @@ package com.symplified.order.ui.orders.tabs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -13,15 +12,14 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.utils.SharedPrefsKey;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;

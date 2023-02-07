@@ -18,12 +18,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.models.asset.StoreProductAsset;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.UpdatedItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.utils.SharedPrefsKey;
 
 import java.text.DecimalFormat;

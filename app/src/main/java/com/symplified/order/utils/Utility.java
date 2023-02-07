@@ -12,7 +12,6 @@ import android.net.ConnectivityManager;
 import android.os.Environment;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 

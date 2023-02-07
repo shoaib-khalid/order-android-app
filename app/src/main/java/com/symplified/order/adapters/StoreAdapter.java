@@ -14,12 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.symplified.order.R;
-import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.dialogs.SettingsBottomSheet;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreStatusResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.StoreApi;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

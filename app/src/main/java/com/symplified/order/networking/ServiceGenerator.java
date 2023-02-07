@@ -4,10 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.symplified.order.App;
+import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.networking.apis.CategoryApi;
 import com.symplified.order.networking.apis.DeliveryApi;
 import com.symplified.order.networking.apis.FirebaseApi;
-import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.networking.apis.StaffApi;

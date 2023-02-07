@@ -9,9 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
-import com.symplified.order.adapters.ItemAdapter;
 import com.symplified.order.models.qrorders.ConsolidatedOrder;
-import com.symplified.order.ui.orders.ConsolidateOrderActivity;
 
 import java.util.ArrayList;
 import java.util.List;

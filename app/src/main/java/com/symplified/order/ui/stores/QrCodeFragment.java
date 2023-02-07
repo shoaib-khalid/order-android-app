@@ -24,11 +24,11 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.symplified.order.R;
-import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.interfaces.QrCodeObserver;
 import com.symplified.order.models.qrcode.QrCodeRequest;
 import com.symplified.order.models.qrcode.QrCodeResponse;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.services.OrderNotificationService;
 
 import retrofit2.Call;

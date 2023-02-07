@@ -14,9 +14,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.R;
-import com.symplified.order.utils.EmptyCallback;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.networking.ServiceGenerator;
+import com.symplified.order.utils.EmptyCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;

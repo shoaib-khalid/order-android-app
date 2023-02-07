@@ -1,7 +1,5 @@
 package com.symplified.order.enums;
 
-import com.symplified.order.utils.Utility;
-
 public enum OrderStatus {
     BEING_DELIVERED,
     BEING_PREPARED,

@@ -6,9 +6,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.symplified.order.App;
-import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.models.login.LoginResponse;
 import com.symplified.order.models.login.Session;
+import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.utils.SharedPrefsKey;
 
 import java.io.IOException;

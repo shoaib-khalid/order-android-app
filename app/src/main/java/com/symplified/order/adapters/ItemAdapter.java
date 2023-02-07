@@ -18,9 +18,7 @@ import com.symplified.order.models.item.Item;
 import com.symplified.order.models.item.ItemAddOn;
 import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.item.UpdatedItem;
-import com.symplified.order.models.order.Order;
 import com.symplified.order.utils.SharedPrefsKey;
-import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
