@@ -139,10 +139,12 @@ public class UnpaidOrdersFragment
                     public void onNext(List<ConsolidatedOrdersResponse> consolidatedOrdersResponses) {
                         List<ConsolidatedOrder> pendingOrders = new ArrayList<>();
                         for (ConsolidatedOrdersResponse response : consolidatedOrdersResponses) {
+                            Log.d("consolidate-orders", "Response status: " + response.status);
                             if (response.status == 200) {
                                 pendingOrders.addAll(response.data.content);
                             }
                         }
+                        Log.d("consolidate-orders", "Pending orders size: " + pendingOrders.size());
 
                         Collections.sort(pendingOrders, (o1, o2) -> {
                             try {

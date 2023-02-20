@@ -108,9 +108,6 @@ public class OrdersFragment extends Fragment
             case "new": {
                 pageViewModel.setIndex(0);
                 orderResponse = orderApiService.searchNewOrdersByClientId(clientId);
-                if (AlertService.isPlaying()) {
-                    requireActivity().stopService(new Intent(getContext(), AlertService.class));
-                }
                 OrderNotificationService.addNewOrderObserver(this);
                 break;
             }

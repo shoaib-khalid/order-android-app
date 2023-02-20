@@ -108,18 +108,6 @@ public class AlertService extends Service {
         return mediaPlayer != null && mediaPlayer.isPlaying();
     }
 
-    public static void stop() {
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        stop();
-    }
-
     private boolean isExternalAudioOutputPluggedIn() {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         for (AudioDeviceInfo device

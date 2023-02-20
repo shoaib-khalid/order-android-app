@@ -37,6 +37,7 @@ import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -63,6 +64,7 @@ public class ShiftManagementFragment extends Fragment
     private SalesAdapter salesAdapter;
     private String currency = "RM";
     private StaffMember currentStaffMember;
+    private final DecimalFormat currencyFormatter = Utility.getMonetaryAmountFormat();
 
     @Override
     public View onCreateView(
@@ -241,8 +243,13 @@ public class ShiftManagementFragment extends Fragment
                         } else {
                             Toast.makeText(getContext(), "An error occurred. Please try again.", Toast.LENGTH_SHORT).show();
                         }
-                        binding.totalSalesTextView.setText(currency
-                                + Utility.getMonetaryAmountFormat().format(totalSales));
+                        binding.totalSalesTextView.setText(
+                                getString(
+                                        R.string.monetary_amount,
+                                        currency,
+                                        currencyFormatter.format(totalSales)
+                                )
+                        );
                     }
 
                     @Override
@@ -365,7 +372,6 @@ public class ShiftManagementFragment extends Fragment
                             @NonNull Call<Void> call,
                             @NonNull Response<Void> response
                     ) {
-
                         stopLoading();
                         if (response.isSuccessful()) {
                             if (App.isPrinterConnected()) {

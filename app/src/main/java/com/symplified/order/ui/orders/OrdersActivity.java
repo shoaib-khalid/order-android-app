@@ -104,14 +104,15 @@ public class OrdersActivity extends NavbarActivity {
                         queryStoresForConsolidateOption();
                     }
                 });
-                Toast.makeText(this, "Unable to sync stores with server. Please connect to the internet.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(
+                        this,
+                        "Unable to sync stores with server. Please connect to the internet.",
+                        Toast.LENGTH_SHORT
+                ).show();
             }
         }
 
-        stopService(new Intent(this, AlertService.class));
-
-        boolean isSubscribedToNotifications = sharedPrefs.getBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, false);
-        if (!isSubscribedToNotifications) {
+        if (!sharedPrefs.getBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, false)) {
             verifyFirebaseConnection();
         }
         OrderNotificationService.enableOrderNotifications();

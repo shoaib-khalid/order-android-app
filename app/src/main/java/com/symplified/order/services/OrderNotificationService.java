@@ -74,6 +74,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
+            Log.d(TAG, "Notif body: " + remoteMessage.getData().get("body"));
             String orderId = parseOrderId(remoteMessage.getData().get("body"));
             Log.d(TAG, "OrderId: " + orderId);
 
@@ -180,8 +181,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 ? OrderStatus.DELIVERED_TO_CUSTOMER
                 : orderDetails.nextCompletionStatus;
 
-        orderApiService.updateOrderStatus(new Order.OrderUpdate(orderDetails.order.id, nextCompletionStatus),
-                orderDetails.order.id).clone().enqueue(new Callback<OrderUpdateResponse>() {
+        orderApiService.updateOrderStatus(
+                new Order.OrderUpdate(
+                        orderDetails.order.id,
+                        nextCompletionStatus
+                ), orderDetails.order.id
+        ).clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
             public void onResponse(@NonNull Call<OrderUpdateResponse> call,
                                    @NonNull Response<OrderUpdateResponse> response) {
