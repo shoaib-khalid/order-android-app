@@ -1,12 +1,17 @@
 package com.symplified.order.ui.staff;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -143,7 +148,7 @@ public class AddStaffMemberDialogFragment extends DialogFragment {
         }
     }
 
-    private class StoreAdapter extends ArrayAdapter<Store> {
+    private static class StoreAdapter extends ArrayAdapter<Store> {
         private final Store[] stores;
 
         public StoreAdapter(
