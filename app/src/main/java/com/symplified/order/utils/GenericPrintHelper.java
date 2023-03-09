@@ -1,4 +1,4 @@
-package com.symplified.order.helpers;
+package com.symplified.order.utils;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -20,7 +20,6 @@ import com.symplified.order.models.order.Order;
 import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.shift.SummaryDetails;
-import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -38,12 +37,12 @@ public class GenericPrintHelper implements Printer {
 
         @Override
         public void onRunResult(final boolean isSuccess) throws RemoteException {
-            Log.i(TAG,"result: " + isSuccess + "\n");
+            Log.i(TAG, "result: " + isSuccess + "\n");
         }
 
         @Override
         public void onReturnString(final String value) throws RemoteException {
-            Log.i(TAG,"result: " + value + "\n");
+            Log.i(TAG, "result: " + value + "\n");
         }
     };
 
@@ -96,12 +95,15 @@ public class GenericPrintHelper implements Printer {
     }
 
     @Override
-    public void printOrderReceipt(Order order, List<Item> items, Context context) throws Exception {
+    public void printOrderReceipt(
+            Order order,
+            List<Item> items,
+            String currency
+    ) throws Exception {
         if (!isPrinterConnected()) {
             return;
         }
 
-        String currency = Utility.getCurrencySymbol(order, context);
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
         String divider = "\n------------------------";
@@ -120,9 +122,11 @@ public class GenericPrintHelper implements Printer {
                 break;
         }
 
-        String title = "\n\t" + (order.serviceType == ServiceType.DINEIN
-                ? customerNotes
-                : order.store != null ? order.store.name : "Deliverin.MY Order Chit");
+        String title = "\n" + (
+                order.serviceType == ServiceType.DINEIN
+                        ? customerNotes
+                        : order.store != null
+                        ? order.store.name : "Deliverin.MY Order Chit");
 
         prefix.append(divider);
         prefix.append("\nOrder Id: ").append(order.invoiceId);

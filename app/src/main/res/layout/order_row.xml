@@ -50,7 +50,6 @@
                     android:background="@drawable/rounded_image_button"
                     android:padding="5dp"
                     android:src="@drawable/ic_print"
-                    android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 

@@ -95,11 +95,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             Order.OrderDetails orderDetails = response.body().data.content.get(0);
                             alert(remoteMessage, orderDetails.order);
                             if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                    && App.isPrinterConnected()) {
-                                Log.d(TAG, "Printing and processing order");
+                                    && (App.isPrinterConnected() || App.btPrinters.size() > 0)) {
                                 printAndProcessOrder(orderApiService, orderDetails);
                             } else {
-                                Log.d(TAG, "Adding serviceType " + orderDetails.order.serviceType + " to new order view");
                                 addOrderToView(newOrderObservers, orderDetails);
                             }
                         } else {
@@ -131,14 +129,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
             @Override
             public void onResponse(@NonNull Call<ItemsResponse> call,
                                    @NonNull Response<ItemsResponse> response) {
-
-                Log.d(TAG, "getItemsForOrder response: " + response.code());
-
                 if (response.isSuccessful() && response.body() != null) {
                     try {
-                        App.getPrinter().printOrderReceipt(
+                        App.printOrderReceipt(
                                 orderDetails.order,
                                 response.body().data.content,
+                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
                                 getApplicationContext()
                         );
                         processNewOrder(orderApiService, orderDetails);
@@ -151,8 +147,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         sendErrorToServer(errorMessage);
                     }
                 } else {
-                    Log.d(TAG, "printAndProcessOrder: Adding order to view");
-
                     addOrderToView(newOrderObservers, orderDetails);
 
                     String errorMessage = "Error " + response.code() + " received while retrieving items for " +
@@ -190,9 +184,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
             @Override
             public void onResponse(@NonNull Call<OrderUpdateResponse> call,
                                    @NonNull Response<OrderUpdateResponse> response) {
-
-                Log.d(TAG, "Process order response: " + response.code());
-
                 if (response.isSuccessful() && response.body() != null) {
                     Order.OrderDetails updatedOrderDetails
                             = new Order.OrderDetails(response.body().data);
@@ -202,8 +193,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         addOrderToView(ongoingOrderObservers, updatedOrderDetails);
                     }
                 } else {
-                    Log.d(TAG, "Process order: Adding order to view.");
-
                     addOrderToView(newOrderObservers, orderDetails);
                     sendErrorToServer("Failed to auto-process order " + orderDetails.order.id);
                 }
@@ -224,20 +213,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
         AuthApi userService = ServiceGenerator.createUserService(this);
         userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
                 .clone().enqueue(new EmptyCallback());
-    }
-
-    private String parseInvoiceId(String body) {
-        if (body != null) {
-            Matcher matcher = pattern.matcher(body);
-            if (matcher.find() && matcher.group(0) != null) {
-                try {
-                    return matcher.group().replace("#", "");
-                } catch (Exception e) {
-                    Log.e(TAG, "Error while parsing invoiceId: " + e.getLocalizedMessage());
-                }
-            }
-        }
-        return null;
     }
 
     private String parseOrderId(String body) {

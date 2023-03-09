@@ -53,7 +53,7 @@ public class OrdersActivity extends NavbarActivity {
     private SectionsPagerAdapter sectionsPagerAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityOrdersBinding.inflate(getLayoutInflater());

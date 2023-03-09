@@ -15,11 +15,18 @@ public interface Printer {
     void initPrinterService(Context context);
     void addObserver(PrinterObserver observer);
     void removeObserver(PrinterObserver observer);
-    void printOrderReceipt(Order order, List<Item> items, Context context) throws Exception;
+    void printOrderReceipt(
+            Order order,
+            List<Item> items,
+            String currency
+    ) throws Exception;
     void printSalesSummary(
             StaffMember staffMember,
             List<SummaryDetails> summaryDetails,
             String currency
     );
-    void printConsolidatedOrderReceipt(ConsolidatedOrder consolidatedOrder, String currency) throws Exception;
+    void printConsolidatedOrderReceipt(
+            ConsolidatedOrder consolidatedOrder,
+            String currency
+    ) throws Exception;
 }

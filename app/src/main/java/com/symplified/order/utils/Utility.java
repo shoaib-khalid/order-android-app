@@ -38,18 +38,6 @@ public class Utility {
     private static final String inputDatePattern = "yyyy-MM-dd HH:mm:ss";
     private static final String outputDatePattern = "dd/MM/yyyy hh:mm:ss aa";
 
-    public static void logToFile(String text, Context context) {
-        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS), "log.txt");
-        try {
-            FileWriter fr = new FileWriter(file, true);
-            fr.write(text);
-            fr.close();
-        } catch (Exception e) {
-            String errorText = "Failed to write to file. " + e.getLocalizedMessage();
-            Log.e("print", errorText);
-        }
-    }
-
     public static String getCurrencySymbol(Order order, Context context) {
         if (order != null
                 && order.store != null

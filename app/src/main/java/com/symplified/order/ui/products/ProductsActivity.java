@@ -57,7 +57,7 @@ public class ProductsActivity extends NavbarActivity {
     private List<Store> stores = new ArrayList<>();
 
     @Override
-    protected void onCreate(Bundle savedInstanceStatus) {
+    public void onCreate(Bundle savedInstanceStatus) {
         super.onCreate(savedInstanceStatus);
 
         ActivityProductsBinding binding = ActivityProductsBinding.inflate(getLayoutInflater());

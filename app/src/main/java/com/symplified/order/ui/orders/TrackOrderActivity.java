@@ -36,7 +36,7 @@ public class TrackOrderActivity extends NavbarActivity {
     private OrderDeliveryDetailsResponse.OrderDeliveryDetailsData riderDetails;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityTrackOrderBinding.inflate(getLayoutInflater());

@@ -34,7 +34,7 @@ public class StoresActivity extends NavbarActivity
     private NavIntentStore action;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityStoresBinding.inflate(getLayoutInflater());

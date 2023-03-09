@@ -13,8 +13,8 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 33
-        versionCode 138
-        versionName "1.9.996"
+        versionCode 140
+        versionName "1.9.998"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,7 +37,7 @@ android {
 dependencies {
 
     implementation 'androidx.core:core:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
@@ -50,7 +50,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.8.0'
     implementation platform('com.google.firebase:firebase-bom:28.4.0')
     implementation 'com.google.code.gson:gson:2.9.0'
-    implementation 'com.google.firebase:firebase-messaging:23.1.1'
+    implementation 'com.google.firebase:firebase-messaging:23.1.2'
     implementation 'com.google.firebase:firebase-config:21.2.1'
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-analytics'

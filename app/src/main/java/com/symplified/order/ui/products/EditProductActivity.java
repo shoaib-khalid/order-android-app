@@ -56,7 +56,7 @@ public class EditProductActivity extends NavbarActivity {
     private ProductApi productApiService;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         com.symplified.order.databinding.ActivityEditProductBinding binding = com.symplified.order.databinding.ActivityEditProductBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

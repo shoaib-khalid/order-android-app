@@ -1,7 +1,18 @@
 package com.symplified.order.ui;
 
+import static android.Manifest.permission.BLUETOOTH_CONNECT;
+
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -10,6 +21,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -30,6 +43,8 @@ import com.symplified.order.ui.stores.StoresActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
+import java.util.Set;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -42,6 +57,54 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     private TextView storeName, storeEmail;
     private NavigationView navigationView;
     public FrameLayout frameLayout;
+
+    private BroadcastReceiver btReceiver;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        syncPairedBtDevices();
+        btReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent != null
+                        && intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(
+                            getApplicationContext(),
+                            BLUETOOTH_CONNECT
+                    ) == PackageManager.PERMISSION_DENIED
+                    ) {
+                        return;
+                    }
+
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                    if (device != null) {
+                        switch (device.getBondState()) {
+                            case BluetoothDevice.BOND_NONE:
+                                device.createBond();
+                                break;
+                            case BluetoothDevice.BOND_BONDED:
+                                App.addBtPrinter(device);
+                                break;
+                        }
+                    }
+                }
+            }
+        };
+
+        registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            unregisterReceiver(btReceiver);
+        } catch (Exception ignored) {
+        }
+    }
 
     @Override
     public void setContentView(View view) {
@@ -76,24 +139,25 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
         ServiceGenerator.createStoreService(this).getStoreById(storeId)
                 .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,
-                                   @NonNull Response<StoreResponse.SingleStoreResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    for (Store.StoreAsset asset : response.body().data.storeAssets) {
-                        if (asset.assetType.equals("LogoUrl")) {
-                            Glide.with(getApplicationContext()).load(asset.assetUrl).into(storeLogo);
+                    @Override
+                    public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                           @NonNull Response<StoreResponse.SingleStoreResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            for (Store.StoreAsset asset : response.body().data.storeAssets) {
+                                if (asset.assetType.equals("LogoUrl")) {
+                                    Glide.with(getApplicationContext()).load(asset.assetUrl).into(storeLogo);
+                                }
+                            }
+                            storeName.setText(response.body().data.name);
+                            storeEmail.setText(response.body().data.email);
                         }
                     }
-                    storeName.setText(response.body().data.name);
-                    storeEmail.setText(response.body().data.email);
-                }
-            }
 
-            @Override
-            public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
-                                  @NonNull Throwable t) { }
-        });
+                    @Override
+                    public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                          @NonNull Throwable t) {
+                    }
+                });
 
         TextView logout = navigationView.findViewById(R.id.nav_logout);
 
@@ -166,6 +230,46 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
             drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+
+    private void syncPairedBtDevices() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && ContextCompat.checkSelfPermission(
+                        getApplicationContext(), BLUETOOTH_CONNECT)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{BLUETOOTH_CONNECT},
+                    App.PERMISSION_REQUEST_CODE
+            );
+            return;
+        }
+
+        BluetoothAdapter adapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+
+        if (pairedDevices != null) {
+            for (BluetoothDevice btDevice : pairedDevices) {
+                btDevice.fetchUuidsWithSdp();
+                App.addBtPrinter(btDevice);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode,
+            @NonNull String[] permissions,
+            @NonNull int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == App.PERMISSION_REQUEST_CODE
+                && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            syncPairedBtDevices();
         }
     }
 }

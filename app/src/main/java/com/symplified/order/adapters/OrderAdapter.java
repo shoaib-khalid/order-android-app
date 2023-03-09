@@ -259,9 +259,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.printButton.setOnClickListener(view -> {
             ItemAdapter adapter = (ItemAdapter) holder.recyclerView.getAdapter();
             List<Item> items = adapter != null ? adapter.getItems() : new ArrayList<>();
-            printReceipt(order, items);
+            App.printOrderReceipt(order, items, currency, context.getApplicationContext());
         });
-        
+
         holder.orderType.setText(order.serviceType == ServiceType.DINEIN
                 ? "Dine In"
                 : order.orderShipmentDetail.storePickup ? "Store Pickup" : "Delivery");
@@ -357,10 +357,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         holder.statusButton.setOnClickListener(view -> updateOrderStatus(orderDetails, holder));
         holder.editButton.setOnClickListener(view -> onEditButtonClicked(order));
         holder.trackButton.setOnClickListener(view -> getRiderDetails(holder, order, 1));
-
-        if (App.isPrinterConnected()) {
-            holder.printButton.setVisibility(View.VISIBLE);
-        }
     }
 
     @Override
@@ -401,7 +397,12 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             @Override
             public void onResponse(@NonNull Call<ItemsResponse> call, @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    printReceipt(order, response.body().data.content);
+                    App.printOrderReceipt(
+                            order,
+                            response.body().data.content,
+                            Utility.getCurrencySymbol(order, context.getApplicationContext()),
+                            context.getApplicationContext()
+                    );
                 }
             }
 
@@ -457,9 +458,13 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         startLoading(holder);
 
         Call<OrderUpdateResponse> processOrder = orderApiService
-                .updateOrderStatus(new Order.OrderUpdate(currentOrderDetails.order.id,
-                                currentOrderDetails.nextCompletionStatus),
-                        currentOrderDetails.order.id);
+                .updateOrderStatus(
+                        new Order.OrderUpdate(
+                                currentOrderDetails.order.id,
+                                currentOrderDetails.nextCompletionStatus
+                        ),
+                        currentOrderDetails.order.id
+                );
 
         processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
@@ -630,16 +635,6 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.editButton.setVisibility(View.VISIBLE);
         } else if (Utility.isOrderOngoing(completionStatus)) {
             holder.ongoingLayout.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void printReceipt(Order order, List<Item> items) {
-        try {
-            App.getPrinter().printOrderReceipt(order, items, context);
-        } catch (Exception e) {
-            Log.e("order-adapter", "Failed to print order. " + e.getLocalizedMessage());
-            e.printStackTrace();
-            Toast.makeText(context, "Failed to print order.", Toast.LENGTH_SHORT).show();
         }
     }
 

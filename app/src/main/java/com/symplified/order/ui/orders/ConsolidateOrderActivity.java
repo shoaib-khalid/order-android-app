@@ -42,7 +42,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
     private Toolbar toolbar;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         binding = ActivityConsolidateOrderBinding.inflate(getLayoutInflater());

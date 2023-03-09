@@ -1,4 +1,4 @@
-package com.symplified.order.helpers;
+package com.symplified.order.utils;
 
 import android.content.Context;
 import android.os.RemoteException;
@@ -12,13 +12,10 @@ import com.symplified.order.enums.ServiceType;
 import com.symplified.order.interfaces.Printer;
 import com.symplified.order.interfaces.PrinterObserver;
 import com.symplified.order.models.item.Item;
-import com.symplified.order.models.item.ItemAddOn;
-import com.symplified.order.models.item.SubItem;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.staff.StaffMember;
 import com.symplified.order.models.staff.shift.SummaryDetails;
-import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -140,13 +137,12 @@ public class SunmiPrintHelper implements Printer {
         ex.printStackTrace();
     }
 
-    public void printOrderReceipt(Order order, List<Item> items, Context context) throws Exception {
+    public void printOrderReceipt(Order order, List<Item> items, String currency) throws Exception {
 
         if (!isPrinterConnected()) {
             return;
         }
 
-        String currency = Utility.getCurrencySymbol(order, context);
         DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
         String divider = "\n----------------------------";
@@ -199,7 +195,7 @@ public class SunmiPrintHelper implements Printer {
 
         prefix.append(divider).append("\n");
 
-        String itemText = generateItemPrintText(items, currency, formatter);
+        String itemText = PrinterUtility.generateItemPrintText(items, currency, formatter);
 
         suffix.append(divider)
                 .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
@@ -250,7 +246,7 @@ public class SunmiPrintHelper implements Printer {
                 .append(divider)
                 .append("\n");
 
-        String itemText = generateItemPrintText(order.orderItemWithDetails, currency, formatter);
+        String itemText = PrinterUtility.generateItemPrintText(order.orderItemWithDetails, currency, formatter);
 
         suffix.append(divider)
                 .append("\nSub-total           ").append(currency).append(" ").append(formatter.format(order.subTotal))
@@ -277,38 +273,6 @@ public class SunmiPrintHelper implements Printer {
         helper.feedPaper();
     }
 
-    private String generateItemPrintText(List<Item> items, String currency, DecimalFormat formatter) {
-        StringBuilder itemText = new StringBuilder();
-        for (Item item : items) {
-            itemText.append("\n").append(item.quantity).append(" x ").append(item.productName);
-            String spacing = Integer.toString(item.quantity).replaceAll("\\d", " ") + " * ";
-
-            if (item.productVariant != null && !item.productVariant.equals("")) {
-                itemText.append("\n").append(spacing).append(item.productVariant);
-            }
-
-            for (SubItem subItem : item.orderSubItem) {
-                itemText.append("\n").append(spacing).append(subItem.productName);
-            }
-
-            for (ItemAddOn itemAddOn : item.orderItemAddOn) {
-                itemText.append("\n").append(spacing).append(itemAddOn.productAddOn.addOnTemplateItem.name);
-            }
-
-            if (item.specialInstruction != null && !"".equals(item.specialInstruction)) {
-                itemText.append("\nInstructions: ").append(item.specialInstruction);
-            }
-
-            itemText.append("\nPrice: ")
-                    .append(currency)
-                    .append(" ")
-                    .append(formatter.format(item.price))
-                    .append("\n");
-        }
-
-        return String.valueOf(itemText);
-    }
-
     public void printSalesSummary(
             StaffMember staffMember,
             List<SummaryDetails> summaryDetailsList,
@@ -326,7 +290,7 @@ public class SunmiPrintHelper implements Printer {
         String divider2 = "\n****************************";
         StringBuilder body = new StringBuilder();
 
-        String title = "\n\tShift Summary";
+        String title = "\nShift Summary";
         Date date = new Date();
         body.append(divider)
                 .append("\nStaff: ").append(staffMember.name)
