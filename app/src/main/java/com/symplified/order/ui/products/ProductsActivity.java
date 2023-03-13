@@ -1,7 +1,9 @@
 package com.symplified.order.ui.products;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -33,6 +35,7 @@ import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -55,12 +58,13 @@ public class ProductsActivity extends NavbarActivity {
     private ProductApi productApiService;
     private StoreApi storeApiService;
     private List<Store> stores = new ArrayList<>();
+    private ActivityProductsBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceStatus) {
         super.onCreate(savedInstanceStatus);
 
-        ActivityProductsBinding binding = ActivityProductsBinding.inflate(getLayoutInflater());
+        binding = ActivityProductsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         Utility.verifyLoginStatus(this);
@@ -164,47 +168,26 @@ public class ProductsActivity extends NavbarActivity {
                                 productsList.addAll(response.data.content);
                             }
                         }
+
+                        Collections.sort(productsList, (p1, p2) -> p1.name.compareTo(p2.name));
+
                         productAdapter.setProducts(productsList);
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         stopLoading();
-                        Toast.makeText(ProductsActivity.this, "An error occurred. Please swipe down to retry.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(
+                                ProductsActivity.this,
+                                "An error occurred. Please swipe down to retry.",
+                                Toast.LENGTH_SHORT
+                        ).show();
                     }
 
                     @Override
                     public void onComplete() { stopLoading(); }
                 });
     }
-
-//    private void getProductsList() {
-//        for (String storeId: storeIdList.split(" ")) {
-//
-//            Call<ProductListResponse> responseCall = productApiService.getProducts(storeId);
-//
-//            responseCall.clone().enqueue(new Callback<ProductListResponse>() {
-//                @Override
-//                public void onResponse(@NonNull Call<ProductListResponse> call,
-//                                       @NonNull Response<ProductListResponse> response) {
-//                    if (response.isSuccessful() && response.body() != null) {
-//                        products.addAll(response.body().data.content);
-//                        productAdapter.notifyDataSetChanged();
-//                    } else {
-//                        Toast.makeText(ProductsActivity.this, "An Error Occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
-//                    }
-//                    stopLoading();
-//                }
-//
-//                @Override
-//                public void onFailure(@NonNull Call<ProductListResponse> call,
-//                                      @NonNull Throwable t) {
-//                    Toast.makeText(ProductsActivity.this, R.string.no_internet, Toast.LENGTH_SHORT).show();
-//                    stopLoading();
-//                }
-//            });
-//        }
-//    }
 
     private void startLoading() {
         refreshLayout.setRefreshing(true);

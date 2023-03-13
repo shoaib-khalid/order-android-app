@@ -32,7 +32,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     private List<Store> stores = new ArrayList<>();
     private List<Product> products = new ArrayList<>();
     private static final String TAG = "ProductAdapter";
-    private DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+    private final DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
     public ProductAdapter(Context context) {
         this.context = context;
@@ -74,6 +74,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         Product product = products.get(position);
 
         holder.productName.setText(product.name);
+
         for (Store store : stores) {
             if(product.storeId.equals(store.id)) {
                 Product.ProductInventory productInventory = product.productInventories.get(0);
@@ -113,7 +114,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             context.startActivity(intent);
         });
 
-        Glide.with(context).load(products.get(position).thumbnailUrl).into(holder.productImage);
+        Glide.with(context)
+                .load(products.get(position).thumbnailUrl)
+                .into(holder.productImage);
     }
 
     @Override
