@@ -74,9 +74,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
-            Log.d(TAG, "Notif body: " + remoteMessage.getData().get("body"));
             String orderId = parseOrderId(remoteMessage.getData().get("body"));
-            Log.d(TAG, "OrderId: " + orderId);
 
             if (orderId != null) {
                 OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
@@ -86,9 +84,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                            @NonNull Response<OrderDetailsResponse> response) {
 
-                        Log.d(TAG, "Query order response: " + response.code() +
-                                "response body != null: " + (response.body() != null) +
-                                "dataSize: " + (response.body() != null ? response.body().data.content.size() : "body null"));
                         if (response.isSuccessful() &&
                                 response.body() != null &&
                                 response.body().data.content.size() > 0) {
@@ -103,7 +98,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
                         } else {
                             alert(remoteMessage, null);
                             if (!response.isSuccessful()) {
-                                sendErrorToServer("Error " + response.code() + " received when querying order "
+                                sendErrorToServer("Error " + response.code()
+                                        + " received when querying order "
                                         + orderId + " after receiving Firebase notification.");
                             }
                         }

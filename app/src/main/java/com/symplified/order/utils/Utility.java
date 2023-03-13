@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
-import android.os.Environment;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -24,8 +23,6 @@ import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.ui.LoginActivity;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

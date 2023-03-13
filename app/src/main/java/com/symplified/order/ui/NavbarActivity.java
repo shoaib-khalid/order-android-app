@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -65,45 +64,45 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         super.onCreate(savedInstanceState);
 
         syncPairedBtDevices();
-        btReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent != null
-                        && intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(
-                            getApplicationContext(),
-                            BLUETOOTH_CONNECT
-                    ) == PackageManager.PERMISSION_DENIED
-                    ) {
-                        return;
-                    }
+//        btReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                if (intent != null
+//                        && intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
+//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(
+//                            getApplicationContext(),
+//                            BLUETOOTH_CONNECT
+//                    ) == PackageManager.PERMISSION_DENIED
+//                    ) {
+//                        return;
+//                    }
+//
+//                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//
+//                    if (device != null) {
+//                        switch (device.getBondState()) {
+//                            case BluetoothDevice.BOND_NONE:
+//                                device.createBond();
+//                                break;
+//                            case BluetoothDevice.BOND_BONDED:
+//                                App.addBtPrinter(device, getApplicationContext());
+//                                break;
+//                        }
+//                    }
+//                }
+//            }
+//        };
 
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-                    if (device != null) {
-                        switch (device.getBondState()) {
-                            case BluetoothDevice.BOND_NONE:
-                                device.createBond();
-                                break;
-                            case BluetoothDevice.BOND_BONDED:
-                                App.addBtPrinter(device);
-                                break;
-                        }
-                    }
-                }
-            }
-        };
-
-        registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+//        registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        try {
-            unregisterReceiver(btReceiver);
-        } catch (Exception ignored) {
-        }
+//        try {
+//            unregisterReceiver(btReceiver);
+//        } catch (Exception ignored) {
+//        }
     }
 
     @Override
@@ -252,8 +251,7 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
         if (pairedDevices != null) {
             for (BluetoothDevice btDevice : pairedDevices) {
-                btDevice.fetchUuidsWithSdp();
-                App.addBtPrinter(btDevice);
+                App.addBtPrinter(btDevice, getApplicationContext());
             }
         }
     }

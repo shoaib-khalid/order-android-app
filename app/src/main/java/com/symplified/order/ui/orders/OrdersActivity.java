@@ -1,7 +1,6 @@
 package com.symplified.order.ui.orders;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -28,7 +27,6 @@ import com.symplified.order.databinding.ActivityOrdersBinding;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.StoreApi;
-import com.symplified.order.services.AlertService;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.ui.LoginActivity;
 import com.symplified.order.ui.NavbarActivity;

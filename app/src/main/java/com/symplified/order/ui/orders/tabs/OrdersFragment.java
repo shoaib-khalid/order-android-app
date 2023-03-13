@@ -25,8 +25,6 @@ import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.adapters.OrderAdapter;
 import com.symplified.order.databinding.FragmentOrdersBinding;
-import com.symplified.order.utils.GenericPrintHelper;
-import com.symplified.order.utils.SunmiPrintHelper;
 import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.interfaces.OrderObserver;
 import com.symplified.order.interfaces.Printer;
@@ -37,7 +35,9 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.services.OrderNotificationService;
 import com.symplified.order.ui.orders.EditOrderActivity;
+import com.symplified.order.utils.GenericPrintHelper;
 import com.symplified.order.utils.SharedPrefsKey;
+import com.symplified.order.utils.SunmiPrintHelper;
 import com.symplified.order.utils.Utility;
 
 import java.text.SimpleDateFormat;
