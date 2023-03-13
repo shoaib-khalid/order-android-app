@@ -25,12 +25,14 @@ import com.symplified.order.utils.Utility;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
     private final Context context;
     private List<Store> stores = new ArrayList<>();
     private List<Product> products = new ArrayList<>();
+    private List<Product> productsToShow = new ArrayList<>();
     private static final String TAG = "ProductAdapter";
     private final DecimalFormat formatter = Utility.getMonetaryAmountFormat();
 
@@ -71,7 +73,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         SharedPreferences sharedPreferences = context.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String currency = sharedPreferences.getString(SharedPrefsKey.CURRENCY_SYMBOL, null);
 
-        Product product = products.get(position);
+        Product product = productsToShow.get(position);
 
         holder.productName.setText(product.name);
 
@@ -86,9 +88,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             }
         }
 
-        String status = products.get(position).status;
-
-        switch (status) {
+        switch (product.status) {
             case "ACTIVE":
                 holder.productStatus.setText("Active");
                 holder.productStatus.setTextColor(ContextCompat.getColor(context, R.color.sf_primary));
@@ -109,19 +109,19 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         holder.itemView.setOnClickListener(view -> {
             Intent intent = new Intent(context, EditProductActivity.class);
-            intent.putExtra("product", products.get(position));
+            intent.putExtra("product", product);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
 
         Glide.with(context)
-                .load(products.get(position).thumbnailUrl)
+                .load(product.thumbnailUrl)
                 .into(holder.productImage);
     }
 
     @Override
     public int getItemCount() {
-        return products.size();
+        return productsToShow.size();
     }
 
     public void setStores(List<Store> stores) {
@@ -132,5 +132,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         int originalSize = products.size();
         products.clear();
         notifyItemRangeRemoved(0, originalSize);
+    }
+
+    public void filter(String searchTerm) {
+        searchTerm = searchTerm.toLowerCase();
+        productsToShow.clear();
+        if (!Utility.isBlank(searchTerm)) {
+            for (Product product : products) {
+                if (product.name.toLowerCase().contains(searchTerm) &&
+                        !productsToShow.contains(product)) {
+                    productsToShow.add(product);
+                    notifyItemInserted(productsToShow.size() - 1);
+                }
+            }
+        } else {
+            productsToShow.addAll(products);
+        }
+        notifyDataSetChanged();
     }
 }

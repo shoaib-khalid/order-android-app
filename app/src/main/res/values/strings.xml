@@ -157,4 +157,5 @@
     <string name="cash_payment">Cash Payment</string>
     <string name="header_special_instruction">Special Instructions:</string>
     <string name="change_due_label">Change Due:</string>
+    <string name="hint_search">Search</string>
 </resources>

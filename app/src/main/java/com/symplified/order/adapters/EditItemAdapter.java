@@ -55,15 +55,10 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
 
         updatedItemsList = new ArrayList<>();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            items.forEach(item -> {
-                item.newQuantity = item.quantity;
-            });
-        } else {
+
             for (Item item : items) {
                 item.newQuantity = item.quantity;
             }
-        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

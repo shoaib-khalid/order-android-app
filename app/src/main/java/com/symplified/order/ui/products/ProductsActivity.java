@@ -3,8 +3,11 @@ package com.symplified.order.ui.products;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -53,8 +56,6 @@ public class ProductsActivity extends NavbarActivity {
     private static final String TAG = "ProductsActivity";
     private String storeIdList;
     private DrawerLayout drawerLayout;
-    private SwipeRefreshLayout refreshLayout;
-    private ProgressBar progressBar;
     private ProductApi productApiService;
     private StoreApi storeApiService;
     private List<Store> stores = new ArrayList<>();
@@ -76,18 +77,27 @@ public class ProductsActivity extends NavbarActivity {
 
         initToolbar();
 
-        RecyclerView recyclerView = findViewById(R.id.products_recyclerview);
-
         productAdapter = new ProductAdapter(this);
-        recyclerView.setAdapter(productAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerView.setAdapter(productAdapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        binding.textBoxSearch.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                productAdapter.filter(s.toString());
+            }
+        });
 
         storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString(SharedPrefsKey.STORE_ID_LIST, null);
 
-        progressBar = findViewById(R.id.product_progress_bar);
-        refreshLayout = findViewById(R.id.layout_products_refresh);
-        refreshLayout.setOnRefreshListener(this::getProductsList);
+        binding.refreshLayout.setOnRefreshListener(this::getProductsList);
 
         productApiService = ServiceGenerator.createProductService(getApplicationContext());
         storeApiService = ServiceGenerator.createStoreService(getApplicationContext());
@@ -172,6 +182,10 @@ public class ProductsActivity extends NavbarActivity {
                         Collections.sort(productsList, (p1, p2) -> p1.name.compareTo(p2.name));
 
                         productAdapter.setProducts(productsList);
+                        EditText searchEditText = binding.textBoxSearch.getEditText();
+                        String searchText = searchEditText != null
+                                ? searchEditText.getText().toString() : "";
+                        productAdapter.filter(searchText);
                     }
 
                     @Override
@@ -190,14 +204,14 @@ public class ProductsActivity extends NavbarActivity {
     }
 
     private void startLoading() {
-        refreshLayout.setRefreshing(true);
-        refreshLayout.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        binding.refreshLayout.setRefreshing(true);
+        binding.refreshLayout.setVisibility(View.GONE);
+        binding.progressBar.setVisibility(View.VISIBLE);
     }
 
     private void stopLoading() {
-        refreshLayout.setRefreshing(false);
-        progressBar.setVisibility(View.GONE);
-        refreshLayout.setVisibility(View.VISIBLE);
+        binding.refreshLayout.setRefreshing(false);
+        binding.refreshLayout.setVisibility(View.VISIBLE);
+        binding.progressBar.setVisibility(View.GONE);
     }
 }
