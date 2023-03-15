@@ -23,7 +23,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.adapters.OrderAdapter;
+import com.symplified.order.ui.orders.OrderAdapter;
 import com.symplified.order.databinding.FragmentOrdersBinding;
 import com.symplified.order.interfaces.OrderManager;
 import com.symplified.order.interfaces.OrderObserver;

@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -37,6 +38,7 @@ import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.ui.products.ProductsActivity;
+import com.symplified.order.ui.settings.SettingsActivity;
 import com.symplified.order.ui.staff.StaffActivity;
 import com.symplified.order.ui.stores.StoresActivity;
 import com.symplified.order.utils.SharedPrefsKey;
@@ -62,38 +64,9 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Utility.verifyLoginStatus(this);
 
         syncPairedBtDevices();
-//        btReceiver = new BroadcastReceiver() {
-//            @Override
-//            public void onReceive(Context context, Intent intent) {
-//                if (intent != null
-//                        && intent.getAction().equals(BluetoothDevice.ACTION_FOUND)) {
-//                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && ContextCompat.checkSelfPermission(
-//                            getApplicationContext(),
-//                            BLUETOOTH_CONNECT
-//                    ) == PackageManager.PERMISSION_DENIED
-//                    ) {
-//                        return;
-//                    }
-//
-//                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//
-//                    if (device != null) {
-//                        switch (device.getBondState()) {
-//                            case BluetoothDevice.BOND_NONE:
-//                                device.createBond();
-//                                break;
-//                            case BluetoothDevice.BOND_BONDED:
-//                                App.addBtPrinter(device, getApplicationContext());
-//                                break;
-//                        }
-//                    }
-//                }
-//            }
-//        };
-
-//        registerReceiver(btReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
     }
 
     @Override
@@ -212,6 +185,11 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
                         startActivity(intent);
                     }
                     break;
+                case R.id.nav_system_config:
+                    if (!item.isChecked()) {
+                        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
+                    }
+                    break;
             }
             return false;
         });
@@ -234,26 +212,32 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
 
 
     private void syncPairedBtDevices() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                && ContextCompat.checkSelfPermission(
+        new Thread() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                        && ContextCompat.checkSelfPermission(
                         getApplicationContext(), BLUETOOTH_CONNECT)
-                == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{BLUETOOTH_CONNECT},
-                    App.PERMISSION_REQUEST_CODE
-            );
-            return;
-        }
+                        == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(
+                            NavbarActivity.this,
+                            new String[]{BLUETOOTH_CONNECT},
+                            App.PERMISSION_REQUEST_CODE
+                    );
+                    return;
+                }
 
-        BluetoothAdapter adapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
-        Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+                BluetoothAdapter adapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+                Log.d("navbar-activity", "Syncing paired bt devices. Size: " + pairedDevices.size());
 
-        if (pairedDevices != null) {
-            for (BluetoothDevice btDevice : pairedDevices) {
-                App.addBtPrinter(btDevice, getApplicationContext());
+                if (pairedDevices != null) {
+                    for (BluetoothDevice btDevice : pairedDevices) {
+                        App.addBtPrinter(btDevice, getApplicationContext());
+                    }
+                }
             }
-        }
+        }.start();
     }
 
     @Override

@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.symplified.order.R;
-import com.symplified.order.adapters.StoreAdapter;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
@@ -32,7 +31,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class StoreSelectionFragment extends Fragment implements StoreAdapter.StoreSelectionListener {
+public class StoreSelectionFragment extends Fragment
+        implements StoreAdapter.StoreSelectionListener {
 
     public interface StoreFragmentListener {
         void onStoreSelected(Fragment fragment, String storeId);

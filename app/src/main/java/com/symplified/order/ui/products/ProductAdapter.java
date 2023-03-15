@@ -1,4 +1,4 @@
-package com.symplified.order.adapters;
+package com.symplified.order.ui.products;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,14 +18,12 @@ import com.symplified.order.App;
 import com.symplified.order.R;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.store.Store;
-import com.symplified.order.ui.products.EditProductActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 

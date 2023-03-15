@@ -50,7 +50,6 @@ public class AlertService extends Service {
 
         String storeType = "", serviceType = "";
         if (intent != null && intent.getExtras() != null) {
-            Log.d("alert-service", "extras not null");
             if (intent.hasExtra(getString(R.string.store_type))) {
                 storeType = intent.getStringExtra(getString(R.string.store_type));
             }

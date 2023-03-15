@@ -1,9 +1,8 @@
-package com.symplified.order.adapters;
+package com.symplified.order.ui.orders;
 
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

@@ -13,7 +13,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.symplified.order.R;
-import com.symplified.order.adapters.StaffAdapter;
 import com.symplified.order.databinding.FragmentStaffManagementBinding;
 import com.symplified.order.models.staff.PasswordChangeRequest;
 import com.symplified.order.models.staff.RegisterStaffMemberRequest;

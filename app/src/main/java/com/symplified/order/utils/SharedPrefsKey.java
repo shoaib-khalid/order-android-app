@@ -14,4 +14,6 @@ public interface SharedPrefsKey {
     String REFRESH_TOKEN = "refreshToken";
     String IS_ORDER_CONSOLIDATION_ENABLED = "is_order_consolidation_enabled";
     String CURRENCY_SYMBOL = "currency";
+
+    String BT_DEVICE_PREFS_FILE_NAME = "Symplified Merchant App Bluetooth Device Preferences";
 }

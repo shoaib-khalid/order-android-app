@@ -1,4 +1,4 @@
-package com.symplified.order.adapters;
+package com.symplified.order.ui.staff;
 
 import android.app.AlertDialog;
 import android.os.Build;
@@ -65,10 +65,12 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        return new ViewHolder(
-                LayoutInflater.from(viewGroup.getContext())
-                        .inflate(R.layout.row_staff_member, viewGroup, false)
-        );
+        return new ViewHolder(LayoutInflater.from(viewGroup.getContext())
+                .inflate(
+                        R.layout.row_staff_member,
+                        viewGroup,
+                        false
+                ));
     }
 
     @Override

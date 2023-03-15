@@ -1,4 +1,4 @@
-package com.symplified.order.adapters;
+package com.symplified.order.ui.stores;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.symplified.order.R;
-import com.symplified.order.dialogs.SettingsBottomSheet;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreStatusResponse;
@@ -103,7 +102,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             holder.itemView.setOnClickListener(view -> {
                 if (!holder.isLoading()) {
                     BottomSheetDialogFragment storeScheduleDialog
-                            = new SettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
+                            = new StoreSettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
                     storeScheduleDialog.show(((FragmentActivity) context).getSupportFragmentManager(),
                             "bottomSheetDialog");
                 }

@@ -8,10 +8,22 @@
             android:id="@+id/nav_orders"
             android:icon="@drawable/ic_orders"
             android:title="Orders" />
+
         <item
-            android:id="@+id/nav_stores"
             android:icon="@drawable/ic_stores"
-            android:title="Store Operation" />
+            android:title="Store Operation">
+            <menu>
+                <item
+                    android:id="@+id/nav_stores"
+                    android:icon="@drawable/ic_stores"
+                    android:title="Operations Timing" />
+                <item
+                    android:id="@+id/nav_system_config"
+                    android:icon="@drawable/ic_print"
+                    android:title="Systems Configuration" />
+            </menu>
+        </item>
+
         <item
             android:id="@+id/nav_products"
             android:icon="@drawable/ic_products"
@@ -24,6 +36,7 @@
         <item
             android:icon="@drawable/ic_person"
             android:title="Shift Management">
+
             <menu>
                 <item
                     android:id="@+id/nav_daily_sales"

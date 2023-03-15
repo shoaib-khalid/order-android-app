@@ -23,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.adapters.EditItemAdapter;
 import com.symplified.order.databinding.ActivityEditOrderBinding;
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.item.Item;

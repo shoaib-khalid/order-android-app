@@ -29,9 +29,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
 
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-            if (device != null
-                    && device.getName() != null
-                    && device.getName().startsWith("CloudPrint")) {
+            if (device != null) {
                 switch (device.getBondState()) {
                     case BluetoothDevice.BOND_NONE:
                         device.createBond();

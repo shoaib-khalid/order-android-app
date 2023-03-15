@@ -1,4 +1,4 @@
-package com.symplified.order.adapters;
+package com.symplified.order.ui.orders;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -39,7 +39,6 @@ import com.symplified.order.models.order.OrderUpdateResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.DeliveryApi;
 import com.symplified.order.networking.apis.OrderApi;
-import com.symplified.order.ui.orders.TrackOrderActivity;
 import com.symplified.order.utils.Utility;
 
 import java.text.DecimalFormat;

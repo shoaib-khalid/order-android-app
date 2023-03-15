@@ -40,9 +40,6 @@ public class StaffActivity extends NavbarActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString(SharedPrefsKey.CLIENT_ID, "");
-
         action = (NavIntentStaff) getIntent().getExtras().getSerializable("action");
 
         initToolbar();
@@ -75,8 +72,12 @@ public class StaffActivity extends NavbarActivity {
     private void initToolbar() {
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
-        navigationView.getMenu().getItem(4)
-                .getSubMenu().getItem(action == NavIntentStaff.VIEW_DAILY_SALES ? 0 : 1).setChecked(true);
+        navigationView
+                .getMenu()
+                .getItem(4)
+                .getSubMenu()
+                .getItem(action == NavIntentStaff.VIEW_DAILY_SALES ? 0 : 1)
+                .setChecked(true);
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources

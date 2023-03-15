@@ -1,15 +1,12 @@
 package com.symplified.order.ui.products;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,13 +15,10 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.navigation.NavigationView;
 import com.symplified.order.App;
 import com.symplified.order.R;
-import com.symplified.order.adapters.ProductAdapter;
 import com.symplified.order.databinding.ActivityProductsBinding;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
@@ -54,7 +48,6 @@ public class ProductsActivity extends NavbarActivity {
     private Toolbar toolbar;
     private ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
-    private String storeIdList;
     private DrawerLayout drawerLayout;
     private ProductApi productApiService;
     private StoreApi storeApiService;
@@ -94,7 +87,7 @@ public class ProductsActivity extends NavbarActivity {
             }
         });
 
-        storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
+        String storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString(SharedPrefsKey.STORE_ID_LIST, null);
 
         binding.refreshLayout.setOnRefreshListener(this::getProductsList);

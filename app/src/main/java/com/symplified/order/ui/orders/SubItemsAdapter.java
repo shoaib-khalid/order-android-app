@@ -1,4 +1,4 @@
-package com.symplified.order.adapters;
+package com.symplified.order.ui.orders;
 
 import android.view.LayoutInflater;
 import android.view.View;
