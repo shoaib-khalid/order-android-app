@@ -38,12 +38,6 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         this.context = context;
     }
 
-    public void setProducts(List<Product> products) {
-        clear();
-        this.products = products;
-        notifyItemRangeInserted(0, products.size());
-    }
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView productName, productPrice, productStatus;
         private final ImageView productImage, statusIcon;
@@ -124,6 +118,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public void setStores(List<Store> stores) {
         this.stores = stores;
+    }
+
+    public void setProducts(List<Product> products) {
+        clear();
+        this.products = products;
+        notifyItemRangeInserted(0, products.size());
     }
 
     public void clear() {

@@ -22,7 +22,7 @@ public final class PrinterUtility {
             itemText.append("\n").append(item.quantity).append(" x ").append(item.productName);
             String spacing = Integer.toString(item.quantity).replaceAll("\\d", " ") + " * ";
 
-            if (Utility.isBlank(item.productVariant)) {
+            if (!Utility.isBlank(item.productVariant)) {
                 itemText.append("\n").append(spacing).append(item.productVariant);
             }
 
@@ -82,7 +82,8 @@ public final class PrinterUtility {
                     ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
                     : TimeZone.getDefault();
             receiptText.append("\n").append(
-                    Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
+                    Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone)
+            );
         }
 
         receiptText.append("\nOrder Type: ")
@@ -90,17 +91,18 @@ public final class PrinterUtility {
                         ? "Dine In"
                         : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
 
-        if (order.orderPaymentDetail != null) {
+        if (order.orderPaymentDetail != null
+                && order.orderPaymentDetail.paymentChannel != null) {
             receiptText.append("\nPayment Type: ")
                     .append(order.orderPaymentDetail.paymentChannel);
         }
 
-        if (order.orderShipmentDetail.phoneNumber != null
-                && !"".equals(order.orderShipmentDetail.phoneNumber)) {
+        if (order.orderShipmentDetail != null
+                && !Utility.isBlank(order.orderShipmentDetail.phoneNumber)) {
             receiptText.append("\nCustomer no.: ").append(order.orderShipmentDetail.phoneNumber);
         }
 
-        if (!"".equals(customerNotes) && order.serviceType != ServiceType.DINEIN) {
+        if (!Utility.isBlank(customerNotes) && order.serviceType != ServiceType.DINEIN) {
             receiptText.append("\nNotes: ").append(customerNotes);
         }
 
