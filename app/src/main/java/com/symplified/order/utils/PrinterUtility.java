@@ -34,7 +34,7 @@ public final class PrinterUtility {
                 itemText.append("\n").append(spacing).append(itemAddOn.productAddOn.addOnTemplateItem.name);
             }
 
-            if (Utility.isBlank(item.specialInstruction)) {
+            if (!Utility.isBlank(item.specialInstruction)) {
                 itemText.append("\nInstructions: ").append(item.specialInstruction);
             }
 
@@ -70,6 +70,7 @@ public final class PrinterUtility {
 
         receiptText.append("\n")
                 .append((order.serviceType == ServiceType.DINEIN
+                        && order.store.verticalCode.equalsIgnoreCase("fnb")
                         ? customerNotes
                         : order.store != null ? order.store.name : "Deliverin.MY Order Chit"))
                 .append(divider)
@@ -88,11 +89,11 @@ public final class PrinterUtility {
 
         receiptText.append("\nOrder Type: ")
                 .append(order.serviceType == ServiceType.DINEIN
-                        ? "Dine In"
+                        ? (!order.store.verticalCode.equalsIgnoreCase("fnb") ? "In-store" : "Dine In")
                         : order.orderShipmentDetail.storePickup ? "Self-Pickup" : "Delivery");
 
-        if (order.orderPaymentDetail != null
-                && order.orderPaymentDetail.paymentChannel != null) {
+        if (order.orderPaymentDetail != null &&
+                order.orderPaymentDetail.paymentChannel != null) {
             receiptText.append("\nPayment Type: ")
                     .append(order.orderPaymentDetail.paymentChannel);
         }
@@ -102,8 +103,14 @@ public final class PrinterUtility {
             receiptText.append("\nCustomer no.: ").append(order.orderShipmentDetail.phoneNumber);
         }
 
-        if (!Utility.isBlank(customerNotes) && order.serviceType != ServiceType.DINEIN) {
-            receiptText.append("\nNotes: ").append(customerNotes);
+        if (!Utility.isBlank(customerNotes)
+                && (order.serviceType != ServiceType.DINEIN
+                || !order.store.verticalCode.equalsIgnoreCase("fnb"))) {
+
+            if (order.serviceType != ServiceType.DINEIN) {
+                receiptText.append("\nNotes: ");
+            }
+            receiptText.append(customerNotes);
         }
 
         receiptText.append(divider).append("\n")

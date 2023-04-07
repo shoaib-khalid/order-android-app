@@ -32,13 +32,6 @@ public class AlertService extends Service {
     private static boolean hasRepeatedOnce = false;
     public static final int notificationId = 27386;
 
-    public void onCreate() {
-        super.onCreate();
-
-        mediaPlayer = MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        startForeground(notificationId, getNotification("", ""));
-    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -48,42 +41,30 @@ public class AlertService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        String storeType = "", serviceType = "";
-        if (intent != null && intent.getExtras() != null) {
-            if (intent.hasExtra(getString(R.string.store_type))) {
-                storeType = intent.getStringExtra(getString(R.string.store_type));
-            }
+        if (intent != null
+                && intent.getExtras() != null
+                && intent.hasExtra("title")
+                && intent.hasExtra("body")
+        ) {
+            String title = intent.getStringExtra("title");
+            String body = intent.getStringExtra("body");
 
-            if (intent.hasExtra(getString(R.string.service_type))) {
-                serviceType = intent.getStringExtra(getString(R.string.service_type));
-            }
-
-            if (intent.hasExtra("title")
-                    && intent.hasExtra("body")) {
-                String title = intent.getStringExtra("title");
-                String body = intent.getStringExtra("body");
-
-                NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.notify(notificationId, getNotification(title, body));
-            }
+            NotificationManager notifMgr
+                    = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notifMgr.notify(notificationId, getNotification(title, body));
         }
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring_dine_in);
-        if (isAppOnForeground(this)
-                || !storeType.contains("FnB")
-                || serviceType.contains(ServiceType.DINEIN.toString())) {
-            mediaPlayer.setLooping(false);
-            hasRepeatedOnce = false;
-            mediaPlayer.setOnCompletionListener(mp -> {
-                if (!hasRepeatedOnce) {
-                    hasRepeatedOnce = true;
-                    mp.seekTo(0);
-                    mp.start();
-                }
-            });
-        } else {
-            mediaPlayer.setLooping(true);
-        }
+        mediaPlayer.setLooping(false);
+
+        hasRepeatedOnce = false;
+        mediaPlayer.setOnCompletionListener(mp -> {
+            if (!hasRepeatedOnce) {
+                hasRepeatedOnce = true;
+                mp.seekTo(0);
+                mp.start();
+            }
+        });
 
 //        AudioManager audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 

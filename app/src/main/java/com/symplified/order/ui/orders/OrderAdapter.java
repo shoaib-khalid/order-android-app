@@ -426,11 +426,20 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             notifyItemRemoved(holder.getAdapterPosition());
             notifyItemRangeChanged(holder.getAdapterPosition(), orders.size());
 
-            Call<OrderUpdateResponse> processOrder = orderApiService
-                    .updateOrderStatus(new Order.OrderUpdate(order.id, OrderStatus.CANCELED_BY_MERCHANT), order.id);
-            processOrder.clone().enqueue(new Callback<OrderUpdateResponse>() {
+            Call<OrderUpdateResponse> cancelOrderRequest = orderApiService
+                    .updateOrderStatus(
+                            new Order.OrderUpdate(
+                                    order.id,
+                                    OrderStatus.CANCELED_BY_MERCHANT
+                            ),
+                            order.id
+                    );
+            cancelOrderRequest.clone().enqueue(new Callback<OrderUpdateResponse>() {
                 @Override
-                public void onResponse(@NonNull Call<OrderUpdateResponse> call, @NonNull Response<OrderUpdateResponse> response) {
+                public void onResponse(
+                        @NonNull Call<OrderUpdateResponse> call,
+                        @NonNull Response<OrderUpdateResponse> response
+                ) {
                     if (response.isSuccessful()) {
                         Toast.makeText(context, "Order Cancelled", Toast.LENGTH_SHORT).show();
                     } else if (response.code() != 406) {
@@ -440,7 +449,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<OrderUpdateResponse> call, @NonNull Throwable t) {
+                public void onFailure(
+                        @NonNull Call<OrderUpdateResponse> call,
+                        @NonNull Throwable t
+                ) {
                     Toast.makeText(context, R.string.no_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ", t);
 

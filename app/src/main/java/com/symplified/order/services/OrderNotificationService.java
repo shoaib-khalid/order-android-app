@@ -118,8 +118,10 @@ public class OrderNotificationService extends FirebaseMessagingService {
         }
     }
 
-    private void printAndProcessOrder(OrderApi orderApiService,
-                                      Order.OrderDetails orderDetails) {
+    private void printAndProcessOrder(
+            OrderApi orderApiService,
+            Order.OrderDetails orderDetails
+    ) {
 
         orderApiService.getItemsForOrder(orderDetails.order.id).clone().enqueue(new Callback<ItemsResponse>() {
             @Override
@@ -190,6 +192,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     }
                 } else {
                     addOrderToView(newOrderObservers, orderDetails);
+                    Log.e("order-adapter", "OrderNotificationService: Failed to process order: Error " + response.code());
                     sendErrorToServer("Failed to auto-process order " + orderDetails.order.id);
                 }
             }

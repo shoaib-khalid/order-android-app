@@ -89,6 +89,10 @@ public class Utility {
         return str == null || "".equals(str);
     }
 
+    public static boolean isNotBlank(String str) {
+        return str != null && !"".equals(str);
+    }
+
     public static boolean isGooglePlayServicesAvailable(Context context) {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;
     }
@@ -141,7 +145,6 @@ public class Utility {
         SharedPreferences sharedPreferences = activity.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         if (!sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)
                 || sharedPreferences.getString(SharedPrefsKey.STORE_ID_LIST, null) == null) {
-            Log.d("utility", "Not logged in");
             logout(activity);
         }
     }
