@@ -113,6 +113,9 @@ public class App extends Application implements PrinterObserver {
                     }
                 }
 
+                if ("innerprinter".equalsIgnoreCase(device.getName())) {
+                    return;
+                }
 
                 isAddingBluetoothDevice = true;
                 for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {

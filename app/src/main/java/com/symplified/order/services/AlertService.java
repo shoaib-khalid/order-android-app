@@ -11,15 +11,13 @@ import android.content.Intent;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
-import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
 import com.symplified.order.R;
-import com.symplified.order.enums.ServiceType;
 import com.symplified.order.ui.orders.OrdersActivity;
 import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.Utility;
@@ -30,7 +28,10 @@ public class AlertService extends Service {
 
     private static MediaPlayer mediaPlayer;
     private static boolean hasRepeatedOnce = false;
-    public static final int notificationId = 27386;
+
+    public static final int NOTIFICATION_ID = 27386;
+
+
 
     @Nullable
     @Override
@@ -39,19 +40,36 @@ public class AlertService extends Service {
     }
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // Necessary to prevent app from crashing
+        startForeground(NOTIFICATION_ID, getNotification("", ""));
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        String title = "", body = "";
 
         if (intent != null
                 && intent.getExtras() != null
                 && intent.hasExtra("title")
                 && intent.hasExtra("body")
         ) {
-            String title = intent.getStringExtra("title");
-            String body = intent.getStringExtra("body");
+            title = intent.getStringExtra("title");
+            body = intent.getStringExtra("body");
+        }
 
-            NotificationManager notifMgr
-                    = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            notifMgr.notify(notificationId, getNotification(title, body));
+        Notification notification = getNotification(title, body);
+
+        startForeground(NOTIFICATION_ID, notification);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForeground(NOTIFICATION_ID, notification);
+        } else {
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE))
+                    .notify(NOTIFICATION_ID, notification);
         }
 
         mediaPlayer = MediaPlayer.create(this, R.raw.ring_dine_in);
@@ -63,6 +81,8 @@ public class AlertService extends Service {
                 hasRepeatedOnce = true;
                 mp.seekTo(0);
                 mp.start();
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                stopForeground(STOP_FOREGROUND_DETACH);
             }
         });
 
@@ -79,7 +99,9 @@ public class AlertService extends Service {
 //            mediaPlayer.setVolume(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
 //                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
 //        }
+        // TODO: setAudioStreamType is deprecated. Look for replacement.
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//        mediaPlayer.setAudioAttributes(AudioAttributes.CONTENT_TYPE_MUSIC);
         mediaPlayer.start();
         return START_STICKY;
     }
@@ -125,7 +147,7 @@ public class AlertService extends Service {
                 PendingIntent.FLAG_IMMUTABLE
         );
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel chan = new NotificationChannel(
                     ChannelId.NEW_ORDERS,
                     ChannelId.NEW_ORDERS,

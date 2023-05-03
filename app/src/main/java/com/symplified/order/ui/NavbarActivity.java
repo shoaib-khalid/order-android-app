@@ -44,6 +44,7 @@ import com.symplified.order.ui.stores.StoresActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
+import java.util.Calendar;
 import java.util.Set;
 
 import retrofit2.Call;
@@ -59,23 +60,12 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
     private NavigationView navigationView;
     public FrameLayout frameLayout;
 
-    private BroadcastReceiver btReceiver;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Utility.verifyLoginStatus(this);
 
         syncPairedBtDevices();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-//        try {
-//            unregisterReceiver(btReceiver);
-//        } catch (Exception ignored) {
-//        }
     }
 
     @Override
@@ -107,7 +97,11 @@ public class NavbarActivity extends AppCompatActivity implements NavigationView.
         storeName = header.findViewById(R.id.nav_store_name);
         storeEmail = header.findViewById(R.id.nav_store_email);
         ((TextView) header.findViewById(R.id.nav_app_version))
-                .setText(getString(R.string.version_indicator, BuildConfig.VERSION_NAME));
+                .setText(getString(
+                        R.string.version_indicator,
+                        Integer.toString(Calendar.getInstance().get(Calendar.YEAR)),
+                        BuildConfig.VERSION_NAME
+                ));
 
         ServiceGenerator.createStoreService(this).getStoreById(storeId)
                 .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {

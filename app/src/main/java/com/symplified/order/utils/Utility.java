@@ -89,9 +89,7 @@ public class Utility {
         return str == null || "".equals(str);
     }
 
-    public static boolean isNotBlank(String str) {
-        return str != null && !"".equals(str);
-    }
+    public static boolean isNotBlank(String str) { return str != null && !"".equals(str); }
 
     public static boolean isGooglePlayServicesAvailable(Context context) {
         return GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS;

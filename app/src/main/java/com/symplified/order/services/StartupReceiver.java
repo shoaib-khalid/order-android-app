@@ -64,8 +64,6 @@ public class StartupReceiver extends BroadcastReceiver {
         }
     }
 
-
-
     private static void checkForNewOrders(Context context) {
         SharedPreferences sharedPrefs = context
                 .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
