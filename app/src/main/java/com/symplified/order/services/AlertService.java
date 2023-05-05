@@ -31,8 +31,6 @@ public class AlertService extends Service {
 
     public static final int NOTIFICATION_ID = 27386;
 
-
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

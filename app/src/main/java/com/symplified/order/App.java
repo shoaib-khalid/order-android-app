@@ -13,7 +13,6 @@ import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
-import androidx.lifecycle.MutableLiveData;
 
 import com.symplified.order.interfaces.Printer;
 import com.symplified.order.interfaces.PrinterObserver;
@@ -65,6 +64,28 @@ public class App extends Application implements PrinterObserver {
     public static boolean isAddingBluetoothDevice = false;
     private static final String PRINTER_UUID = "00001101-0000-1000-8000-00805F9B34FB";
 
+    private static App instance;
+
+//    private static AppDatabase database;
+//    public static synchronized AppDatabase getDatabase() {
+//        if (database == null) {
+//            database = AppDatabase.Companion.getDatabase(getAppContext());
+//        }
+//        return database;
+//    }
+//
+//    private static BtPrinterRepository btPrinterRepository;
+//    public static synchronized BtPrinterRepository getBtPrinterRepository() {
+//        if (btPrinterRepository == null) {
+//            btPrinterRepository = new BtPrinterRepository(getDatabase().printerDao());
+//        }
+//        return btPrinterRepository;
+//    }
+
+    public App() {
+        instance = this;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -96,53 +117,60 @@ public class App extends Application implements PrinterObserver {
             BluetoothDevice device,
             Context context
     ) {
-        new Thread() {
-            @Override
-            public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                        ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
-                                == PackageManager.PERMISSION_DENIED
-                ) {
-                    return;
-                }
 
-                for (PairedDevice storedPrinter : btPrinters) {
-                    if (storedPrinter.device.getName()
-                            .equals(device.getName())) {
-                        return;
-                    }
-                }
-
-                if ("innerprinter".equalsIgnoreCase(device.getName())) {
-                    return;
-                }
-
-                isAddingBluetoothDevice = true;
-                for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-                    listener.onIsAddingBluetoothDevice(isAddingBluetoothDevice);
-                }
-                try {
-                    BluetoothSocket socket = device
-                            .createRfcommSocketToServiceRecord(UUID.fromString(PRINTER_UUID));
-                    if (socket != null) {
-                        socket.connect();
-                        PairedDevice pairedDevice = new PairedDevice(device, socket, device.getName());
-                        btPrinters.add(pairedDevice);
-                        for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-                            listener.onBluetoothDeviceAdded(pairedDevice);
-                        }
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                isAddingBluetoothDevice = false;
-                for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-                    listener.onIsAddingBluetoothDevice(isAddingBluetoothDevice);
-                }
-            }
-        }.start();
     }
+
+//    public static void addBtPrinter(
+//            BluetoothDevice device,
+//            Context context
+//    ) {
+//        new Thread() {
+//            @Override
+//            public void run() {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+//                        ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
+//                                == PackageManager.PERMISSION_DENIED
+//                ) {
+//                    return;
+//                }
+//
+//                for (PairedDevice storedPrinter : btPrinters) {
+//                    if (storedPrinter.device.getName()
+//                            .equals(device.getName())) {
+//                        return;
+//                    }
+//                }
+//
+//                if ("innerprinter".equalsIgnoreCase(device.getName())) {
+//                    return;
+//                }
+//
+//                isAddingBluetoothDevice = true;
+//                for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
+//                    listener.onIsAddingBluetoothDevice(isAddingBluetoothDevice);
+//                }
+//                try {
+//                    BluetoothSocket socket = device
+//                            .createRfcommSocketToServiceRecord(UUID.fromString(PRINTER_UUID));
+//                    if (socket != null) {
+//                        socket.connect();
+//                        PairedDevice pairedDevice = new PairedDevice(device, socket, device.getName());
+//                        btPrinters.add(pairedDevice);
+//                        for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
+//                            listener.onBluetoothDeviceAdded(pairedDevice);
+//                        }
+//                    }
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                isAddingBluetoothDevice = false;
+//                for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
+//                    listener.onIsAddingBluetoothDevice(isAddingBluetoothDevice);
+//                }
+//            }
+//        }.start();
+//    }
 
     public static void printOrderReceipt(
             Order order,
@@ -172,7 +200,8 @@ public class App extends Application implements PrinterObserver {
             return;
         }
 
-        SharedPreferences sharedPrefs = context.getSharedPreferences(SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedPrefs = context.getSharedPreferences(
+                SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
         byte[] dataToPrint = PrinterUtility.generateReceiptText(order, items, currency)
                 .getBytes(StandardCharsets.UTF_8);
 
@@ -192,8 +221,7 @@ public class App extends Application implements PrinterObserver {
                         while (noOfTries < 10) {
                             try {
                                 if (btPrinter.socket == null) {
-                                    btPrinter.socket
-                                            = btPrinter.device.createRfcommSocketToServiceRecord(
+                                    btPrinter.socket = btPrinter.device.createRfcommSocketToServiceRecord(
                                             UUID.fromString(PRINTER_UUID)
                                     );
                                 }
@@ -219,5 +247,9 @@ public class App extends Application implements PrinterObserver {
     }
     public static void removeBluetoothDeviceListener(OnBluetoothDeviceAddedListener listener) {
         deviceAddedListeners.remove(listener);
+    }
+
+    public static Context getAppContext() {
+        return instance.getApplicationContext();
     }
 }

@@ -105,8 +105,13 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
         <service
             android:name=".services.AlertService"
+            android:enabled="true" />
+
+        <service
+            android:name=".services.BluetoothPrinterService"
             android:enabled="true" />
 
         <receiver

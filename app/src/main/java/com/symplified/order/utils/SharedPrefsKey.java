@@ -16,4 +16,6 @@ public interface SharedPrefsKey {
     String CURRENCY_SYMBOL = "currency";
 
     String BT_DEVICE_PREFS_FILE_NAME = "Symplified Merchant App Bluetooth Device Preferences";
+    String SAVED_BT_DEVICES_FILE_NAME = "Symplified Merchant App Bluetooth Devices";
+
 }

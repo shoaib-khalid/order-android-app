@@ -6,4 +6,6 @@ public interface ChannelId {
 
     String ERRORS = "Errors";
     int ERRORS_NOTIF_ID = 9328;
+
+    String PRINTING_NEW_ORDER = "Printing new order";
 }

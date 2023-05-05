@@ -26,9 +26,11 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.utils.EmptyCallback;
+import com.symplified.order.utils.PrinterUtility;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -74,46 +76,55 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
+            Log.d(BluetoothPrinterService.TAG, "Message body: " + remoteMessage.getData().get("body"));
             String orderId = parseOrderId(remoteMessage.getData().get("body"));
+            Log.d(BluetoothPrinterService.TAG, "Parsed orderId: " + orderId);
 
             if (orderId != null) {
                 OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
                 orderApiService.searchNewOrdersByClientIdAndOrderId(clientId, orderId)
                         .clone().enqueue(new Callback<OrderDetailsResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<OrderDetailsResponse> call,
-                                           @NonNull Response<OrderDetailsResponse> response) {
+                            @Override
+                            public void onResponse(@NonNull Call<OrderDetailsResponse> call,
+                                                   @NonNull Response<OrderDetailsResponse> response) {
 
-                        if (response.isSuccessful() &&
-                                response.body() != null &&
-                                response.body().data.content.size() > 0) {
-                            Order.OrderDetails orderDetails = response.body().data.content.get(0);
-                            alert(remoteMessage, orderDetails.order);
-                            if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                    && (App.isPrinterConnected() || App.btPrinters.size() > 0)) {
-                                printAndProcessOrder(orderApiService, orderDetails);
-                            } else {
-                                addOrderToView(newOrderObservers, orderDetails);
-                            }
-                        } else {
-                            alert(remoteMessage, null);
-                            if (!response.isSuccessful()) {
-                                sendErrorToServer("Error " + response.code()
-                                        + " received when querying order "
-                                        + orderId + " after receiving Firebase notification.");
-                            }
-                        }
-                    }
+                                Log.d(BluetoothPrinterService.TAG, "Order query success: " + response.isSuccessful());
 
-                    @Override
-                    public void onFailure(@NonNull Call<OrderDetailsResponse> call,
-                                          @NonNull Throwable t) {
-                        Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
-                        sendErrorToServer("Failed to query order "
-                                + orderId + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
-                        alert(remoteMessage, null);
-                    }
-                });
+                                if (response.isSuccessful() &&
+                                        response.body() != null &&
+                                        response.body().data.content.size() > 0) {
+                                    Order.OrderDetails orderDetails = response.body().data.content.get(0);
+                                    Log.d(BluetoothPrinterService.TAG, "OrderId in response: " + orderDetails.order.id);
+                                    try {
+                                        alert(remoteMessage, orderDetails.order);
+                                    } catch (Exception ignored) {}
+                                    // TODO: Uncomment
+//                                    if (orderDetails.order.serviceType == ServiceType.DINEIN
+//                                            && (App.isPrinterConnected() || App.btPrinters.size() > 0)) {
+                                    Log.d(BluetoothPrinterService.TAG, "Calling printAndProcessOrder");
+                                        printAndProcessOrder(orderApiService, orderDetails);
+//                                    } else {
+//                                        addOrderToView(newOrderObservers, orderDetails);
+//                                    }
+                                } else {
+                                    alert(remoteMessage, null);
+                                    if (!response.isSuccessful()) {
+                                        sendErrorToServer("Error " + response.code()
+                                                + " received when querying order "
+                                                + orderId + " after receiving Firebase notification.");
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(@NonNull Call<OrderDetailsResponse> call,
+                                                  @NonNull Throwable t) {
+                                Log.e(TAG, "onFailure on orderRequest. " + t.getLocalizedMessage());
+                                sendErrorToServer("Failed to query order "
+                                        + orderId + " after receiving Firebase notification. Error: " + t.getLocalizedMessage());
+                                alert(remoteMessage, null);
+                            }
+                        });
             }
         }
     }
@@ -122,6 +133,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             OrderApi orderApiService,
             Order.OrderDetails orderDetails
     ) {
+        Log.d(BluetoothPrinterService.TAG, "OrderNotificationService: Printing and Processing order");
 
         orderApiService.getItemsForOrder(orderDetails.order.id).clone().enqueue(new Callback<ItemsResponse>() {
             @Override
@@ -129,12 +141,30 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                    @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
-                        App.printOrderReceipt(
+//                        App.printOrderReceipt(
+//                                orderDetails.order,
+//                                response.body().data.content,
+//                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
+//                                getApplicationContext()
+//                        );
+
+                        byte[] dataToPrint = PrinterUtility.generateReceiptText(
                                 orderDetails.order,
                                 response.body().data.content,
-                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
-                                getApplicationContext()
-                        );
+                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext())
+                        ).getBytes(StandardCharsets.UTF_8);
+
+                        dataToPrint = "Testing".getBytes(StandardCharsets.UTF_8);
+
+                        Intent printIntent = new Intent(getApplicationContext(), BluetoothPrinterService.class);
+                        printIntent.putExtra(BluetoothPrinterService.PRINT_DATA, dataToPrint);
+                        Log.d(BluetoothPrinterService.TAG, "OrderNotificationService: Request successful: Printing");
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            startForegroundService(printIntent);
+                        } else {
+                            startService(printIntent);
+                        }
+
                         processNewOrder(orderApiService, orderDetails);
                     } catch (Exception e) {
                         addOrderToView(newOrderObservers, orderDetails);
@@ -280,6 +310,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public static void addPastOrderObserver(OrderObserver observer) {
         pastOrderObservers.add(observer);
     }
+
     public static void removePastOrderObserver(OrderObserver observer) {
         pastOrderObservers.remove(observer);
     }
@@ -287,6 +318,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public static void addQrCodeObserver(QrCodeObserver observer) {
         qrCodeObservers.add(observer);
     }
+
     public static void removeQrCodeObserver(QrCodeObserver observer) {
         qrCodeObservers.remove(observer);
     }
@@ -294,6 +326,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
     public static void disableOrderNotifications() {
         isOrderNotifsEnabled = false;
     }
+
     public static void enableOrderNotifications() {
         isOrderNotifsEnabled = true;
     }
