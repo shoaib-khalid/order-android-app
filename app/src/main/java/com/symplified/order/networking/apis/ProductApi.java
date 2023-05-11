@@ -11,11 +11,15 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface ProductApi {
 
-    @GET("stores/{storeId}/products?status=ACTIVE,INACTIVE,OUTOFSTOCK&pageSize=1000000")
-    Observable<ProductListResponse> getProducts(@Path("storeId") String storeId);
+    @GET("stores/{storeId}/products?status=ACTIVE,INACTIVE,OUTOFSTOCK")
+    Observable<ProductListResponse> getProducts(
+            @Path("storeId") String storeId,
+            @Query("page") int pageNo
+    );
 
     @PUT("stores/{storeId}/products/{productId}")
     Call<ResponseBody> updateProduct(

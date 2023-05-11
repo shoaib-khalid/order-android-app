@@ -1,5 +1,8 @@
 package com.symplified.order.models.product;
 
+import com.symplified.order.enums.ProductStatus;
+import com.symplified.order.models.store.Store;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,7 +13,7 @@ public class Product implements Serializable {
     public String description;
     public String storeId;
     public String categoryId;
-    public String status;
+    public ProductStatus status;
     public String thumbnailUrl;
     public String vendor;
     public String region;
@@ -30,6 +33,7 @@ public class Product implements Serializable {
     public List<ProductInventory> productInventories;
     public List<ProductAsset> productAssets;
     public ProductDeliveryDetail productDeliveryDetail;
+    public Store store;
 
     public static class ProductVariant implements Serializable{
         public String id;
@@ -149,6 +153,7 @@ public class Product implements Serializable {
 
     public static class ProductList implements Serializable {
         public List<Product> content;
+        public Boolean last;
     }
 
     public static class SingleProductResponse implements Serializable {

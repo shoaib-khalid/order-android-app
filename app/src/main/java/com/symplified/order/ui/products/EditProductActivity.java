@@ -23,6 +23,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import com.symplified.order.R;
 import com.symplified.order.databinding.ActivityEditProductBinding;
+import com.symplified.order.enums.ProductStatus;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductEditRequest;
 import com.symplified.order.networking.ServiceGenerator;
@@ -39,6 +40,8 @@ import retrofit2.Response;
 
 public class EditProductActivity extends NavbarActivity {
 
+    public static String PRODUCT = "product";
+
     private Button updateButton;
     private Toolbar toolbar;
     private Product product = null;
@@ -50,7 +53,7 @@ public class EditProductActivity extends NavbarActivity {
     private String storeId;
 
     private List<String> statusList;
-    private ArrayAdapter<String> statusAdapter;
+    private ArrayAdapter<ProductStatus> statusAdapter;
 
     private static Dialog progressDialog;
 
@@ -77,13 +80,13 @@ public class EditProductActivity extends NavbarActivity {
         initViews();
 
         Bundle data = getIntent().getExtras();
-        product = (Product) data.getSerializable("product");
+        product = (Product) data.getSerializable(PRODUCT);
         storeId = product.storeId;
 
         getProductDetails();
 
         statusList = new ArrayList<>();
-        statusAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, statusList);
+        statusAdapter = new ArrayAdapter<>(this, R.layout.drop_down_item, ProductStatus.values());
         statusTextView.setAdapter(statusAdapter);
         setStatus();
 
@@ -91,17 +94,18 @@ public class EditProductActivity extends NavbarActivity {
 
         statusTextView.setOnItemClickListener((adapterView, view, i, l) -> {
             String selected = adapterView.getItemAtPosition(i).toString();
-            switch (selected) {
-                case "Active":
-                    product.status = "ACTIVE";
-                    break;
-                case "Inactive":
-                    product.status = "INACTIVE";
-                    break;
-                case "Out of Stock":
-                    product.status = "OUTOFSTOCK";
-                    break;
-            }
+//            product.status =
+//            switch (selected) {
+//                case "Active":
+//                    product.status = "ACTIVE";
+//                    break;
+//                case "Inactive":
+//                    product.status = "INACTIVE";
+//                    break;
+//                case "Out of Stock":
+//                    product.status = "OUTOFSTOCK";
+//                    break;
+//            }
         });
 
         productApiService = ServiceGenerator.createProductService(this);
@@ -166,19 +170,19 @@ public class EditProductActivity extends NavbarActivity {
 
 
     public void setStatus() {
-        statusList.add("Active");
-        statusList.add("Inactive");
-//        statusList.add("Out of Stock");
-        String status = product.status;
-        switch (status) {
-            case "ACTIVE":
-                statusTextView.setText(statusList.get(0), false);
-                break;
-            case "INACTIVE":
-                statusTextView.setText(statusList.get(1), false);
-                break;
-        }
-        statusAdapter.notifyDataSetChanged();
+//        statusList.add("Active");
+//        statusList.add("Inactive");
+////        statusList.add("Out of Stock");
+//        String status = product.status;
+//        switch (status) {
+//            case "ACTIVE":
+//                statusTextView.setText(statusList.get(0), false);
+//                break;
+//            case "INACTIVE":
+//                statusTextView.setText(statusList.get(1), false);
+//                break;
+//        }
+//        statusAdapter.notifyDataSetChanged();
     }
 
     private void getProductDetails() {

@@ -1,11 +1,13 @@
 package com.symplified.order.ui.products;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,7 +17,9 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.symplified.order.App;
 import com.symplified.order.R;
@@ -32,8 +36,8 @@ import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -44,7 +48,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ProductsActivity extends NavbarActivity {
+public class ProductsActivity extends NavbarActivity implements ProductAdapter.OnProductClickListener {
     private Toolbar toolbar;
     private ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
@@ -52,7 +56,14 @@ public class ProductsActivity extends NavbarActivity {
     private ProductApi productApiService;
     private StoreApi storeApiService;
     private List<Store> stores = new ArrayList<>();
+    private final List<Product> products = new ArrayList<>();
     private ActivityProductsBinding binding;
+    private int pageNo = 0;
+    private boolean isLoading = false;
+    private boolean isAnyProductLeft = true;
+    private final String ALL_STORES = "All";
+    private Store selectedStore;
+    private String currencySymbol;
 
     @Override
     public void onCreate(Bundle savedInstanceStatus) {
@@ -70,32 +81,50 @@ public class ProductsActivity extends NavbarActivity {
 
         initToolbar();
 
-        productAdapter = new ProductAdapter(this);
-        binding.recyclerView.setAdapter(productAdapter);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        currencySymbol = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString(SharedPrefsKey.CURRENCY_SYMBOL, "RM");
+        initProductList();
 
-        binding.textBoxSearch.getEditText().addTextChangedListener(new TextWatcher() {
+        binding.recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                productAdapter.filter(s.toString());
+                if (!recyclerView.canScrollVertically(1)
+                        && newState == RecyclerView.SCROLL_STATE_IDLE
+                        && !isLoading
+                        && isAnyProductLeft) {
+                    fetchProducts();
+                }
             }
         });
 
-        String storeIdList = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString(SharedPrefsKey.STORE_ID_LIST, null);
+        binding.textBoxSearch.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-        binding.refreshLayout.setOnRefreshListener(this::getProductsList);
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        binding.refreshLayout.setOnRefreshListener(() -> {
+            resetAll();
+            fetchStoresAndProducts();
+        });
 
         productApiService = ServiceGenerator.createProductService(getApplicationContext());
         storeApiService = ServiceGenerator.createStoreService(getApplicationContext());
 
-        fetchStoresAndProducts();
+        if (savedInstanceStatus == null) {
+            fetchStoresAndProducts();
+        }
+
     }
 
     private void initToolbar() {
@@ -104,7 +133,7 @@ public class ProductsActivity extends NavbarActivity {
         home.setOnClickListener(view -> super.onBackPressed());
 
         TextView title = toolbar.findViewById(R.id.app_bar_title);
-        title.setText("All Products");
+        title.setText("Products");
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(2).setChecked(true);
@@ -112,99 +141,184 @@ public class ProductsActivity extends NavbarActivity {
 
     private void fetchStoresAndProducts() {
         startLoading();
-        productAdapter.clear();
 
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString(SharedPrefsKey.CLIENT_ID, "");
-        storeApiService.getStores(clientId)
-                .clone()
-                .enqueue(new Callback<StoreResponse>() {
-                    @Override
-                    public void onResponse(
-                            @NonNull Call<StoreResponse> call,
-                            @NonNull Response<StoreResponse> response
-                    ) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            stores = response.body().data.content;
-                            productAdapter.setStores(stores);
-                            getProductsList();
-                        } else {
-                            Toast.makeText(ProductsActivity.this, "An error occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
-                            stopLoading();
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<StoreResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(ProductsActivity.this, "An error occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
-                        stopLoading();
+        if (!stores.isEmpty()) {
+            fetchProducts();
+            return;
+        }
+        storeApiService.getStores(clientId).clone().enqueue(new Callback<StoreResponse>() {
+            @Override
+            public void onResponse(
+                    @NonNull Call<StoreResponse> call,
+                    @NonNull Response<StoreResponse> response
+            ) {
+                if (response.isSuccessful() && response.body() != null) {
+                    stores = response.body().data.content;
+                    String[] storeNames = new String[stores.size() + 1];
+                    storeNames[0] = ALL_STORES;
+                    for (int i = 0; i < stores.size(); i++) {
+                        storeNames[i + 1] = stores.get(i).name;
                     }
-                });
+                    binding.storeSelectButton.setOnClickListener(v -> {
+                        new MaterialAlertDialogBuilder(ProductsActivity.this)
+                                .setTitle("Store Products to Show")
+                                .setItems(storeNames, (dialog, which) -> {
+                                    // If the same store has been selected as the onebefore
+                                    if ((selectedStore == null && storeNames[which].equals(ALL_STORES))
+                                            || (selectedStore != null && storeNames[which].equals(selectedStore.name))) {
+                                        return;
+                                    }
+
+                                    resetAll();
+                                    if (storeNames[which].equals(ALL_STORES)) {
+                                        selectedStore = null;
+                                    } else {
+                                        for (Store store : stores) {
+                                            if (store.name.equals(storeNames[which])) {
+                                                selectedStore = store;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    binding.storeSelectButton.setText(selectedStore != null ? selectedStore.name : ALL_STORES);
+                                    fetchProducts();
+                                })
+                                .show();
+
+                    });
+                    fetchProducts();
+                } else {
+                    Toast.makeText(ProductsActivity.this, "An error occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
+                    stopLoading();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<StoreResponse> call, @NonNull Throwable t) {
+                Toast.makeText(ProductsActivity.this, "An error occurred. Swipe down to retry", Toast.LENGTH_SHORT).show();
+                stopLoading();
+            }
+        });
     }
 
     @SuppressLint("CheckResult")
-    private void getProductsList() {
+    private void fetchProducts() {
+        startLoading();
         List<Observable<ProductListResponse>> requests = new ArrayList<>();
 
-        for (Store store : stores) {
-            requests.add(productApiService.getProducts(store.id));
+        if (selectedStore == null) {
+            for (Store store : stores) {
+                requests.add(productApiService.getProducts(store.id, pageNo));
+            }
+        } else {
+            requests.add(productApiService.getProducts(selectedStore.id, pageNo));
         }
 
         Observable<List<ProductListResponse>> observableResult
                 = Observable.zip(requests, objects -> {
-                    List<ProductListResponse> responses = new ArrayList<>();
-                    for (Object o : objects) {
-                        responses.add((ProductListResponse) o);
-                    }
-                    return responses;
+            List<ProductListResponse> responses = new ArrayList<>();
+            for (Object o : objects) {
+                responses.add((ProductListResponse) o);
+            }
+            return responses;
         }).subscribeOn(Schedulers.newThread());
-        observableResult.observeOn(AndroidSchedulers.mainThread())
-                .subscribeWith(new Observer<List<ProductListResponse>>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {}
+        observableResult.observeOn(AndroidSchedulers.mainThread()).subscribeWith(new Observer<List<ProductListResponse>>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+            }
 
-                    @Override
-                    public void onNext(List<ProductListResponse> productListResponses) {
-                        List<Product> productsList = new ArrayList<>();
-                        for (ProductListResponse response : productListResponses) {
-                            if (response.status == 200) {
-                                productsList.addAll(response.data.content);
+            @Override
+            public void onNext(List<ProductListResponse> productListResponses) {
+                boolean isLastPage = true;
+                for (ProductListResponse response : productListResponses) {
+                    if (response.status == 200) {
+                        if (!response.data.last) {
+                            isLastPage = false;
+                        }
+                        for (Product product : response.data.content) {
+                            for (Store store : stores) {
+                                if (store.id.equals(product.storeId)) {
+                                    product.store = store;
+                                    break;
+                                }
                             }
                         }
-
-                        Collections.sort(productsList, (p1, p2) -> p1.name.compareTo(p2.name));
-
-                        productAdapter.setProducts(productsList);
-                        EditText searchEditText = binding.textBoxSearch.getEditText();
-                        String searchText = searchEditText != null
-                                ? searchEditText.getText().toString() : "";
-                        productAdapter.filter(searchText);
+                        products.addAll(response.data.content);
                     }
+                }
+                isAnyProductLeft = !isLastPage;
 
-                    @Override
-                    public void onError(Throwable e) {
-                        stopLoading();
-                        Toast.makeText(
-                                ProductsActivity.this,
-                                "An error occurred. Please swipe down to retry.",
-                                Toast.LENGTH_SHORT
-                        ).show();
-                    }
+                productAdapter.submitList(products);
+            }
 
-                    @Override
-                    public void onComplete() { stopLoading(); }
-                });
+            @Override
+            public void onError(Throwable e) {
+                stopLoading();
+                Toast.makeText(
+                        ProductsActivity.this,
+                        "An error occurred. Please swipe down to retry.",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+
+            @Override
+            public void onComplete() {
+                pageNo++;
+                if (products.isEmpty()) {
+                    binding.emptyProductsText.setVisibility(View.VISIBLE);
+                }
+                stopLoading();
+            }
+        });
     }
 
     private void startLoading() {
-        binding.refreshLayout.setRefreshing(true);
-        binding.refreshLayout.setVisibility(View.GONE);
-        binding.progressBar.setVisibility(View.VISIBLE);
+        isLoading = true;
+        binding.emptyProductsText.setVisibility(View.GONE);
+        if (products.isEmpty()) {
+//            binding.mainLayout.setVisibility(View.GONE);
+            binding.progressBar.setVisibility(View.VISIBLE);
+        }
+        if (!products.isEmpty()) {
+            binding.bottomProgressBar.setVisibility(View.VISIBLE);
+        }
     }
 
     private void stopLoading() {
+        isLoading = false;
         binding.refreshLayout.setRefreshing(false);
-        binding.refreshLayout.setVisibility(View.VISIBLE);
+//        binding.refreshLayout.setVisibility(View.VISIBLE);
+        binding.mainLayout.setVisibility(View.VISIBLE);
         binding.progressBar.setVisibility(View.GONE);
+        binding.bottomProgressBar.setVisibility(View.GONE);
+    }
+
+    private void resetAll() {
+        pageNo = 0;
+        products.clear();
+        isAnyProductLeft = false;
+        initProductList();
+    }
+
+    private void initProductList() {
+        productAdapter = new ProductAdapter(currencySymbol, this);
+        binding.recyclerView.setAdapter(productAdapter);
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void clearSelectedStore() {
+        selectedStore = null;
+        binding.storeSelectButton.setText(ALL_STORES);
+    }
+
+    @Override
+    public void onProductClicked(Product p) {
+        Intent intent = new Intent(this, EditProductActivity.class);
+        intent.putExtra(EditProductActivity.PRODUCT, p);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }

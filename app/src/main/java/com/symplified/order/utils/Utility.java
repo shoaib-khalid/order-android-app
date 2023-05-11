@@ -34,6 +34,7 @@ public class Utility {
 
     private static final String inputDatePattern = "yyyy-MM-dd HH:mm:ss";
     private static final String outputDatePattern = "dd/MM/yyyy hh:mm:ss aa";
+    private static final DecimalFormat priceFormatter = new DecimalFormat("#,###0.00");
 
     public static String getCurrencySymbol(Order order, Context context) {
         if (order != null
@@ -48,6 +49,10 @@ public class Utility {
 
     public static DecimalFormat getMonetaryAmountFormat() {
         return new DecimalFormat("#,###0.00");
+    }
+
+    public static String formatPrice(Double price) {
+        return priceFormatter.format(price);
     }
 
     public static String convertUtcTimeToLocalTimezone(String dateTime, TimeZone localTimeZone) {

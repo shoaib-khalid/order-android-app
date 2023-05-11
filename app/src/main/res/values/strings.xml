@@ -158,7 +158,6 @@
     <string name="header_special_instruction">Special Instructions:</string>
     <string name="change_due_label">Change Due:</string>
     <string name="hint_search">Search</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="bt_devices_pref_key">Bluetooth Device Preferences</string>
+    <string name="empty_products_text">No products added yet.</string>
 </resources>
