@@ -4,10 +4,10 @@ import com.symplified.order.enums.ProductStatus;
 
 import java.io.Serializable;
 
-public class ProductEditRequest implements Serializable {
-    String name;
-    ProductStatus status;
-    public ProductEditRequest(Product product) {
+public class UpdatedProduct implements Serializable {
+    public String name;
+    public ProductStatus status;
+    public UpdatedProduct(Product product) {
         this.name = product.name;
         this.status = product.status;
     }

@@ -10,7 +10,7 @@ public enum ProductStatus {
     public final String text;
     public final int color;
 
-    private ProductStatus(String text, int color) {
+    ProductStatus(String text, int color) {
         this.text = text;
         this.color = color;
     }

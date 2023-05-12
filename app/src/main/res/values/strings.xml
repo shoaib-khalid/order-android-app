@@ -160,4 +160,6 @@
     <string name="hint_search">Search</string>
     <string name="bt_devices_pref_key">Bluetooth Device Preferences</string>
     <string name="empty_products_text">No products added yet.</string>
+    <string name="all">All</string>
+    <string name="filter">Filter</string>
 </resources>
