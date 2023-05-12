@@ -157,9 +157,10 @@
     <string name="cash_payment">Cash Payment</string>
     <string name="header_special_instruction">Special Instructions:</string>
     <string name="change_due_label">Change Due:</string>
-    <string name="hint_search">Search</string>
+    <string name="search_hint">Search</string>
     <string name="bt_devices_pref_key">Bluetooth Device Preferences</string>
     <string name="empty_products_text">No products added yet.</string>
     <string name="all">All</string>
     <string name="filter">Filter</string>
+    <string name="search_result_text">Results for \"%1$s\"</string>
 </resources>

@@ -46,6 +46,7 @@ public interface StoreApi {
     Observable<ProductListResponse> getProducts(
             @Path("storeId") String storeId,
             @Query("categoryId") String categoryId,
+            @Query("name") String name,
             @Query("page") int pageNo
     );
 }

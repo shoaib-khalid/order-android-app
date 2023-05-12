@@ -2,12 +2,14 @@ package com.symplified.order.ui.products;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -32,14 +35,12 @@ import com.symplified.order.models.category.CategoryResponse;
 import com.symplified.order.models.product.Product;
 import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.models.product.UpdatedProduct;
-import com.symplified.order.models.qrorders.ConsolidatedOrder;
 import com.symplified.order.models.store.Store;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.networking.apis.StoreApi;
 import com.symplified.order.ui.NavbarActivity;
-import com.symplified.order.ui.orders.ConsolidateOrderActivity;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
@@ -76,7 +77,7 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
     private Category selectedCategory;
     private String currencySymbol;
     private ActivityResultLauncher<Intent> editProductActivityResultLauncher;
-
+    private String searchQuery;
 
     @Override
     public void onCreate(Bundle savedInstanceStatus) {
@@ -112,20 +113,6 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
             }
         });
 
-        binding.textBoxSearch.getEditText().addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
         binding.refreshLayout.setOnRefreshListener(() -> {
             resetAll();
             fetchAll();
@@ -153,10 +140,32 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
                 }
             }
         });
-        if (savedInstanceStatus == null) {
-            fetchAll();
+
+        Intent intent = getIntent();
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            searchQuery = intent.getStringExtra(SearchManager.QUERY);
+            binding.searchResultText.setText(getString(R.string.search_result_text, searchQuery));
+            binding.searchResultText.setVisibility(View.VISIBLE);
+        }
+        fetchAll();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (Intent.ACTION_SEARCH.equals(getIntent().getAction())) {
+            return super.onCreateOptionsMenu(menu);
         }
 
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.products_dashboard, menu);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setIconified(false);
+
+        return true;
     }
 
     private void initToolbar() {
@@ -291,12 +300,13 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
             requests.add(storeApiService.getProducts(
                     selectedStore.id,
                     selectedCategory != null ? selectedCategory.id : null,
+                    searchQuery,
                     pageNo
             ));
         } else {
             for (Store store : stores) {
                 requests.add(storeApiService.getProducts(
-                        store.id, null, pageNo
+                        store.id, null, searchQuery, pageNo
                 ));
             }
         }
