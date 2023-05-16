@@ -73,38 +73,60 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/product_status"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu"
+<!--                <TextView-->
+<!--                    android:id="@+id/product_status"-->
+<!--                    android:background="@drawable/box_border"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:padding="20dp"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@+id/product_name"-->
+<!--                    app:layout_constraintWidth_percent="0.90"-->
+<!--                    tools:ignore="MissingConstraints" />-->
+
+                <TextView
+                    android:id="@+id/product_status_label"
+                    style="@style/TextAppearance.MaterialComponents.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Status"
+                    android:paddingVertical="2dp"
+                    app:layout_constraintTop_toBottomOf="@id/product_name"
+                    app:layout_constraintBottom_toTopOf="@id/spinner_layout"
+                    app:layout_constraintStart_toStartOf="@id/spinner_layout" />
+
+
+                <LinearLayout
+                    android:id="@+id/spinner_layout"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Status*"
-                    android:paddingVertical="5dp"
+                    android:background="@drawable/spinner_border"
+                    android:orientation="horizontal"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/product_name"
-                    app:layout_constraintWidth_percent="0.90"
-                    tools:ignore="MissingConstraints">
+                    app:layout_constraintTop_toBottomOf="@+id/product_status_label"
+                    app:layout_constraintWidth_percent="0.90">
 
-                    <AutoCompleteTextView
-                        android:id="@+id/statusTextView"
+                    <Spinner
+                        android:id="@+id/product_status_spinner"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="none" />
-
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:overlapAnchor="false"
+                        android:spinnerMode="dialog" />
+                </LinearLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/product_description"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:hint="Description*"
+                    android:hint="Description (read-only)"
                     android:paddingVertical="5dp"
                     app:boxBackgroundColor="@color/white"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/product_status"
+                    app:layout_constraintTop_toBottomOf="@+id/spinner_layout"
                     app:layout_constraintWidth_percent="0.90"
                     app:startIconTint="@color/sf_primary">
 

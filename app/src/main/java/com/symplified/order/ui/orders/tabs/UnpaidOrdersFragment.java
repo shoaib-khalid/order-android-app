@@ -180,8 +180,6 @@ public class UnpaidOrdersFragment
 
     @Override
     public void onTableClicked(ConsolidatedOrder order) {
-        Log.d("consolidate", "onTableClicked: " + order.tableNo);
-
         Intent intent = new Intent(getActivity(), ConsolidateOrderActivity.class);
         intent.putExtra(ConsolidateOrderActivity.CONSOLIDATED_ORDER_KEY, order);
         consolidateOrderActivityResultLauncher.launch(intent);

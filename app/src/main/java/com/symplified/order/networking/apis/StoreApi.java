@@ -2,9 +2,12 @@ package com.symplified.order.networking.apis;
 
 import com.symplified.order.models.HttpResponse;
 import com.symplified.order.models.asset.Asset;
+import com.symplified.order.models.category.CategoryResponse;
+import com.symplified.order.models.product.ProductListResponse;
 import com.symplified.order.models.store.StoreResponse;
 import com.symplified.order.models.store.StoreStatusResponse;
 
+import io.reactivex.Observable;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -27,10 +30,23 @@ public interface StoreApi {
     Call<StoreResponse.SingleStoreResponse> getStoreById(@Path("storeId") String storeId);
 
     @PUT("stores/{storeId}/timings/snooze")
-    Call<HttpResponse> updateStoreStatus(@Path("storeId") String storeId,
-                                         @Query("isSnooze") boolean isSnooze,
-                                         @Query("snoozeDuration") int snoozeDuration);
+    Call<HttpResponse> updateStoreStatus(
+            @Path("storeId") String storeId,
+            @Query("isSnooze") boolean isSnooze,
+            @Query("snoozeDuration") int snoozeDuration
+    );
 
     @GET("stores/{storeId}/timings/snooze")
     Call<StoreStatusResponse> getStoreStatusById(@Path("storeId") String storeId);
+
+    @GET("store-categories?pageSize=100")
+    Observable<CategoryResponse> getCategoriesByStoreId(@Query("storeId") String storeId);
+
+    @GET("stores/{storeId}/products?status=ACTIVE,INACTIVE,OUTOFSTOCK")
+    Observable<ProductListResponse> getProducts(
+            @Path("storeId") String storeId,
+            @Query("categoryId") String categoryId,
+            @Query("name") String name,
+            @Query("page") int pageNo
+    );
 }

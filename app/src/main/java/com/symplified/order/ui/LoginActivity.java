@@ -278,8 +278,7 @@ public class LoginActivity extends AppCompatActivity {
                                             Log.d(TAG, "Subscribed to " + store.name);
                                             subscriptionCount++;
                                             boolean isLoggedIn = sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false);
-                                            if (subscriptionCount >= stores.size()
-                                                    && !isLoggedIn) {
+                                            if (subscriptionCount >= stores.size() && !isLoggedIn) {
                                                 sharedPreferences.edit()
                                                         .putBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
                                                         .apply();

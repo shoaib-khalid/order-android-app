@@ -10,8 +10,6 @@ import retrofit2.http.HeaderMap;
 import retrofit2.http.Query;
 
 public interface CategoryApi {
-
-    @GET("store-categories?page=0&pageSize=20&sortByCol=name&sortingOrder=ASC&name=")
-    Call<CategoryResponse> getCategories(@HeaderMap Map<String, String> headers, @Query("storeId") String storeId);
-
+    @GET("store-categories?pageSize=100")
+    Call<CategoryResponse> getCategories(@Query("storeId") String storeId);
 }
