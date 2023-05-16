@@ -11,9 +11,17 @@ import android.os.Build;
 
 import androidx.core.content.ContextCompat;
 
-import com.symplified.order.App;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BluetoothReceiver extends BroadcastReceiver {
+
+    private static final List<OnBluetoothDeviceAddedListener> deviceListeners = new ArrayList<>();
+
+    public interface OnBluetoothDeviceAddedListener {
+        void onBluetoothDeviceAdded(BluetoothDevice device);
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent != null
@@ -35,10 +43,15 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         device.createBond();
                         break;
                     case BluetoothDevice.BOND_BONDED:
-                        App.addBtPrinter(device, context.getApplicationContext());
+                        for (OnBluetoothDeviceAddedListener listener : deviceListeners) {
+                            listener.onBluetoothDeviceAdded(device);
+                        }
                         break;
                 }
             }
         }
     }
+
+    public static void addDeviceListener(OnBluetoothDeviceAddedListener listener) { deviceListeners.add(listener); }
+    public static void removeDeviceListener(OnBluetoothDeviceAddedListener listener) { deviceListeners.remove(listener); }
 }

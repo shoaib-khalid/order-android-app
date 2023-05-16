@@ -4,6 +4,7 @@ import static android.Manifest.permission.BLUETOOTH_CONNECT;
 
 import android.app.Application;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -16,7 +17,6 @@ import androidx.core.content.ContextCompat;
 
 import com.symplified.order.interfaces.Printer;
 import com.symplified.order.interfaces.PrinterObserver;
-import com.symplified.order.models.bluetooth.PairedDevice;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.utils.GenericPrintHelper;
@@ -37,11 +37,6 @@ import java.util.UUID;
  */
 public class App extends Application implements PrinterObserver {
 
-    public interface OnBluetoothDeviceAddedListener {
-        void onIsAddingBluetoothDevice(boolean isAdding);
-        void onBluetoothDeviceAdded(PairedDevice device);
-    }
-
     public static final String DEV_TAG = "dev-logging";
 
     public static final String BASE_URL_PRODUCTION = "https://api.symplified.biz/";
@@ -57,7 +52,7 @@ public class App extends Application implements PrinterObserver {
     public static final String SESSION = "session";
 
     private static Printer connectedPrinter;
-    public static final Set<PairedDevice> btPrinters = new HashSet<>();
+    public static final Set<BluetoothDevice> btDevices = new HashSet<>();
     private static final List<OnBluetoothDeviceAddedListener> deviceAddedListeners
             = new ArrayList<>();
     public static final int PERMISSION_REQUEST_CODE = 10000;
@@ -113,11 +108,19 @@ public class App extends Application implements PrinterObserver {
         return connectedPrinter != null && connectedPrinter.isPrinterConnected();
     }
 
-    public static void addBtPrinter(
-            BluetoothDevice device,
-            Context context
-    ) {
-
+    public static void addBtPrinter(BluetoothDevice device, Context context) {
+//        SharedPreferences sharedPrefs = context.getSharedPreferences(SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
+//        if (ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
+//                == PackageManager.PERMISSION_DENIED) {
+//            return;
+//        }
+//        if (!sharedPrefs.contains(device.getName())) {
+//            sharedPrefs.edit().putBoolean(device.getName(), true).apply();
+//        }
+//
+//        for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
+//            listener.onBluetoothDeviceAdded(device);
+//        }
     }
 
 //    public static void addBtPrinter(
@@ -180,7 +183,7 @@ public class App extends Application implements PrinterObserver {
     ) {
         new Thread() {
             @Override
-            public  void run() {
+            public void run() {
                 if (connectedPrinter != null && connectedPrinter.isPrinterConnected()) {
                     try {
                         connectedPrinter.printOrderReceipt(order, items, currency);
@@ -205,8 +208,10 @@ public class App extends Application implements PrinterObserver {
         byte[] dataToPrint = PrinterUtility.generateReceiptText(order, items, currency)
                 .getBytes(StandardCharsets.UTF_8);
 
-        for (PairedDevice btPrinter : btPrinters) {
-            if (sharedPrefs.getBoolean(btPrinter.deviceName, true)) {
+        Set<BluetoothDevice> pairedDevices = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter().getBondedDevices();
+
+        for (BluetoothDevice device : pairedDevices) {
+            if (sharedPrefs.getBoolean(device.getName(), true)) {
                 new Thread() {
                     @Override
                     public void run() {
@@ -217,24 +222,57 @@ public class App extends Application implements PrinterObserver {
                             return;
                         }
 
-                        int noOfTries = 0;
-                        while (noOfTries < 10) {
-                            try {
-                                if (btPrinter.socket == null) {
-                                    btPrinter.socket = btPrinter.device.createRfcommSocketToServiceRecord(
-                                            UUID.fromString(PRINTER_UUID)
-                                    );
-                                }
+//                        try {
+//                            BluetoothSocket socket = device.createRfcommSocketToServiceRecord(
+//                                    UUID.fromString(PRINTER_UUID)
+//                            );
+//                            if (!socket.isConnected()) {
+//                                socket.connect();
+//                            }
+//
+//                            new Thread() {
+//                                @Override
+//                                public void run() {
+//                                    try {
+//                                        socket.getOutputStream().write(dataToPrint);
+//                                    } catch (IOException e) {
+//                                        Log.e("bluetooth-print", "Failed to write to socket.", e);;
+//                                    }
+//
+//                                    try {
+//                                        socket.close();
+//                                    } catch (IOException e) {
+//                                        Log.e("bluetooth-print", "Failed to close socket.", e);;
+//                                    }
+//                                }
+//                            }.start();
+//                        } catch (Exception e) {
+//                            Log.e("bluetooth-print", "Could not create socket.", e);
+//                        }
 
-                                if (!btPrinter.socket.isConnected()) {
-                                    btPrinter.socket.connect();
-                                }
-                                btPrinter.socket.getOutputStream().write(dataToPrint);
-                                break;
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                        try (BluetoothSocket socket = device.createRfcommSocketToServiceRecord(UUID.fromString(PRINTER_UUID))) {
+                            if (!socket.isConnected()) {
+                                socket.connect();
                             }
-                            noOfTries++;
+
+//                            new Thread() {
+//                                @Override
+//                                public void run() {
+                            try {
+                                socket.getOutputStream().write(dataToPrint);
+                            } catch (IOException e) {
+                                Log.e("bluetooth-print", "Failed to write to socket.", e);
+                            }
+
+                            try {
+                                socket.close();
+                            } catch (IOException e) {
+                                Log.e("bluetooth-print", "Failed to close socket.", e);
+                            }
+//                                }
+//                            }.start();
+                        } catch (Exception e) {
+                            Log.e("bluetooth-print", "Could not create socket.", e);
                         }
                     }
                 }.start();
@@ -245,6 +283,7 @@ public class App extends Application implements PrinterObserver {
     public static void addBluetoothDeviceListener(OnBluetoothDeviceAddedListener listener) {
         deviceAddedListeners.add(listener);
     }
+
     public static void removeBluetoothDeviceListener(OnBluetoothDeviceAddedListener listener) {
         deviceAddedListeners.remove(listener);
     }

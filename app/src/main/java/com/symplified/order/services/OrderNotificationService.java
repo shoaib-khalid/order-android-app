@@ -26,11 +26,9 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.AuthApi;
 import com.symplified.order.networking.apis.OrderApi;
 import com.symplified.order.utils.EmptyCallback;
-import com.symplified.order.utils.PrinterUtility;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -98,14 +96,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                     try {
                                         alert(remoteMessage, orderDetails.order);
                                     } catch (Exception ignored) {}
-                                    // TODO: Uncomment
-//                                    if (orderDetails.order.serviceType == ServiceType.DINEIN
-//                                            && (App.isPrinterConnected() || App.btPrinters.size() > 0)) {
-                                    Log.d(BluetoothPrinterService.TAG, "Calling printAndProcessOrder");
+                                    if (orderDetails.order.serviceType == ServiceType.DINEIN
+                                            && (App.isPrinterConnected() || App.btDevices.size() > 0)) {
                                         printAndProcessOrder(orderApiService, orderDetails);
-//                                    } else {
-//                                        addOrderToView(newOrderObservers, orderDetails);
-//                                    }
+                                    } else {
+                                        addOrderToView(newOrderObservers, orderDetails);
+                                    }
                                 } else {
                                     alert(remoteMessage, null);
                                     if (!response.isSuccessful()) {
@@ -141,29 +137,12 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                    @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     try {
-//                        App.printOrderReceipt(
-//                                orderDetails.order,
-//                                response.body().data.content,
-//                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
-//                                getApplicationContext()
-//                        );
-
-                        byte[] dataToPrint = PrinterUtility.generateReceiptText(
+                        App.printOrderReceipt(
                                 orderDetails.order,
                                 response.body().data.content,
-                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext())
-                        ).getBytes(StandardCharsets.UTF_8);
-
-                        dataToPrint = "Testing".getBytes(StandardCharsets.UTF_8);
-
-                        Intent printIntent = new Intent(getApplicationContext(), BluetoothPrinterService.class);
-                        printIntent.putExtra(BluetoothPrinterService.PRINT_DATA, dataToPrint);
-                        Log.d(BluetoothPrinterService.TAG, "OrderNotificationService: Request successful: Printing");
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            startForegroundService(printIntent);
-                        } else {
-                            startService(printIntent);
-                        }
+                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
+                                getApplicationContext()
+                        );
 
                         processNewOrder(orderApiService, orderDetails);
                     } catch (Exception e) {
