@@ -6,10 +6,10 @@ Steps for carrying over changes from Symplified app to Easydukan:
 4. In strings.xml, preserve app_name and welcome_message values to that in the easydukan branch
 5. In nav_header.xml and every activity_login.xml file, set the top ImageView src from "sym_white_cloud" to "ic_easy_dukan_logo"
 6. In app/java, refactor com.symplified.order package to com.symplified.easydukan
-8. Replace files in "src/main/res/mipmap" directory with the one from Easydukan, as well as ic_launcher-playstore.png in "src/main" directory
-9. In App.java, Set BASE_URL_PRODUCTION to "https://api.deliverin.pk/".
-10. Replace google-services.json file with the one from the EasyDukan branch.
-11. Run app and check to make sure everything looks visually consistent.
-12. Merge this branch into "staging-easydukan"
-13. Delete the intermediate branch
-14. When building the app bundle, select "easydukan_release_alias" as the Key Alias
+7. Replace files in "src/main/res/mipmap" directory with the one from Easydukan, as well as ic_launcher-playstore.png in "src/main" directory
+8. In App.java, Set BASE_URL_PRODUCTION to "https://api.deliverin.pk/".
+9. Replace google-services.json file with the one from the EasyDukan branch.
+10. Run app and check to make sure everything looks visually consistent.
+11. Merge this branch into "staging-easydukan"
+12. Delete the intermediate branch
+13. When building the app bundle, select "easydukan_release_alias" as the Key Alias

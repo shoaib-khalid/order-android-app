@@ -1,6 +1,9 @@
 package com.symplified.order.models.store;
 
+import com.symplified.order.models.category.Category;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Store implements Serializable {
@@ -17,6 +20,8 @@ public class Store implements Serializable {
     public List<StoreTiming> storeTiming;
 
     public List<StoreAsset> storeAssets;
+
+    public List<Category> categories = new ArrayList<>();
 
     public static class RegionCountry implements Serializable{
         public String id;
