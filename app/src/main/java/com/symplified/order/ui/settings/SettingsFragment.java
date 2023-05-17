@@ -143,6 +143,5 @@ public class SettingsFragment extends Fragment
         requireContext().getSharedPreferences(
                 SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE
         ).edit().putBoolean(name, isEnabled).apply();
-        Log.d("nigger", "nigger: " + name);
     }
 }
