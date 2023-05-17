@@ -19,10 +19,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
+import com.symplified.order.databinding.RowBluetoothDeviceBinding;
 import com.symplified.order.models.bluetooth.PairedDevice;
 import com.symplified.order.utils.SharedPrefsKey;
 
@@ -31,78 +34,67 @@ import java.util.List;
 import java.util.Set;
 
 public class BluetoothDeviceAdapter
-        extends RecyclerView.Adapter<BluetoothDeviceAdapter.ViewHolder> {
+        extends ListAdapter<PairedDevice, BluetoothDeviceAdapter.DeviceViewHolder> {
 
-    private final List<BluetoothDevice> pairedDevices = new ArrayList<>();
+    private final OnDeviceToggleListener toggleListener;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public interface OnDeviceToggleListener {
+        void onDeviceToggled(String name, boolean isEnabled);
+    }
 
-        private final TextView deviceName, deviceStatusText;
-        private final SwitchCompat printToggle;
-
-        public ViewHolder(@NonNull View view) {
-            super(view);
-
-            deviceName = view.findViewById(R.id.device_name);
-            deviceStatusText = view.findViewById(R.id.device_status_text);
-            printToggle = view.findViewById(R.id.device_status_switch);
-        }
+    public BluetoothDeviceAdapter(OnDeviceToggleListener toggleListener) {
+        super(DIFF_CALLBACK);
+        this.toggleListener = toggleListener;
     }
 
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int viewType) {
-        return new ViewHolder(LayoutInflater.from(viewGroup.getContext())
-                .inflate(
-                        R.layout.row_bluetooth_device,
-                        viewGroup,
-                        false
-                ));
-
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
-        if (ActivityCompat.checkSelfPermission(holder.itemView.getContext(), Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        holder.deviceName.setText(pairedDevices.get(position).getName());
-
-        holder.deviceStatusText.setText(
-                pairedDevices.get(position).isEnabled
-                        ? "Printing enabled"
-                        : "Printing disabled."
+    public DeviceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        DeviceViewHolder holder = new DeviceViewHolder(RowBluetoothDeviceBinding.inflate(
+                LayoutInflater.from(parent.getContext()), parent, false)
         );
-
-        SharedPreferences btSharedPrefs = holder.itemView.getContext().getSharedPreferences(
-                SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
-
-        holder.printToggle.setChecked(btSharedPrefs.getBoolean(pairedDevices.get(position).deviceName, true));
-        holder.printToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-            PairedDevice device = pairedDevices.get(holder.getAdapterPosition());
-            device.isEnabled = isChecked;
-            holder.deviceStatusText.setText(isChecked ? "Printing enabled" : "Printing disabled");
-            PairedDevice selectedDevice = pairedDevices.get(holder.getAdapterPosition());
-            btSharedPrefs.edit().putBoolean(device.deviceName, isChecked).apply();
-        });
+        holder.binding.deviceStatusSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                toggleListener.onDeviceToggled(getItem(holder.getAdapterPosition()).name, isChecked));
+        return holder;
     }
 
     @Override
-    public int getItemCount() {
-        return pairedDevices.size();
+    public void onBindViewHolder(@NonNull DeviceViewHolder holder, int position) {
+        holder.bind(getItem(position));
     }
 
-    public void addDevice(PairedDevice device) {
-        pairedDevices.add(device);
-        notifyItemInserted(pairedDevices.indexOf(device));
+    public static class DeviceViewHolder extends RecyclerView.ViewHolder {
+
+        private final RowBluetoothDeviceBinding binding;
+
+        public DeviceViewHolder(RowBluetoothDeviceBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
+        }
+
+        public void bind(PairedDevice device) {
+            binding.deviceName.setText(device.name);
+            binding.deviceStatusText.setText(device.isEnabled ? "Printing enabled." : "Printing disabled.");
+            binding.deviceStatusSwitch.setChecked(device.isEnabled);
+        }
     }
+
+    public static final DiffUtil.ItemCallback<PairedDevice> DIFF_CALLBACK
+            = new DiffUtil.ItemCallback<PairedDevice>() {
+        @Override
+        public boolean areItemsTheSame(
+                @NonNull PairedDevice oldDevice,
+                @NonNull PairedDevice newDevice
+        ) {
+            return oldDevice.name.equals(newDevice.name);
+        }
+
+        @Override
+        public boolean areContentsTheSame(
+                @NonNull PairedDevice oldDevice,
+                @NonNull PairedDevice newDevice
+        ) {
+            return oldDevice.isEnabled == newDevice.isEnabled;
+        }
+    };
 }

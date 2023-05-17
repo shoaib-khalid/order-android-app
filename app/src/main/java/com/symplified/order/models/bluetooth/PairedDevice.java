@@ -4,18 +4,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 
 public class PairedDevice {
-    public final BluetoothDevice device;
-    public BluetoothSocket socket;
+    public final String name;
     public boolean isEnabled = true;
-    public final String deviceName;
 
-    public PairedDevice(
-            BluetoothDevice device,
-            BluetoothSocket socket,
-            String deviceName
-    ) {
-        this.device = device;
-        this.socket = socket;
-        this.deviceName = deviceName;
+    public PairedDevice(String name, boolean isEnabled) {
+        this.name = name;
+        this.isEnabled = isEnabled;
     }
 }

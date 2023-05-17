@@ -164,4 +164,6 @@
     <string name="all">All</string>
     <string name="filter">Filter</string>
     <string name="search_result_text">Results for \"%1$s\"</string>
+    <string name="bluetooth_permission_error">Bluetooth permission not given</string>
+    <string name="empty_bluetooth_device_text">No Bluetooth devices found.</string>
 </resources>

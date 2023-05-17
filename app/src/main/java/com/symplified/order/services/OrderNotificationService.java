@@ -42,7 +42,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private final Pattern pattern = Pattern.compile("orderId:(\\S+?)$");
     private final String TAG = "order-notification-service";
-    private final String PRINT_TAG = "print-helper";
 
     private static boolean isOrderNotifsEnabled = true;
 
@@ -74,9 +73,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
-            Log.d(BluetoothPrinterService.TAG, "Message body: " + remoteMessage.getData().get("body"));
+            Log.d(App.PRINT_TAG, "Message body: " + remoteMessage.getData().get("body"));
             String orderId = parseOrderId(remoteMessage.getData().get("body"));
-            Log.d(BluetoothPrinterService.TAG, "Parsed orderId: " + orderId);
+            Log.d(App.PRINT_TAG, "Parsed orderId: " + orderId);
 
             if (orderId != null) {
                 OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
@@ -86,20 +85,25 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                                    @NonNull Response<OrderDetailsResponse> response) {
 
-                                Log.d(BluetoothPrinterService.TAG, "Order query success: " + response.isSuccessful());
+                                Log.d(App.PRINT_TAG, "Order query success: " + response.isSuccessful());
+
+                                boolean isNotNullOrEmpty = response.body() != null && !response.body().data.content.isEmpty();
+                                Log.d(App.PRINT_TAG, "response.issuccessful? " + response.isSuccessful() +
+                                        ", response.body != null ? " + (response.body() != null) +
+                                        ", isNotNullOrEmpty: " + isNotNullOrEmpty);
 
                                 if (response.isSuccessful() &&
                                         response.body() != null &&
                                         response.body().data.content.size() > 0) {
                                     Order.OrderDetails orderDetails = response.body().data.content.get(0);
                                     Log.d(BluetoothPrinterService.TAG, "OrderId in response: " + orderDetails.order.id);
-                                    try {
                                         alert(remoteMessage, orderDetails.order);
-                                    } catch (Exception ignored) {}
                                     if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                            && (App.isPrinterConnected() || App.btDevices.size() > 0)) {
+                                            && (App.isPrinterConnected() || App.isAnyBtPrinterEnabled(getApplicationContext()))) {
+                                        Log.d(App.PRINT_TAG, "Printing order");
                                         printAndProcessOrder(orderApiService, orderDetails);
                                     } else {
+                                        Log.d(App.PRINT_TAG, "Not printing order");
                                         addOrderToView(newOrderObservers, orderDetails);
                                     }
                                 } else {

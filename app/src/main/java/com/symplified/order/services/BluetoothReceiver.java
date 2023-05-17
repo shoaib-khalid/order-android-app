@@ -6,10 +6,14 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
 import androidx.core.content.ContextCompat;
+
+import com.symplified.order.models.bluetooth.PairedDevice;
+import com.symplified.order.utils.SharedPrefsKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +23,7 @@ public class BluetoothReceiver extends BroadcastReceiver {
     private static final List<OnBluetoothDeviceAddedListener> deviceListeners = new ArrayList<>();
 
     public interface OnBluetoothDeviceAddedListener {
-        void onBluetoothDeviceAdded(BluetoothDevice device);
+        void onBluetoothDeviceAdded(PairedDevice device);
     }
 
     @Override
@@ -43,8 +47,12 @@ public class BluetoothReceiver extends BroadcastReceiver {
                         device.createBond();
                         break;
                     case BluetoothDevice.BOND_BONDED:
+                        SharedPreferences sharedPrefs = context.getSharedPreferences(SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
                         for (OnBluetoothDeviceAddedListener listener : deviceListeners) {
-                            listener.onBluetoothDeviceAdded(device);
+                            listener.onBluetoothDeviceAdded(new PairedDevice(
+                                    device.getName(),
+                                    sharedPrefs.getBoolean(device.getName(), false)
+                            ));
                         }
                         break;
                 }
@@ -52,6 +60,11 @@ public class BluetoothReceiver extends BroadcastReceiver {
         }
     }
 
-    public static void addDeviceListener(OnBluetoothDeviceAddedListener listener) { deviceListeners.add(listener); }
-    public static void removeDeviceListener(OnBluetoothDeviceAddedListener listener) { deviceListeners.remove(listener); }
+    public static void addDeviceListener(OnBluetoothDeviceAddedListener listener) {
+        deviceListeners.add(listener);
+    }
+
+    public static void removeDeviceListener(OnBluetoothDeviceAddedListener listener) {
+        deviceListeners.remove(listener);
+    }
 }
