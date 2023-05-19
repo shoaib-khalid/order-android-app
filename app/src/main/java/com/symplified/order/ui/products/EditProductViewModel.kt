@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.symplified.order.App
 import com.symplified.order.models.product.Product
-import com.symplified.order.models.product.ProductListResponse
 import com.symplified.order.models.store.Store
 import com.symplified.order.networking.RequestInterceptor
 import com.symplified.order.networking.apis.ProductApiKt
@@ -14,9 +13,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.OkHttpClient
-import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
 class EditProductViewModel : ViewModel() {

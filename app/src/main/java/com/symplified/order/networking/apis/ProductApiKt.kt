@@ -1,8 +1,8 @@
 package com.symplified.order.networking.apis
 
 import com.symplified.order.models.asset.StoreProductAsset.StoreProductAssetListResponse
-import com.symplified.order.models.product.UpdatedProduct
 import com.symplified.order.models.product.ProductListResponse
+import com.symplified.order.models.product.UpdatedProduct
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body

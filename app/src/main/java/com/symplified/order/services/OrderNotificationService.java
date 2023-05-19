@@ -42,7 +42,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
 
     private final Pattern pattern = Pattern.compile("orderId:(\\S+?)$");
     private final String TAG = "order-notification-service";
-
     private static boolean isOrderNotifsEnabled = true;
 
     private static final List<OrderObserver> newOrderObservers = new ArrayList<>();
@@ -73,9 +72,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 observer.onRedeemed();
             }
         } else if (isOrderNotifsEnabled) {
-            Log.d(App.PRINT_TAG, "Message body: " + remoteMessage.getData().get("body"));
             String orderId = parseOrderId(remoteMessage.getData().get("body"));
-            Log.d(App.PRINT_TAG, "Parsed orderId: " + orderId);
 
             if (orderId != null) {
                 OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
@@ -86,13 +83,14 @@ public class OrderNotificationService extends FirebaseMessagingService {
                                                    @NonNull Response<OrderDetailsResponse> response) {
 
                                 Order newOrder = null;
-
                                 if (response.isSuccessful()) {
                                     if (response.body() != null && !response.body().data.content.isEmpty()) {
                                         Order.OrderDetails orderDetails = response.body().data.content.get(0);
                                         newOrder = orderDetails.order;
+
                                         if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                                && (App.isPrinterConnected() || App.isAnyBtPrinterEnabled(getApplicationContext()))) {
+                                                && (App.isPrinterConnected()
+                                                || App.isAnyBtPrinterEnabled(getApplicationContext()))) {
                                             printAndProcessOrder(orderApiService, orderDetails);
                                         } else {
                                             addOrderToView(newOrderObservers, orderDetails);

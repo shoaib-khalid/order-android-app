@@ -14,8 +14,8 @@ android {
         applicationId "com.symplified.order"
         minSdk 23
         targetSdk 33
-        versionCode 156
-        versionName "2.0.6"
+        versionCode 157
+        versionName "2.0.7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {

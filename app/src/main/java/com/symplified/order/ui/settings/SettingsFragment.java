@@ -1,7 +1,6 @@
 package com.symplified.order.ui.settings;
 
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
-
 import static com.symplified.order.App.PRINT_TAG;
 
 import android.bluetooth.BluetoothDevice;
@@ -11,17 +10,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.symplified.order.App;
 import com.symplified.order.R;
@@ -32,7 +30,6 @@ import com.symplified.order.utils.SharedPrefsKey;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class SettingsFragment extends Fragment
         implements BluetoothReceiver.OnBluetoothDeviceAddedListener,

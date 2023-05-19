@@ -1,37 +1,15 @@
 package com.symplified.order.ui.settings;
 
-import static android.Manifest.permission.BLUETOOTH_CONNECT;
-
-import android.Manifest;
-import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SwitchCompat;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.symplified.order.App;
-import com.symplified.order.R;
 import com.symplified.order.databinding.RowBluetoothDeviceBinding;
 import com.symplified.order.models.bluetooth.PairedDevice;
-import com.symplified.order.utils.SharedPrefsKey;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 public class BluetoothDeviceAdapter
         extends ListAdapter<PairedDevice, BluetoothDeviceAdapter.DeviceViewHolder> {

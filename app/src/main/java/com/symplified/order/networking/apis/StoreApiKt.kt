@@ -1,12 +1,9 @@
 package com.symplified.order.networking.apis
 
 import com.symplified.order.models.HttpResponse
-import com.symplified.order.models.asset.Asset.AssetListResponse
 import com.symplified.order.models.store.StoreResponse
 import com.symplified.order.models.store.StoreResponse.SingleStoreResponse
 import com.symplified.order.models.store.StoreStatusResponse
-import okhttp3.ResponseBody
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.PUT

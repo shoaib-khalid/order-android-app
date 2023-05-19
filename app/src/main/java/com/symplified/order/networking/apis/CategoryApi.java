@@ -2,11 +2,8 @@ package com.symplified.order.networking.apis;
 
 import com.symplified.order.models.category.CategoryResponse;
 
-import java.util.Map;
-
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.HeaderMap;
 import retrofit2.http.Query;
 
 public interface CategoryApi {

@@ -23,7 +23,6 @@ import com.symplified.order.databinding.ActivityStoresBinding;
 import com.symplified.order.enums.NavIntentStore;
 import com.symplified.order.ui.NavbarActivity;
 import com.symplified.order.utils.SharedPrefsKey;
-import com.symplified.order.utils.Utility;
 
 public class StoresActivity extends NavbarActivity
         implements StoreSelectionFragment.StoreFragmentListener {

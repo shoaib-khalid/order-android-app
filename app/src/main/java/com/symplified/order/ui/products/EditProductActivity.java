@@ -36,7 +36,6 @@ import com.symplified.order.networking.ServiceGenerator;
 import com.symplified.order.networking.apis.ProductApi;
 import com.symplified.order.ui.NavbarActivity;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
