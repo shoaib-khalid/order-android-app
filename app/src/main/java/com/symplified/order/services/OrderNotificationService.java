@@ -85,35 +85,30 @@ public class OrderNotificationService extends FirebaseMessagingService {
                             public void onResponse(@NonNull Call<OrderDetailsResponse> call,
                                                    @NonNull Response<OrderDetailsResponse> response) {
 
-                                Log.d(App.PRINT_TAG, "Order query success: " + response.isSuccessful());
+                                Order newOrder = null;
 
-                                boolean isNotNullOrEmpty = response.body() != null && !response.body().data.content.isEmpty();
-                                Log.d(App.PRINT_TAG, "response.issuccessful? " + response.isSuccessful() +
-                                        ", response.body != null ? " + (response.body() != null) +
-                                        ", isNotNullOrEmpty: " + isNotNullOrEmpty);
-
-                                if (response.isSuccessful() &&
-                                        response.body() != null &&
-                                        response.body().data.content.size() > 0) {
-                                    Order.OrderDetails orderDetails = response.body().data.content.get(0);
-                                    Log.d(BluetoothPrinterService.TAG, "OrderId in response: " + orderDetails.order.id);
-                                        alert(remoteMessage, orderDetails.order);
-                                    if (orderDetails.order.serviceType == ServiceType.DINEIN
-                                            && (App.isPrinterConnected() || App.isAnyBtPrinterEnabled(getApplicationContext()))) {
-                                        Log.d(App.PRINT_TAG, "Printing order");
-                                        printAndProcessOrder(orderApiService, orderDetails);
+                                if (response.isSuccessful()) {
+                                    if (response.body() != null && !response.body().data.content.isEmpty()) {
+                                        Order.OrderDetails orderDetails = response.body().data.content.get(0);
+                                        newOrder = orderDetails.order;
+                                        if (orderDetails.order.serviceType == ServiceType.DINEIN
+                                                && (App.isPrinterConnected() || App.isAnyBtPrinterEnabled(getApplicationContext()))) {
+                                            printAndProcessOrder(orderApiService, orderDetails);
+                                        } else {
+                                            addOrderToView(newOrderObservers, orderDetails);
+                                        }
                                     } else {
-                                        Log.d(App.PRINT_TAG, "Not printing order");
-                                        addOrderToView(newOrderObservers, orderDetails);
+                                        sendErrorToServer("Received empty list in " +
+                                                "response when searching order " + orderId +
+                                                " after receiving FCM notification.");
                                     }
                                 } else {
-                                    alert(remoteMessage, null);
-                                    if (!response.isSuccessful()) {
-                                        sendErrorToServer("Error " + response.code()
-                                                + " received when querying order "
-                                                + orderId + " after receiving Firebase notification.");
-                                    }
+                                    sendErrorToServer("Error " + response.code()
+                                            + " received when querying order "
+                                            + orderId + " after receiving FCM notification.");
                                 }
+
+                                alert(remoteMessage, newOrder);
                             }
 
                             @Override
@@ -133,36 +128,25 @@ public class OrderNotificationService extends FirebaseMessagingService {
             OrderApi orderApiService,
             Order.OrderDetails orderDetails
     ) {
-        Log.d(BluetoothPrinterService.TAG, "OrderNotificationService: Printing and Processing order");
-
         orderApiService.getItemsForOrder(orderDetails.order.id).clone().enqueue(new Callback<ItemsResponse>() {
             @Override
             public void onResponse(@NonNull Call<ItemsResponse> call,
                                    @NonNull Response<ItemsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    try {
-                        App.printOrderReceipt(
-                                orderDetails.order,
-                                response.body().data.content,
-                                Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
-                                getApplicationContext()
-                        );
+                    App.printOrderReceipt(
+                            orderDetails.order,
+                            response.body().data.content,
+                            Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
+                            getApplicationContext()
+                    );
 
-                        processNewOrder(orderApiService, orderDetails);
-                    } catch (Exception e) {
-                        addOrderToView(newOrderObservers, orderDetails);
-
-                        String errorMessage = "Error occurred while printing Dine-in order "
-                                + orderDetails.order.id + " after receiving notification. " +
-                                "Cannot proceed with auto-process of order.";
-                        sendErrorToServer(errorMessage);
-                    }
+                    processNewOrder(orderApiService, orderDetails);
                 } else {
                     addOrderToView(newOrderObservers, orderDetails);
 
-                    String errorMessage = "Error " + response.code() + " received while retrieving items for " +
-                            "Dine-in order " + orderDetails.order.id + " after receiving notification. " +
-                            "Cannot proceed with printing and auto-process of order.";
+                    String errorMessage = "Error " + response.code() + " received while retrieving " +
+                            "items for Dine-in order " + orderDetails.order.id + " after receiving " +
+                            "FCM notification. Cannot proceed with printing and auto-process of order.";
                     sendErrorToServer(errorMessage);
                 }
             }
@@ -187,10 +171,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 : orderDetails.nextCompletionStatus;
 
         orderApiService.updateOrderStatus(
-                new Order.OrderUpdate(
-                        orderDetails.order.id,
-                        nextCompletionStatus
-                ), orderDetails.order.id
+                new Order.OrderUpdate(orderDetails.order.id, nextCompletionStatus),
+                orderDetails.order.id
         ).clone().enqueue(new Callback<OrderUpdateResponse>() {
             @Override
             public void onResponse(@NonNull Call<OrderUpdateResponse> call,

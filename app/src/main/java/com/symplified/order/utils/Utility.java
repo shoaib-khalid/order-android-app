@@ -22,6 +22,7 @@ import com.symplified.order.R;
 import com.symplified.order.enums.OrderStatus;
 import com.symplified.order.models.order.Order;
 import com.symplified.order.ui.LoginActivity;
+import com.symplified.order.ui.orders.OrdersActivity;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -112,13 +113,16 @@ public class Utility {
             String bigText,
             String channel,
             int notificationId,
+            boolean shouldCancelPreviousNotification,
             Class<?> activity
     ) {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-        stackBuilder.addNextIntentWithParentStack(new Intent(context, activity));
+        stackBuilder.addNextIntentWithParentStack(new Intent(context,
+                activity != null ? activity : OrdersActivity.class));
         PendingIntent pendingIntent =
                 stackBuilder.getPendingIntent(0,
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
 
         NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -130,17 +134,16 @@ public class Utility {
                 .setContentIntent(pendingIntent)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
-                .setContentText(text);
-        if (!isBlank(bigText)) {
-            builder.setStyle(new NotificationCompat.BigTextStyle()
-                    .bigText(bigText));
-        }
-        builder.setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentText(text)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                    .bigText(!isBlank(bigText) ? bigText : text))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setColor(Color.CYAN)
-                .setAutoCancel(true)
-                .build();
+                .setAutoCancel(true);
 
-        notificationManager.cancel(notificationId);
+        if (shouldCancelPreviousNotification) {
+            notificationManager.cancel(notificationId);
+        }
         notificationManager.notify(notificationId, builder.build());
     }
 

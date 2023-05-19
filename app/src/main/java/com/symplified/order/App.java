@@ -1,37 +1,52 @@
 package com.symplified.order;
 
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 
 import android.app.Application;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.Log;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 
 import com.symplified.order.interfaces.Printer;
 import com.symplified.order.interfaces.PrinterObserver;
-import com.symplified.order.models.bluetooth.PairedDevice;
 import com.symplified.order.models.item.Item;
 import com.symplified.order.models.order.Order;
+import com.symplified.order.ui.orders.OrdersActivity;
+import com.symplified.order.utils.ChannelId;
 import com.symplified.order.utils.GenericPrintHelper;
 import com.symplified.order.utils.PrinterUtility;
 import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.SunmiPrintHelper;
+import com.symplified.order.utils.Utility;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Application file to have properties used throughout the lifecycle of app.
@@ -61,22 +76,6 @@ public class App extends Application implements PrinterObserver {
 
     private static App instance;
 
-//    private static AppDatabase database;
-//    public static synchronized AppDatabase getDatabase() {
-//        if (database == null) {
-//            database = AppDatabase.Companion.getDatabase(getAppContext());
-//        }
-//        return database;
-//    }
-//
-//    private static BtPrinterRepository btPrinterRepository;
-//    public static synchronized BtPrinterRepository getBtPrinterRepository() {
-//        if (btPrinterRepository == null) {
-//            btPrinterRepository = new BtPrinterRepository(getDatabase().printerDao());
-//        }
-//        return btPrinterRepository;
-//    }
-
     public App() {
         instance = this;
     }
@@ -84,6 +83,8 @@ public class App extends Application implements PrinterObserver {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        createNotificationChannels();
 
         //restrict devices from forcing the dark mode on the app
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
@@ -93,6 +94,20 @@ public class App extends Application implements PrinterObserver {
 
         GenericPrintHelper.getInstance().addObserver(this);
         GenericPrintHelper.getInstance().initPrinterService(this);
+
+    }
+
+    private void createNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            NotificationChannel channel = new NotificationChannel(
+                    ChannelId.PRINTING_NEW_ORDER,
+                    "Printing new orders",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            channel.setDescription("For when the app is printing a new order");
+            manager.createNotificationChannel(channel);
+        }
     }
 
     public static Printer getPrinter() {
@@ -108,81 +123,12 @@ public class App extends Application implements PrinterObserver {
         return connectedPrinter != null && connectedPrinter.isPrinterConnected();
     }
 
-    public static void addBtPrinter(BluetoothDevice device, Context context) {
-//        SharedPreferences sharedPrefs = context.getSharedPreferences(SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
-//        if (ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
-//                == PackageManager.PERMISSION_DENIED) {
-//            return;
-//        }
-//        if (!sharedPrefs.contains(device.getName())) {
-//            sharedPrefs.edit().putBoolean(device.getName(), true).apply();
-//        }
-//
-//        for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-//            listener.onBluetoothDeviceAdded(device);
-//        }
-    }
-
-//    public static void addBtPrinter(
-//            BluetoothDevice device,
-//            Context context
-//    ) {
-//        new Thread() {
-//            @Override
-//            public void run() {
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-//                        ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
-//                                == PackageManager.PERMISSION_DENIED
-//                ) {
-//                    return;
-//                }
-//
-//                for (PairedDevice storedPrinter : btPrinters) {
-//                    if (storedPrinter.device.getName()
-//                            .equals(device.getName())) {
-//                        return;
-//                    }
-//                }
-//
-//                if ("innerprinter".equalsIgnoreCase(device.getName())) {
-//                    return;
-//                }
-//
-//                isAddingBluetoothDevice = true;
-//                for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-//                    listener.onIsAddingBluetoothDevice(isAddingBluetoothDevice);
-//                }
-//                try {
-//                    BluetoothSocket socket = device
-//                            .createRfcommSocketToServiceRecord(UUID.fromString(PRINTER_UUID));
-//                    if (socket != null) {
-//                        socket.connect();
-//                        PairedDevice pairedDevice = new PairedDevice(device, socket, device.getName());
-//                        btPrinters.add(pairedDevice);
-//                        for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-//                            listener.onBluetoothDeviceAdded(pairedDevice);
-//                        }
-//                    }
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                isAddingBluetoothDevice = false;
-//                for (OnBluetoothDeviceAddedListener listener : deviceAddedListeners) {
-//                    listener.onIsAddingBluetoothDevice(isAddingBluetoothDevice);
-//                }
-//            }
-//        }.start();
-//    }
-
     public static void printOrderReceipt(
             Order order,
             List<Item> items,
             String currency,
             Context context
     ) {
-
-        Log.d(PRINT_TAG, "Printing order receipt");
         new Thread() {
             @Override
             public void run() {
@@ -190,101 +136,137 @@ public class App extends Application implements PrinterObserver {
                     try {
                         connectedPrinter.printOrderReceipt(order, items, currency);
                     } catch (Exception e) {
-                        Log.d("printer-helper", "Failed to print receipt: " + e.getLocalizedMessage());
+                        Log.e("printer-helper", "Failed to print receipt: ", e);
                     }
                 }
             }
         }.start();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                ContextCompat.checkSelfPermission(
-                        context,
-                        BLUETOOTH_CONNECT
-                ) == PackageManager.PERMISSION_DENIED
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
+                == PackageManager.PERMISSION_DENIED
         ) {
-            Log.d(PRINT_TAG, "Bluetooth permission denied");
-
             return;
         }
 
+        Log.d(PRINT_TAG, "Starting print");
         SharedPreferences sharedPrefs = context.getSharedPreferences(
                 SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
         byte[] dataToPrint = PrinterUtility.generateReceiptText(order, items, currency)
                 .getBytes(StandardCharsets.UTF_8);
+        Log.d(PRINT_TAG, "Generated byte data");
 
-        Set<BluetoothDevice> pairedDevices = ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter().getBondedDevices();
+        final Set<BluetoothDevice> pairedDevices = ((BluetoothManager) context.getSystemService(
+                Context.BLUETOOTH_SERVICE)).getAdapter().getBondedDevices();
+        final NotificationManagerCompat mNotificationManager = NotificationManagerCompat.from(context);
+        final String NOTIF_GROUP = order.id;
+
+        if (!pairedDevices.isEmpty()
+                && (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                || ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED)) {
+            mNotificationManager.notify(ThreadLocalRandom.current().nextInt(),
+                    new NotificationCompat.Builder(context, ChannelId.PRINTING_NEW_ORDER)
+                            .setSmallIcon(R.drawable.ic_notification)
+                            .setContentText("Printing order " + order.invoiceId)
+                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                            .setGroup(NOTIF_GROUP)
+                            .build()
+            );
+        }
 
         for (BluetoothDevice device : pairedDevices) {
-            if (sharedPrefs.getBoolean(device.getName(), false)) {
+            final String deviceName = device.getName();
+            if (sharedPrefs.getBoolean(deviceName, false)) {
                 new Thread() {
                     @Override
                     public void run() {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                                ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
-                                        == PackageManager.PERMISSION_DENIED
-                        ) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                                && ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
+                                == PackageManager.PERMISSION_DENIED) {
                             return;
                         }
 
-//                        try {
-//                            BluetoothSocket socket = device.createRfcommSocketToServiceRecord(
-//                                    UUID.fromString(PRINTER_UUID)
-//                            );
-//                            if (!socket.isConnected()) {
-//                                socket.connect();
-//                            }
-//
-//                            new Thread() {
-//                                @Override
-//                                public void run() {
-//                                    try {
-//                                        socket.getOutputStream().write(dataToPrint);
-//                                    } catch (IOException e) {
-//                                        Log.e("bluetooth-print", "Failed to write to socket.", e);;
-//                                    }
-//
-//                                    try {
-//                                        socket.close();
-//                                    } catch (IOException e) {
-//                                        Log.e("bluetooth-print", "Failed to close socket.", e);;
-//                                    }
-//                                }
-//                            }.start();
-//                        } catch (Exception e) {
-//                            Log.e("bluetooth-print", "Could not create socket.", e);
-//                        }
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                                || ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS)
+                                == PackageManager.PERMISSION_GRANTED) {
+                            mNotificationManager.notify(ThreadLocalRandom.current().nextInt(),
+                                    new NotificationCompat.Builder(context, ChannelId.PRINTING_NEW_ORDER)
+                                            .setSmallIcon(R.drawable.ic_notification)
+                                            .setStyle(new NotificationCompat.InboxStyle()
+                                                    .setSummaryText("Order " + order.invoiceId))
+                                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                            .setGroup(NOTIF_GROUP)
+                                            .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_CHILDREN)
+                                            .setGroupSummary(true)
+                                            .build()
+                            );
+                        }
 
-
-                        final String deviceName = device.getName();
+                        Log.d(PRINT_TAG, "Creating socket for " + deviceName);
                         try {
                             BluetoothSocket socket = device.createRfcommSocketToServiceRecord(UUID.fromString(PRINTER_UUID));
                             Log.d(PRINT_TAG, "Created socket for " + deviceName);
+
                             if (!socket.isConnected()) {
                                 socket.connect();
                             }
-                            Log.d(PRINT_TAG, "socket connected for " + deviceName);
+                            Log.d(PRINT_TAG, "Socket connected for " + deviceName);
 
                             new Thread() {
                                 @Override
                                 public void run() {
+                                    String text = "";
                                     try {
                                         socket.getOutputStream().write(dataToPrint);
-                                        Log.d(PRINT_TAG, "written to socket for " + deviceName);
-
+                                        Log.d(PRINT_TAG, "Data written to " + deviceName);
+                                        text = "Print data send to " + deviceName + " successfully.";
                                     } catch (IOException e) {
                                         Log.e(PRINT_TAG, "Failed to write to socket.", e);
+                                        text = "Failed to send print data to " + deviceName;
+                                    }
+
+                                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                                            || ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS)
+                                            == PackageManager.PERMISSION_GRANTED) {
+                                        mNotificationManager.notify(ThreadLocalRandom.current().nextInt(),
+                                                new NotificationCompat.Builder(context, ChannelId.PRINTING_NEW_ORDER)
+                                                        .setSmallIcon(R.drawable.ic_notification)
+                                                        .setContentText(text)
+                                                        .setStyle(new NotificationCompat.BigTextStyle()
+                                                                .bigText(text))
+                                                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                                        .setGroup(NOTIF_GROUP)
+                                                        .build()
+                                        );
                                     }
 
                                     try {
                                         socket.close();
-                                        Log.d(PRINT_TAG, "closed socket for " + deviceName);
+                                        Log.d(PRINT_TAG, "Socket closed for " + deviceName);
                                     } catch (IOException e) {
                                         Log.e(PRINT_TAG, "Failed to close socket.", e);
                                     }
                                 }
                             }.start();
                         } catch (Exception e) {
-                            Log.e(PRINT_TAG, "Failed to create socket for " + deviceName, e);
+                            String text = "Failed to connect to " + deviceName + " for printing";
+                            Log.e(PRINT_TAG, text, e);
+
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                                    || ContextCompat.checkSelfPermission(context, POST_NOTIFICATIONS)
+                                    == PackageManager.PERMISSION_GRANTED) {
+                                mNotificationManager.notify(ThreadLocalRandom.current().nextInt(),
+                                        new NotificationCompat.Builder(context, ChannelId.PRINTING_NEW_ORDER)
+                                                .setSmallIcon(R.drawable.ic_notification)
+                                                .setContentText(text)
+                                                .setStyle(new NotificationCompat.BigTextStyle()
+                                                        .bigText(text))
+                                                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                                .setGroup(NOTIF_GROUP)
+                                                .build()
+                                );
+                            }
                         }
                     }
                 }.start();
@@ -293,9 +275,9 @@ public class App extends Application implements PrinterObserver {
     }
 
     public static boolean isAnyBtPrinterEnabled(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S || ContextCompat.checkSelfPermission(
-                context, BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
-
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                || ContextCompat.checkSelfPermission(context, BLUETOOTH_CONNECT)
+                == PackageManager.PERMISSION_GRANTED) {
             SharedPreferences sharedPrefs = context.getSharedPreferences(SharedPrefsKey.BT_DEVICE_PREFS_FILE_NAME, Context.MODE_PRIVATE);
             for (BluetoothDevice device : ((BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE))
                     .getAdapter().getBondedDevices()) {
@@ -310,5 +292,11 @@ public class App extends Application implements PrinterObserver {
 
     public static Context getAppContext() {
         return instance.getApplicationContext();
+    }
+
+    private static void notifyPrint(
+
+    ) {
+
     }
 }

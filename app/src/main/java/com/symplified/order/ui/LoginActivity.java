@@ -451,6 +451,7 @@ public class LoginActivity extends AppCompatActivity {
                 getString(R.string.notif_firebase_error_text_full),
                 ChannelId.ERRORS,
                 ChannelId.ERRORS_NOTIF_ID,
+                true,
                 LoginActivity.class
         );
     }

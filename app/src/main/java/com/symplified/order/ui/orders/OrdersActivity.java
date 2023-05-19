@@ -212,7 +212,8 @@ public class OrdersActivity extends NavbarActivity {
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call, @NonNull Throwable t) {}
+                public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                      @NonNull Throwable t) {}
             });
         }
     }
@@ -225,6 +226,7 @@ public class OrdersActivity extends NavbarActivity {
                 getString(R.string.notif_firebase_error_text_full),
                 ChannelId.ERRORS,
                 ChannelId.ERRORS_NOTIF_ID,
+                true,
                 LoginActivity.class
         );
 

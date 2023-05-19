@@ -1,24 +1,21 @@
 package com.symplified.order.ui;
 
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
+import static android.Manifest.permission.POST_NOTIFICATIONS;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -45,7 +42,6 @@ import com.symplified.order.utils.SharedPrefsKey;
 import com.symplified.order.utils.Utility;
 
 import java.util.Calendar;
-import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -61,12 +57,18 @@ public class NavbarActivity extends AppCompatActivity
     private NavigationView navigationView;
     public FrameLayout frameLayout;
 
+    private ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Utility.verifyLoginStatus(this);
 
-        syncPairedBtDevices();
+        requestPermissions();
     }
 
     @Override
@@ -206,47 +208,19 @@ public class NavbarActivity extends AppCompatActivity
     }
 
 
-    private void syncPairedBtDevices() {
-        new Thread() {
-            @Override
-            public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                        && ContextCompat.checkSelfPermission(
-                        getApplicationContext(), BLUETOOTH_CONNECT)
-                        == PackageManager.PERMISSION_DENIED) {
-                    ActivityCompat.requestPermissions(
-                            NavbarActivity.this,
-                            new String[]{BLUETOOTH_CONNECT},
-                            App.PERMISSION_REQUEST_CODE
-                    );
-                    return;
-                }
-
-                BluetoothAdapter adapter = ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
-                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-                Log.d("navbar-activity", "Syncing paired bt devices. Size: " + pairedDevices.size());
-
-                if (pairedDevices != null) {
-                    for (BluetoothDevice btDevice : pairedDevices) {
-                        App.addBtPrinter(btDevice, getApplicationContext());
-                    }
-                }
-            }
-        }.start();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(
-            int requestCode,
-            @NonNull String[] permissions,
-            @NonNull int[] grantResults
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == App.PERMISSION_REQUEST_CODE
-                && grantResults.length > 0
-                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            syncPairedBtDevices();
+    private void requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                && ContextCompat.checkSelfPermission(
+                getApplicationContext(), BLUETOOTH_CONNECT)
+                == PackageManager.PERMISSION_DENIED) {
+            requestPermissionLauncher.launch(BLUETOOTH_CONNECT);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+                && ContextCompat.checkSelfPermission(getApplicationContext(), POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_DENIED) {
+            requestPermissionLauncher.launch(POST_NOTIFICATIONS);
+        }
+
     }
 }
