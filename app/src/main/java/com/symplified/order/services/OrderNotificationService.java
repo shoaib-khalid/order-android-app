@@ -60,6 +60,8 @@ public class OrderNotificationService extends FirebaseMessagingService {
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString(SharedPrefsKey.CLIENT_ID, "null");
 
+        Log.d(TAG, "Received notification: " + remoteMessage.getData().get("body"));
+
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
             AuthApi userService = ServiceGenerator.createUserService(this);
             String transactionId = remoteMessage.getData().get("body");
