@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_qr_screen_gradient"
     android:keepScreenOn="true"
-    tools:context=".ui.stores.QrCodeFragment">
+    tools:context="com.ekedai.merchant.ui.stores.QrCodeFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

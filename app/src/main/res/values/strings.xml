@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">SYMplified Merchant</string>
-    <string name="db_name">symplified_merchant_db</string>
+    <string name="app_name">eKedai Merchant</string>
+    <string name="db_name">ekedai_merchant_db</string>
     <string name="hint_email">Email or Username</string>
     <string name="hint_password">Password</string>
     <string name="login_text">Login</string>
@@ -80,9 +80,10 @@
     <string name="contact_number">Contact Number: \u0020</string>
     <string name="delivery_time">Delivery Time: \u0020</string>
     <string name="request_failure">An error occurred. Please try again.</string>
+    <string name="request_failure_with_code">Error %1$s occurred. Please try again.</string>
     <string name="no_internet">Please check your internet connection and try again!</string>
     <string name="forgot_password"><u>Forgot Password</u></string>
-    <string name="welcome_message">Welcome to Symplified App for Merchant</string>
+    <string name="welcome_message">Welcome to eKedai App for Merchant</string>
     <string name="order_placed_date">Order Placed:\u0020</string>
     <string name="order_placed_date_value">08–03–22 13:05 pm</string>
     <string name="remember_me">Remember me</string>
@@ -103,6 +104,7 @@
     <string name="add">Add New</string>
     <string name="dialog_title">Cancel Order</string>
     <string name="dialog_okay">Okay</string>
+    <string name="ok">Ok</string>
     <string name="dialog_no">No</string>
     <string name="dialog_yes">Yes</string>
     <string name="dialog_message">Are you sure you want to cancel the order?</string>

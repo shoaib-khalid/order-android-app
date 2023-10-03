@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="5dp"
-    tools:context=".ui.orders.ConsolidateOrderActivity">
+    tools:context="com.ekedai.merchant.ui.orders.ConsolidateOrderActivity">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

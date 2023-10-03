@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:keepScreenOn="true"
-    tools:context=".ui.orders.OrdersActivity">
+    tools:context="com.ekedai.merchant.ui.orders.OrdersActivity">
 
     <include
         android:id="@+id/toolbar"

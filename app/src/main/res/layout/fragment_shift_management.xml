@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
-    tools:context=".ui.staff.ShiftManagementFragment">
+    tools:context="com.ekedai.merchant.ui.staff.ShiftManagementFragment">
 
     <ProgressBar
         android:id="@+id/progress_bar"

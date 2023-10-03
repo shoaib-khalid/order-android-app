@@ -5,5 +5,5 @@ dependencyResolutionManagement {
         mavenCentral() // Warning: this repository is going to shut down soon
     }
 }
-rootProject.name = "Symplified Merchant"
+rootProject.name = "eKedai Merchant"
 include ':app'

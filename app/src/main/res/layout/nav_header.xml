@@ -11,7 +11,7 @@
         android:id="@+id/nav_header_logo"
         android:layout_width="142dp"
         android:layout_height="67dp"
-        android:src="@drawable/sym_white_cloud"
+        android:src="@drawable/ekedai_merchant_logo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
