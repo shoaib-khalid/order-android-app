@@ -20,7 +20,7 @@ import androidx.core.app.NotificationCompat;
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.ui.orders.OrdersActivity;
 import com.ekedai.merchant.utils.ChannelId;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 import java.util.List;
 
@@ -144,8 +144,8 @@ public class AlertService extends Service {
             notificationManager.createNotificationChannel(chan);
         }
         return new NotificationCompat.Builder(this, ChannelId.NEW_ORDERS)
-                .setContentTitle(!Utility.isBlank(title) ? title : "You have new orders")
-                .setContentText(!Utility.isBlank(body) ? body : "Tap to view")
+                .setContentTitle(!Utilities.isBlank(title) ? title : "You have new orders")
+                .setContentText(!Utilities.isBlank(body) ? body : "Tap to view")
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentIntent(pendingIntent)
                 .build();

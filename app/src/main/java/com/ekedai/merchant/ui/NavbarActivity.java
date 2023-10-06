@@ -25,11 +25,11 @@ import com.ekedai.merchant.models.store.StoreResponse;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.ui.orders.OrdersActivity;
 import com.ekedai.merchant.ui.products.ProductsActivity;
-import com.ekedai.merchant.ui.settings.SettingsActivity;
 import com.ekedai.merchant.ui.staff.StaffActivity;
 import com.ekedai.merchant.ui.stores.StoresActivity;
+import com.ekedai.merchant.ui.voucher.VoucherActivity;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.Calendar;
@@ -51,7 +51,7 @@ public class NavbarActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Utility.verifyLoginStatus(this);
+        Utilities.verifyLoginStatus(this);
     }
 
     @Override
@@ -117,60 +117,45 @@ public class NavbarActivity extends AppCompatActivity
             logout.setVisibility(View.VISIBLE);
         }
 
-        logout.setOnClickListener(view -> Utility.logout(this));
+        logout.setOnClickListener(view -> Utilities.logout(this));
 
         navigationView.setNavigationItemSelectedListener(item -> {
 
             drawerLayout.closeDrawer(GravityCompat.START);
-            int id = item.getItemId();
-            Intent intent;
-            switch (id) {
-                case R.id.nav_orders:
-                    if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), OrdersActivity.class);
-                        startActivity(intent);
-                    }
-                    break;
-                case R.id.nav_products:
-                    if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), ProductsActivity.class);
-                        startActivity(intent);
-                    }
-                    break;
-                case R.id.nav_stores:
-                    if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), StoresActivity.class);
-                        intent.putExtra("action", NavIntentStore.SET_STORE_TIMING);
-                        startActivity(intent);
-                    }
-                    break;
-                case R.id.nav_qr_code:
-                    if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), StoresActivity.class);
-                        intent.putExtra("action", NavIntentStore.DISPLAY_QR_CODE);
-                        startActivity(intent);
-                    }
-                    break;
-                case R.id.nav_daily_sales:
-                    if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), StaffActivity.class);
-                        intent.putExtra("action", NavIntentStaff.VIEW_DAILY_SALES);
-                        startActivity(intent);
-                    }
-                    break;
-                case R.id.nav_manage_staff:
-                    if (!item.isChecked()) {
-                        intent = new Intent(getApplicationContext(), StaffActivity.class);
-                        intent.putExtra("action", NavIntentStaff.MANAGE_STAFF);
-                        startActivity(intent);
-                    }
-                    break;
-                case R.id.nav_system_config:
-                    if (!item.isChecked()) {
-                        startActivity(new Intent(getApplicationContext(), SettingsActivity.class));
-                    }
-                    break;
+
+            if (item.isChecked()) {
+                return false;
             }
+
+            int id = item.getItemId();
+            Intent intent = null;
+            if (id == R.id.nav_orders) {
+                intent = new Intent(getApplicationContext(), OrdersActivity.class);
+            } else if (id == R.id.nav_vouchers) {
+                intent = new Intent(getApplicationContext(), VoucherActivity.class);
+            } else if (id == R.id.nav_products) {
+                intent = new Intent(getApplicationContext(), ProductsActivity.class);
+            } else if (id == R.id.nav_stores) {
+                intent = new Intent(getApplicationContext(), StoresActivity.class);
+                intent.putExtra("action", NavIntentStore.SET_STORE_TIMING);
+            } else if (id == R.id.nav_qr_code) {
+                intent = new Intent(getApplicationContext(), StoresActivity.class);
+                intent.putExtra("action", NavIntentStore.DISPLAY_QR_CODE);
+            } else if (id == R.id.nav_daily_sales) {
+                intent = new Intent(getApplicationContext(), StaffActivity.class);
+                intent.putExtra("action", NavIntentStaff.VIEW_DAILY_SALES);
+            } else if (id == R.id.nav_manage_staff) {
+                intent = new Intent(getApplicationContext(), StaffActivity.class);
+                intent.putExtra("action", NavIntentStaff.MANAGE_STAFF);
+            }
+//            else if (id == R.id.nav_system_config) {
+//                intent = new Intent(getApplicationContext(), SettingsActivity.class);
+//            }
+
+            if (intent != null) {
+                startActivity(intent);
+            }
+
             return false;
         });
     }

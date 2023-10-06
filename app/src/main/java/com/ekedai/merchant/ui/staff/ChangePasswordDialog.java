@@ -84,14 +84,12 @@ public class ChangePasswordDialog extends DialogFragment {
         layoutConfirmPassword.setErrorEnabled(doPasswordsMatch);
         layoutNewPassword.setErrorEnabled(doPasswordsMatch);
         if (!doPasswordsMatch) {
-            Log.d("change-password-dialog", "getError: " + layoutNewPassword.getError());
 //            editTextNewPassword.setError("Passwords do not match");
             if (layoutNewPassword.getError() == null)
                 layoutNewPassword.setError("Passwords do not match");
             if (layoutConfirmPassword.getError() == null)
                 layoutConfirmPassword.setError("Passwords do not match");
         } else {
-            Log.d("change-password-dialog", "Setting null");
             layoutNewPassword.setError(null);
             layoutConfirmPassword.setError(null);
         }

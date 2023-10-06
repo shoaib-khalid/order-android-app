@@ -74,7 +74,6 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        Log.d("qr-code", "onAttach");
         orderApiService = ServiceGenerator.createOrderService(context);
         OrderNotificationService.disableOrderNotifications();
         OrderNotificationService.addQrCodeObserver(this);

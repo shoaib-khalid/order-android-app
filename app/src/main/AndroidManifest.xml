@@ -10,16 +10,13 @@
     <uses-permission
         android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"
         tools:ignore="ProtectedPermissions" />
-
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    
+
     <uses-feature
         android:name="android.hardware.bluetooth"
         android:required="false" />
@@ -28,7 +25,7 @@
         android:required="false" />
 
     <application
-        android:name="com.ekedai.merchant.App"
+        android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -36,14 +33,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SymplifiedOrderUpdate">
         <activity
-            android:name="com.ekedai.merchant.ui.settings.SettingsActivity"
+            android:name=".ui.voucher.VoucherDetailsActivity"
+            android:exported="false" />
+
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
+
+        <activity
+            android:name=".ui.voucher.VoucherActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.settings.SettingsActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
         <activity
-            android:name="com.ekedai.merchant.ui.staff.StaffActivity"
+            android:name=".ui.staff.StaffActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false">
             <meta-data
@@ -51,15 +59,15 @@
                 android:value="" />
         </activity>
         <activity
-            android:name="com.ekedai.merchant.ui.orders.TrackOrderActivity"
+            android:name=".ui.orders.TrackOrderActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
-            android:name="com.ekedai.merchant.ui.orders.EditOrderActivity"
+            android:name=".ui.orders.EditOrderActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
-            android:name="com.ekedai.merchant.ui.orders.ConsolidateOrderActivity"
+            android:name=".ui.orders.ConsolidateOrderActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
 
@@ -68,36 +76,37 @@
             android:resource="@mipmap/ic_launcher" />
 
         <activity
-            android:name="com.ekedai.merchant.ui.NavbarActivity"
+            android:name=".ui.NavbarActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true" />
         <activity
-            android:name="com.ekedai.merchant.ui.stores.StoresActivity"
+            android:name=".ui.stores.StoresActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false" />
         <activity
-            android:name="com.ekedai.merchant.ui.products.EditProductActivity"
+            android:name=".ui.products.EditProductActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true" />
         <activity
-            android:name="com.ekedai.merchant.ui.products.ProductsActivity"
+            android:name=".ui.products.ProductsActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
+
             <meta-data
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name="com.ekedai.merchant.ui.orders.OrdersActivity"
+            android:name=".ui.orders.OrdersActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true"
             android:label="@string/title_activity_orders"
             android:theme="@style/Theme.SymplifiedOrderUpdate.NoActionBar" />
         <activity
-            android:name="com.ekedai.merchant.ui.LoginActivity"
+            android:name=".ui.LoginActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true"
             android:noHistory="true">
@@ -109,23 +118,21 @@
         </activity>
 
         <service
-            android:name="com.ekedai.merchant.services.OrderNotificationService"
+            android:name=".services.OrderNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service
-            android:name="com.ekedai.merchant.services.AlertService"
+            android:name=".services.AlertService"
             android:enabled="true" />
-
         <service
             android:name=".services.BluetoothPrinterService"
             android:enabled="true" />
 
         <receiver
-            android:name="com.ekedai.merchant.services.StartupReceiver"
+            android:name=".services.StartupReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -137,7 +144,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name="com.ekedai.merchant.services.BluetoothReceiver"
+            android:name=".services.BluetoothReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

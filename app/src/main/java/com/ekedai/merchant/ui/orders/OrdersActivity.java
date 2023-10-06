@@ -30,7 +30,7 @@ import com.ekedai.merchant.ui.NavbarActivity;
 import com.ekedai.merchant.ui.orders.tabs.SectionsPagerAdapter;
 import com.ekedai.merchant.utils.ChannelId;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -56,8 +56,6 @@ public class OrdersActivity extends NavbarActivity {
 
         binding = ActivityOrdersBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        Utility.verifyLoginStatus(this);
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -85,7 +83,7 @@ public class OrdersActivity extends NavbarActivity {
         mViewPager = viewPager;
 
         if (!sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false)) {
-            if (Utility.isConnectedToInternet(this)) {
+            if (Utilities.isConnectedToInternet(this)) {
                 queryStoresForConsolidateOption();
             } else {
                 ConnectivityManager connMan =
@@ -124,7 +122,7 @@ public class OrdersActivity extends NavbarActivity {
         TextView title = toolbar.findViewById(R.id.app_bar_title);
         title.setText("Your Orders");
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
-        navigationView.getMenu().getItem(0).setChecked(true);
+        navigationView.getMenu().findItem(R.id.nav_orders).setChecked(true);
     }
 
     @Override
@@ -218,7 +216,7 @@ public class OrdersActivity extends NavbarActivity {
     }
 
     private void logoutWithFirebaseErrorNotification() {
-        Utility.notify(
+        Utilities.notify(
                 getApplicationContext(),
                 getString(R.string.notif_firebase_error_title),
                 getString(R.string.notif_firebase_error_text),
@@ -229,6 +227,6 @@ public class OrdersActivity extends NavbarActivity {
                 LoginActivity.class
         );
 
-        Utility.logout(this);
+        Utilities.logout(this);
     }
 }

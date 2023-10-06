@@ -194,7 +194,6 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     }
 
     private void loadItemImageFromUrl(String url, ViewHolder holder) {
-        Glide.with(context)
-                .load(url).into(holder.itemImage);
+        Glide.with(context).load(url).into(holder.itemImage);
     }
 }

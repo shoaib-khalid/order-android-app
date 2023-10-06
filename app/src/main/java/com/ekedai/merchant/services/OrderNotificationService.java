@@ -25,7 +25,7 @@ import com.ekedai.merchant.networking.apis.AuthApi;
 import com.ekedai.merchant.networking.apis.OrderApi;
 import com.ekedai.merchant.utils.EmptyCallback;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
@@ -59,8 +59,6 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String messageTitle = remoteMessage.getData().get("title");
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(App.SESSION, MODE_PRIVATE);
         String clientId = sharedPreferences.getString(SharedPrefsKey.CLIENT_ID, "null");
-
-        Log.d(TAG, "Received notification: " + remoteMessage.getData().get("body"));
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
             AuthApi userService = ServiceGenerator.createUserService(this);
@@ -134,7 +132,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
                     App.printOrderReceipt(
                             orderDetails.order,
                             response.body().data.content,
-                            Utility.getCurrencySymbol(orderDetails.order, getApplicationContext()),
+                            Utilities.getCurrencySymbol(orderDetails.order, getApplicationContext()),
                             getApplicationContext()
                     );
 
@@ -178,9 +176,9 @@ public class OrderNotificationService extends FirebaseMessagingService {
                 if (response.isSuccessful() && response.body() != null) {
                     Order.OrderDetails updatedOrderDetails
                             = new Order.OrderDetails(response.body().data);
-                    if (Utility.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
+                    if (Utilities.isOrderCompleted(updatedOrderDetails.currentCompletionStatus)) {
                         addOrderToView(pastOrderObservers, updatedOrderDetails);
-                    } else if (Utility.isOrderOngoing(updatedOrderDetails.currentCompletionStatus)) {
+                    } else if (Utilities.isOrderOngoing(updatedOrderDetails.currentCompletionStatus)) {
                         addOrderToView(ongoingOrderObservers, updatedOrderDetails);
                     }
                 } else {

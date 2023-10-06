@@ -63,20 +63,15 @@ class BluetoothPrinterService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d(TAG, "onStartCommand")
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
             && ContextCompat.checkSelfPermission(
                 applicationContext,
                 permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_DENIED
         ) {
-            Log.d(TAG, "Permission not granted")
             stopSelf()
             return START_STICKY
         }
-
-        Log.d(TAG, "Permission available. proceeding")
 
         intent?.getByteArrayExtra(PRINT_DATA).let { printData ->
             val adapter = (getSystemService(BLUETOOTH_SERVICE) as BluetoothManager).adapter
@@ -86,7 +81,6 @@ class BluetoothPrinterService : Service() {
                 if (pairedDevice.name.lowercase().contains("cloudprint")) {
 
                     thread {
-                        Log.d(TAG, "Creating socket for ${pairedDevice.name}")
                         pairedDevice.createRfcommSocketToServiceRecord(
                             UUID.fromString(MY_UUID)
                         )?.apply {
@@ -94,14 +88,11 @@ class BluetoothPrinterService : Service() {
                             while (noOfTries < 3) {
                                 try {
                                     if (!isConnected) {
-                                        Log.d(TAG, "Connecting to socket for ${pairedDevice.name}")
                                         connect()
                                     }
-                                    Log.d(TAG, "Writing to socket for ${pairedDevice.name}")
                                     thread {
                                         outputStream.write(printData)
                                     }
-                                    Log.d(TAG, "Done writing to socket for ${pairedDevice.name}")
 //                                    break
                                 } catch (e: Throwable) {
                                     Log.e(

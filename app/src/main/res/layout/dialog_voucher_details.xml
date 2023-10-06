@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="400dp"
+    android:layout_height="wrap_content">
+
+    <include layout="@layout/activity_voucher_details" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

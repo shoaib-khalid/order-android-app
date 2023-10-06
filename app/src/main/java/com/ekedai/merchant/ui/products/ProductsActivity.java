@@ -38,7 +38,6 @@ import com.ekedai.merchant.networking.apis.ProductApi;
 import com.ekedai.merchant.networking.apis.StoreApi;
 import com.ekedai.merchant.ui.NavbarActivity;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 
@@ -83,8 +82,6 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
 
         binding = ActivityProductsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        Utility.verifyLoginStatus(this);
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -175,7 +172,8 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
         title.setText("Products");
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
-        navigationView.getMenu().getItem(2).setChecked(true);
+
+        navigationView.getMenu().findItem(R.id.nav_products).setChecked(true);
     }
 
     private void fetchAll() {

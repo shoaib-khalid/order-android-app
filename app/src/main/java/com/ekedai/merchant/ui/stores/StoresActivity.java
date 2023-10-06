@@ -3,7 +3,6 @@ package com.ekedai.merchant.ui.stores;
 import android.content.pm.ActivityInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -65,10 +64,11 @@ public class StoresActivity extends NavbarActivity
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
 
-        MenuItem item = action == NavIntentStore.SET_STORE_TIMING
-                ? navigationView.getMenu().getItem(1).getSubMenu().getItem(0)
-                : navigationView.getMenu().getItem(3);
-        item.setChecked(true);
+        if (action == NavIntentStore.SET_STORE_TIMING) {
+            navigationView.getMenu().findItem(R.id.nav_stores).setChecked(true);
+        } else {
+            navigationView.getMenu().findItem(R.id.nav_qr_code).setChecked(true);
+        }
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources

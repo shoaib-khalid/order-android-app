@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.models.staff.shift.SummaryDetails;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ public class SalesAdapter extends RecyclerView.Adapter<SalesAdapter.ViewHolder> 
 
     private List<SummaryDetails> summaryDetails = new ArrayList<>();
     private String currency = "RM";
-    private final DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+    private final DecimalFormat formatter = Utilities.getMonetaryAmountFormat();
 
     public SalesAdapter() {
     }

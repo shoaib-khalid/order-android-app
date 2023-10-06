@@ -32,40 +32,5 @@
         android:nestedScrollingEnabled="true"
         app:headerLayout="@layout/nav_header"
         app:menu="@menu/nav_menu">
-
-<!--        <LinearLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="top"-->
-<!--            android:background="@color/white"-->
-<!--            android:orientation="vertical">-->
-
-<!--            <com.google.android.material.button.MaterialButton-->
-<!--                android:id="@+id/nav_logout"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_marginStart="16dp"-->
-<!--                android:drawableStart="@drawable/ic_logout"-->
-<!--                android:text="@string/logout"-->
-<!--                android:textSize="14sp"-->
-<!--                android:visibility="gone"-->
-<!--                app:cornerRadius="25dp" />-->
-
-<!--            &lt;!&ndash;                <View&ndash;&gt;-->
-<!--            &lt;!&ndash;                    android:id="@+id/divider_card"&ndash;&gt;-->
-<!--            &lt;!&ndash;                    android:layout_width="match_parent"&ndash;&gt;-->
-<!--            &lt;!&ndash;                    android:layout_height="1dp"&ndash;&gt;-->
-<!--            &lt;!&ndash;                    android:background="@color/light_grey" />&ndash;&gt;-->
-
-<!--            <TextView-->
-<!--                android:id="@+id/nav_app_version"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:ellipsize="start"-->
-<!--                android:gravity="center"-->
-<!--                android:maxLines="1"-->
-<!--                android:text="@string/version" />-->
-<!--        </LinearLayout>-->
-
     </com.google.android.material.navigation.NavigationView>
 </androidx.drawerlayout.widget.DrawerLayout>

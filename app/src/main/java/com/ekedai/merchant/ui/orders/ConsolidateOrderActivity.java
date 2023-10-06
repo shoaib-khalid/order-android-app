@@ -20,7 +20,7 @@ import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.OrderApi;
 import com.ekedai.merchant.ui.NavbarActivity;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 import java.text.DecimalFormat;
 
@@ -32,7 +32,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
 
     public static String CONSOLIDATED_ORDER_KEY = "order";
 
-    private final DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+    private final DecimalFormat formatter = Utilities.getMonetaryAmountFormat();
     private ActivityConsolidateOrderBinding binding;
     private OrderApi orderApiService;
     private ConsolidatedOrder consolidatedOrder;
@@ -70,7 +70,6 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
         currencySymbol = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
                 .getString(SharedPrefsKey.CURRENCY_SYMBOL, "RM");
 
-        Log.d("consolidate", "Consolidated order isPaid: " + consolidatedOrder.isPaid + ", changeDue: " + consolidatedOrder.changeDue);
         if (consolidatedOrder.isPaid && consolidatedOrder.changeDue != null) {
             binding.changeDueLabel.setVisibility(View.VISIBLE);
             binding.changeDueTextView.setText(getString(R.string.monetary_amount,

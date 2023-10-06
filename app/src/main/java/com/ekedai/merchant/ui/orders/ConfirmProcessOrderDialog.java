@@ -16,7 +16,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.models.qrorders.ConsolidatedOrder;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.DecimalFormat;
@@ -44,7 +44,7 @@ public class ConfirmProcessOrderDialog extends DialogFragment {
         this.currency = currency;
         this.order = order;
         this.listener = listener;
-        this.formatter = Utility.getMonetaryAmountFormat();
+        this.formatter = Utilities.getMonetaryAmountFormat();
     }
 
     @Nullable
@@ -79,7 +79,7 @@ public class ConfirmProcessOrderDialog extends DialogFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                amountPaid = Double.parseDouble(!Utility.isBlank(s.toString()) ? s.toString() : "0.00");
+                amountPaid = Double.parseDouble(!Utilities.isBlank(s.toString()) ? s.toString() : "0.00");
                 changeDue = amountPaid - order.totalOrderAmount;
                 changeDueText.setText(getString(R.string.monetary_amount, currency, changeDue >= 0 ? formatter.format(changeDue) : "0.00"));
                 confirmButton.setEnabled(changeDue >= 0);

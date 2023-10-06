@@ -36,7 +36,7 @@ import com.ekedai.merchant.ui.orders.EditOrderActivity;
 import com.ekedai.merchant.ui.orders.OrderAdapter;
 import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.ekedai.merchant.utils.SunmiPrintHelper;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -87,7 +87,6 @@ public class OrdersFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         String clientId = requireActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
                 .getString(SharedPrefsKey.CLIENT_ID, null);
@@ -157,7 +156,6 @@ public class OrdersFragment extends Fragment
     ) {
 
         FragmentOrdersBinding binding = FragmentOrdersBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
 
         recyclerView = binding.orderRecycler;
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -178,7 +176,7 @@ public class OrdersFragment extends Fragment
             setClearHistoryHandler();
         }
 
-        return root;
+        return binding.getRoot();
     }
 
     @Override
@@ -255,7 +253,7 @@ public class OrdersFragment extends Fragment
     @Override
     public void onOrderReceived(Order.OrderDetails orderDetails) {
         if (orderAdapter != null) {
-            if (Utility.isOrderCompleted(orderDetails.currentCompletionStatus)) {
+            if (Utilities.isOrderCompleted(orderDetails.currentCompletionStatus)) {
                 orders.add(0, orderDetails);
                 orderAdapter.notifyItemInserted(0);
                 recyclerView.smoothScrollToPosition(0);

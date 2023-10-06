@@ -10,6 +10,11 @@
             android:title="Orders" />
 
         <item
+            android:id="@+id/nav_vouchers"
+            android:icon="@drawable/ic_orders"
+            android:title="Voucher Redemption" />
+
+        <item
             android:icon="@drawable/ic_stores"
             android:title="Store Operation">
             <menu>
@@ -17,10 +22,10 @@
                     android:id="@+id/nav_stores"
                     android:icon="@drawable/ic_stores"
                     android:title="Operations Timing" />
-                <item
-                    android:id="@+id/nav_system_config"
-                    android:icon="@drawable/ic_print"
-                    android:title="Systems Configuration" />
+<!--                <item-->
+<!--                    android:id="@+id/nav_system_config"-->
+<!--                    android:icon="@drawable/ic_print"-->
+<!--                    android:title="Systems Configuration" />-->
             </menu>
         </item>
 

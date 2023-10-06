@@ -116,6 +116,7 @@
     <string name="staging_mode">Staging mode</string>
     <string name="production_mode_text">Switch to production</string>
     <string name="empty_orders_text">No orders to show. Swipe down to refresh or check back later.</string>
+    <string name="error_text">An error occurred. Please try again.</string>
     <string name="error_text_pull_to_refresh">An error occurred. Please swipe down to retry.</string>
     <string name="order_items_fail_text">Failed to get items. Please swipe down to refresh.</string>
     <string name="edit_order_warning">You are about to change a confirmed order.\u000AYou can only perform this once.\u000AAny extra money will be refunded to customer.</string>
@@ -168,4 +169,21 @@
     <string name="search_result_text">Results for \"%1$s\"</string>
     <string name="bluetooth_permission_error">Bluetooth permission not given</string>
     <string name="empty_bluetooth_device_text">No Bluetooth devices found.</string>
+    <string name="scan_code">Scan Code</string>
+    <string name="history">History</string>
+    <string name="scan_voucher_code">Scan Voucher Code</string>
+
+    <!--  Voucher Redemption Activity  -->
+    <string name="order_summary">ORDER SUMMARY</string>
+    <string name="product_details">Product Details</string>
+    <string name="voucher_code_template">Voucher Code: %1$s</string>
+    <string name="valid_until_template">Valid Until: %1$s</string>
+    <string name="quantity_template">Quantity: %1$s</string>
+    <string name="price_template">%1$s %2$s</string>
+    <string name="redeem_now">Redeem Now</string>
+    <string name="successfully_redeemed">Successfully Redeemed!</string>
+    <string name="close">Close</string>
+    <string name="redemption_date_template">Redeemed: %1$s</string>
+    <string name="product_image">Product Image</string>
+
 </resources>

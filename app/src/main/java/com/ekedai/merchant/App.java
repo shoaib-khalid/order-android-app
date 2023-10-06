@@ -30,7 +30,7 @@ public class App extends Application implements PrinterObserver {
     public static final String DEV_TAG = "dev-logging";
 
     public static final String BASE_URL_PRODUCTION = "https://api.e-kedai.my/";
-    public static final String BASE_URL_STAGING = "https://backend.lawat.la/";
+    public static final String BASE_URL_STAGING = "https://uatapi.e-kedai.my/";
 
     public static final String USER_CLIENT_SERVICE_URL = "user-service/clients/";
     public static final String USER_SERVICE_URL = "user-service/";

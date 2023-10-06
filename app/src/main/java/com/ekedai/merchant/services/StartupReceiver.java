@@ -27,7 +27,7 @@ import com.ekedai.merchant.networking.apis.OrderApi;
 import com.ekedai.merchant.ui.orders.OrdersActivity;
 import com.ekedai.merchant.utils.ChannelId;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 import java.util.Random;
 
@@ -44,7 +44,7 @@ public class StartupReceiver extends BroadcastReceiver {
         if ((Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction()) ||
                 Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(intent.getAction()))
                 && sharedPrefs.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)) {
-            if (Utility.isConnectedToInternet(context)) {
+            if (Utilities.isConnectedToInternet(context)) {
                 checkForNewOrders(context);
             } else {
                 ConnectivityManager connMan =

@@ -22,7 +22,7 @@ public final class PrinterUtility {
             itemText.append("\n").append(item.quantity).append(" x ").append(item.productName);
             String spacing = Integer.toString(item.quantity).replaceAll("\\d", " ") + " * ";
 
-            if (!Utility.isBlank(item.productVariant)) {
+            if (!Utilities.isBlank(item.productVariant)) {
                 itemText.append("\n").append(spacing).append(item.productVariant);
             }
 
@@ -34,7 +34,7 @@ public final class PrinterUtility {
                 itemText.append("\n").append(spacing).append(itemAddOn.productAddOn.addOnTemplateItem.name);
             }
 
-            if (!Utility.isBlank(item.specialInstruction)) {
+            if (!Utilities.isBlank(item.specialInstruction)) {
                 itemText.append("\nInstructions: ").append(item.specialInstruction);
             }
 
@@ -53,7 +53,7 @@ public final class PrinterUtility {
             List<Item> items,
             String currency
     ) {
-        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+        DecimalFormat formatter = Utilities.getMonetaryAmountFormat();
         String divider = "\n----------------------------";
         String divider2 = "\n****************************";
         StringBuilder receiptText = new StringBuilder();
@@ -83,7 +83,7 @@ public final class PrinterUtility {
                     ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
                     : TimeZone.getDefault();
             receiptText.append("\n").append(
-                    Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone)
+                    Utilities.convertUtcTimeToLocalTimezone(order.created, storeTimeZone)
             );
         }
 
@@ -99,11 +99,11 @@ public final class PrinterUtility {
         }
 
         if (order.orderShipmentDetail != null
-                && !Utility.isBlank(order.orderShipmentDetail.phoneNumber)) {
+                && !Utilities.isBlank(order.orderShipmentDetail.phoneNumber)) {
             receiptText.append("\nCustomer no.: ").append(order.orderShipmentDetail.phoneNumber);
         }
 
-        if (!Utility.isBlank(customerNotes)
+        if (!Utilities.isBlank(customerNotes)
                 && (order.serviceType != ServiceType.DINEIN
                 || !order.store.verticalCode.equalsIgnoreCase("fnb"))) {
 

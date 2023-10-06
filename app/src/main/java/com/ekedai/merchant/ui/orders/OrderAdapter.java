@@ -38,7 +38,7 @@ import com.ekedai.merchant.models.order.OrderUpdateResponse;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.DeliveryApi;
 import com.ekedai.merchant.networking.apis.OrderApi;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.button.MaterialButton;
 
 import java.text.DecimalFormat;
@@ -173,9 +173,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         Order.OrderDetails orderDetails = orders.get(position);
         Order order = orderDetails.order;
 
-        formatter = Utility.getMonetaryAmountFormat();
+        formatter = Utilities.getMonetaryAmountFormat();
 
-        String currency = Utility.getCurrencySymbol(order, context);
+        String currency = Utilities.getCurrencySymbol(order, context);
 
         holder.name.setText(order.orderShipmentDetail.receiverName);
 
@@ -183,23 +183,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             TimeZone storeTimeZone = order.store != null && order.store.regionCountry != null && order.store.regionCountry.timezone != null
                     ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
                     : TimeZone.getDefault();
-            holder.date.setText(Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
+            holder.date.setText(Utilities.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
         }
 
         holder.invoice.setText(order.invoiceId);
         holder.total.setText(context.getString(R.string.monetary_amount, currency, formatter.format(order.total)));
 
         StringBuilder fullAddress = new StringBuilder();
-        if (!Utility.isBlank(order.orderShipmentDetail.address)) {
+        if (!Utilities.isBlank(order.orderShipmentDetail.address)) {
             fullAddress.append(order.orderShipmentDetail.address).append(", ");
         }
-        if (!Utility.isBlank(order.orderShipmentDetail.city)) {
+        if (!Utilities.isBlank(order.orderShipmentDetail.city)) {
             fullAddress.append(order.orderShipmentDetail.city).append(", ");
         }
-        if (!Utility.isBlank(order.orderShipmentDetail.state)) {
+        if (!Utilities.isBlank(order.orderShipmentDetail.state)) {
             fullAddress.append(order.orderShipmentDetail.state).append(", ");
         }
-        if (!Utility.isBlank(order.orderShipmentDetail.zipcode)) {
+        if (!Utilities.isBlank(order.orderShipmentDetail.zipcode)) {
             fullAddress.append(order.orderShipmentDetail.zipcode);
         }
         if (fullAddress.length() > 0) {
@@ -207,7 +207,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
             holder.rlAddress.setVisibility(View.VISIBLE);
         }
 
-        if (!Utility.isBlank(order.orderShipmentDetail.phoneNumber)) {
+        if (!Utilities.isBlank(order.orderShipmentDetail.phoneNumber)) {
             holder.phoneNumber.setText(order.orderShipmentDetail.phoneNumber);
             holder.rlContact.setVisibility(View.VISIBLE);
         }
@@ -399,7 +399,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     App.printOrderReceipt(
                             order,
                             response.body().data.content,
-                            Utility.getCurrencySymbol(order, context.getApplicationContext()),
+                            Utilities.getCurrencySymbol(order, context.getApplicationContext()),
                             context.getApplicationContext()
                     );
                 }
@@ -486,8 +486,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     Order.OrderDetails updatedOrder = new Order.OrderDetails(response.body().data);
 
                     String statusUpdateToastText = "Status Updated";
-                    if (Utility.isOrderOngoing(updatedOrder.currentCompletionStatus)) {
-                        if (Utility.isOrderOngoing(currentOrderDetails.currentCompletionStatus)
+                    if (Utilities.isOrderOngoing(updatedOrder.currentCompletionStatus)) {
+                        if (Utilities.isOrderOngoing(currentOrderDetails.currentCompletionStatus)
                                 && indexOfOrder != -1) {
                             orders.set(indexOfOrder, updatedOrder);
                             notifyItemChanged(indexOfOrder);
@@ -498,9 +498,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                         }
                     }
 
-                    if (Utility.isOrderNew(currentOrderDetails.currentCompletionStatus)
-                            || Utility.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
-                        if (Utility.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                    if (Utilities.isOrderNew(currentOrderDetails.currentCompletionStatus)
+                            || Utilities.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
+                        if (Utilities.isOrderCompleted(updatedOrder.currentCompletionStatus)) {
                             orderManager.addOrderToHistoryTab(updatedOrder);
                             statusUpdateToastText = "Order moved to history tab";
                         }
@@ -510,7 +510,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                             notifyItemRemoved(indexOfOrder);
                         }
 
-                        if (Utility.isOrderNew(currentOrderDetails.currentCompletionStatus)) {
+                        if (Utilities.isOrderNew(currentOrderDetails.currentCompletionStatus)) {
                             getOrderItemsForPrint(currentOrderDetails.order);
                         }
                     }
@@ -641,10 +641,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
     private void stopLoading(ViewHolder holder, OrderStatus completionStatus) {
         holder.clOrderProgressBar.setVisibility(View.GONE);
-        if (Utility.isOrderNew(completionStatus)) {
+        if (Utilities.isOrderNew(completionStatus)) {
             holder.newLayout.setVisibility(View.VISIBLE);
 //            holder.editButton.setVisibility(View.VISIBLE);
-        } else if (Utility.isOrderOngoing(completionStatus)) {
+        } else if (Utilities.isOrderOngoing(completionStatus)) {
             holder.ongoingLayout.setVisibility(View.VISIBLE);
         }
     }

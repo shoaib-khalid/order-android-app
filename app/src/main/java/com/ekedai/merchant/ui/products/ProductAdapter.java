@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide;
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.databinding.ProductRowBinding;
 import com.ekedai.merchant.models.product.Product;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 public class ProductAdapter extends ListAdapter<Product, ProductAdapter.ProductViewHolder> {
 
@@ -70,7 +70,7 @@ public class ProductAdapter extends ListAdapter<Product, ProductAdapter.ProductV
                 binding.productPrice.setText(binding.getRoot().getContext().getString(
                         R.string.monetary_amount,
                         currencySymbol,
-                        Utility.formatPrice(product.store.isDineIn ? inv.dineInPrice : inv.price)
+                        Utilities.formatPrice(product.store.isDineIn ? inv.dineInPrice : inv.price)
                 ));
             }
 

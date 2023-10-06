@@ -16,7 +16,6 @@ import com.ekedai.merchant.databinding.ActivityStaffBinding;
 import com.ekedai.merchant.enums.NavIntentStaff;
 import com.ekedai.merchant.ui.NavbarActivity;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
 import com.google.android.material.navigation.NavigationView;
 
 public class StaffActivity extends NavbarActivity {
@@ -32,8 +31,6 @@ public class StaffActivity extends NavbarActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityStaffBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        Utility.verifyLoginStatus(this);
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
@@ -72,12 +69,11 @@ public class StaffActivity extends NavbarActivity {
     private void initToolbar() {
 
         NavigationView navigationView = drawerLayout.findViewById(R.id.nav_view);
-        navigationView
-                .getMenu()
-                .getItem(4)
-                .getSubMenu()
-                .getItem(action == NavIntentStaff.VIEW_DAILY_SALES ? 0 : 1)
-                .setChecked(true);
+        if (action == NavIntentStaff.VIEW_DAILY_SALES) {
+            navigationView.getMenu().findItem(R.id.nav_daily_sales).setChecked(true);
+        } else {
+            navigationView.getMenu().findItem(R.id.nav_manage_staff).setChecked(true);
+        }
 
         ImageView home = toolbar.findViewById(R.id.app_bar_home);
         home.setImageDrawable(AppCompatResources

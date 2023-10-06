@@ -109,8 +109,6 @@ public class StoreSelectionFragment extends Fragment
             @Override
             public void onResponse(@NonNull Call<StoreResponse> call,
                                    @NonNull Response<StoreResponse> response) {
-                Log.d("login-activity", call.request().url().toString());
-                Log.d("login-activity", "Response:" + response.raw());
                 if (response.isSuccessful() && response.body() != null) {
                     stores = response.body().data.content;
                     if (stores.isEmpty()) {
@@ -153,7 +151,6 @@ public class StoreSelectionFragment extends Fragment
                         storesWithQrCodeAvailability.add(store);
                     }
                     if (storesChecked >= stores.size()) {
-                        Log.d("store-selection", "All stores checked");
                         if (!storesWithQrCodeAvailability.isEmpty()) {
                             storeAdapter = new StoreAdapter(storesWithQrCodeAvailability, action, listener, getContext());
                             recyclerView.setAdapter(storeAdapter);

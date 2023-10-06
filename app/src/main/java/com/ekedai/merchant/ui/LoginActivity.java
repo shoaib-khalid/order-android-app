@@ -30,7 +30,7 @@ import com.ekedai.merchant.networking.apis.FirebaseApi;
 import com.ekedai.merchant.ui.orders.OrdersActivity;
 import com.ekedai.merchant.utils.ChannelId;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.play.core.appupdate.AppUpdateInfo;
 import com.google.android.play.core.appupdate.AppUpdateManager;
@@ -83,7 +83,9 @@ public class LoginActivity extends AppCompatActivity {
 
         configureRemoteConfig();
 
-        if (App.BASE_URL_STAGING.equals(sharedPreferences.getString(SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION))) {
+        if (App.BASE_URL_STAGING.equals(sharedPreferences.getString(
+                SharedPrefsKey.BASE_URL, App.BASE_URL_PRODUCTION
+        ))) {
             switchToStagingMode();
         } else {
             switchToProductionMode();
@@ -157,10 +159,9 @@ public class LoginActivity extends AppCompatActivity {
             password.getEditText().getText().clear();
             email.getEditText().requestFocus();
             Toast.makeText(getApplicationContext(), "Switched to staging", Toast.LENGTH_SHORT).show();
-        } else if (Utility.isConnectedToInternet(this)) {
+        } else if (Utilities.isConnectedToInternet(this)) {
             startLoading();
             progressText.setText("Checking access to firebase servers");
-
             firebaseApiService.ping().clone().enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
@@ -186,10 +187,8 @@ public class LoginActivity extends AppCompatActivity {
     private void tryLogin() {
         progressText.setText("Attempting login");
 
-        String emailInput = email.getEditText() != null
-                ? email.getEditText().getText().toString() : "";
-        String passwordInput = password.getEditText() != null
-                ? password.getEditText().getText().toString() : "";
+        String emailInput = email.getEditText() != null ? email.getEditText().getText().toString() : "";
+        String passwordInput = password.getEditText() != null ? password.getEditText().getText().toString() : "";
 
         LoginRequest loginRequest = new LoginRequest(emailInput, passwordInput);
         ServiceGenerator
@@ -201,7 +200,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(@NonNull Call<LoginResponse> call,
                                            @NonNull Response<LoginResponse> response) {
-                        Log.d("login-activity", "Login request: " + response.raw());
                         if (response.isSuccessful() && response.body() != null) {
                             LoginData res = response.body().data;
                             sharedPreferences.edit().putString(SharedPrefsKey.USERNAME, res.session.username)
@@ -215,7 +213,7 @@ public class LoginActivity extends AppCompatActivity {
                             if (response.code() == 401) {
                                 handleError(response.code(), response.raw().toString(), "Username or password is incorrect");
                             } else if (response.errorBody() != null) {
-                                Utility.handleUnknownError(LoginActivity.this, response.errorBody());
+                                Utilities.handleUnknownError(LoginActivity.this, response.errorBody());
                             } else {
                                 handleError(response.code(), response.raw().toString(), null);
                             }
@@ -225,7 +223,8 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Call<LoginResponse> call,
                                           @NonNull Throwable t) {
-                        Log.e("TAG", "onFailure: ", t.getCause());
+                        Log.e(TAG, "onFailure: " + t.getLocalizedMessage());
+                        Log.e(TAG, "onFailure: ", t.getCause());
                         Toast.makeText(getApplicationContext(), R.string.no_internet, Toast.LENGTH_SHORT).show();
                         stopLoading();
                     }
@@ -257,7 +256,6 @@ public class LoginActivity extends AppCompatActivity {
                                         .addOnSuccessListener(unused -> {
                                             getSystemService(NotificationManager.class)
                                                     .cancel(ChannelId.ERRORS_NOTIF_ID);
-                                            Log.d(TAG, "Subscribed to " + store.name);
                                             subscriptionCount++;
                                             boolean isLoggedIn = sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false);
                                             if (subscriptionCount >= stores.size() && !isLoggedIn) {
@@ -304,7 +302,6 @@ public class LoginActivity extends AppCompatActivity {
                 .putBoolean(SharedPrefsKey.IS_LOGGED_IN, true)
                 .commit();
 
-        Log.d(TAG, "setStoreDataAndProceed");
         Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
         startActivity(intent);
         finish();
@@ -317,21 +314,16 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        Log.d(TAG, "onStart");
-
         callInAppUpdate();
         //check if user session already exists, for persistent login
         if (sharedPreferences.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)
                 && sharedPreferences.contains(SharedPrefsKey.STORE_ID_LIST)) {
-            Log.d(TAG, "Starting orderActivity from onStart");
             Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
             startActivity(intent);
             finish();
         } else if (!isLoading) {
-            Log.d(TAG, "User not logged in");
             removeUserData();
         }
-
     }
 
     /**
@@ -427,7 +419,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showFirebaseErrorNotification() {
-        Utility.notify(
+        Utilities.notify(
                 getApplicationContext(),
                 getString(R.string.notif_firebase_error_title),
                 getString(R.string.notif_firebase_error_text),
@@ -442,7 +434,6 @@ public class LoginActivity extends AppCompatActivity {
     private class SubscribeTimeoutTask extends TimerTask {
         @Override
         public void run() {
-            Log.d("login-activity", "SubscribeTimeoutTask");
             if (subscriptionCount == 0 && isLoading) {
                 runOnUiThread(() -> {
                     stopLoading();

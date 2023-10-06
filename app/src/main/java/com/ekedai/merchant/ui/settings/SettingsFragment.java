@@ -77,7 +77,6 @@ public class SettingsFragment extends Fragment
         );
         for (BluetoothDevice device : ((BluetoothManager) requireContext().getSystemService(Context.BLUETOOTH_SERVICE))
                 .getAdapter().getBondedDevices()) {
-            Log.d(PRINT_TAG, "Adding device " + device.getName());
             pairedDevices.add(new PairedDevice(device.getName(), sharedPrefs.getBoolean(device.getName(), false)));
         }
         deviceList.clear();

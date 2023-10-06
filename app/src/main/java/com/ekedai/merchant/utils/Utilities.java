@@ -36,10 +36,10 @@ import java.util.TimeZone;
 
 import okhttp3.ResponseBody;
 
-public class Utility {
+public class Utilities {
 
     private static final String inputDatePattern = "yyyy-MM-dd HH:mm:ss";
-    private static final String outputDatePattern = "dd/MM/yyyy hh:mm:ss aa";
+    private static final String outputDatePattern = "dd/MM/yyyy | hh:mm:ss aa";
     private static final DecimalFormat priceFormatter = new DecimalFormat("#,###0.00");
 
     public static String getCurrencySymbol(Order order, Context context) {
@@ -58,6 +58,9 @@ public class Utility {
     }
 
     public static String formatPrice(Double price) {
+        if (price == null) {
+            price = 0.0;
+        }
         return priceFormatter.format(price);
     }
 

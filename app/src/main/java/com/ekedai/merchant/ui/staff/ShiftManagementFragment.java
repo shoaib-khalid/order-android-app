@@ -35,7 +35,7 @@ import com.ekedai.merchant.networking.apis.AuthApi;
 import com.ekedai.merchant.networking.apis.StaffApi;
 import com.ekedai.merchant.networking.apis.StoreApi;
 import com.ekedai.merchant.utils.SharedPrefsKey;
-import com.ekedai.merchant.utils.Utility;
+import com.ekedai.merchant.utils.Utilities;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -64,7 +64,7 @@ public class ShiftManagementFragment extends Fragment
     private SalesAdapter salesAdapter;
     private String currency = "RM";
     private StaffMember currentStaffMember;
-    private final DecimalFormat currencyFormatter = Utility.getMonetaryAmountFormat();
+    private final DecimalFormat currencyFormatter = Utilities.getMonetaryAmountFormat();
 
     @Override
     public View onCreateView(
@@ -288,7 +288,7 @@ public class ShiftManagementFragment extends Fragment
         SharedPreferences sharedPrefs = requireActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         String clientId = sharedPrefs.getString(SharedPrefsKey.CLIENT_ID, null);
         if (clientId == null && getActivity() != null) {
-            Utility.logout(getActivity());
+            Utilities.logout(getActivity());
             return;
         }
         authApi.getClientById(clientId)

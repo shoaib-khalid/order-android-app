@@ -143,7 +143,7 @@ public class SunmiPrintHelper implements Printer {
             return;
         }
 
-        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+        DecimalFormat formatter = Utilities.getMonetaryAmountFormat();
 
         String divider = "\n----------------------------";
         String divider2 = "\n****************************";
@@ -171,7 +171,7 @@ public class SunmiPrintHelper implements Printer {
             TimeZone storeTimeZone = order.store != null && order.store.regionCountry != null && order.store.regionCountry.timezone != null
                     ? TimeZone.getTimeZone(order.store.regionCountry.timezone)
                     : TimeZone.getDefault();
-            prefix.append("\n").append(Utility.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
+            prefix.append("\n").append(Utilities.convertUtcTimeToLocalTimezone(order.created, storeTimeZone));
         }
 
         prefix.append("\nOrder Type: ")
@@ -231,7 +231,7 @@ public class SunmiPrintHelper implements Printer {
         if (!isPrinterConnected)
             return;
 
-        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+        DecimalFormat formatter = Utilities.getMonetaryAmountFormat();
 
         String divider = "\n----------------------------";
         String divider2 = "\n****************************";
@@ -285,7 +285,7 @@ public class SunmiPrintHelper implements Printer {
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm:ss", Locale.getDefault());
 
-        DecimalFormat formatter = Utility.getMonetaryAmountFormat();
+        DecimalFormat formatter = Utilities.getMonetaryAmountFormat();
         String divider = "\n----------------------------";
         String divider2 = "\n****************************";
         StringBuilder body = new StringBuilder();

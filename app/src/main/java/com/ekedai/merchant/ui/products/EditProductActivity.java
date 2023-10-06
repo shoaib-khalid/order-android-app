@@ -184,7 +184,6 @@ public class EditProductActivity extends NavbarActivity {
                 }
             }
             binding.productStatusSpinner.setSelection(indexOfStatus, true);
-            Log.d("prod-status", "Index of status: "  + indexOfStatus);
         }
         if (product.thumbnailUrl != null) {
             Glide.with(this).load(product.thumbnailUrl).into(productImage);
