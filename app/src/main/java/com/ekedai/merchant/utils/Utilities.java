@@ -38,8 +38,8 @@ import okhttp3.ResponseBody;
 
 public class Utilities {
 
-    private static final String inputDatePattern = "yyyy-MM-dd HH:mm:ss";
-    private static final String outputDatePattern = "dd/MM/yyyy | hh:mm:ss aa";
+    public static final String inputDatePattern = "yyyy-MM-dd HH:mm:ss";
+    public static final String outputDatePattern = "dd/MM/yyyy | hh:mm:ss aa";
     private static final DecimalFormat priceFormatter = new DecimalFormat("#,###0.00");
 
     public static String getCurrencySymbol(Order order, Context context) {

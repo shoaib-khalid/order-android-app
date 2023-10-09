@@ -1,6 +1,7 @@
 package com.ekedai.merchant.ui.voucher;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -21,6 +22,12 @@ import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.ProductApi;
 import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.navigation.NavigationView;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,6 +79,10 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                     binding.progressBar.setVisibility(View.INVISIBLE);
                     if (response.isSuccessful()) {
                         new VoucherSuccessDialog().show(getSupportFragmentManager(), VoucherSuccessDialog.TAG);
+                    } else if (response.code() == 409) {
+                        Toast.makeText(VoucherDetailsActivity.this,
+                                "Voucher has been redeemed already.",
+                                Toast.LENGTH_SHORT).show();
                     } else {
                         v.setEnabled(true);
                         if (response.errorBody() != null){
@@ -88,6 +99,18 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 }
             });
         });
+
+        SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        dateParser.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Date parsedDate = null;
+        Date today = new Date();
+        try {
+            parsedDate = dateParser.parse(voucherDetails.date);
+            binding.redeemButton.setEnabled(parsedDate != null && today.compareTo(parsedDate) < 0);
+        } catch (ParseException e) {
+            Log.e("VoucherDetailsActivity", "Failed to parse date. " + e.getLocalizedMessage());
+        }
     }
 
     private void initToolbar() {

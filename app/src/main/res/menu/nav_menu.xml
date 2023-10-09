@@ -11,7 +11,7 @@
 
         <item
             android:id="@+id/nav_vouchers"
-            android:icon="@drawable/ic_orders"
+            android:icon="@drawable/ic_scan_qr_code"
             android:title="Voucher Redemption" />
 
         <item
@@ -20,23 +20,23 @@
             <menu>
                 <item
                     android:id="@+id/nav_stores"
-                    android:icon="@drawable/ic_stores"
-                    android:title="Operations Timing" />
+                    android:icon="@drawable/ic_operation_time"
+                    android:title="Operation Time" />
 <!--                <item-->
 <!--                    android:id="@+id/nav_system_config"-->
-<!--                    android:icon="@drawable/ic_print"-->
-<!--                    android:title="Systems Configuration" />-->
+<!--                    android:icon="@drawable/ic_system_config"-->
+<!--                    android:title="System Configuration" />-->
             </menu>
         </item>
 
         <item
             android:id="@+id/nav_products"
-            android:icon="@drawable/ic_products"
+            android:icon="@drawable/ic_update_products"
             android:title="Update Products" />
         <item
             android:id="@+id/nav_qr_code"
             android:icon="@drawable/ic_qr_code"
-            android:title="Store QR Code" />
+            android:title="QR Code Menu" />
 
         <item
             android:icon="@drawable/ic_person"
@@ -45,12 +45,12 @@
             <menu>
                 <item
                     android:id="@+id/nav_daily_sales"
-                    android:icon="@drawable/ic_currency_exchange"
+                    android:icon="@drawable/ic_staff_daily_sales"
                     android:title="Staff Daily Sales" />
 
                 <item
                     android:id="@+id/nav_manage_staff"
-                    android:icon="@drawable/ic_person"
+                    android:icon="@drawable/ic_manage_staff"
                     android:title="Manage Staff" />
 
             </menu>

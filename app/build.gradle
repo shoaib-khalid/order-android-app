@@ -14,8 +14,8 @@ android {
         applicationId "com.ekedai.merchant"
         minSdk 23
         targetSdk 33
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 3
+        versionName "1.0.82"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
@@ -92,7 +92,6 @@ dependencies {
     implementation "androidx.room:room-ktx:2.5.2"
     implementation 'com.google.firebase:firebase-auth-ktx:22.0.0'
     implementation 'androidx.databinding:databinding-runtime:8.0.2'
-    androidTestImplementation "androidx.room:room-testing:2.5.2"
 
     // Code scanner
     implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
@@ -101,4 +100,5 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     androidTestImplementation 'androidx.navigation:navigation-testing:2.6.0'
+    androidTestImplementation "androidx.room:room-testing:2.5.2"
 }

@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ekedai.merchant.App;
+import com.ekedai.merchant.R;
 import com.ekedai.merchant.databinding.FragmentVoucherHistoryBinding;
 import com.ekedai.merchant.models.voucher.VoucherDetails;
 import com.ekedai.merchant.models.voucher.VoucherHistoryResponse;
@@ -36,7 +37,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class VoucherHistoryFragment extends Fragment implements VoucherAdapter.OnVoucherClickListener {
+public class VoucherHistoryFragment
+        extends Fragment
+        implements VoucherAdapter.OnVoucherClickListener {
 
     private FragmentVoucherHistoryBinding binding;
 
@@ -71,6 +74,8 @@ public class VoucherHistoryFragment extends Fragment implements VoucherAdapter.O
 
     @SuppressLint("CheckResult")
     private void getVoucherHistory() {
+        binding.emptyVouchersTextView.setVisibility(View.GONE);
+
         List<Observable<VoucherHistoryResponse>> requests = new ArrayList<>();
 
         for (String storeId : storeIds) {
@@ -91,8 +96,8 @@ public class VoucherHistoryFragment extends Fragment implements VoucherAdapter.O
                     }
 
                     @Override
-                    public void onNext(List<VoucherHistoryResponse> VoucherHistoryResponses) {
-                        for (VoucherHistoryResponse response : VoucherHistoryResponses) {
+                    public void onNext(List<VoucherHistoryResponse> voucherHistoryResponses) {
+                        for (VoucherHistoryResponse response : voucherHistoryResponses) {
                             if (response.status == 200) {
                                 for (VoucherDetails voucher : response.data) {
                                     voucher.redeemDate = Utilities.convertUtcTimeToLocalTimezone(
@@ -118,12 +123,21 @@ public class VoucherHistoryFragment extends Fragment implements VoucherAdapter.O
                         ).show();
                         Log.e(TAG, e.getLocalizedMessage());
                         e.printStackTrace();
+
+                        if (voucherHistory.isEmpty()) {
+                            binding.emptyVouchersTextView.setText(getString(R.string.voucher_history_error_text));
+                            binding.emptyVouchersTextView.setVisibility(View.VISIBLE);
+                        }
                     }
 
                     @Override
                     public void onComplete() {
                         stopLoading();
                         voucherAdapter.setVouchers(voucherHistory);
+                        if (voucherHistory.isEmpty()) {
+                            binding.emptyVouchersTextView.setText(getString(R.string.empty_vouchers_text));
+                            binding.emptyVouchersTextView.setVisibility(View.VISIBLE);
+                        }
                     }
                 });
     }

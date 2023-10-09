@@ -1,7 +1,6 @@
 package com.ekedai.merchant.ui.voucher;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +22,8 @@ public class VoucherFragment extends Fragment {
     FragmentVoucherBinding binding;
     final String TAG = "voucher-fragment";
     final TabDetails[] tabDetails = {
-            new TabDetails(R.drawable.icon_scan_qr_code, R.string.scan_code),
-            new TabDetails(R.drawable.ic_easy_dukan_logo, R.string.history),
+            new TabDetails(R.drawable.ic_scan_qr_code, R.string.scan_code),
+            new TabDetails(R.drawable.ic_history, R.string.history),
     };
 
     @Override
@@ -52,7 +51,7 @@ public class VoucherFragment extends Fragment {
             public void onTabUnselected(TabLayout.Tab tab) {
                 View v = tab.getCustomView();
                 ((TextView) v.findViewById(R.id.text_view)).setTextColor(ContextCompat.getColor(tab.view.getContext(), R.color.black));
-                ((ImageView) v.findViewById(R.id.icon)).setColorFilter(ContextCompat.getColor(tab.view.getContext(), R.color.sf_primary));
+                ((ImageView) v.findViewById(R.id.icon)).setColorFilter(ContextCompat.getColor(tab.view.getContext(), R.color.black));
 
             }
 

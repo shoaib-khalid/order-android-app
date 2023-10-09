@@ -185,5 +185,7 @@
     <string name="close">Close</string>
     <string name="redemption_date_template">Redeemed: %1$s</string>
     <string name="product_image">Product Image</string>
+    <string name="empty_vouchers_text">No vouchers redeemed yet for any store.</string>
+    <string name="voucher_history_error_text">Failed to get vouchers. Please swipe down to try again.</string>
 
 </resources>
