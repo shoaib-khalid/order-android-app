@@ -49,8 +49,6 @@ public class RequestInterceptor implements Interceptor {
 
         Response response = chain.proceed(request);
 
-        Log.d("interceptor", "Response: " + response.code());
-
         if (response.code() == 401 && sharedPrefs.getBoolean(SharedPrefsKey.IS_LOGGED_IN, false)) {
             try {
                 String refreshToken = sharedPrefs.getString(SharedPrefsKey.REFRESH_TOKEN, "");

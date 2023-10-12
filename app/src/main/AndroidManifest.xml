@@ -16,6 +16,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.bluetooth"
@@ -39,6 +42,9 @@
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode_ui" />
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
 
         <activity
             android:name=".ui.voucher.VoucherActivity"
@@ -126,9 +132,6 @@
         </service>
         <service
             android:name=".services.AlertService"
-            android:enabled="true" />
-        <service
-            android:name=".services.BluetoothPrinterService"
             android:enabled="true" />
 
         <receiver

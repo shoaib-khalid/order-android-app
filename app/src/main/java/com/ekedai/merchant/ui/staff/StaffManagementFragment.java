@@ -3,6 +3,7 @@ package com.ekedai.merchant.ui.staff;
 import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,9 +77,7 @@ public class StaffManagementFragment
 //        fetchStoresAndStaffMembers();
         fetchStoresAndStaffMembers();
 
-        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
-            fetchStoresAndStaffMembers();
-        });
+        binding.swipeRefreshLayout.setOnRefreshListener(this::fetchStoresAndStaffMembers);
 
         return binding.getRoot();
     }

@@ -9,13 +9,13 @@ apply plugin: 'com.google.firebase.crashlytics'
 android {
     signingConfigs {}
 
-    compileSdk 33
+    compileSdk 34
     defaultConfig {
         applicationId "com.ekedai.merchant"
         minSdk 23
-        targetSdk 33
-        versionCode 3
-        versionName "1.0.82"
+        targetSdk 34
+        versionCode 4
+        versionName "1.0.83"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {
@@ -45,28 +45,27 @@ android {
 
 dependencies {
 
-    implementation 'androidx.core:core:1.9.0'
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.6.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
     // Navigation
-    implementation "androidx.navigation:navigation-fragment-ktx:2.5.3"
-    implementation "androidx.navigation:navigation-ui-ktx:2.5.3"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.7.4"
+    implementation "androidx.navigation:navigation-ui-ktx:2.7.4"
 
     implementation 'com.github.bumptech.glide:glide:4.14.2'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.14.2'
 
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation platform('com.google.firebase:firebase-bom:28.4.0')
     implementation 'com.google.code.gson:gson:2.9.0'
-    implementation 'com.google.firebase:firebase-messaging:23.1.2'
-    implementation 'com.google.firebase:firebase-config:21.4.0'
+    implementation 'com.google.firebase:firebase-messaging:23.2.1'
+    implementation 'com.google.firebase:firebase-config:21.4.1'
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.android.play:core:1.10.3'
@@ -90,8 +89,8 @@ dependencies {
     // Room components
     implementation "androidx.room:room-runtime:2.5.2"
     implementation "androidx.room:room-ktx:2.5.2"
-    implementation 'com.google.firebase:firebase-auth-ktx:22.0.0'
-    implementation 'androidx.databinding:databinding-runtime:8.0.2'
+    implementation 'com.google.firebase:firebase-auth-ktx:22.1.2'
+    implementation 'androidx.databinding:databinding-runtime:8.1.2'
 
     // Code scanner
     implementation 'com.google.android.gms:play-services-code-scanner:16.1.0'
@@ -99,6 +98,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    androidTestImplementation 'androidx.navigation:navigation-testing:2.6.0'
+    androidTestImplementation 'androidx.navigation:navigation-testing:2.7.4'
     androidTestImplementation "androidx.room:room-testing:2.5.2"
 }
