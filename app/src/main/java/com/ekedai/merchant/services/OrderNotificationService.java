@@ -61,7 +61,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = sharedPreferences.getString(SharedPrefsKey.CLIENT_ID, "null");
 
         if (messageTitle != null && messageTitle.equalsIgnoreCase("heartbeat")) {
-            AuthApi userService = ServiceGenerator.createUserService(this);
+            AuthApi userService = ServiceGenerator.createUserService();
             String transactionId = remoteMessage.getData().get("body");
 
             String deviceModel = Build.MANUFACTURER + " " + Build.MODEL;
@@ -75,7 +75,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
             String orderId = parseOrderId(remoteMessage.getData().get("body"));
 
             if (orderId != null) {
-                OrderApi orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
+                OrderApi orderApiService = ServiceGenerator.createOrderService();
                 orderApiService.searchNewOrdersByClientIdAndOrderId(clientId, orderId)
                         .clone().enqueue(new Callback<OrderDetailsResponse>() {
                             @Override
@@ -200,7 +200,7 @@ public class OrderNotificationService extends FirebaseMessagingService {
         String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
                 .getString(SharedPrefsKey.CLIENT_ID, "");
 
-        AuthApi userService = ServiceGenerator.createUserService(this);
+        AuthApi userService = ServiceGenerator.createUserService();
         userService.logError(new ErrorRequest(clientId, errorMessage, "HIGH"))
                 .clone().enqueue(new EmptyCallback());
     }

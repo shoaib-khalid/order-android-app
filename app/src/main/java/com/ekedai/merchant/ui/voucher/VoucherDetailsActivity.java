@@ -69,7 +69,7 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 .getString(SharedPrefsKey.STORE_ID_LIST, "")
                 .split(" ");
 
-        ProductApi productService = ServiceGenerator.createProductService(App.getAppContext());
+        ProductApi productService = ServiceGenerator.createProductService();
         binding.redeemButton.setOnClickListener(v -> {
             v.setEnabled(false);
             binding.progressBar.setVisibility(View.VISIBLE);

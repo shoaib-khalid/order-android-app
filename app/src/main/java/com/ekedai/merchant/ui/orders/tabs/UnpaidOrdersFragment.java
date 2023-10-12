@@ -74,7 +74,7 @@ public class UnpaidOrdersFragment
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        orderApiService = ServiceGenerator.createOrderService(requireActivity().getApplicationContext());
+        orderApiService = ServiceGenerator.createOrderService();
         SharedPreferences sharedPrefs =
                 requireActivity().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         storeIds = new ArrayList<>();

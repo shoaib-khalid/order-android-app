@@ -182,7 +182,7 @@ public class OrdersActivity extends NavbarActivity {
     boolean isOrderConsolidationEnabled = false;
     private void queryStoresForConsolidateOption() {
 
-        StoreApi storeApiService = ServiceGenerator.createStoreService(getApplicationContext());
+        StoreApi storeApiService = ServiceGenerator.createStoreService();
         SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         isOrderConsolidationEnabled = sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false);
 

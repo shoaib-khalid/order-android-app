@@ -88,7 +88,7 @@ public class StaffAdapter extends RecyclerView.Adapter<StaffAdapter.ViewHolder> 
                     .setTitle("Delete Staff Member")
                     .setMessage("Are you sure you want to delete staff member " + selectedStaffMember.name + "?")
                     .setPositiveButton("Yes", (dialog, which) -> {
-                        ServiceGenerator.createStaffService(view.getContext().getApplicationContext())
+                        ServiceGenerator.createStaffService()
                                 .deleteStaffMember(selectedStaffMember.storeId, selectedStaffMember.id)
                                 .clone().enqueue(new EmptyCallback());
 

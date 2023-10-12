@@ -7,7 +7,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -74,7 +73,7 @@ public class QrCodeFragment extends Fragment implements QrCodeObserver {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        orderApiService = ServiceGenerator.createOrderService(context);
+        orderApiService = ServiceGenerator.createOrderService();
         OrderNotificationService.disableOrderNotifications();
         OrderNotificationService.addQrCodeObserver(this);
 

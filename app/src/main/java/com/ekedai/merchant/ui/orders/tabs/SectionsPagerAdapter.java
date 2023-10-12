@@ -47,7 +47,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     boolean isOrderConsolidationEnabled = false;
     private void queryStoresForConsolidateOption() {
 
-        StoreApi storeApiService = ServiceGenerator.createStoreService(mContext.getApplicationContext());
+        StoreApi storeApiService = ServiceGenerator.createStoreService();
         SharedPreferences sharedPrefs = mContext.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         isOrderConsolidationEnabled = sharedPrefs.getBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, false);
 

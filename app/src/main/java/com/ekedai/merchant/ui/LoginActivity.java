@@ -192,7 +192,7 @@ public class LoginActivity extends AppCompatActivity {
 
         LoginRequest loginRequest = new LoginRequest(emailInput, passwordInput);
         ServiceGenerator
-                .createUserService(this)
+                .createUserService()
                 .authenticate(loginRequest)
                 .clone()
                 .enqueue(new Callback<LoginResponse>() {
@@ -239,7 +239,7 @@ public class LoginActivity extends AppCompatActivity {
     private void getStoresAndRegister(String clientId) {
         progressText.setText("Getting store data");
 
-        ServiceGenerator.createStoreService(this)
+        ServiceGenerator.createStoreService()
                 .getStores(clientId).clone().enqueue(new Callback<StoreResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<StoreResponse> call,

@@ -89,7 +89,7 @@ public class NavbarActivity extends AppCompatActivity
                         BuildConfig.VERSION_NAME
                 ));
 
-        ServiceGenerator.createStoreService(this).getStoreById(storeId)
+        ServiceGenerator.createStoreService().getStoreById(storeId)
                 .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,

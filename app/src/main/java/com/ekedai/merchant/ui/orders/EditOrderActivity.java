@@ -84,7 +84,7 @@ public class EditOrderActivity extends NavbarActivity {
             order = (Order) data.getSerializable("order");
         }
 
-        orderApiService = ServiceGenerator.createOrderService(this);
+        orderApiService = ServiceGenerator.createOrderService();
 
         if (order != null) {
             getOrderItems(order);

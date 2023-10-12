@@ -79,9 +79,9 @@ public class ShiftManagementFragment extends Fragment
         binding.salesList.setAdapter(salesAdapter);
         binding.salesList.setLayoutManager(new LinearLayoutManager(binding.getRoot().getContext()));
 
-        staffApi = ServiceGenerator.createStaffService(requireActivity().getApplicationContext());
-        storeApi = ServiceGenerator.createStoreService(requireActivity().getApplicationContext());
-        authApi = ServiceGenerator.createUserService(requireActivity().getApplicationContext());
+        staffApi = ServiceGenerator.createStaffService();
+        storeApi = ServiceGenerator.createStoreService();
+        authApi = ServiceGenerator.createUserService();
 
         Bundle bundle = requireArguments();
         clientId = bundle.getString(SharedPrefsKey.CLIENT_ID, "");

@@ -71,8 +71,8 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
         this.context = context;
         this.orderManager = orderManager;
 
-        orderApiService = ServiceGenerator.createOrderService(context.getApplicationContext());
-        deliveryApiService = ServiceGenerator.createDeliveryService(context.getApplicationContext());
+        orderApiService = ServiceGenerator.createOrderService();
+        deliveryApiService = ServiceGenerator.createDeliveryService();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

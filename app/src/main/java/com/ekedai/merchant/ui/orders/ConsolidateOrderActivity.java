@@ -51,7 +51,7 @@ public class ConsolidateOrderActivity extends NavbarActivity implements ConfirmP
         setSupportActionBar(toolbar);
         initToolbar();
 
-        orderApiService = ServiceGenerator.createOrderService(getApplicationContext());
+        orderApiService = ServiceGenerator.createOrderService();
 
         Intent intent = getIntent();
         if (!intent.hasExtra(CONSOLIDATED_ORDER_KEY)) {

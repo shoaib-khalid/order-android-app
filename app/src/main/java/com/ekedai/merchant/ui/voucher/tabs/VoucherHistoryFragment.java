@@ -60,7 +60,7 @@ public class VoucherHistoryFragment
                              Bundle savedInstanceState) {
         binding = FragmentVoucherHistoryBinding.inflate(inflater, container, false);
 
-        productApi = ServiceGenerator.createProductService(App.getAppContext());
+        productApi = ServiceGenerator.createProductService();
         sharedPrefs = App.getAppContext().getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
         storeIds = sharedPrefs.getString(SharedPrefsKey.STORE_ID_LIST, "").split(" ");
 

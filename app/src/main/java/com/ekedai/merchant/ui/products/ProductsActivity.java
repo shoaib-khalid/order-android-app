@@ -113,8 +113,8 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
             fetchAll();
         });
 
-        productApiService = ServiceGenerator.createProductService(getApplicationContext());
-        storeApiService = ServiceGenerator.createStoreService(getApplicationContext());
+        productApiService = ServiceGenerator.createProductService();
+        storeApiService = ServiceGenerator.createStoreService();
 
         editProductActivityResultLauncher
                 = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {

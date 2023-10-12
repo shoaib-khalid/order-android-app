@@ -157,7 +157,7 @@ public class EditItemAdapter extends RecyclerView.Adapter<EditItemAdapter.ViewHo
     }
 
     private void getProductImageFromAssets(Item item, ViewHolder holder) {
-        ProductApi productApiService = ServiceGenerator.createProductService(context);
+        ProductApi productApiService = ServiceGenerator.createProductService();
         productApiService.getStoreProductAssets(order.storeId, item.productId)
                 .clone().enqueue(new Callback<StoreProductAsset.StoreProductAssetListResponse>() {
                     @Override

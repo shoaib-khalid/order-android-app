@@ -93,7 +93,7 @@ public class OrdersFragment extends Fragment
 
         orders = new ArrayList<>();
 
-        OrderApi orderApiService = ServiceGenerator.createOrderService(getContext());
+        OrderApi orderApiService = ServiceGenerator.createOrderService();
 
         section = requireArguments().getString(ARG_SECTION);
 

@@ -58,7 +58,7 @@ public class StoreSettingsBottomSheet extends BottomSheetDialogFragment {
         this.viewHolder = holder;
         this.storeAdapter = storeAdapter;
 
-        storeApiService = ServiceGenerator.createStoreService(context);
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
     @Nullable

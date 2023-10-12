@@ -55,7 +55,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         this.selectionListener = selectionListener;
         this.context = context;
 
-        storeApiService = ServiceGenerator.createStoreService(context);
+        storeApiService = ServiceGenerator.createStoreService();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

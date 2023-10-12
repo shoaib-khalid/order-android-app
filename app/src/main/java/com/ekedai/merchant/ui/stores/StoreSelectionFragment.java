@@ -78,8 +78,8 @@ public class StoreSelectionFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        storeApiService = ServiceGenerator.createStoreService(getContext());
-        orderApiService = ServiceGenerator.createOrderService(getContext());
+        storeApiService = ServiceGenerator.createStoreService();
+        orderApiService = ServiceGenerator.createOrderService();
     }
 
     @Override

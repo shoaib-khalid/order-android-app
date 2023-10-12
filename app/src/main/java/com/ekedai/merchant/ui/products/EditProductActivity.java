@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -107,7 +106,7 @@ public class EditProductActivity extends NavbarActivity {
 
         getProductDetails();
 
-        productApiService = ServiceGenerator.createProductService(this);
+        productApiService = ServiceGenerator.createProductService();
     }
 
     public void initToolbar() {

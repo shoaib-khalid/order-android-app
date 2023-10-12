@@ -72,8 +72,8 @@ public class StaffManagementFragment
 
         Bundle bundle = requireArguments();
         clientId = bundle.getString(SharedPrefsKey.CLIENT_ID, "");
-        staffApi = ServiceGenerator.createStaffService(getActivity().getApplicationContext());
-        storeApi = ServiceGenerator.createStoreService(getActivity().getApplicationContext());
+        staffApi = ServiceGenerator.createStaffService();
+        storeApi = ServiceGenerator.createStoreService();
 //        fetchStoresAndStaffMembers();
         fetchStoresAndStaffMembers();
 
