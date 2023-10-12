@@ -1,5 +1,6 @@
 package com.ekedai.merchant.ui.voucher;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,7 @@ import com.ekedai.merchant.models.voucher.VoucherDetails;
 import com.ekedai.merchant.models.voucher.VoucherQrCodeDetails;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.ProductApi;
+import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.navigation.NavigationView;
 
@@ -47,7 +49,6 @@ public class VoucherDetailsActivity extends AppCompatActivity {
 
         initToolbar();
 
-
         if (!getIntent().hasExtra(VOUCHER_DETAILS_KEY)) {
             finish();
         }
@@ -63,6 +64,10 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 Utilities.getCurrencySymbol(null, this),
                 Utilities.formatPrice(voucherDetails.productPrice)
         ));
+
+        String[] storeIds = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString(SharedPrefsKey.STORE_ID_LIST, "")
+                .split(" ");
 
         ProductApi productService = ServiceGenerator.createProductService(App.getAppContext());
         binding.redeemButton.setOnClickListener(v -> {
@@ -95,22 +100,34 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     binding.progressBar.setVisibility(View.INVISIBLE);
                     v.setEnabled(true);
-                    Toast.makeText(VoucherDetailsActivity.this, getString(R.string.no_internet), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(VoucherDetailsActivity.this,
+                            getString(R.string.no_internet),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         });
 
-        SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        dateParser.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-        Date parsedDate = null;
-        Date today = new Date();
+        boolean isNotRedeemed = false;
         try {
-            parsedDate = dateParser.parse(voucherDetails.date);
-            binding.redeemButton.setEnabled(parsedDate != null && today.compareTo(parsedDate) < 0);
+            SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            Date today = new Date();
+            Date parsedDate = dateParser.parse(voucherDetails.date);
+            isNotRedeemed = parsedDate != null && today.compareTo(parsedDate) < 0;
         } catch (ParseException e) {
             Log.e("VoucherDetailsActivity", "Failed to parse date. " + e.getLocalizedMessage());
         }
+
+        boolean isOwnVoucher = false;
+        for (String storeId : storeIds) {
+            if (storeId.equals(voucherDetails.storeId)) {
+                isOwnVoucher = true;
+                break;
+            }
+        }
+
+        binding.redeemButton.setEnabled(isOwnVoucher && isNotRedeemed);
+        binding.alreadyRedeemedErrorText.setVisibility(isNotRedeemed ? View.GONE : View.VISIBLE);
+        binding.notOwnStoreVoucherErrorText.setVisibility(isOwnVoucher ? View.GONE : View.VISIBLE);
     }
 
     private void initToolbar() {
@@ -126,6 +143,6 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 R.drawable.ic_arrow_back_black_24dp));
         binding.toolbar.appBarHome.setOnClickListener(view -> super.onBackPressed());
 
-        binding.toolbar.appBarTitle.setText("Voucher Redemption");
+        binding.toolbar.appBarTitle.setText(getString(R.string.voucher_redemption));
     }
 }

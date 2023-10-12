@@ -8,10 +8,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.ekedai.merchant.App;
@@ -21,6 +23,7 @@ import com.ekedai.merchant.models.voucher.VoucherDetails;
 import com.ekedai.merchant.models.voucher.VoucherHistoryResponse;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.ProductApi;
+import com.ekedai.merchant.ui.voucher.SearchViewModel;
 import com.ekedai.merchant.ui.voucher.VoucherAdapter;
 import com.ekedai.merchant.ui.voucher.VoucherDetailsDialog;
 import com.ekedai.merchant.ui.voucher.VoucherSuccessDialog;
@@ -44,11 +47,13 @@ public class VoucherHistoryFragment
     private FragmentVoucherHistoryBinding binding;
 
     private final List<VoucherDetails> voucherHistory = new ArrayList<>();
+    private List<VoucherDetails> filteredVoucherHistory = new ArrayList<>();
     private VoucherAdapter voucherAdapter;
     String[] storeIds = {};
     private final String TAG = "VoucherHistoryFragment";
     private ProductApi productApi;
     private SharedPreferences sharedPrefs;
+    SearchViewModel viewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -70,6 +75,31 @@ public class VoucherHistoryFragment
         });
 
         return binding.getRoot();
+    }
+
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(requireActivity()).get(SearchViewModel.class);
+        viewModel.getSearchTerm().observe(getViewLifecycleOwner(), searchTerm -> {
+            Log.d(TAG, "searchTerm: " + searchTerm);
+            filteredVoucherHistory.clear();
+//            if (searchTerm.trim().isEmpty()) {
+//                filteredVoucherHistory = voucherHistory;
+//            } else {
+                for (VoucherDetails voucher : voucherHistory) {
+                    if (voucher.voucherCode == null) {
+                        voucher.voucherCode = "";
+                    }
+                    boolean isContained = voucher.voucherCode.trim().toLowerCase().contains(
+                            searchTerm.trim().toLowerCase());
+                    Log.d(TAG, "voucherCode " + voucher.voucherCode + " contains search-term "
+                            + searchTerm + ": " + isContained);
+                    if (isContained) {
+                        filteredVoucherHistory.add(voucher);
+                    }
+                }
+//            }
+            voucherAdapter.setVouchers(filteredVoucherHistory);
+        });
     }
 
     @SuppressLint("CheckResult")

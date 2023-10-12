@@ -1,9 +1,13 @@
 package com.ekedai.merchant.ui.voucher;
 
+import android.media.Image;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.databinding.FragmentVoucherBinding;
@@ -25,6 +30,7 @@ public class VoucherFragment extends Fragment {
             new TabDetails(R.drawable.ic_scan_qr_code, R.string.scan_code),
             new TabDetails(R.drawable.ic_history, R.string.history),
     };
+    SearchViewModel viewModel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -36,6 +42,42 @@ public class VoucherFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        viewModel = new ViewModelProvider(requireActivity()).get(SearchViewModel.class);
+
+        binding.textInputSearch.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                viewModel.setSearchTerm(s.toString());
+            }
+        });
+        ImageView searchButton = requireActivity().findViewById(R.id.app_bar_search_button);
+        searchButton.setVisibility(View.VISIBLE);
+        searchButton.setOnClickListener(v -> {
+           v.setVisibility(View.INVISIBLE);
+            binding.textInputSearch.setVisibility(View.VISIBLE);
+
+            binding.textInputSearch.setEndIconOnClickListener(icon -> {
+                Editable inputText = binding.textInputSearch.getEditText().getText();
+
+                if (inputText.length() == 0) {
+                    binding.textInputSearch.setVisibility(View.GONE);
+                    searchButton.setVisibility(View.VISIBLE);
+                } else {
+                    inputText.clear();
+                }
+            });
+        });
+
         VoucherTabAdapter tabAdapter = new VoucherTabAdapter(this);
         binding.viewPager.setAdapter(tabAdapter);
 
@@ -72,7 +114,6 @@ public class VoucherFragment extends Fragment {
                     tab.setCustomView(v);
                 }
         ).attach();
-
     }
 
     static class TabDetails {
