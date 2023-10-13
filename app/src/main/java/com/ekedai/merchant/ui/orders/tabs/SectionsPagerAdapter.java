@@ -36,7 +36,6 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     private final Context mContext;
     private OrdersFragment newOrderFragment, ongoingOrderFragment;
     private OrderObserver historyOrderFragment, unpaidOrderFragment;
-    private OrderManager orderManager;
 
     public SectionsPagerAdapter(Context context, FragmentManager fm, List<String> tabTitles) {
         super(fm);
@@ -45,6 +44,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
     }
 
     boolean isOrderConsolidationEnabled = false;
+
     private void queryStoresForConsolidateOption() {
 
         StoreApi storeApiService = ServiceGenerator.createStoreService();
@@ -74,7 +74,8 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter implements OrderM
                 }
 
                 @Override
-                public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call, @NonNull Throwable t) {}
+                public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call, @NonNull Throwable t) {
+                }
             });
         }
     }
