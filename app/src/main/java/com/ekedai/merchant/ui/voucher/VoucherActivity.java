@@ -26,11 +26,7 @@ public class VoucherActivity extends NavbarActivity {
 
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(
-                        R.id.voucher_fragment_container,
-                        VoucherFragment.class,
-                        new Bundle()
-                )
+                .add(R.id.voucher_fragment_container, VoucherFragment.class, new Bundle())
                 .commit();
     }
 

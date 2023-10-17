@@ -4,6 +4,7 @@ import android.media.Image;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +88,8 @@ public class VoucherFragment extends Fragment {
                 View v = tab.getCustomView();
                 ((TextView) v.findViewById(R.id.text_view)).setTextColor(ContextCompat.getColor(tab.view.getContext(), R.color.white));
                 ((ImageView) v.findViewById(R.id.icon)).setColorFilter(ContextCompat.getColor(tab.view.getContext(), R.color.white));
+
+                Log.d("voucher", "Tab ID: " + tab.getId() + ", position: " + tab.getPosition());
             }
 
             @Override

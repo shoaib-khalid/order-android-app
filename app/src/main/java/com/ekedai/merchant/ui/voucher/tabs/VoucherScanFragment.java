@@ -28,7 +28,7 @@ public class VoucherScanFragment extends Fragment {
 
     private FragmentVoucherScanBinding binding;
     final String TAG = "voucher-fragment";
-
+    GmsBarcodeScanner scanner;
 
     @Override
     public View onCreateView(
@@ -59,9 +59,12 @@ public class VoucherScanFragment extends Fragment {
                         Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to scan QR Code: " + e.getLocalizedMessage());
-                    Toast.makeText(getActivity(), getString(R.string.error_text), Toast.LENGTH_SHORT).show();
+                    String errorMessage = "Failed to scan QR Code: " + e.getLocalizedMessage();
+                    Log.e(TAG, errorMessage);
+                    Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
                 })
         );
     }
+
+//    public void
 }
