@@ -188,8 +188,9 @@
     <string name="empty_vouchers_text">No vouchers redeemed yet for any store.</string>
     <string name="voucher_history_error_text">Failed to get vouchers. Please swipe down to try again.</string>
     <string name="voucher_redemption">Voucher Redemption</string>
-    <string name="already_redeemed">Already Redeemed</string>
-    <string name="not_an_own_store_voucher">Not an own store voucher</string>
+    <string name="already_redeemed">This voucher has already been redeemed</string>
+    <string name="not_an_own_store_voucher">This voucher does not belong to any of your stores</string>
     <string name="search_voucher_code">Search voucher code</string>
+    <string name="voucher_expired">This voucher is expired</string>
 
 </resources>

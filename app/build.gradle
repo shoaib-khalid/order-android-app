@@ -14,8 +14,8 @@ android {
         applicationId "com.ekedai.merchant"
         minSdk 23
         targetSdk 34
-        versionCode 4
-        versionName "1.0.83"
+        versionCode 6
+        versionName "1.0.85"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {

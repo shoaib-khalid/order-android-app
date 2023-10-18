@@ -16,6 +16,16 @@ public class VoucherSuccessDialog extends DialogFragment {
 
     public static final String TAG = "VoucherSuccessDialog";
 
+    public interface OnDialogDismissListener {
+        void onDialogDismissed();
+    }
+
+    final OnDialogDismissListener dismissListener;
+
+    public VoucherSuccessDialog(OnDialogDismissListener dismissListener) {
+        this.dismissListener = dismissListener;
+    }
+
     @Nullable
     @Override
     public View onCreateView(
@@ -28,5 +38,11 @@ public class VoucherSuccessDialog extends DialogFragment {
         ((Button) view.findViewById(R.id.close_button)).setOnClickListener(v -> dismiss());
 
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        dismissListener.onDialogDismissed();
     }
 }

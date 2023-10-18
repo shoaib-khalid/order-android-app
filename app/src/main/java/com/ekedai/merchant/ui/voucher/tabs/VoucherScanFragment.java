@@ -28,7 +28,6 @@ public class VoucherScanFragment extends Fragment {
 
     private FragmentVoucherScanBinding binding;
     final String TAG = "voucher-fragment";
-    GmsBarcodeScanner scanner;
 
     @Override
     public View onCreateView(
@@ -42,28 +41,31 @@ public class VoucherScanFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        GmsBarcodeScannerOptions options = new GmsBarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC)
-                .enableAutoZoom()
-                .build();
-        GmsBarcodeScanner scanner = GmsBarcodeScanning.getClient(binding.getRoot().getContext(), options);
 
-        binding.scanVoucherCodeButton.setOnClickListener(v ->
-                scanner.startScan().addOnSuccessListener(barcode -> {
-                    try {
-                        VoucherQrCodeDetails voucherDetails = new Gson().fromJson(barcode.getRawValue(), VoucherQrCodeDetails.class);
-                        Intent intent = new Intent(requireActivity(), VoucherDetailsActivity.class);
-                        intent.putExtra(VoucherDetailsActivity.VOUCHER_DETAILS_KEY, voucherDetails);
-                        startActivity(intent);
-                    } catch (JsonSyntaxException ex) {
-                        Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(e -> {
-                    String errorMessage = "Failed to scan QR Code: " + e.getLocalizedMessage();
-                    Log.e(TAG, errorMessage);
-                    Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
-                })
-        );
+        binding.scanVoucherCodeButton.setOnClickListener(v -> {
+
+            GmsBarcodeScanning.getClient(
+                    binding.getRoot().getContext(),
+                    new GmsBarcodeScannerOptions.Builder()
+                            .setBarcodeFormats(Barcode.FORMAT_QR_CODE, Barcode.FORMAT_AZTEC)
+                            .enableAutoZoom()
+                            .build()
+            ).startScan().addOnSuccessListener(barcode -> {
+                try {
+                    Log.d("voucher", "Scanned QR code: " + barcode.getRawValue());
+                    VoucherQrCodeDetails voucherDetails = new Gson().fromJson(barcode.getRawValue(), VoucherQrCodeDetails.class);
+                    Intent intent = new Intent(requireActivity(), VoucherDetailsActivity.class);
+                    intent.putExtra(VoucherDetailsActivity.VOUCHER_DETAILS_KEY, voucherDetails);
+                    startActivity(intent);
+                } catch (JsonSyntaxException ex) {
+                    Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                String errorMessage = "Failed to scan QR Code: " + e.getLocalizedMessage();
+                Log.e(TAG, errorMessage);
+                Toast.makeText(getActivity(), errorMessage, Toast.LENGTH_SHORT).show();
+            });
+        });
     }
 
 //    public void

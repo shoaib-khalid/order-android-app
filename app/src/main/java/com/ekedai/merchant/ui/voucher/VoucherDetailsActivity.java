@@ -35,7 +35,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class VoucherDetailsActivity extends AppCompatActivity {
+public class VoucherDetailsActivity extends AppCompatActivity implements VoucherSuccessDialog.OnDialogDismissListener {
 
     public static String VOUCHER_DETAILS_KEY = "VOUCHER_DETAILS";
 
@@ -70,8 +70,8 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 .split(" ");
 
         ProductApi productService = ServiceGenerator.createProductService();
-        binding.redeemButton.setOnClickListener(v -> {
-            v.setEnabled(false);
+        binding.redeemButton.setOnClickListener(btn -> {
+            btn.setEnabled(false);
             binding.progressBar.setVisibility(View.VISIBLE);
 
             productService.redeemVoucher(
@@ -83,13 +83,14 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
                     binding.progressBar.setVisibility(View.INVISIBLE);
                     if (response.isSuccessful()) {
-                        new VoucherSuccessDialog().show(getSupportFragmentManager(), VoucherSuccessDialog.TAG);
+                        new VoucherSuccessDialog(VoucherDetailsActivity.this).show(getSupportFragmentManager(), VoucherSuccessDialog.TAG);
                     } else if (response.code() == 409) {
                         Toast.makeText(VoucherDetailsActivity.this,
                                 "Voucher has been redeemed already.",
                                 Toast.LENGTH_SHORT).show();
+                        binding.alreadyRedeemedErrorText.setVisibility(View.VISIBLE);
                     } else {
-                        v.setEnabled(true);
+                        btn.setEnabled(true);
                         if (response.errorBody() != null){
                             Utilities.handleUnknownError(VoucherDetailsActivity.this, response.errorBody());
                         }
@@ -99,7 +100,7 @@ public class VoucherDetailsActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(@NonNull Call<Void> call, @NonNull Throwable t) {
                     binding.progressBar.setVisibility(View.INVISIBLE);
-                    v.setEnabled(true);
+                    btn.setEnabled(true);
                     Toast.makeText(VoucherDetailsActivity.this,
                             getString(R.string.no_internet),
                             Toast.LENGTH_SHORT).show();
@@ -107,12 +108,12 @@ public class VoucherDetailsActivity extends AppCompatActivity {
             });
         });
 
-        boolean isNotRedeemed = false;
+        boolean isNotExpired = false;
         try {
             SimpleDateFormat dateParser = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
             Date today = new Date();
             Date parsedDate = dateParser.parse(voucherDetails.date);
-            isNotRedeemed = parsedDate != null && today.compareTo(parsedDate) < 0;
+            isNotExpired = parsedDate != null && today.compareTo(parsedDate) < 0;
         } catch (ParseException e) {
             Log.e("VoucherDetailsActivity", "Failed to parse date. " + e.getLocalizedMessage());
         }
@@ -125,8 +126,8 @@ public class VoucherDetailsActivity extends AppCompatActivity {
             }
         }
 
-        binding.redeemButton.setEnabled(isOwnVoucher && isNotRedeemed);
-        binding.alreadyRedeemedErrorText.setVisibility(isNotRedeemed ? View.GONE : View.VISIBLE);
+        binding.redeemButton.setEnabled(isOwnVoucher && isNotExpired);
+        binding.expiredErrorText.setVisibility(isNotExpired ? View.GONE : View.VISIBLE);
         binding.notOwnStoreVoucherErrorText.setVisibility(isOwnVoucher ? View.GONE : View.VISIBLE);
     }
 
@@ -144,5 +145,10 @@ public class VoucherDetailsActivity extends AppCompatActivity {
         binding.toolbar.appBarHome.setOnClickListener(view -> super.onBackPressed());
 
         binding.toolbar.appBarTitle.setText(getString(R.string.voucher_redemption));
+    }
+
+    @Override
+    public void onDialogDismissed() {
+        finish();
     }
 }
