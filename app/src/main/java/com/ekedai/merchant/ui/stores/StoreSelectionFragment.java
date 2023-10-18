@@ -2,7 +2,6 @@ package com.ekedai.merchant.ui.stores;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;

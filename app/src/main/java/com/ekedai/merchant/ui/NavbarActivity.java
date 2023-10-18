@@ -138,15 +138,15 @@ public class NavbarActivity extends AppCompatActivity
             } else if (id == R.id.nav_stores) {
                 intent = new Intent(getApplicationContext(), StoresActivity.class);
                 intent.putExtra("action", NavIntentStore.SET_STORE_TIMING);
-            } else if (id == R.id.nav_qr_code) {
-                intent = new Intent(getApplicationContext(), StoresActivity.class);
-                intent.putExtra("action", NavIntentStore.DISPLAY_QR_CODE);
-            } else if (id == R.id.nav_daily_sales) {
-                intent = new Intent(getApplicationContext(), StaffActivity.class);
-                intent.putExtra("action", NavIntentStaff.VIEW_DAILY_SALES);
-            } else if (id == R.id.nav_manage_staff) {
-                intent = new Intent(getApplicationContext(), StaffActivity.class);
-                intent.putExtra("action", NavIntentStaff.MANAGE_STAFF);
+//            } else if (id == R.id.nav_qr_code) {
+//                intent = new Intent(getApplicationContext(), StoresActivity.class);
+//                intent.putExtra("action", NavIntentStore.DISPLAY_QR_CODE);
+//            } else if (id == R.id.nav_daily_sales) {
+//                intent = new Intent(getApplicationContext(), StaffActivity.class);
+//                intent.putExtra("action", NavIntentStaff.VIEW_DAILY_SALES);
+//            } else if (id == R.id.nav_manage_staff) {
+//                intent = new Intent(getApplicationContext(), StaffActivity.class);
+//                intent.putExtra("action", NavIntentStaff.MANAGE_STAFF);
             }
 //            else if (id == R.id.nav_system_config) {
 //                intent = new Intent(getApplicationContext(), SettingsActivity.class);

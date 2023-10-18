@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 import com.ekedai.merchant.App;
 import com.ekedai.merchant.networking.apis.AuthApi;
-import com.ekedai.merchant.networking.apis.CategoryApi;
 import com.ekedai.merchant.networking.apis.DeliveryApi;
 import com.ekedai.merchant.networking.apis.FirebaseApi;
 import com.ekedai.merchant.networking.apis.OrderApi;

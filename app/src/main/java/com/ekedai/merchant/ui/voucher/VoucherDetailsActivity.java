@@ -4,32 +4,27 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.bumptech.glide.Glide;
 import com.ekedai.merchant.App;
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.databinding.ActivityVoucherDetailsBinding;
-import com.ekedai.merchant.models.voucher.VoucherDetails;
 import com.ekedai.merchant.models.voucher.VoucherQrCodeDetails;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.ProductApi;
 import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.ekedai.merchant.utils.Utilities;
-import com.google.android.material.navigation.NavigationView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;

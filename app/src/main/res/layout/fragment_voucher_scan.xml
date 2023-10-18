@@ -23,10 +23,35 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
         android:paddingVertical="12dp"
-        android:textSize="18dp"
+        android:textSize="18sp"
+        android:enabled="false"
         android:text="@string/scan_voucher_code"
         app:layout_constraintTop_toBottomOf="@id/scan_voucher_code_icon"
         app:layout_constraintLeft_toLeftOf="@id/scan_voucher_code_icon"
         app:layout_constraintRight_toRightOf="@id/scan_voucher_code_icon" />
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/install_progress_bar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/scan_voucher_code_button"
+        app:layout_constraintLeft_toLeftOf="@id/scan_voucher_code_icon"
+        app:layout_constraintRight_toRightOf="@id/scan_voucher_code_icon" />
+
+    <TextView
+        android:id="@+id/install_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textSize="12sp"
+        android:textColor="@color/sf_primary"
+        android:text="@string/installing_scanner_module"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/install_progress_bar"
+        app:layout_constraintLeft_toLeftOf="@id/scan_voucher_code_icon"
+        app:layout_constraintRight_toRightOf="@id/scan_voucher_code_icon" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

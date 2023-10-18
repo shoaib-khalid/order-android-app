@@ -1,7 +1,6 @@
 package com.ekedai.merchant.ui.settings;
 
 import static android.Manifest.permission.BLUETOOTH_CONNECT;
-import static com.ekedai.merchant.App.PRINT_TAG;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -10,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

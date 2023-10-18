@@ -36,22 +36,26 @@
         <item
             android:id="@+id/nav_qr_code"
             android:icon="@drawable/ic_qr_code"
-            android:title="QR Code Menu" />
+            android:title="QR Code Menu"
+            android:visible="false" />
 
         <item
             android:icon="@drawable/ic_person"
-            android:title="Shift Management">
+            android:title="Shift Management"
+            android:visible="false">
 
             <menu>
                 <item
                     android:id="@+id/nav_daily_sales"
                     android:icon="@drawable/ic_staff_daily_sales"
-                    android:title="Staff Daily Sales" />
+                    android:title="Staff Daily Sales"
+                    android:visible="false"/>
 
                 <item
                     android:id="@+id/nav_manage_staff"
                     android:icon="@drawable/ic_manage_staff"
-                    android:title="Manage Staff" />
+                    android:title="Manage Staff"
+                    android:visible="false" />
 
             </menu>
         </item>

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,7 +25,6 @@ import com.ekedai.merchant.networking.apis.ProductApi;
 import com.ekedai.merchant.ui.voucher.SearchViewModel;
 import com.ekedai.merchant.ui.voucher.VoucherAdapter;
 import com.ekedai.merchant.ui.voucher.VoucherDetailsDialog;
-import com.ekedai.merchant.ui.voucher.VoucherSuccessDialog;
 import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.ekedai.merchant.utils.Utilities;
 
@@ -145,9 +143,13 @@ public class VoucherHistoryFragment
 
                     @Override
                     public void onError(Throwable e) {
+                        if (binding == null) {
+                            return;
+                        }
+
                         stopLoading();
                         Toast.makeText(
-                                getContext(),
+                                binding.getRoot().getContext(),
                                 "An error occurred. Please swipe down to retry.",
                                 Toast.LENGTH_SHORT
                         ).show();
@@ -162,6 +164,10 @@ public class VoucherHistoryFragment
 
                     @Override
                     public void onComplete() {
+                        if (binding == null) {
+                            return;
+                        }
+
                         stopLoading();
                         voucherAdapter.setVouchers(voucherHistory);
                         if (voucherHistory.isEmpty()) {
