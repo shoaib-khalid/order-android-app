@@ -43,6 +43,7 @@ import com.google.android.play.core.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.google.gson.JsonSyntaxException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -213,7 +214,11 @@ public class LoginActivity extends AppCompatActivity {
                             if (response.code() == 401) {
                                 handleError(response.code(), response.raw().toString(), "Username or password is incorrect");
                             } else if (response.errorBody() != null) {
-                                Utilities.handleUnknownError(LoginActivity.this, response.errorBody());
+                                try {
+                                    Utilities.handleUnknownError(LoginActivity.this, response.errorBody());
+                                } catch (JsonSyntaxException ex) {
+                                    handleError(response.code(), response.raw().toString(), null);
+                                }
                             } else {
                                 handleError(response.code(), response.raw().toString(), null);
                             }

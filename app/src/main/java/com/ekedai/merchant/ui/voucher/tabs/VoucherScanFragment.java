@@ -4,6 +4,7 @@ import static com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpd
 import static com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpdate.InstallState.STATE_COMPLETED;
 import static com.google.android.gms.common.moduleinstall.ModuleInstallStatusUpdate.InstallState.STATE_FAILED;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,10 +17,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.ekedai.merchant.App;
 import com.ekedai.merchant.R;
 import com.ekedai.merchant.databinding.FragmentVoucherScanBinding;
 import com.ekedai.merchant.models.voucher.VoucherQrCodeDetails;
 import com.ekedai.merchant.ui.voucher.VoucherDetailsActivity;
+import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.google.android.gms.common.api.OptionalModuleApi;
 import com.google.android.gms.common.moduleinstall.InstallStatusListener;
 import com.google.android.gms.common.moduleinstall.ModuleInstall;
@@ -36,7 +39,7 @@ public class VoucherScanFragment extends Fragment implements InstallStatusListen
 
     private FragmentVoucherScanBinding binding;
     final String TAG = "voucher-fragment";
-
+    String[] storeIds = {};
 
     @Override
     public View onCreateView(
@@ -45,6 +48,10 @@ public class VoucherScanFragment extends Fragment implements InstallStatusListen
             @Nullable Bundle savedInstanceState
     ) {
         binding = FragmentVoucherScanBinding.inflate(inflater, container, false);
+        storeIds = App.getAppContext()
+                .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getString(SharedPrefsKey.STORE_ID_LIST, "")
+                .split(" ");
         return binding.getRoot();
     }
 
@@ -98,9 +105,21 @@ public class VoucherScanFragment extends Fragment implements InstallStatusListen
             try {
                 Log.d("voucher", "Scanned QR code: " + barcode.getRawValue());
                 VoucherQrCodeDetails voucherDetails = new Gson().fromJson(barcode.getRawValue(), VoucherQrCodeDetails.class);
-                Intent intent = new Intent(requireActivity(), VoucherDetailsActivity.class);
-                intent.putExtra(VoucherDetailsActivity.VOUCHER_DETAILS_KEY, voucherDetails);
-                startActivity(intent);
+
+                boolean isStoreVoucher = false;
+                for (String storeId : storeIds) {
+                    if (storeId.equals(voucherDetails.storeId)) {
+                        isStoreVoucher = true;
+                        Intent intent = new Intent(requireActivity(), VoucherDetailsActivity.class);
+                        intent.putExtra(VoucherDetailsActivity.VOUCHER_DETAILS_KEY, voucherDetails);
+                        startActivity(intent);
+                        break;
+                    }
+                }
+
+                if (!isStoreVoucher) {
+                    Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
+                }
             } catch (JsonSyntaxException ex) {
                 Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
             }

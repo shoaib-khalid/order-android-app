@@ -26,6 +26,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -186,7 +187,7 @@ public class Utilities {
         activity.finish();
     }
 
-    public static void handleUnknownError(Context context, ResponseBody errorJson) {
+    public static void handleUnknownError(Context context, ResponseBody errorJson) throws JsonSyntaxException {
         Gson gson = new Gson();
         ErrorResponse errorResponse = gson.fromJson(errorJson.charStream(), ErrorResponse.class);
 
