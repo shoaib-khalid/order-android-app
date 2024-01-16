@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
@@ -39,7 +40,6 @@ public class App extends Application implements PrinterObserver {
     public static final String DELIVERY_SERVICE_URL = "delivery-service/";
 
     public static final String SESSION = "session";
-    public static final String PRINT_TAG = "bluetooth-printer";
 
     private static Printer connectedPrinter;
     public static final Set<BluetoothDevice> btDevices = new HashSet<>();
@@ -55,26 +55,12 @@ public class App extends Application implements PrinterObserver {
     public void onCreate() {
         super.onCreate();
 
-        createNotificationChannels();
 
         //restrict devices from forcing the dark mode on the app
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         SunmiPrintHelper.getInstance().addObserver(this);
         SunmiPrintHelper.getInstance().initPrinterService(this);
-    }
-
-    private void createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            NotificationChannel channel = new NotificationChannel(
-                    ChannelId.PRINTING_NEW_ORDER,
-                    "Printing new orders",
-                    NotificationManager.IMPORTANCE_DEFAULT
-            );
-            channel.setDescription("For when the app is printing a new order");
-            manager.createNotificationChannel(channel);
-        }
     }
 
     public static Printer getPrinter() {
@@ -110,5 +96,8 @@ public class App extends Application implements PrinterObserver {
 
     public static Context getAppContext() {
         return instance.getApplicationContext();
+    }
+    public static SharedPreferences getSharedPreferences() {
+        return instance.getSharedPreferences(App.SESSION, Context.MODE_PRIVATE);
     }
 }

@@ -5,6 +5,7 @@ import com.ekedai.merchant.enums.DineInPack;
 import com.ekedai.merchant.enums.OrderStatus;
 import com.ekedai.merchant.enums.ServiceType;
 import com.ekedai.merchant.models.HttpResponse;
+import com.ekedai.merchant.models.item.Item;
 import com.ekedai.merchant.models.store.Store;
 
 import java.io.Serializable;
@@ -44,44 +45,9 @@ public class Order implements Serializable {
     public List<OrderRefund> orderRefund;
     public boolean isRevised;
     public Store store;
+    public List<Item> items;
 
-    @Override
-    public String toString() {
-        return "Order{" +
-                "id='" + id + '\'' +
-                ", storeId='" + storeId + '\'' +
-                ", deliveryCharges=" + deliveryCharges +
-                ", subTotal=" + subTotal +
-                ", total=" + total +
-                ", completionStatus='" + completionStatus + '\'' +
-                ", paymentStatus='" + paymentStatus + '\'' +
-                ", customerNotes='" + customerNotes + '\'' +
-                ", privateAdminNotes='" + privateAdminNotes + '\'' +
-                ", cartId='" + cartId + '\'' +
-                ", customerId='" + customerId + '\'' +
-                ", created='" + created + '\'' +
-                ", updated='" + updated + '\'' +
-                ", invoiceId='" + invoiceId + '\'' +
-                ", klCommission=" + klCommission +
-                ", storeServiceCharges=" + storeServiceCharges +
-                ", storeShare=" + storeShare +
-                ", paymentType='" + paymentType + '\'' +
-                ", appliedDiscount=" + appliedDiscount +
-                ", deliveryDiscount=" + deliveryDiscount +
-                ", appliedDiscountDescription='" + appliedDiscountDescription + '\'' +
-                ", deliveryDiscountDescription='" + deliveryDiscountDescription + '\'' +
-                ",  voucherDiscount='" + voucherDiscount + '\'' +
-                ",  storeVoucherDiscount='" + storeVoucherDiscount + '\'' +
-                ",  serviceType='" + (serviceType != null ? serviceType : "null") + '\'' +
-                ",  dineInOption='" + (dineInOption != null ? dineInOption : "null") + '\'' +
-                ",  dineInPack='" + (dineInPack != null ? dineInPack : "null") + '\'' +
-                ", orderShipmentDetail=" + orderShipmentDetail +
-                ", orderPaymentDetail=" + orderPaymentDetail +
-                ", customer=" + customer +
-                ", orderRefund=" + orderRefund +
-                ", isRevised=" + isRevised +
-                '}';
-    }
+
 
     public static class DeliveryPeriod implements Serializable {
         public String id;
@@ -90,14 +56,6 @@ public class Order implements Serializable {
 
         public String description;
 
-        @Override
-        public String toString() {
-            return "DeliveryPeriod{" +
-                    "id='" + id + '\'' +
-                    ", name='" + name + '\'' +
-                    ", description='" + description + '\'' +
-                    '}';
-        }
     }
 
     public static class OrderShipmentDetail implements Serializable {
@@ -117,28 +75,6 @@ public class Order implements Serializable {
         public String customerTrackingUrl;
         public String trackingNumber;
         public DeliveryPeriod deliveryPeriodDetails;
-
-        @Override
-        public String toString() {
-            return "OrderShipmentDetail{" +
-                    "receiverName='" + receiverName + '\'' +
-                    ", phoneNumber='" + phoneNumber + '\'' +
-                    ", address='" + address + '\'' +
-                    ", city='" + city + '\'' +
-                    ", zipcode='" + zipcode + '\'' +
-                    ", email='" + email + '\'' +
-                    ", deliveryProviderId=" + deliveryProviderId +
-                    ", state='" + state + '\'' +
-                    ", country='" + country + '\'' +
-                    ", trackingUrl='" + trackingUrl + '\'' +
-                    ", orderId='" + orderId + '\'' +
-                    ", storePickup=" + storePickup +
-                    ", merchantTrackingUrl='" + merchantTrackingUrl + '\'' +
-                    ", customerTrackingUrl='" + customerTrackingUrl + '\'' +
-                    ", trackingNumber='" + trackingNumber + '\'' +
-                    ", deliveryPeriodDetails=" + deliveryPeriodDetails +
-                    '}';
-        }
     }
 
 
@@ -170,22 +106,6 @@ public class Order implements Serializable {
         public String created;
         public String updated;
         public String refunded;
-
-        @Override
-        public String toString() {
-            return "OrderRefund{" +
-                    "id='" + id + '\'' +
-                    ", orderId='" + orderId + '\'' +
-                    ", refundAmount=" + refundAmount +
-                    ", remarks='" + remarks + '\'' +
-                    ", paymentChannel='" + paymentChannel + '\'' +
-                    ", refundStatus='" + refundStatus + '\'' +
-                    ", refundType='" + refundType + '\'' +
-                    ", created='" + created + '\'' +
-                    ", updated='" + updated + '\'' +
-                    ", refunded='" + refunded + '\'' +
-                    '}';
-        }
     }
 
     public static class OrderList implements Serializable {

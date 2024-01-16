@@ -10,46 +10,28 @@ public class Store implements Serializable {
 
     public String id;
     public String name;
-    public String clientId;
-    public String verticalCode;
-    public String email;
-    public Boolean isDineIn;
-    public Boolean dineInConsolidatedOrder;
+    public String clientId = "";
+    public String verticalCode = "fnb";
+    public String email = "default@kalsym.com";
+    public Boolean isDineIn = true;
+    public Boolean dineInConsolidatedOrder = true;
     public String storePrefix;
-    public RegionCountry regionCountry;
-    public List<StoreTiming> storeTiming;
-
-    public List<StoreAsset> storeAssets;
-
+    public RegionCountry regionCountry = new RegionCountry();
+    public List<StoreAsset> storeAssets = new ArrayList<>();
     public List<Category> categories = new ArrayList<>();
+    public StoreStatusResponse.StoreStatus status = new StoreStatusResponse.StoreStatus();
 
     public static class RegionCountry implements Serializable{
-        public String id;
-        public String name;
-        public String region;
-        public String currency;
-        public String currencyCode;
-        public String currencySymbol;
-        public String timezone;
-    }
-
-    static class StoreTiming implements Serializable{
-        public String storeId;
-        public String day;
-        public String openTime;
-        public String closeTime;
-        public boolean isOff;
+        public String currencySymbol = "Rs. ";
+        public String timezone = "Asia/Karachi";
     }
 
     public static class StoreAsset implements Serializable{
-        public String id;
-        public String storeId;
         public String assetUrl;
-        public String assetDescription;
-        public String assetType;
+        public String assetType = "LogoUrl";
     }
 
-    public static class StoreList{
+    public static class StoreList {
         public List<Store> content;
     }
 

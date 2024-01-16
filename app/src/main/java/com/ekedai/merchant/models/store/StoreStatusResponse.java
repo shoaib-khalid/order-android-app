@@ -10,15 +10,6 @@ public class StoreStatusResponse extends HttpResponse implements Serializable {
 
     public static class StoreStatus implements Serializable {
         public boolean isSnooze = false;
-        public String snoozeReason = "";
-        public String snoozeStartTime = "";
         public String snoozeEndTime = "";
-
-        @Override
-        public String toString() {
-            return "{ isSnooze: " + isSnooze + ", snoozeReason: " + snoozeReason
-                    + ", snoozeStartTime: " + snoozeStartTime + ", snoozeEndTime: " + snoozeEndTime
-                    + " }";
-        }
     }
 }

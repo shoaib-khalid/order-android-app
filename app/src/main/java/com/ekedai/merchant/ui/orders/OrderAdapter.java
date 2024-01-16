@@ -38,6 +38,7 @@ import com.ekedai.merchant.models.order.OrderUpdateResponse;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.DeliveryApi;
 import com.ekedai.merchant.networking.apis.OrderApi;
+import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.ekedai.merchant.utils.Utilities;
 import com.google.android.material.button.MaterialButton;
 
@@ -349,7 +350,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context);
         holder.recyclerView.setLayoutManager(linearLayoutManager);
-        getOrderItemsForView(order, holder);
+
+        if (App.getAppContext()
+                .getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
+                .getBoolean(SharedPrefsKey.IS_DEMO, false)) {
+//            orderDetails.order
+        } else {
+            getOrderItemsForView(order, holder);
+        }
 
         holder.cancelButton.setOnClickListener(view -> onCancelOrderButtonClick(order, holder));
         holder.acceptButton.setOnClickListener(view -> updateOrderStatus(orderDetails, holder));

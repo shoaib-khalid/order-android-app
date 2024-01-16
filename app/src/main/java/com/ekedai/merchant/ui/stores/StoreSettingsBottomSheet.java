@@ -49,8 +49,7 @@ public class StoreSettingsBottomSheet extends BottomSheetDialogFragment {
             String storeId,
             int position,
             StoreAdapter.ViewHolder holder,
-            StoreAdapter storeAdapter,
-            Context context
+            StoreAdapter storeAdapter
     ) {
         super();
         this.storeId = storeId;
@@ -105,7 +104,10 @@ public class StoreSettingsBottomSheet extends BottomSheetDialogFragment {
 
         storeSnoozeCall.clone().enqueue(new Callback<HttpResponse>() {
             @Override
-            public void onResponse(@NonNull Call<HttpResponse> call, @NonNull Response<HttpResponse> response) {
+            public void onResponse(
+                    @NonNull Call<HttpResponse> call,
+                    @NonNull Response<HttpResponse> response
+            ) {
                 if (response.isSuccessful()) {
 //                    storeAdapter.notifyItemChanged(storePosition);
                     storeAdapter.getStoreStatus(storeId, viewHolder);

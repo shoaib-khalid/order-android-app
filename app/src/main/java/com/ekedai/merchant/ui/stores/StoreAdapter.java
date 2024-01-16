@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -12,12 +13,16 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.ekedai.merchant.App;
 import com.ekedai.merchant.R;
+import com.ekedai.merchant.data.SampleData;
 import com.ekedai.merchant.enums.NavIntentStore;
 import com.ekedai.merchant.models.store.Store;
 import com.ekedai.merchant.models.store.StoreStatusResponse;
 import com.ekedai.merchant.networking.ServiceGenerator;
 import com.ekedai.merchant.networking.apis.StoreApi;
+import com.ekedai.merchant.utils.SharedPrefsKey;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import java.text.ParseException;
@@ -60,6 +65,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView name, status;
+        private final ImageView logo;
         private final ProgressBar progressBar;
         private final AppCompatImageView qrCodeImage;
         private boolean isLoading;
@@ -71,6 +77,7 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             status = view.findViewById(R.id.store_status);
             progressBar = view.findViewById(R.id.circular_progress_bar);
             qrCodeImage = view.findViewById(R.id.qr_code_button);
+            logo = view.findViewById(R.id.store_logo);
         }
 
         public boolean isLoading() {
@@ -102,7 +109,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
             holder.itemView.setOnClickListener(view -> {
                 if (!holder.isLoading()) {
                     BottomSheetDialogFragment storeScheduleDialog
-                            = new StoreSettingsBottomSheet(storeId, position, holder, StoreAdapter.this, context);
+                            = new StoreSettingsBottomSheet(
+                                    storeId,
+                            position,
+                            holder,
+                            StoreAdapter.this
+                    );
                     storeScheduleDialog.show(((FragmentActivity) context).getSupportFragmentManager(),
                             "bottomSheetDialog");
                 }
@@ -110,6 +122,12 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         }
 
         holder.name.setText(items.get(position).name);
+
+        for (Store.StoreAsset asset : items.get(position).storeAssets) {
+            if (asset.assetType.equals("LogoUrl")) {
+                Glide.with(holder.itemView.getContext()).load(asset.assetUrl).into(holder.logo);
+            }
+        }
     }
 
     @Override
@@ -125,9 +143,27 @@ public class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.ViewHolder> 
         startLoading(holder);
         holder.status.setText("");
 
+        if (App.getSharedPreferences().getBoolean(SharedPrefsKey.IS_DEMO, false)) {
+            for (Store store: SampleData.getInstance().stores) {
+                if (storeId.equals(store.id)) {
+                    if (store.status.isSnooze) {
+                        setStoreStatus(store.status.snoozeEndTime, holder.status);
+                    } else {
+                        holder.status.setText("Open");
+                    }
+                }
+            }
+
+            stopLoading(holder);
+            return;
+        }
+
         storeApiService.getStoreStatusById(storeId).clone().enqueue(new Callback<StoreStatusResponse>() {
             @Override
-            public void onResponse(@NonNull Call<StoreStatusResponse> call, @NonNull Response<StoreStatusResponse> response) {
+            public void onResponse(
+                    @NonNull Call<StoreStatusResponse> call,
+                    @NonNull Response<StoreStatusResponse> response
+            ) {
                 if (response.isSuccessful() && response.body() != null) {
                     StoreStatusResponse.StoreStatus storeStatus = response.body().data;
                     if (storeStatus.isSnooze) {

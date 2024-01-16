@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,14 +61,13 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
     private ProductAdapter productAdapter;
     private static final String TAG = "ProductsActivity";
     private DrawerLayout drawerLayout;
-    private ProductApi productApiService;
     private StoreApi storeApiService;
     private List<Store> stores = new ArrayList<>();
     private final List<Product> products = new ArrayList<>();
     private ActivityProductsBinding binding;
     private int pageNo = 0;
     private boolean isLoading = false;
-    private boolean isAnyProductLeft = true;
+    private boolean isAnyProductLeft = false;
     private final String ALL_STORES = "All";
     private final String ALL_CATEGORIES = "All";
     private Store selectedStore;
@@ -113,7 +113,6 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
             fetchAll();
         });
 
-        productApiService = ServiceGenerator.createProductService();
         storeApiService = ServiceGenerator.createStoreService();
 
         editProductActivityResultLauncher
@@ -179,8 +178,14 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
     private void fetchAll() {
         startLoading();
 
-        String clientId = getSharedPreferences(App.SESSION, MODE_PRIVATE)
-                .getString(SharedPrefsKey.CLIENT_ID, "");
+        SharedPreferences sharedPrefs = getSharedPreferences(App.SESSION, MODE_PRIVATE);
+
+        if (sharedPrefs.getBoolean(SharedPrefsKey.IS_DEMO, false)) {
+
+            return;
+        }
+
+        String clientId = sharedPrefs.getString(SharedPrefsKey.CLIENT_ID, "");
 
         if (!stores.isEmpty()) {
             fetchProducts();
@@ -365,34 +370,6 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
         });
     }
 
-    private void startLoading() {
-        isLoading = true;
-        binding.emptyProductsText.setVisibility(View.GONE);
-        if (products.isEmpty()) {
-//            binding.mainLayout.setVisibility(View.GONE);
-            binding.progressBar.setVisibility(View.VISIBLE);
-        }
-        if (!products.isEmpty()) {
-            binding.bottomProgressBar.setVisibility(View.VISIBLE);
-        }
-    }
-
-    private void stopLoading() {
-        isLoading = false;
-        binding.refreshLayout.setRefreshing(false);
-//        binding.refreshLayout.setVisibility(View.VISIBLE);
-        binding.mainLayout.setVisibility(View.VISIBLE);
-        binding.progressBar.setVisibility(View.GONE);
-        binding.bottomProgressBar.setVisibility(View.GONE);
-    }
-
-    private void resetAll() {
-        pageNo = 0;
-        products.clear();
-        isAnyProductLeft = false;
-        initProductList();
-    }
-
     private void initProductList() {
         productAdapter = new ProductAdapter(currencySymbol, this);
         binding.recyclerView.setAdapter(productAdapter);
@@ -455,5 +432,33 @@ public class ProductsActivity extends NavbarActivity implements ProductAdapter.O
         Intent intent = new Intent(this, EditProductActivity.class);
         intent.putExtra(EditProductActivity.PRODUCT, p);
         editProductActivityResultLauncher.launch(intent);
+    }
+
+    private void startLoading() {
+        isLoading = true;
+        binding.emptyProductsText.setVisibility(View.GONE);
+        if (products.isEmpty()) {
+//            binding.mainLayout.setVisibility(View.GONE);
+            binding.progressBar.setVisibility(View.VISIBLE);
+        }
+        if (!products.isEmpty()) {
+            binding.bottomProgressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void stopLoading() {
+        isLoading = false;
+        binding.refreshLayout.setRefreshing(false);
+//        binding.refreshLayout.setVisibility(View.VISIBLE);
+        binding.mainLayout.setVisibility(View.VISIBLE);
+        binding.progressBar.setVisibility(View.GONE);
+        binding.bottomProgressBar.setVisibility(View.GONE);
+    }
+
+    private void resetAll() {
+        pageNo = 0;
+        products.clear();
+        isAnyProductLeft = false;
+        initProductList();
     }
 }

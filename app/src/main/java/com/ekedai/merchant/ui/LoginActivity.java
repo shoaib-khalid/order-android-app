@@ -150,11 +150,30 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void onLoginButtonClick() {
         String testUser = "qa_user", testPass = "qa@kalsym";
+        String demoUser = "demouser14", demoPass = "imranraja88";
 
         String emailInput = email.getEditText() != null ? email.getEditText().getText().toString() : "";
         String passwordInput = password.getEditText() != null ? password.getEditText().getText().toString() : "";
 
-        if (emailInput.equals(testUser) && passwordInput.equals(testPass)) {
+        if (emailInput.equals(demoUser) && passwordInput.equals(demoPass)) {
+            sharedPreferences.edit()
+                    .putBoolean(SharedPrefsKey.IS_DEMO, true)
+                    .putBoolean(SharedPrefsKey.IS_LOGGED_IN, true)
+                    .putBoolean(SharedPrefsKey.IS_STAGING, true)
+                    .putBoolean(SharedPrefsKey.IS_ORDER_CONSOLIDATION_ENABLED, true)
+                    .putBoolean(SharedPrefsKey.IS_SUBSCRIBED_TO_NOTIFICATIONS, true)
+                    .putString(SharedPrefsKey.STORE_ID_LIST, "")
+                    .putString(SharedPrefsKey.USERNAME, "Demo User")
+                    .putString(SharedPrefsKey.ACCESS_TOKEN, "accessToken")
+                    .putString(SharedPrefsKey.REFRESH_TOKEN, "refreshToken")
+                    .putString(SharedPrefsKey.CLIENT_ID, "clientId")
+                    .putString(SharedPrefsKey.CURRENCY_SYMBOL, stores.get(0).regionCountry.currencySymbol)
+                    .commit();
+
+            Intent intent = new Intent(getApplicationContext(), OrdersActivity.class);
+            startActivity(intent);
+            finish();
+        }else if (emailInput.equals(testUser) && passwordInput.equals(testPass)) {
             switchToStagingMode();
             email.getEditText().getText().clear();
             password.getEditText().getText().clear();
@@ -203,7 +222,8 @@ public class LoginActivity extends AppCompatActivity {
                                            @NonNull Response<LoginResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             LoginData res = response.body().data;
-                            sharedPreferences.edit().putString(SharedPrefsKey.USERNAME, res.session.username)
+                            sharedPreferences.edit()
+                                    .putString(SharedPrefsKey.USERNAME, res.session.username)
                                     .putString(SharedPrefsKey.ACCESS_TOKEN, res.session.accessToken)
                                     .putString(SharedPrefsKey.REFRESH_TOKEN, res.session.refreshToken)
                                     .putString(SharedPrefsKey.CLIENT_ID, res.session.ownerId)

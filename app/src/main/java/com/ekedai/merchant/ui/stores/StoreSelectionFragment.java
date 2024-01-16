@@ -13,7 +13,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.ekedai.merchant.App;
 import com.ekedai.merchant.R;
+import com.ekedai.merchant.data.SampleData;
 import com.ekedai.merchant.enums.NavIntentStore;
 import com.ekedai.merchant.models.store.Store;
 import com.ekedai.merchant.models.store.StoreResponse;
@@ -103,7 +105,15 @@ public class StoreSelectionFragment extends Fragment
     private void getStores() {
         startLoading();
 
-        StoreAdapter.StoreSelectionListener listener = this;
+        if (App.getSharedPreferences().getBoolean(SharedPrefsKey.IS_DEMO, false)) {
+            stores = SampleData.getInstance().stores;
+            storeAdapter = new StoreAdapter(SampleData.getInstance().stores, action, this, getContext());
+            recyclerView.setAdapter(storeAdapter);
+            storeAdapter.notifyDataSetChanged();
+            stopLoading();
+            return;
+        }
+
         storeApiService.getStores(clientId).clone().enqueue(new Callback<StoreResponse>() {
             @Override
             public void onResponse(@NonNull Call<StoreResponse> call,
@@ -115,7 +125,7 @@ public class StoreSelectionFragment extends Fragment
                     } else if (action == NavIntentStore.DISPLAY_QR_CODE) {
                         checkQrCodeAvailabilityForStores();
                     } else {
-                        storeAdapter = new StoreAdapter(stores, action, listener, getContext());
+                        storeAdapter = new StoreAdapter(stores, action, StoreSelectionFragment.this, getContext());
                         recyclerView.setAdapter(storeAdapter);
                         storeAdapter.notifyDataSetChanged();
                         stopLoading();
@@ -132,9 +142,7 @@ public class StoreSelectionFragment extends Fragment
         });
     }
 
-    // TODO: Use RxJava to callback from multiple requests concurrently.
     int storesChecked = 0;
-
     private void checkQrCodeAvailabilityForStores() {
 
         storesChecked = 0;
@@ -185,7 +193,6 @@ public class StoreSelectionFragment extends Fragment
         refreshLayout.setRefreshing(false);
         progressBarLayout.setVisibility(View.GONE);
         emptyStoresTextView.setText(message);
-
         emptyLayout.setVisibility(View.VISIBLE);
     }
 

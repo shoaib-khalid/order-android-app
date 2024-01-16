@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide;
 import com.ekedai.merchant.App;
 import com.ekedai.merchant.BuildConfig;
 import com.ekedai.merchant.R;
+import com.ekedai.merchant.data.SampleData;
 import com.ekedai.merchant.enums.NavIntentStaff;
 import com.ekedai.merchant.enums.NavIntentStore;
 import com.ekedai.merchant.models.store.Store;
@@ -89,27 +90,35 @@ public class NavbarActivity extends AppCompatActivity
                         BuildConfig.VERSION_NAME
                 ));
 
-        ServiceGenerator.createStoreService().getStoreById(storeId)
-                .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,
-                                           @NonNull Response<StoreResponse.SingleStoreResponse> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            for (Store.StoreAsset asset : response.body().data.storeAssets) {
-                                if (asset.assetType.equals("LogoUrl")) {
-                                    Glide.with(getApplicationContext()).load(asset.assetUrl).into(storeLogo);
+        if (getSharedPreferences(App.SESSION, MODE_PRIVATE)
+                .getBoolean(SharedPrefsKey.IS_DEMO, false)) {
+            Store sampleStore = SampleData.generateStores().get(0);
+            Glide.with(storeLogo.getContext()).load(sampleStore.storeAssets.get(0).assetUrl).into(storeLogo);
+            storeName.setText(sampleStore.name);
+            storeName.setText(sampleStore.email);
+        } else {
+            ServiceGenerator.createStoreService().getStoreById(storeId)
+                    .enqueue(new Callback<StoreResponse.SingleStoreResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                               @NonNull Response<StoreResponse.SingleStoreResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                for (Store.StoreAsset asset : response.body().data.storeAssets) {
+                                    if (asset.assetType.equals("LogoUrl")) {
+                                        Glide.with(getApplicationContext()).load(asset.assetUrl).into(storeLogo);
+                                    }
                                 }
+                                storeName.setText(response.body().data.name);
+                                storeEmail.setText(response.body().data.email);
                             }
-                            storeName.setText(response.body().data.name);
-                            storeEmail.setText(response.body().data.email);
                         }
-                    }
 
-                    @Override
-                    public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
-                                          @NonNull Throwable t) {
-                    }
-                });
+                        @Override
+                        public void onFailure(@NonNull Call<StoreResponse.SingleStoreResponse> call,
+                                              @NonNull Throwable t) {
+                        }
+                    });
+        }
 
         TextView logout = header.findViewById(R.id.nav_logout);
 
