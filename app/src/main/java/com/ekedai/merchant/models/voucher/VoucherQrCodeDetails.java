@@ -14,4 +14,5 @@ public class VoucherQrCodeDetails implements Serializable {
     public String phoneNumber;
     public String voucherCode;
     public String productImageUrl;
+    public Boolean isGlobal;
 }
