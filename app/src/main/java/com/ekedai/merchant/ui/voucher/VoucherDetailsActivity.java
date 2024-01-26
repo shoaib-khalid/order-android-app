@@ -114,10 +114,15 @@ public class VoucherDetailsActivity extends AppCompatActivity implements Voucher
         }
 
         boolean isOwnVoucher = false;
-        for (String storeId : storeIds) {
-            if (storeId.equals(voucherDetails.storeId)) {
-                isOwnVoucher = true;
-                break;
+        if (voucherDetails.isGlobalStore != null && voucherDetails.isGlobalStore) {
+            isOwnVoucher = true;
+        }
+        else {
+            for (String storeId : storeIds) {
+                if (storeId.equals(voucherDetails.storeId)) {
+                    isOwnVoucher = true;
+                    break;
+                }
             }
         }
 
