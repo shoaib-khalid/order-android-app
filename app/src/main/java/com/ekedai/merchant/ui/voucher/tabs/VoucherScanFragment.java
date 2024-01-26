@@ -108,7 +108,7 @@ public class VoucherScanFragment extends Fragment implements InstallStatusListen
 
                 boolean isStoreVoucher = false;
                 for (String storeId : storeIds) {
-                    if (storeId.equals(voucherDetails.storeId) || voucherDetails.isGlobal) {
+                    if (storeId.equals(voucherDetails.storeId) || (voucherDetails.isGlobalStore != null && voucherDetails.isGlobalStore)) {
                         isStoreVoucher = true;
                         Intent intent = new Intent(requireActivity(), VoucherDetailsActivity.class);
                         intent.putExtra(VoucherDetailsActivity.VOUCHER_DETAILS_KEY, voucherDetails);
