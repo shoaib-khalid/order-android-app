@@ -42,13 +42,14 @@ public class VoucherDetailsDialog extends DialogFragment {
         orderSummaryText.setTextColor(ContextCompat.getColor(v.getContext(), R.color.white));
 
         v.findViewById(R.id.redeem_button).setVisibility(View.GONE);
+        v.findViewById(R.id.validity_period_text).setVisibility(View.GONE);
 
         AppCompatImageButton closeButton = v.findViewById(R.id.close_button);
         closeButton.setVisibility(View.VISIBLE);
         closeButton.setOnClickListener(b -> dismiss());
 
         ((TextView) v.findViewById(R.id.voucher_code_text)).setText(getString(R.string.voucher_code_template, voucher.voucherCode));
-        ((TextView) v.findViewById(R.id.validity_period_text)).setText(getString(R.string.valid_until_template, voucher.redeemDate));
+//        ((TextView) v.findViewById(R.id.validity_period_text)).setText(getString(R.string.valid_until_template, voucher.redeemDate));
         ((TextView) v.findViewById(R.id.product_name_text)).setText(voucher.voucherName);
         ((TextView) v.findViewById(R.id.product_quantity_text)).setText(getString(R.string.quantity_template, "1"));
         ((TextView) v.findViewById(R.id.product_price_text)).setText(getString(
@@ -56,6 +57,7 @@ public class VoucherDetailsDialog extends DialogFragment {
                 voucher.currencyLabel,
                 Utilities.formatPrice(voucher.discountValue)
         ));
+        ((TextView) v.findViewById(R.id.redeemed_at_text)).setText(getString(R.string.redeemed_at_template, voucher.storeName));
         Glide.with(v.getContext()).load(voucher.thumbnailUrl).into(((ImageView) v.findViewById(R.id.product_image)));
 
         return v;

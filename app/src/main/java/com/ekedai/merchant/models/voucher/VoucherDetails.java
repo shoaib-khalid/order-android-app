@@ -14,4 +14,5 @@ public class VoucherDetails implements Serializable {
     public String serialNumber;
     public String voucherRedeemCode;
     public String thumbnailUrl;
+    public String storeName;
 }

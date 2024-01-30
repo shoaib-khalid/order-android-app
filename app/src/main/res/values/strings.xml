@@ -193,5 +193,8 @@
     <string name="search_voucher_code">Search voucher code</string>
     <string name="voucher_expired">This voucher is expired</string>
     <string name="installing_scanner_module">Installing scanner module</string>
+    <string name="continue_text">Continue</string>
+    <string name="select_redemption_store">Select Redemption Store</string>
+    <string name="redeemed_at_template">Redeemed at: %1$s</string>
 
 </resources>

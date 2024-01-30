@@ -33,7 +33,7 @@ import retrofit2.Response;
 public class VoucherDetailsActivity extends AppCompatActivity implements VoucherSuccessDialog.OnDialogDismissListener {
 
     public static String VOUCHER_DETAILS_KEY = "VOUCHER_DETAILS";
-
+    public static String SELECTED_STORE_ID_KEY = "SELECTED_STORE_ID_KEY";
     private ActivityVoucherDetailsBinding binding;
 
     @Override
@@ -47,8 +47,9 @@ public class VoucherDetailsActivity extends AppCompatActivity implements Voucher
         if (!getIntent().hasExtra(VOUCHER_DETAILS_KEY)) {
             finish();
         }
-
+        String selectedStoreId = getIntent().getStringExtra(VoucherDetailsActivity.SELECTED_STORE_ID_KEY);
         VoucherQrCodeDetails voucherDetails = (VoucherQrCodeDetails) getIntent().getExtras().getSerializable(VOUCHER_DETAILS_KEY);
+
         Glide.with(this).load(voucherDetails.productImageUrl).into(binding.productImage);
         binding.voucherCodeText.setText(getString(R.string.voucher_code_template, voucherDetails.voucherCode));
         binding.validityPeriodText.setText(getString(R.string.valid_until_template, voucherDetails.date));
@@ -59,6 +60,7 @@ public class VoucherDetailsActivity extends AppCompatActivity implements Voucher
                 Utilities.getCurrencySymbol(null, this),
                 Utilities.formatPrice(voucherDetails.productPrice)
         ));
+        binding.redeemedAtText.setVisibility(View.GONE);
 
         String[] storeIds = getSharedPreferences(App.SESSION, Context.MODE_PRIVATE)
                 .getString(SharedPrefsKey.STORE_ID_LIST, "")
@@ -72,7 +74,7 @@ public class VoucherDetailsActivity extends AppCompatActivity implements Voucher
             productService.redeemVoucher(
                     voucherDetails.voucherCode,
                     voucherDetails.phoneNumber,
-                    voucherDetails.storeId
+                    selectedStoreId
             ).enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(@NonNull Call<Void> call, @NonNull Response<Void> response) {
