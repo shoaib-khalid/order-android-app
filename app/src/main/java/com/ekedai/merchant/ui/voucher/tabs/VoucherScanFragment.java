@@ -133,21 +133,19 @@ public class VoucherScanFragment extends Fragment implements InstallStatusListen
                 Log.d("voucher", "Scanned QR code: " + barcode.getRawValue());
                 VoucherQrCodeDetails voucherDetails = new Gson().fromJson(barcode.getRawValue(), VoucherQrCodeDetails.class);
 
-                boolean isStoreVoucher = false;
-                for (String storeId : storeIds) {
-                    if (storeId.equals(voucherDetails.storeId) || (voucherDetails.isGlobalStore != null && voucherDetails.isGlobalStore)) {
-                        isStoreVoucher = true;
+                if (voucherDetails.isGlobalStore != null) {
+                    if (voucherDetails.isGlobalStore || this.selectedStoreId.equals(voucherDetails.storeId)) {
                         Intent intent = new Intent(requireActivity(), VoucherDetailsActivity.class);
                         intent.putExtra(VoucherDetailsActivity.VOUCHER_DETAILS_KEY, voucherDetails);
                         intent.putExtra(VoucherDetailsActivity.SELECTED_STORE_ID_KEY, this.selectedStoreId);
                         startActivity(intent);
-                        break;
+                    } else {
+                        Toast.makeText(requireActivity(), "QR Code is not valid for this store", Toast.LENGTH_SHORT).show();
                     }
-                }
-
-                if (!isStoreVoucher) {
+                } else {
                     Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
                 }
+
             } catch (JsonSyntaxException ex) {
                 Toast.makeText(requireActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
             }
